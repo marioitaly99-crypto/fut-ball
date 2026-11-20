@@ -38,7 +38,8 @@ button.ghost{background:#1f2a48;color:#cfe3ff}button.danger{background:linear-gr
 #screen-login #enter:active{transform:translateY(3px);box-shadow:0 2px 0 #0369a1,0 4px 12px rgba(56,189,248,.5),inset 0 2px 0 rgba(255,255,255,.45)}
 #screen-login .foot{margin-top:8px;padding-top:10px;border-top:1px solid rgba(147,197,253,.25);text-align:center;font-size:.95rem;color:#dbeafe}
 #screen-lobby{flex-direction:column;align-items:center;gap:14px;overflow:auto;box-sizing:border-box;width:100vw;height:100vh;padding:18vh 0 28px;position:relative;
- background:url('assets/lobby-bg.png') center top / cover no-repeat,linear-gradient(160deg,#0a46d6,#0626a0 60%,#041a6e)}
+ background:url('assets/lobby-bg.png') center top / cover no-repeat !important;background-color:#0a46d6 !important}
+html:has(#screen-lobby.active),body:has(#screen-lobby.active){background:url('assets/lobby-bg.png') center top / cover no-repeat !important;background-color:#0a46d6 !important}
 #screen-lobby .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 #screen-lobby #who{position:absolute;top:10px;left:12px;padding:3px 12px;border-radius:999px;background:rgba(6,28,72,.7);border:1px solid rgba(56,189,248,.6);color:#dbeafe;font-size:.8rem}
 #screen-lobby .grid{width:94vw;max-width:1120px;grid-template-columns:58% 40%;column-gap:2%;row-gap:46px;flex:none}
