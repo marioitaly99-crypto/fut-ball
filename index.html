@@ -15,7 +15,28 @@ button{cursor:pointer;border:none;border-radius:10px;padding:10px 14px;font-weig
 button:hover{filter:brightness(1.1)}button:disabled{opacity:.4;cursor:not-allowed}
 button.ghost{background:#1f2a48;color:#cfe3ff}button.danger{background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff}
 .err{color:#f87171;font-size:.85rem;min-height:1em;text-align:center}.label{font-size:.8rem;color:var(--mut)}
-#screen-login{align-items:center;justify-content:center}
+#screen-login{align-items:center;justify-content:center;width:100vw;height:100vh;overflow-y:auto;
+ background:url('assets/login-bg.png') center center / cover no-repeat,linear-gradient(160deg,#0a46d6,#0626a0 60%,#041a6e)}
+#screen-login .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#screen-login .card{margin-top:28vh;width:460px;max-width:92vw;padding:22px 26px;gap:8px;background:rgba(6,28,72,.78);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:2px solid #38bdf8;border-radius:20px;box-shadow:0 0 28px rgba(56,189,248,.45)}
+@media(max-height:640px){#screen-login .card{margin-top:0}}
+#screen-login .lbl{display:flex;align-items:center;gap:10px;font-size:1.05rem;font-weight:800;color:#fff;margin-top:4px}
+#screen-login .lbl svg{width:26px;height:26px;fill:#fff;flex:none}
+#screen-login input{background:rgba(4,18,48,.85);border:1.5px solid #1d4ed8;color:#fff;border-radius:12px;padding:12px 16px;font-size:1.05rem}
+#screen-login input::placeholder{color:#8fa6cf}
+#screen-login input:focus{border-color:#38bdf8;box-shadow:0 0 0 2px rgba(56,189,248,.25)}
+#screen-login .pick{position:relative}
+#screen-login .pick input{padding-right:48px}
+#screen-login .pick .chev{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:40px;height:34px;padding:0;background:none;color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center}
+#screen-login .pick .chev svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+#screen-login .pick.open .chev svg{transform:rotate(180deg)}
+#screen-login .pop{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:5;display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:rgba(4,18,48,.97);border:1.5px solid #1d4ed8;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+#screen-login .pop button{min-width:44px;padding:6px 10px;font-size:1.15rem;font-weight:800;background:#0b2a6b;color:#fff;border:1px solid #1d4ed8;border-radius:10px}
+#screen-login .pop button:hover{background:#1349b8;filter:none}
+#screen-login #enter{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:6px;padding:12px 18px;border-radius:999px;border:2px solid #bae6fd;background:linear-gradient(180deg,#38bdf8 0%,#0284c7 100%);box-shadow:0 5px 0 #0369a1,0 8px 18px rgba(56,189,248,.55),inset 0 2px 0 rgba(255,255,255,.45);color:#fff;font-size:1.15rem;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:.3px;text-shadow:-1px -1px 0 #04284d,1px -1px 0 #04284d,-1px 1px 0 #04284d,1px 1px 0 #04284d,0 2px 3px rgba(0,0,0,.4)}
+#screen-login #enter svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#screen-login #enter:active{transform:translateY(3px);box-shadow:0 2px 0 #0369a1,0 4px 12px rgba(56,189,248,.5),inset 0 2px 0 rgba(255,255,255,.45)}
+#screen-login .foot{margin-top:8px;padding-top:10px;border-top:1px solid rgba(147,197,253,.25);text-align:center;font-size:.95rem;color:#dbeafe}
 #screen-lobby{flex-direction:column;align-items:center;padding:20px;gap:14px;overflow:auto}
 .grid{width:min(1000px,100%);display:grid;grid-template-columns:1.4fr 1fr;gap:14px}@media(max-width:760px){.grid{grid-template-columns:1fr}}
 .room{display:flex;align-items:center;gap:10px;background:var(--in);border:1px solid #243056;border-radius:10px;padding:10px 12px}
@@ -46,12 +67,26 @@ canvas{width:100%;aspect-ratio:5/3;border-radius:14px;border:1px solid #1e2a4a;d
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script></head><body>
 
 <div id="screen-login" class="screen active"><div class="card">
-  <h1>Fut-ball <span>⚽</span></h1>
-  <div class="label">Apodo</div><input id="nick" maxlength="16" placeholder="Nombre de usuario / Apodo" autocomplete="off">
-  <div class="label">Dorsal/Emoji (máx. 2)</div><input id="num" maxlength="4" placeholder="10 · 🔥 · ⚡" autocomplete="off">
-  <button id="enter">ENTRAR A LA CANCHA</button><div id="loginErr" class="err"></div>
-  <div class="label" style="text-align:center">Versión de demostración: partido local contra bots.</div>
+  <h1 class="sr-only">Fut-ball</h1>
+  <label class="lbl" for="nick"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.5" r="4.5"/><path d="M3 22c0-5 4-8 9-8s9 3 9 8z"/></svg>Apodo</label>
+  <input id="nick" maxlength="16" placeholder="Nombre de usuario / Apodo" autocomplete="off">
+  <label class="lbl" for="num"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5a10.5 10.5 0 1 0 0 21 10.5 10.5 0 0 0 0-21zM8.5 8.5a1.6 1.6 0 1 1 0 3.2 1.6 1.6 0 0 1 0-3.2zm7 0a1.6 1.6 0 1 1 0 3.2 1.6 1.6 0 0 1 0-3.2zM12 19a6.5 6.5 0 0 1-5.6-3.2c-.3-.6.1-1.3.8-1.3h9.6c.7 0 1.1.7.8 1.3A6.5 6.5 0 0 1 12 19z"/></svg>Dorsal/Emoji (máx. 2)</label>
+  <div class="pick" id="numPick">
+   <input id="num" maxlength="4" value="10" placeholder="10 · 🔥 · ⚡" autocomplete="off">
+   <button type="button" class="chev" id="numTog" aria-label="Elegir dorsal o emoji"><svg viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></svg></button>
+   <div class="pop hidden" id="numPop"></div>
+  </div>
+  <button id="enter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5M3 12h11M10 8l4 4-4 4"/></svg><span>ENTRAR A LA CANCHA</span></button><div id="loginErr" class="err"></div>
+  <div class="foot">Multijugador online y salas con bots</div>
 </div></div>
+<script>
+(()=>{const pick=document.getElementById('numPick'),pop=document.getElementById('numPop'),inp=document.getElementById('num'),tog=document.getElementById('numTog');
+ ['10','7','9','11','1','5','🔥','⚡','⚽','🏆','👑','🚀','🦁','⭐'].forEach(v=>{const b=document.createElement('button');b.type='button';b.textContent=v;b.onclick=()=>{inp.value=v;close();inp.focus()};pop.appendChild(b)});
+ const close=()=>{pop.classList.add('hidden');pick.classList.remove('open')};
+ tog.onclick=e=>{e.stopPropagation();const o=pop.classList.toggle('hidden');pick.classList.toggle('open',!o)};
+ document.addEventListener('click',e=>{if(!pick.contains(e.target))close()});
+ inp.addEventListener('keydown',e=>{if(e.key==='Escape')close()})})();
+</script>
 
 <div id="screen-lobby" class="screen">
   <h1 style="font-size:1.5rem">Fut-ball <span>⚽</span></h1><div id="who" class="label"></div>
