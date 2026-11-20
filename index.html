@@ -189,7 +189,8 @@ const $=id=>document.getElementById(id);
 const SIZES={chica:[800,420],mediana:[1150,600],grande:[1700,900],gigante:[2300,1300],realista:[2100,1250]},GHT={chica:110,mediana:140,grande:190,gigante:220,realista:210};
 const ACC=.224,PD=.94,KPD=.93,BD=.975,REST=.6,PREST=.1,KS=9,PR=6,KCD=.1,FL=.15,GD=34,MAXB=10,LOCK=4,PRAD=18,BRAD=10,BMAX=20;
 const RL=()=>G.size==='realista',areaD=()=>RL()?G.w*.157:G.gh*1.2,areaH=()=>RL()?G.h*.593:G.gh*2.6,smallD=()=>RL()?G.w*.0524:G.gh*.55,smallH=()=>RL()?G.h*.27:G.gh*1.4,spotD=()=>(RL()?G.w*.1048:G.gh*.75)*1.2; /* punto penal 20 % más atrás */
-const NET={role:'local',peer:null,conn:null,conns:[],code:'',pm:new Map(),pk:'',tick:0},bc=m=>NET.conns.forEach(c=>{if(c.open&&c.pl)c.send(m)});
+const NET={role:'local',peer:null,conn:null,conns:[],code:'',pm:new Map(),pk:'',tick:0},bc=m=>NET.conns.forEach(c=>{try{if(c&&c.open&&c.pl)c.send(m)}catch(e){}}),
+ safeSend=(c,m)=>{try{if(c&&c.open){c.send(m);return true}}catch(e){}return false};
 let AUTO=new URLSearchParams(location.search).get('sala')||'',FLAG='🌐';
 const flagOf=c=>/^[A-Za-z]{2}$/.test(c||'')?String.fromCodePoint(...[...c.toUpperCase()].map(ch=>127397+ch.charCodeAt(0))):'🌐'; /* AR → 🇦🇷 (indicadores regionales) */
 const safeFlag=f=>/^(\p{Regional_Indicator}{2}|🌐)$/u.test(String(f||''))?f:'🌐';
@@ -238,6 +239,13 @@ function roster(){const el=$('teams'),T=[['red','Local','#ff5d5d'],['spec','Espe
 let rooms=[{id:1,name:'SALA DE PRUEBA',max:12,priv:false,pass:'',n:0,owner:'Sistema',size:'mediana',test:true}];
 let user={nick:'',num:'10'},G=null,me=null,isAdmin=false,cur=null,pending=null,inGame=false,menuOpen=false,botSeq=1,evT;
 const keys={up:0,down:0,left:0,right:0,kick:0};
+/* Dorsales únicos: ningún bot repite el número/emoji de un humano (ni el de otro bot) */
+const normNum=v=>{v=String(v==null?'':v).trim();return /^\d+$/.test(v)?String(+v):v};
+const NUM_POOL=['2','3','4','6','7','8','9','11','5','1','10',...Array.from({length:88},(_,i)=>String(i+12)).filter(n=>n!=='11'),'⚽','🔥','⚡','🚀','🦁','⭐','🏆','👑'];
+function uniqueBotNums(){if(!G||NET.role==='client')return;
+ const taken=new Set(G.players.filter(p=>!p.bot).map(p=>normNum(p.num))),todo=[];
+ G.players.forEach(p=>{if(!p.bot)return;const n=normNum(p.num);if(!n||n==='0'||taken.has(n))todo.push(p);else taken.add(n)}); /* conserva los dorsales libres; reasigna los repetidos */
+ todo.forEach(p=>{const n=NUM_POOL.find(x=>!taken.has(normNum(x)))||'';p.num=n;taken.add(normNum(n))})}
 const other=t=>t==='red'?'blue':'red',clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0');
@@ -284,12 +292,12 @@ $('jPass').addEventListener('keydown',e=>e.key==='Enter'&&$('jOk').click());
 /* Partida local (misma física que el servidor) */
 const mk=(name,num,team,bot,id)=>({id:id||'b'+Math.random().toString(36).slice(2,7),name,num,team,bot,flag:'🌐',ping:0,x:0,y:0,vx:0,vy:0,r:PRAD,cd:0,flash:0,ax:0,ay:0,kick:false,wander:Math.random()*10});
 function enter(r,admin){netReset();updateInvite();cur=r;isAdmin=admin;me=mk(user.nick,user.num,'red',false,'host');me.flag=FLAG;
- G={uni:defUni(),size:r.size||'mediana',duration:180,goalLimit:0,players:[me,...(r.test?[mk('Bot 1','7','red',true),mk('Bot 2','9','blue',true),mk('Bot 3','3','blue',true)]:[])]};botSeq=r.test?4:1;
+ G={uni:defUni(),size:r.size||'mediana',duration:180,goalLimit:0,players:[me,...(r.test?[mk('Bot 1','7','red',true),mk('Bot 2','9','blue',true),mk('Bot 3','3','blue',true)]:[])]};botSeq=r.test?4:1;uniqueBotNums();
  sizeUp();restart();show('screen-game');$('log').textContent='';$('c').focus()}
 function sizeUp(){[G.w,G.h]=SIZES[G.size];G.gh=GHT[G.size];G.gT=(G.h-G.gh)/2;G.gB=G.gT+G.gh;G.k=G.size==='gigante'?1.2:G.size==='grande'?1.1:1;G.cam=null}
 function kickoff(){G.sp=null;G.outImm=0;G.lastT=null;G.ko=G.koTeam||'red';G.ball={x:G.w/2,y:G.h/2,vx:0,vy:0,r:BRAD*G.k};G.players.forEach(p=>p.r=PRAD*G.k);
  ['red','blue'].forEach(t=>{const l=G.players.filter(p=>p.team===t);l.forEach((p,i)=>{p.x=t==='red'?G.w*.3:G.w*.7;p.y=G.h*(i+1)/(l.length+1);p.vx=p.vy=0;p.cd=p.flash=0})})}
-function restart(){assignRoles();G.koTeam='red';G.pen=null;$('penbar').classList.add('hidden');$('sb').classList.remove('hidden');$('sb').appendChild($('mute'));G.vote=null;G.golden=false;$('vote').classList.add('hidden');G.paused=false;G.cd=0;G.score={red:0,blue:0};G.clock=0;G.gp=0;G.over=false;kickoff();hud()}
+function restart(){clearTimeout(evT);$('ev').classList.remove('show');assignRoles();G.koTeam='red';G.pen=null;$('penbar').classList.add('hidden');$('sb').classList.remove('hidden');$('sb').appendChild($('mute'));G.vote=null;G.golden=false;$('vote').classList.add('hidden');G.paused=false;G.cd=0;G.score={red:0,blue:0};G.clock=0;G.gp=0;G.over=false;kickoff();hud()}
 /* Etiquetas LOCAL/VISITANTE con los colores del uniforme: 1 color → palabra completa; 2 colores → mitad y mitad */
 function teamLabel(el,team,txt){const u=(G&&G.uni&&G.uni[team])||{n:1,c1:team==='red'?'#ff5d5d':'#3b9cff'},key=u.n+'|'+u.c1+'|'+u.c2;if(el._k===key)return;el._k=key;el.textContent=txt;
  el.style.cssText=u.n===2?`background:linear-gradient(90deg,${u.c1} 50%,${u.c2} 50%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;-webkit-text-stroke:.5px rgba(255,255,255,.35)`
@@ -342,6 +350,9 @@ function botAI(p){const b=G.ball,W=G.w,H=G.h,dir=p.team==='red'?1:-1,ownX=dir>0?
   else if(role==='extremo'){x=F(lp(.52,.88,(bf-.2)*1.3+(atk?.2:0)));y=by}
   else{x=F(lp(.65,.92,bf*1.2+(atk?.2:0)));p.lc=(p.lc||0)-1; /* delantero: busca espacio libre entre defensores */
    if(p.lc<=0||p.ly===undefined){p.lc=40;let best=-1;[H*.22,H*.5,H*.78,clamp(b.y,40,H-40)].forEach(yy=>{const sc=minFoe(x,yy);if(sc>best){best=sc;p.ly=yy}})}y=p.ly+off*.5}
+  if(!atk&&owner.team!==p.team&&(role==='lateral'||role==='mediocampista'||role==='extremo')){ /* cierra la línea de pase: se interpone entre el poseedor y el rival que marca */
+   let mf=null,md=260;foes.forEach(f=>{if(f===owner)return;const dd=Math.hypot(f.x-x,f.y-y);if(dd<md){md=dd;mf=f}});
+   if(mf){x=clamp(mf.x+(owner.x-mf.x)*.3,x-120,x+120);y=mf.y+(owner.y-mf.y)*.3}}
   return[clamp(x,30,W-30),clamp(y,30,H-30)]};
  const cornerT=far=>{const cs=[[oppX,G.gT+G.gh*.12],[oppX,G.gB-G.gh*.12]];return far?cs[p.y<H/2?1:0]:cs.reduce((a,c)=>minFoe(c[0],c[1])>minFoe(a[0],a[1])?c:a)};
  const chaseT=()=>{const dG=Math.hypot(oppX-p.x,H/2-p.y),tm=mine.filter(q=>q!==p),free=q=>minFoe(q.x,q.y),clear=!foes.some(f=>segD(b.x,b.y,oppX,H/2,f.x,f.y)<40),
@@ -361,10 +372,12 @@ function botAI(p){const b=G.ball,W=G.w,H=G.h,dir=p.team==='red'?1:-1,ownX=dir>0?
   const dG=Math.hypot(oppX-p.x,H/2-p.y),dOwn=Math.abs(p.x-ownX)/W,fd=minFoe(p.x,p.y),press=fd<95,wall=Math.min(b.y,H-b.y),cornered=fd<75&&(wall<70||(fd<55&&wall<110)),
    laneOK=q=>!foes.some(f=>segD(b.x,b.y,q.x,q.y,f.x,f.y)<38),mates=mine.filter(q=>q!==p&&(q.x-p.x)*dir>35&&laneOK(q)&&minFoe(q.x,q.y)>85),
    better=mates.length?mates.reduce((a,c)=>minFoe(c.x,c.y)>minFoe(a.x,a.y)?c:a):null,clr=!foes.some(f=>segD(b.x,b.y,oppX,H/2,f.x,f.y)<40),
-   shootD=(RL()?620:470)*(ps==='ataque'?1.15:ps==='defensa'?.7:1),hold=p.hold||0;
+   shootD=(RL()?620:470)*(ps==='ataque'?1.15:ps==='defensa'?.7:1)*(role==='delantero'||role==='extremo'?1.2:1),hold=p.hold||0,
+   shots=[G.gT+G.gh*.14,H/2,G.gB-G.gh*.14].filter(y=>!foes.some(f=>segD(b.x,b.y,oppX,y,f.x,f.y)<38)), /* ángulos de remate libres */
+   shotT=shots.length?[oppX,shots.reduce((a,y)=>minFoe(oppX,y)>minFoe(oppX,a)?y:a)]:null;
   if(dOwn<.22&&press)return{T:[ownX+dir*W*.4,minFoe(b.x,H*.1)>minFoe(b.x,H*.9)?H*.1:H*.9],min:.05,why:'despeje'};
-  if(dG<shootD&&clr)return{T:cornerT(false),min:.18,why:'tiro'};
-  if(better&&(press||hold>.4))return{T:[clamp(better.x+dir*60,20,W-20),better.y],min:.3,why:'pase'};
+  if(dG<shootD&&shotT)return{T:shotT,min:.1,why:'tiro'}; /* buen ángulo: remata él mismo */
+  if(better&&(press||hold>.2||minFoe(better.x,better.y)>fd+60))return{T:[clamp(better.x+dir*60,20,W-20),better.y],min:.15,why:'pase'}; /* pase filtrado al mejor ubicado */
   if(cornered){if(!RL())return{T:[clamp(b.x+dir*260,20,W-20),b.y<H/2?0:H],min:.2,why:'pared'}; /* rebote contra la banda (Clásico) */
    const q=mine.filter(o=>o!==p).sort((a,c)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(c.x-p.x,c.y-p.y))[0];return q?{T:[q.x,q.y],min:.2,why:'apoyo'}:{T:T0,min:.1,why:'despeje'}}
   if(hold>1.3)return{T:T0,min:1.3,why:'rol'};
@@ -381,16 +394,15 @@ function botAI(p){const b=G.ball,W=G.w,H=G.h,dir=p.team==='red'?1:-1,ownX=dir>0?
   if(db<p.r+b.r+5&&p.ct>.25&&Math.hypot(tx-p.x,ty-p.y)<14){const m=S.type==='arco'?1.65:S.type==='corner'?1.6:.95,ddx=T[0]-b.x,ddy=T[1]-b.y,l=Math.hypot(ddx,ddy)||1;
    b.vx=ddx/l*KS*m;b.vy=ddy/l*KS*m;p.flash=FL;p.cd=KCD;G.lastT=p.team;thump()}}
  else if(p.bk>0){p.bk-=DT;p.ct=0;tx=clamp(p.x-(b.x-p.x)*3,30,W-30);ty=clamp(p.y-(b.y-p.y)*3,30,H-30)} /* retroceso anti-traba */
- else if(near===p&&(p.hold||0)>1.8&&Math.hypot(b.vx,b.vy)<1.5&&!G.ko&&!G.sp){p.bk=.5;p.hold=0;p.ct=0;tx=clamp(p.x-(b.x-p.x)*3,30,W-30);ty=clamp(p.y-(b.y-p.y)*3,30,H-30)} /* pelota clavada: suelta y retrocede */
- else if(near===p){chase=true;const D=decide(),T=D.T,ux=T[0]-b.x,uy=T[1]-b.y,ul=Math.hypot(ux,uy)||1,u=[ux/ul,uy/ul],al=((b.x-p.x)*u[0]+(b.y-p.y)*u[1])/(db||1),o=al>.3?15:50;p.why=D.why;
+  else if(near===p){chase=true;const D=decide(),T=D.T,ux=T[0]-b.x,uy=T[1]-b.y,ul=Math.hypot(ux,uy)||1,u=[ux/ul,uy/ul],al=((b.x-p.x)*u[0]+(b.y-p.y)*u[1])/(db||1),o=al>.3?15:50;p.why=D.why;
   tx=b.x-u[0]*o;ty=b.y-u[1]*o;p.ct=db<p.r+b.r+6?(p.ct||0)+DT:0;p.hold=db<p.r+b.r+24?Math.min(3,(p.hold||0)+DT):Math.max(0,(p.hold||0)-DT*2);
   p.kick=db<p.r+b.r+4&&p.ct>.03&&(al>.55||p.ct>.3)&&p.hold>=D.min}
  else{p.ct=0;[tx,ty]=pos()} /* vuelve fluido a su zona táctica */
  /* steering: llegar al punto táctico, nunca por debajo de MINV */
  const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);let hx,hy,spd;
  if(d>10){hx=dx/d;hy=dy/d;spd=chase?MAXV:clamp(d/60*MAXV,MINV,MAXV)}else{hx=Math.cos(p.wander);hy=Math.sin(p.wander);spd=MINV}
- let sx=0,sy=0; /* separación: repulsión + componente lateral a <65 px */
- all.forEach(q=>{if(q===p)return;const ex=p.x-q.x,ey=p.y-q.y,e=Math.hypot(ex,ey);
+ let sx=0,sy=0; /* separación SOLO con compañeros (a los rivales se les marca de frente, nunca se les abre paso) */
+ all.forEach(q=>{if(q===p||q.team!==p.team)return;const ex=p.x-q.x,ey=p.y-q.y,e=Math.hypot(ex,ey);
   if(e>0&&e<65){const w=(65-e)/65*(chase&&db<60?.4:1),rx=ex/e,ry=ey/e,sg=Math.sign(hx*ry-hy*rx)||1;sx+=rx*w*1.2-hy*sg*w*.8;sy+=ry*w*1.2+hx*sg*w*.8}});
  let vx=hx*spd+sx*MAXV,vy=hy*spd+sy*MAXV;const vl=Math.hypot(vx,vy);
  if(vl>MAXV){vx*=MAXV/vl;vy*=MAXV/vl}else if(vl<MINV){if(vl<1e-3){vx=hx*MINV;vy=hy*MINV}else{vx*=MINV/vl;vy*=MINV/vl}}
@@ -436,7 +448,8 @@ function antiJam(){const b=G.ball,c=act().filter(p=>Math.hypot(p.x-b.x,p.y-b.y)<
  if(G.jam>.6){G.jam=0;let cx=0,cy=0;c.forEach(p=>{cx+=p.x;cy+=p.y});cx/=c.length;cy/=c.length;
   let ux=b.x-cx,uy=b.y-cy,l=Math.hypot(ux,uy);
   if(l<1||Math.min(b.x,G.w-b.x,b.y,G.h-b.y)<40){ux=G.w/2-b.x;uy=G.h/2-b.y;l=Math.hypot(ux,uy)||1}
-  b.vx+=ux/l*6;b.vy+=uy/l*6;c.forEach(p=>{if(p.bot)p.bk=.4});thump(.5)}}
+  b.vx+=ux/l*6;b.vy+=uy/l*6;if(!c.some(p=>p.team!==c[0].team))c.forEach(p=>{if(p.bot)p.bk=.4}); /* solo retroceden si el amontonamiento es entre compañeros */
+  thump(.5)}}
 function pauseFx(){ctx.filter='none';
  if(!('filter' in ctx)){ctx.globalCompositeOperation='saturation';ctx.fillStyle='#000';ctx.fillRect(0,0,VW,VH);ctx.globalCompositeOperation='source-over'} /* respaldo sin ctx.filter */
  ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='rgba(8,12,22,.5)';ctx.fillRect(0,0,VW,VH);
@@ -521,9 +534,12 @@ function penStep(){const P=G.pen,b=G.ball,s=P.s;P.t+=DT;
    const dx=P.gx-b.x,dy=y-b.y,l=Math.hypot(dx,dy)||1,pw=bad?1.1:P.zone===1?1.45:1.1;b.vx=dx/l*KS*pw;b.vy=dy/l*KS*pw;s.flash=FL;thump();penShotStart()}}
   else if(Math.hypot(b.vx,b.vy)>2.5)penShotStart();
   if(P.ph==='aim'&&P.t>7)penDone(false)}
- else if(P.ph==='ball'){const k=P.k;
-  if(Math.hypot(k.x-b.x,k.y-b.y)<k.r+b.r+1)penDone(false); /* atajada */
-  else if((P.t>.5&&Math.hypot(b.vx,b.vy)<.4)||P.t>4||(b.x-P.gx)*P.din>P.sd+80)penDone(false)}
+ else if(P.ph==='ball'){const k=P.k,out=(b.x-P.gx)*P.din,inMouth=b.y>G.gT&&b.y<G.gB; /* out = distancia a la línea de gol, hacia adentro de la cancha */
+  if(Math.hypot(k.x-b.x,k.y-b.y)<k.r+b.r+1)P.touch=true; /* el arquero la tocó: NO es atajada todavía; sigue la física del rebote y, si la pelota cruza la línea, goal() lo valida como GOL */
+  if(!inMouth&&out<=b.r+.5)penDone(false); /* sale por la línea de fondo fuera de los postes */
+  else if(out>P.sd+80)penDone(false); /* rebota hacia afuera del área */
+  else if(P.t>.5&&Math.hypot(b.vx,b.vy)<.4)penDone(false); /* se detiene sin haber cruzado la línea */
+  else if(P.t>2.5)penDone(false)} /* tiempo máximo de resolución del disparo */
  else if(P.ph==='res'&&P.t>1.4)penNext();
  $('pTimer').textContent=P.ph==='aim'?Math.max(0,Math.ceil(7-P.t)):'';const info=P.ph==='aim'||P.ph==='intro'?`🥅 Patea ${s.name} (${P.team==='red'?'LOCAL':'VISITANTE'})`:'';if($('pInfo').textContent!==info)$('pInfo').textContent=info}
 /* Votación de desempate (8 s) */
@@ -553,7 +569,11 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
  if(!G.pen&&G.duration&&!G.golden&&G.clock>=G.duration){G.clock=G.duration;return G.score.red===G.score.blue?startVote():end()}
  if(G.gp>0){if((G.gp-=DT)<=0)kickoff();return hud()}
  if(G.outImm>0)G.outImm-=DT;
+ if(NET.role!=='client'&&(G.nt=(G.nt||0)+DT)>1){G.nt=0;uniqueBotNums()}
  const{w,h}=G,b=G.ball,bdf=BD;
+ const nf=v=>!Number.isFinite(v); /* anti-congelamiento: ningún valor NaN/Infinity queda en el estado */
+ if(nf(b.x)||nf(b.y)||nf(b.vx)||nf(b.vy)){b.x=w/2;b.y=h/2;b.vx=b.vy=0}
+ G.players.forEach(p=>{if(nf(p.x)||nf(p.y)||nf(p.vx)||nf(p.vy)){p.x=w/2;p.y=h/2;p.vx=p.vy=0}if(nf(p.ax))p.ax=0;if(nf(p.ay))p.ay=0});
  G.players.forEach(p=>{if(p.bot)return;const k=p===me?keys:(p.keys||{}),ix=(k.right|0)-(k.left|0),iy=(k.down|0)-(k.up|0),l=Math.hypot(ix,iy)||1;p.ax=ix/l;p.ay=iy/l;p.kick=!!k.kick;if(G.pen&&G.pen.k===p)p.ax=0}); /* teclas de cada humano; arquero: solo vertical */
  act().forEach(p=>{if(p.bot)G.pen?penAI(p):botAI(p);
   const dm=p.kick?KPD:PD;p.vx=(p.vx+p.ax*ACC)*dm;p.vy=(p.vy+p.ay*ACC)*dm;
@@ -561,13 +581,20 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
   p.x=clamp(p.x+p.vx,-GD+p.r-ex,w+GD-p.r+ex);p.y=clamp(p.y+p.vy,p.r-ex,h-p.r+ex);wallsP(p);penLock(p);koWall(p);spWall(p);p.cd=Math.max(0,p.cd-DT);p.flash=Math.max(0,p.flash-DT);
   if(p.kick&&!p.kd)p.flash=FL; /* destello 150 ms al presionar patear, toque o no la pelota */
   p.kd=p.kick;if(p.kick&&p.cd<=0)tryKick(p)});
- const L=act();for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++){const a=L[i],c=L[j],d=Math.hypot(c.x-a.x,c.y-a.y),m=a.r+c.r;
-  if(d>0&&d<m){const nx=(c.x-a.x)/d,ny=(c.y-a.y)/d,o=(m-d)/2;a.x-=nx*o;a.y-=ny*o;c.x+=nx*o;c.y+=ny*o}}
+ const L=act();
+ for(let pass=0;pass<3;pass++){let hit=false; /* máx. 3 pasadas de resolución jugador↔jugador por frame */
+  for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++){const a=L[i],c=L[j],dx=c.x-a.x,dy=c.y-a.y,m=a.r+c.r;let dist=Math.hypot(dx,dy);if(dist>=m)continue;hit=true;
+   let nx,ny;if(dist<.001){const g=((i*7+j*13)%628)/100;nx=Math.cos(g);ny=Math.sin(g)}else{nx=dx/dist;ny=dy/dist}
+   dist=Math.max(dist,.001);const o=(m-dist)/2;a.x-=nx*o;a.y-=ny*o;c.x+=nx*o;c.y+=ny*o}
+  if(!hit)break}
  b.x+=b.vx;b.y+=b.vy;b.vx*=bdf;b.vy*=bdf;if(Math.hypot(b.vx,b.vy)<.01)b.vx=b.vy=0;
- L.forEach(p=>{if(G.sp&&p.bot&&p.team===G.sp.team)return; /* un bot sacador no empuja la pelota: la libera con su pase */
-  const d=Math.hypot(b.x-p.x,b.y-p.y),m=p.r+b.r;
-  if(d>0&&d<m){G.lastT=p.team;const nx=(b.x-p.x)/d,ny=(b.y-p.y)/d;b.x=p.x+nx*m;b.y=p.y+ny*m;const vn=(b.vx-p.vx)*nx+(b.vy-p.vy)*ny;
-   if(vn<0){const j=-(1+PREST)*vn/1.5;b.vx+=j*nx;b.vy+=j*ny;p.vx-=j*.5*nx;p.vy-=j*.5*ny}}});
+ for(let pass=0;pass<3;pass++){let hit=false; /* máx. 3 pasadas jugador↔balón por frame */
+  L.forEach(p=>{if(G.sp&&p.bot&&p.team===G.sp.team)return; /* un bot sacador no empuja la pelota: la libera con su pase */
+   const dx=b.x-p.x,dy=b.y-p.y,m=p.r+b.r;let dist=Math.hypot(dx,dy);
+   if(dist<m-.001){hit=true;G.lastT=p.team;let nx,ny;if(dist<.001){const g=(p.x*13.7+p.y*7.3)%6.283;nx=Math.cos(g);ny=Math.sin(g)}else{nx=dx/dist;ny=dy/dist}
+    dist=Math.max(dist,.001);b.x=p.x+nx*m;b.y=p.y+ny*m;const vn=(b.vx-p.vx)*nx+(b.vy-p.vy)*ny;
+    if(vn<0){const j=-(1+PREST)*vn/1.5;b.vx+=j*nx;b.vy+=j*ny;p.vx-=j*.5*nx;p.vy-=j*.5*ny}}});
+  if(!hit)break}
  if(G.sp&&(!L.some(p=>p.team===G.sp.team)||L.some(p=>!p.bot&&p.team===G.sp.team&&Math.hypot(p.x-b.x,p.y-b.y)<p.r+b.r+1)||Math.hypot(b.vx,b.vy)>.3)){G.sp=null;G.outImm=.15} /* se ejecutó la reanudación; 150 ms de inmunidad contra re-detección */
  if(G.sp){b.vx=b.vy=0;b.x=G.sp.x;b.y=G.sp.y} /* balón parado: quieto y en su sitio */
  if(G.ko&&(!L.some(p=>p.team===G.ko)||L.some(p=>p.team===G.ko&&Math.hypot(p.x-b.x,p.y-b.y)<p.r+b.r+1)||Math.hypot(b.vx,b.vy)>.3))G.ko=null; /* el saque se ejecutó: se quita la barrera */
@@ -600,7 +627,7 @@ function syncNum(){const m=G.duration/60,g=G.goalLimit,T=$('aTime'),Gl=$('aGoals
  T.value=m<=10?String(m):'c';$('aTimeN').value=m>10?Math.round(m):'';$('aTimeN').classList.toggle('hidden',m<=10);
  Gl.value=g<=10?String(g):'c';$('aGoalsN').value=g>10?g:'';$('aGoalsN').classList.toggle('hidden',g<=10)}
 $('aRestart').onclick=()=>{toggleMenu(false);restart();showEv('¡PARTIDO REINICIADO!')};
-$('bAdd').onclick=()=>{const t=$('aBotTeam').value;if(hum()>=LOCK||nb(t).length>=(RL()?11:MAXB))return;const n=botSeq++;if(G.pen)return showEv('Espera: tanda de penales en curso',1500);const nb2=mk(`Bot ${n}`,String(n%99),t,true);placeFree(nb2);G.players.push(nb2);assignRoles(t);botUI();showEv(`+1 bot · ${t==='red'?'Local':'Visitante'}`,900)};
+$('bAdd').onclick=()=>{const t=$('aBotTeam').value;if(hum()>=LOCK||nb(t).length>=(RL()?11:MAXB))return;const n=botSeq++;if(G.pen)return showEv('Espera: tanda de penales en curso',1500);const nb2=mk(`Bot ${n}`,String(n%99),t,true);placeFree(nb2);G.players.push(nb2);uniqueBotNums();assignRoles(t);botUI();showEv(`+1 bot · ${t==='red'?'Local':'Visitante'}`,900)};
 $('bDel').onclick=()=>{const b=nb($('aBotTeam').value).pop();if(b){G.players.splice(G.players.indexOf(b),1);botUI()}};
 $('mLeave').onclick=()=>{netLeave();if(isAdmin&&!cur.test)rooms=rooms.filter(r=>r!==cur);menuOpen=false;$('menu').classList.add('hidden');$('vote').classList.add('hidden');renderRooms();show('screen-lobby')};
 
@@ -609,7 +636,7 @@ const mv={ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',ArrowLeft:'left',K
 const chatIn=$('chatIn');
 function addMsg(name,team,text,flag){const d=document.createElement('div'),b=document.createElement('b');
  b.style.color=team==='red'?'#ff5d5d':team==='blue'?'#3b9cff':'#9aa8c7';b.textContent=(flag?flag+' ':'')+name+': ';
- d.append(b,document.createTextNode(text));const L=$('log');L.appendChild(d);while(L.children.length>50)L.firstChild.remove();L.scrollTop=L.scrollHeight}
+ d.append(b,document.createTextNode(text));const L=$('log');L.appendChild(d);while(L.children.length>40)L.firstChild.remove();L.scrollTop=L.scrollHeight}
 chatIn.addEventListener('keydown',e=>{
  if(e.code==='Tab')e.preventDefault();
  if(e.code==='Enter'){e.preventDefault();e.stopPropagation();const t=chatIn.value.trim();if(t)sendChat(t);chatIn.value='';chatIn.blur();$('c').focus()}});
@@ -663,35 +690,35 @@ const linkOf=c=>location.href.split('#')[0].split('?')[0]+'?sala='+c;
 async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch(e){try{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();const ok=document.execCommand('copy');a.remove();return ok}catch(e2){return false}}}
 function updateInvite(){const c=NET.code;$('mCopy').classList.toggle('hidden',!c);$('mCode').textContent=c?'Sala online: '+c:''}
 $('mCopy').onclick=async()=>{const ok=await copyText(linkOf(NET.code));showEv(ok?'📋 Link copiado':'Contraseña: '+NET.code,1600)};
-function netReset(){clearInterval(NET.pingT);const p=NET.peer;if(p)setTimeout(()=>{try{p.destroy()}catch(e){}},300);Object.assign(NET,{role:'local',peer:null,conn:null,conns:[],code:'',pm:new Map(),pk:''})}
+function netReset(){clearInterval(NET.pingT);clearInterval(NET.roomT);clearTimeout(NET.jt);clearTimeout(NET.ht);const p=NET.peer;if(p)setTimeout(()=>{try{p.destroy()}catch(e){}},300);Object.assign(NET,{role:'local',peer:null,conn:null,conns:[],code:'',pm:new Map(),pk:''})}
 const delRoom=()=>{if(NET.role==='host'&&NET.code)fetch('/api/salas',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({peerId:NET.code}),keepalive:true}).catch(()=>{})};
 window.addEventListener('beforeunload',delRoom);window.addEventListener('pagehide',delRoom);
 function netLeave(){delRoom();clearInterval(NET.roomT);if(NET.role==='host')bc({t:'bye'});if(NET.role==='client'){try{NET.conn.close()}catch(e){}}netReset();updateInvite()}
-const csend=m=>{if(NET.conn&&NET.conn.open)NET.conn.send(m)}; /* envío seguro: ignora si la conexión ya se cerró */
+const csend=m=>safeSend(NET.conn,m); /* envío seguro: ignora si la conexión ya se cerró */
 const sendKeys=()=>{if(NET.role==='client'&&NET.conn&&NET.conn.open)csend({t:'k',k:{...keys}})};
 function sendChat(t){if(NET.role==='client')csend({t:'chat',x:t});else{addMsg(me.name,me.team,t,me.flag);bc({t:'chat',n:me.name,tm:me.team,x:t,f:me.flag})}}
 const cfgMsg=()=>({t:'cfg',size:G.size,d:G.duration,g:G.goalLimit,uni:G.uni,name:cur.name,code:NET.code,rf:cur.flag||'🌐',pl:G.players.map(p=>[p.id,p.flag||'🌐',p.ping|0])});
 /* --- Host --- */
 function startHost(r){if(typeof Peer==='undefined'){showEv('Online no disponible: sala solo local',2400);return}
  const attempt=n=>{const id='futball-'+(1000+Math.floor(Math.random()*9000)),pr=new Peer(id);let done=false;
-  const tm=setTimeout(()=>{if(!done){done=true;try{pr.destroy()}catch(e){}showEv('Sin conexión al servidor online: sala solo local',2800)}},8000);
-  pr.on('open',()=>{clearTimeout(tm);if(done||cur!==r){try{pr.destroy()}catch(e){}return}done=true;NET.peer=pr;NET.role='host';NET.code=id;NET.pingT=setInterval(()=>NET.conns.forEach(c=>{if(c.open&&c.pl)c.send({t:'ping',ts:Date.now()})}),2000);r.code=id;updateInvite();showEv('🌐 Sala online: '+id,2800);
+  const tm=setTimeout(()=>{if(!done){done=true;try{pr.destroy()}catch(e){}showEv('Sin conexión al servidor online: sala solo local',2800)}},8000);clearTimeout(NET.ht);NET.ht=tm;
+  pr.on('open',()=>{clearTimeout(tm);if(done||cur!==r){try{pr.destroy()}catch(e){}return}done=true;NET.peer=pr;NET.role='host';NET.code=id;clearInterval(NET.pingT);NET.pingT=setInterval(()=>bc({t:'ping',ts:Date.now()}),2000);r.code=id;updateInvite();showEv('🌐 Sala online: '+id,2800);
    const pub=()=>{if(NET.role!=='host'||NET.code!==id){clearInterval(NET.roomT);return}fetch('/api/salas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({peerId:id,name:r.name,owner:r.owner,flag:r.flag||FLAG,ping:0,n:hum(),max:r.max,priv:r.priv,code:id})}).catch(()=>{})};
    pub();clearInterval(NET.roomT);NET.roomT=setInterval(pub,15000)});
   pr.on('error',e=>{if(done)return;clearTimeout(tm);done=true;if(e.type==='unavailable-id'&&n<5)attempt(n+1);else showEv('No se pudo abrir la sala online: sala solo local',2800)});
-  pr.on('connection',c=>{c.on('data',m=>hostData(c,m));c.on('close',()=>hostGone(c));c.on('error',()=>hostGone(c))})};
+  pr.on('connection',c=>{c.on('data',m=>{try{hostData(c,m)}catch(e){console.warn('hostData',e)}});c.on('close',()=>hostGone(c));c.on('error',()=>hostGone(c))})};
  attempt(0)}
-function hostData(c,m){if(!m||NET.role!=='host')return;
+function hostData(c,m){if(!m||typeof m!=='object'||NET.role!=='host')return;
  if(m.t==='join'){if(c.pl)return;const r=cur,nick=String(m.nick||'').slice(0,16).trim()||'Jugador',num=Array.from(String(m.num||'')).slice(0,2).join('')||'10';
-  if(r.priv&&m.pass!==r.pass){c.send(m.pass?{t:'err',m:'Contraseña incorrecta.'}:{t:'need'});return}
-  if(hum()>=r.max){c.send({t:'err',m:'La sala está llena.'});return}
+  if(r.priv&&m.pass!==r.pass){safeSend(c,m.pass?{t:'err',m:'Contraseña incorrecta.'}:{t:'need'});return}
+  if(hum()>=r.max){safeSend(c,{t:'err',m:'La sala está llena.'});return}
   const rc=G.players.filter(p=>p.team==='red').length,bl=G.players.filter(p=>p.team==='blue').length,tm=rc<=bl?'red':'blue',p=mk(nick,num,tm,false,c.peer);
-  p.flag=safeFlag(m.flag);p.keys={};p.x=G.pen?G.w/2:(tm==='red'?G.w*.3:G.w*.7);p.y=G.pen?G.h/2:G.h*(.2+Math.random()*.6);G.players.push(p);c.pl=p;NET.conns.push(c);
-  c.send({t:'welcome',id:c.peer,cfg:cfgMsg()});c.send({t:'ping',ts:Date.now()});showEv(`➕ ${nick} se unió`,1400)}
+  p.flag=safeFlag(m.flag);p.keys={};p.x=G.pen?G.w/2:(tm==='red'?G.w*.3:G.w*.7);p.y=G.pen?G.h/2:G.h*(.2+Math.random()*.6);G.players.push(p);c.pl=p;NET.conns.push(c);uniqueBotNums();
+  safeSend(c,{t:'welcome',id:c.peer,cfg:cfgMsg()});safeSend(c,{t:'ping',ts:Date.now()});showEv(`➕ ${nick} se unió`,1400)}
  else if(!c.pl)return;
  else if(m.t==='pong'){const r=Math.max(1,Date.now()-m.ts);c.pl.ping=c.pl.ping?Math.round(c.pl.ping*.5+r*.5):r}
  else if(m.t==='flag')c.pl.flag=safeFlag(m.f);
- else if(m.t==='k')c.pl.keys=m.k||{};
+ else if(m.t==='k')c.pl.keys=m.k&&typeof m.k==='object'?m.k:{};
  else if(m.t==='chat'){const x=String(m.x||'').slice(0,120);if(x){addMsg(c.pl.name,c.pl.team,x,c.pl.flag);bc({t:'chat',n:c.pl.name,tm:c.pl.team,x,f:c.pl.flag})}}
  else if(m.t==='vote'){if(G.vote&&[1,2,3].includes(m.n)&&G.vote.voters.includes(c.pl))c.pl.vc=m.n}}
 function hostGone(c){const p=c.pl;if(!p)return;c.pl=null;NET.conns=NET.conns.filter(x=>x!==c);
@@ -711,14 +738,14 @@ function joinCode(raw){const code=norm(raw),err=m=>{$('codeErr').textContent=m};
  if(typeof Peer==='undefined')return err('PeerJS no está disponible (¿sin conexión?).');
  netReset();err('Conectando…');NET.target=code;let ok=false;const pr=new Peer();NET.peer=pr;
  const fail=m=>{if(NET.peer!==pr)return;const wasIn=NET.role==='client';netLeave();$('modal').classList.add('hidden');if(wasIn)show('screen-lobby');err(m)};
- const tm=setTimeout(()=>{if(!ok)fail('No se encontró la sala (revisa la contraseña).')},9000);
+ const tm=setTimeout(()=>{if(!ok)fail('No se encontró la sala (revisa la contraseña).')},9000);clearTimeout(NET.jt);NET.jt=tm;
  pr.on('error',e=>{clearTimeout(tm);fail(e.type==='peer-unavailable'?'No se encontró la sala (revisa la contraseña).':'No se pudo conectar al servidor online.')});
  pr.on('open',()=>{const c=pr.connect(code,{reliable:true,serialization:'json'});NET.conn=c;
-  c.on('open',()=>c.send({t:'join',nick:user.nick,num:user.num,pass:'',flag:FLAG}));
-  c.on('data',m=>{if(NET.conn!==c)return;if(m.t==='welcome'){ok=true;clearTimeout(tm);enterClient(m)}
+  c.on('open',()=>safeSend(c,{t:'join',nick:user.nick,num:user.num,pass:'',flag:FLAG}));
+  c.on('data',m=>{try{if(NET.conn!==c||!m||typeof m!=='object')return;if(m.t==='welcome'){ok=true;clearTimeout(tm);enterClient(m)}
    else if(m.t==='need'){clearTimeout(tm);pending={net:1};$('jName').textContent='Sala '+code;$('jPass').value='';$('jErr').textContent='';$('modal').classList.remove('hidden');$('jPass').focus()}
    else if(m.t==='err'){clearTimeout(tm);if($('modal').classList.contains('hidden'))fail(m.m);else $('jErr').textContent=m.m}
-   else cliData(m)});
+   else cliData(m)}catch(e){console.warn('cliData',e)}});
   c.on('close',()=>{if(NET.peer===pr)fail('El Host cerró la sala.')});c.on('error',()=>{})})}
 $('codeGo').onclick=()=>joinCode($('codeIn').value);
 $('codeIn').addEventListener('keydown',e=>e.key==='Enter'&&$('codeGo').click());
@@ -754,5 +781,7 @@ function applyState(m){const seen=new Set();
 function cliSmooth(){const sm=o=>{if(o.tx===undefined)return;const dx=o.tx-o.x,dy=o.ty-o.y;if(Math.hypot(dx,dy)>150){o.x=o.tx;o.y=o.ty}else{o.x+=dx*.5;o.y+=dy*.5}};G.players.forEach(sm);sm(G.ball)}
 let last=performance.now(),acc=0;
 (function loop(t){acc+=Math.min(.05,(t-last)/1000);last=t;
- if(inGame&&G){if(NET.role==='client')cliSmooth();else while(acc>=DT){step();acc-=DT;if(NET.role==='host')netState()}draw()}else acc=0;requestAnimationFrame(loop)})(last);
+ try{if(inGame&&G){if(NET.role==='client')cliSmooth();else{let n=0;while(acc>=DT&&n++<5){step();acc-=DT;if(NET.role==='host')netState()}if(acc>DT*5)acc=0}draw()}else acc=0}
+ catch(e){console.error('loop',e);acc=0} /* un error aislado no detiene el juego */
+ requestAnimationFrame(loop)})(last);
 </script></body></html>
