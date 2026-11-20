@@ -37,7 +37,36 @@ button.ghost{background:#1f2a48;color:#cfe3ff}button.danger{background:linear-gr
 #screen-login #enter svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 #screen-login #enter:active{transform:translateY(3px);box-shadow:0 2px 0 #0369a1,0 4px 12px rgba(56,189,248,.5),inset 0 2px 0 rgba(255,255,255,.45)}
 #screen-login .foot{margin-top:8px;padding-top:10px;border-top:1px solid rgba(147,197,253,.25);text-align:center;font-size:.95rem;color:#dbeafe}
-#screen-lobby{flex-direction:column;align-items:center;padding:20px;gap:14px;overflow:auto}
+#screen-lobby{flex-direction:column;align-items:center;gap:14px;overflow:auto;box-sizing:border-box;width:100vw;height:100vh;padding:18vh 0 28px;position:relative;
+ background:url('assets/lobby-bg.png') center top / cover no-repeat,linear-gradient(160deg,#0a46d6,#0626a0 60%,#041a6e)}
+#screen-lobby .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#screen-lobby #who{position:absolute;top:10px;left:12px;padding:3px 12px;border-radius:999px;background:rgba(6,28,72,.7);border:1px solid rgba(56,189,248,.6);color:#dbeafe;font-size:.8rem}
+#screen-lobby .grid{width:94vw;max-width:1120px;grid-template-columns:58% 40%;column-gap:2%;row-gap:46px;flex:none}
+#screen-lobby .panel{position:relative;padding:34px 18px 18px;gap:10px;background:rgba(8,42,115,.72);border:2px solid #38bdf8;border-radius:18px;box-shadow:0 0 18px rgba(56,189,248,.3),inset 0 0 30px rgba(14,80,200,.25)}
+#screen-lobby .panel>h2{position:absolute;top:-38px;left:16px;height:40px;box-sizing:border-box;display:flex;align-items:center;gap:8px;margin:0;padding:0 24px;background:rgba(5,24,70,.97);border:2px solid #38bdf8;border-bottom:none;border-radius:16px 16px 0 0;color:#fff;font-size:1.3rem;font-weight:900;font-style:italic;white-space:nowrap}
+#screen-lobby .err{color:#fca5a5;text-shadow:0 1px 2px #000}#screen-lobby .err:empty{display:none}
+#screen-lobby input:not([type=radio]),#screen-lobby select{background:rgba(4,18,48,.9);border:1.5px solid #1d4ed8;color:#fff;border-radius:12px;padding:12px 16px;font-size:1.05rem}
+#screen-lobby input::placeholder{color:#8fa6cf}
+#screen-lobby input:not([type=radio]):focus,#screen-lobby select:focus{border-color:#38bdf8;box-shadow:0 0 0 2px rgba(56,189,248,.25)}
+#screen-lobby select{-webkit-appearance:none;appearance:none;padding-right:44px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 9l7 7 7-7'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:18px}
+#screen-lobby select option{background:#04122f;color:#fff}
+#screen-lobby button:not(.ghost){background:linear-gradient(180deg,#4ade80 0%,#22c55e 100%);color:#04210f;border:2px solid #052e16;border-radius:12px;font-weight:900;font-size:1.05rem;padding:9px 18px;box-shadow:0 3px 0 #052e16,0 0 10px rgba(74,222,128,.35)}
+#screen-lobby button:not(.ghost):active{transform:translateY(2px);box-shadow:0 1px 0 #052e16}
+#screen-lobby button.ghost{background:rgba(4,18,48,.9);border:1.5px solid #1d4ed8;color:#dbeafe}
+#screen-lobby #create{width:100%;padding:12px 18px;font-size:1.15rem}
+#screen-lobby .radios{gap:22px;align-items:center}
+#screen-lobby .radios label{display:flex;align-items:center;gap:8px;font-size:1.1rem;font-weight:800;color:#fff;cursor:pointer}
+#screen-lobby .radios input[type=radio]{-webkit-appearance:none;appearance:none;width:24px;height:24px;margin:0;border-radius:50%;background:#475569;border:2px solid #94a3b8;cursor:pointer}
+#screen-lobby .radios input[type=radio]:checked{background:radial-gradient(circle,#1d4ed8 0 42%,#fff 46% 100%);border-color:#fff;box-shadow:0 0 8px #38bdf8}
+#roomList{height:290px;overflow-y:auto;padding-right:6px;scrollbar-width:thin;scrollbar-color:#38bdf8 #06204f}
+#roomList::-webkit-scrollbar{width:10px}
+#roomList::-webkit-scrollbar-track{background:#06204f;border-radius:999px}
+#roomList::-webkit-scrollbar-thumb{background:#38bdf8;border-radius:999px;box-shadow:0 0 8px rgba(56,189,248,.8)}
+#screen-lobby .room{background:rgba(5,22,62,.88);border:1px solid #1e3a8a;border-radius:14px;padding:12px 14px;flex:none}
+#screen-lobby .room b{font-size:1.1rem;font-weight:800;text-transform:uppercase;color:#fff}
+#screen-lobby .room .label{color:#9fb6e0;font-size:.9rem}
+#screen-lobby .count{font-size:1.3rem;font-weight:800;color:#4ade80}#screen-lobby .count.full{color:#f87171}
+@media(max-width:760px){#screen-lobby .grid{grid-template-columns:1fr;row-gap:46px}#screen-lobby .panel>h2{font-size:1.1rem}}
 .grid{width:min(1000px,100%);display:grid;grid-template-columns:1.4fr 1fr;gap:14px}@media(max-width:760px){.grid{grid-template-columns:1fr}}
 .room{display:flex;align-items:center;gap:10px;background:var(--in);border:1px solid #243056;border-radius:10px;padding:10px 12px}
 .room .i{flex:1;min-width:0}.room b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -89,7 +118,7 @@ canvas{width:100%;aspect-ratio:5/3;border-radius:14px;border:1px solid #1e2a4a;d
 </script>
 
 <div id="screen-lobby" class="screen">
-  <h1 style="font-size:1.5rem">Fut-ball <span>⚽</span></h1><div id="who" class="label"></div>
+  <h1 class="sr-only">Fut-ball Online</h1><div id="who" class="label"></div>
   <div class="grid">
     <section class="panel"><h2>Salas activas</h2><div id="roomList" style="display:flex;flex-direction:column;gap:9px"></div></section>
     <section class="panel"><h2>Crear nueva sala</h2>
@@ -100,7 +129,7 @@ canvas{width:100%;aspect-ratio:5/3;border-radius:14px;border:1px solid #1e2a4a;d
       <button id="create">Crear sala</button><div id="lobbyErr" class="err"></div>
     </section>
     <section class="panel" style="grid-column:1/-1"><h2>🌐 Unirse a una sala online</h2>
-      <div style="display:flex;gap:8px"><input id="codeIn" placeholder="Contraseña (futball-1234) o link de invitación" autocomplete="off"><button id="codeGo" style="white-space:nowrap">Unirse</button></div>
+      <div style="display:flex;gap:10px"><input id="codeIn" placeholder="Código de sala (futball-1234) o link de invitación" autocomplete="off"><button id="codeGo" style="white-space:nowrap">Unirse</button></div>
       <div id="codeErr" class="err"></div>
     </section>
   </div>
