@@ -5,7 +5,7 @@
 <style>
 :root{color-scheme:dark;--bg:#0b0f1a;--fg:#e6edf7;--card:#171f38;--line:#2a3760;--in:#0c1222;--mut:#8aa0c8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--bg);color:var(--fg);font-family:"Segoe UI",system-ui,sans-serif;overflow:hidden}
+html,body{margin:0;padding:0;width:100vw;height:100vh;height:100dvh;box-sizing:border-box;background:var(--bg);color:var(--fg);font-family:"Segoe UI",system-ui,sans-serif;overflow:hidden!important}
 .hidden{display:none!important}.screen{display:none;height:100%}.screen.active{display:flex}
 .card,.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:11px}
 .card{width:min(420px,92vw)}h1{text-align:center;font-size:2.1rem}h2{font-size:1.05rem;color:#9fd5ff}
@@ -72,21 +72,21 @@ html:has(#screen-lobby.active),body:has(#screen-lobby.active){background:url('as
 .room{display:flex;align-items:center;gap:10px;background:var(--in);border:1px solid #243056;border-radius:10px;padding:10px 12px}
 .room .i{flex:1;min-width:0}.room b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .count{font-weight:700;color:#4ade80}.count.full{color:#f87171}.radios{display:flex;gap:14px}.radios input{width:auto}
-#screen-game{flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;padding:10px 0 6px;height:100vh;height:100dvh;box-sizing:border-box;overflow-x:hidden;overflow-y:auto}
-.stage{position:relative;flex:0 0 auto;width:min(1000px,100vw - 16px)}
-#sb{position:static;margin:0 auto 6px;width:max-content;display:flex;align-items:center;gap:10px;z-index:5;background:#0b0f1a;border:1px solid #2a3760;border-radius:10px;padding:3px 12px}
+#screen-game{position:fixed;inset:0;margin:0;padding:0;width:100vw;height:100vh;height:100dvh;box-sizing:border-box;overflow:hidden!important}
+.stage{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;display:block;margin:0;padding:0;overflow:hidden}
+#sb{position:fixed;top:10px;left:50%;transform:translateX(-50%);margin:0;width:max-content;display:flex;align-items:center;gap:10px;z-index:20;background:#0b0f1a;border:1px solid #2a3760;border-radius:10px;padding:3px 12px}
 #sb .t{font-weight:800;font-size:.7rem;letter-spacing:1px}#score{font-size:1.4rem;font-weight:900;letter-spacing:3px;text-align:center;line-height:1.1}
 #clock{font-size:.75rem;color:#fbbf24;text-align:center}
 #ev{position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);font-size:clamp(1.8rem,6vw,4rem);font-weight:900;-webkit-text-stroke:2px #0b0f1a;paint-order:stroke fill;opacity:0;pointer-events:none;z-index:6;transition:opacity .25s;white-space:nowrap}
 #ev.show{opacity:1}#ev.long{font-size:clamp(1.2rem,3.6vw,2.2rem)}
-canvas{width:100%;aspect-ratio:5/3;border-radius:14px;border:1px solid #1e2a4a;display:block;outline:none}
-.ov{position:absolute;inset:0;background:rgba(5,8,16,.8);border-radius:14px;display:flex;align-items:center;justify-content:center;z-index:10}
+canvas{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;max-width:none;aspect-ratio:auto;border:0;border-radius:0;display:block;outline:none}
+.ov{position:absolute;inset:0;background:rgba(5,8,16,.8);border-radius:0;display:flex;align-items:center;justify-content:center;z-index:10}
 .ov .card{max-height:96%;overflow-y:auto}#hint{font-size:.8rem;color:var(--mut)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50}
-#chat{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:min(440px,70%);z-index:7;background:rgba(8,12,24,.55);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:5px 7px;display:flex;flex-direction:column;gap:4px}
+#chat{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);width:min(440px,70vw);z-index:20;background:rgba(8,12,24,.55);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:5px 7px;display:flex;flex-direction:column;gap:4px}
 #log{max-height:84px;overflow-y:auto;font-size:.8rem;display:flex;flex-direction:column;gap:2px;pointer-events:none}#log:empty{display:none}
 #chatIn{padding:5px 8px;font-size:.85rem;background:rgba(5,8,16,.6)}
-#penbar{position:static;margin:0 auto 6px;width:max-content;z-index:5;background:#0b0f1a;border:1px solid #2a3760;border-radius:12px;padding:5px 14px;display:flex;flex-direction:column;align-items:center;gap:2px}
+#penbar{position:fixed;top:10px;left:50%;transform:translateX(-50%);margin:0;width:max-content;z-index:20;background:#0b0f1a;border:1px solid #2a3760;border-radius:12px;padding:5px 14px;display:flex;flex-direction:column;align-items:center;gap:2px}
 #pRow{display:flex;align-items:center;gap:14px}.pt{display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:800;letter-spacing:1px;white-space:nowrap}#pbR,#pbB{display:flex;align-items:center}
 #pTimer{min-width:42px;text-align:center;font-size:1.7rem;font-weight:900;color:#fbbf24;font-variant-numeric:tabular-nums}
 .pc{display:inline-block;width:20px;height:20px;margin:0 2px;border-radius:50%;background:#2b3552;border:2px solid #1b2440;vertical-align:middle}
@@ -432,11 +432,11 @@ function antiJam(){const b=G.ball,c=act().filter(p=>Math.hypot(p.x-b.x,p.y-b.y)<
   if(l<1||Math.min(b.x,G.w-b.x,b.y,G.h-b.y)<40){ux=G.w/2-b.x;uy=G.h/2-b.y;l=Math.hypot(ux,uy)||1}
   b.vx+=ux/l*6;b.vy+=uy/l*6;c.forEach(p=>{if(p.bot)p.bk=.4});thump(.5)}}
 function pauseFx(){ctx.filter='none';
- if(!('filter' in ctx)){ctx.globalCompositeOperation='saturation';ctx.fillStyle='#000';ctx.fillRect(0,0,1000,600);ctx.globalCompositeOperation='source-over'} /* respaldo sin ctx.filter */
- ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='rgba(8,12,22,.5)';ctx.fillRect(0,0,1000,600);
+ if(!('filter' in ctx)){ctx.globalCompositeOperation='saturation';ctx.fillStyle='#000';ctx.fillRect(0,0,VW,VH);ctx.globalCompositeOperation='source-over'} /* respaldo sin ctx.filter */
+ ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='rgba(8,12,22,.5)';ctx.fillRect(0,0,VW,VH);
  ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.strokeStyle='#0b0f1a';ctx.fillStyle='#fff';
- const cd=G.cd>0,h=cd?String(Math.ceil(G.cd)):'PAUSADO',hy=cd?270:280;ctx.lineWidth=8;ctx.font=cd?'900 150px "Segoe UI",sans-serif':'900 84px "Segoe UI",sans-serif';ctx.strokeText(h,500,hy);ctx.fillText(h,500,hy);
- const t=cd?'3... 2... 1...':'Vuelve a presionar la letra P para reanudar el partido',y=cd?380:342;ctx.lineWidth=5;ctx.font='600 22px "Segoe UI",sans-serif';ctx.strokeText(t,500,y);ctx.fillText(t,500,y)}
+ const cd=G.cd>0,h=cd?String(Math.ceil(G.cd)):'PAUSADO',cx=VW/2,cy=VH/2,hy=cd?cy-30:cy-20;ctx.lineWidth=8;ctx.font=cd?'900 150px "Segoe UI",sans-serif':'900 84px "Segoe UI",sans-serif';ctx.strokeText(h,cx,hy);ctx.fillText(h,cx,hy);
+ const t=cd?'3... 2... 1...':'Vuelve a presionar la letra P para reanudar el partido',y=cd?cy+80:cy+42;ctx.lineWidth=5;ctx.font='600 22px "Segoe UI",sans-serif';ctx.strokeText(t,cx,y);ctx.fillText(t,cx,y)}
 /* Uniformes */
 const defUni=()=>({red:{n:1,c1:'#ff5d5d',c2:'#ffffff',st:'v1'},blue:{n:1,c1:'#3b9cff',c2:'#ffffff',st:'v1'}});
 function jersey(p){const u=G.uni[p.team]||G.uni.red,x=p.x-p.r,y=p.y-p.r,d=p.r*2,k=d/5;
@@ -620,11 +620,14 @@ $('c').addEventListener('mousedown',()=>$('c').focus());
 
 /* Render */
 const cv=$('c'),ctx=cv.getContext('2d');
-function draw(){ctx.filter=(G.paused||G.cd>0)?'grayscale(100%)':'none';ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#0f1626';ctx.fillRect(0,0,1000,600);
- const{w:W,h:H,gT,gB,gh}=G,Z=.9,vw=500/Z,vh=300/Z,x0=-GD-80,x1=W+GD+80,y0=-100,y1=H+100,bl=G.pen?{x:G.pen.gx+G.pen.din*G.w*.22,y:G.h/2}:(me&&me.team!=='spec'?me:G.ball); /* sigue a tu personaje; si eres espectador, a la pelota */
+let VW=1000,VH=600; /* tamaño interno del canvas = ventana (1 px de canvas = 1 px de pantalla, sin deformar) */
+function resizeCanvas(){VW=Math.max(1,Math.floor(window.innerWidth));VH=Math.max(1,Math.floor(window.innerHeight));if(cv.width!==VW||cv.height!==VH){cv.width=VW;cv.height=VH}}
+resizeCanvas();addEventListener('resize',resizeCanvas);addEventListener('orientationchange',resizeCanvas);
+function draw(){if(cv.width!==Math.floor(window.innerWidth)||cv.height!==Math.floor(window.innerHeight))resizeCanvas();ctx.filter=(G.paused||G.cd>0)?'grayscale(100%)':'none';ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#2a8f4f';ctx.fillRect(0,0,VW,VH);
+ const{w:W,h:H,gT,gB,gh}=G,Z=.9,vw=VW/2/Z,vh=VH/2/Z,x0=-GD-80,x1=W+GD+80,y0=-100,y1=H+100,bl=G.pen?{x:G.pen.gx+G.pen.din*G.w*.22,y:G.h/2}:(me&&me.team!=='spec'?me:G.ball); /* sigue a tu personaje; si eres espectador, a la pelota */
  const fx=x1-x0<=2*vw?(x0+x1)/2:clamp(bl.x,x0+vw,x1-vw),fy=y1-y0<=2*vh?(y0+y1)/2:clamp(bl.y,y0+vh,y1-vh); /* cámara sigue la pelota sin salir del estadio */
  if(!G.cam)G.cam={x:fx,y:fy};G.cam.x+=(fx-G.cam.x)*.1;G.cam.y+=(fy-G.cam.y)*.1;
- ctx.setTransform(Z,0,0,Z,500-G.cam.x*Z,300-G.cam.y*Z);
+ ctx.setTransform(Z,0,0,Z,VW/2-G.cam.x*Z,VH/2-G.cam.y*Z);
  for(let i=0;i<12;i++){ctx.fillStyle=i%2?'#36ab61':'#30a05a';ctx.fillRect(i*W/12,0,W/12+1,H)}
  ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.strokeRect(0,0,W,H);
  ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();ctx.beginPath();ctx.arc(W/2,H/2,H*.14,0,7);ctx.stroke();
