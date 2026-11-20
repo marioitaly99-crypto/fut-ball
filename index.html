@@ -93,57 +93,6 @@ canvas{width:100%;aspect-ratio:5/3;border-radius:14px;border:1px solid #1e2a4a;d
 .pc.g{background:#22c55e}.pc.m{background:#ef4444}.pc.cur{border-color:#fff}
 #pInfo{color:#fbbf24;font-size:.72rem}
 #menu{background:rgba(5,8,16,.38)} /* ventana superpuesta semitransparente: se ve el partido detrás */
-
-/* ===== AJUSTE GLOBAL DE VIEWPORT / ENCUADRE RESPONSIVO ===== */
-html,body{height:100dvh;width:100vw;overflow:hidden;box-sizing:border-box;margin:0}
-:root{padding-top:0!important;padding-bottom:0!important}
-.screen{height:100dvh;width:100vw;max-height:100dvh;overflow:hidden;box-sizing:border-box}
-#screen-login,#screen-lobby,#screen-room,#screen-game{height:100dvh;width:100vw;overflow:hidden;box-sizing:border-box}
-
-/* LOGIN */
-#screen-login{flex-direction:column;align-items:center;justify-content:flex-end;padding:clamp(4px,1.5dvh,14px) 0;
- background:url('assets/login-bg.png') center center / 100% 100% no-repeat,linear-gradient(160deg,#0a46d6,#0626a0 60%,#041a6e)}
-#screen-login .card{margin-top:0;flex:0 1 auto;width:min(460px,92vw);max-height:calc(100dvh - 27dvh - 12px);min-height:0;overflow:hidden;
- padding:clamp(8px,2dvh,22px) clamp(14px,2.2vw,26px);gap:clamp(3px,.8dvh,8px)}
-#screen-login .lbl{font-size:clamp(.85rem,2.1dvh,1.05rem);margin-top:0}
-#screen-login .lbl svg{width:clamp(18px,3dvh,26px);height:clamp(18px,3dvh,26px)}
-#screen-login input{padding:clamp(6px,1.4dvh,12px) 16px;font-size:clamp(.9rem,2.2dvh,1.05rem)}
-#screen-login #enter{padding:clamp(7px,1.5dvh,12px) 18px;font-size:clamp(.95rem,2.3dvh,1.15rem);margin-top:2px}
-#screen-login .foot{margin-top:2px;padding-top:clamp(4px,1dvh,10px);font-size:clamp(.78rem,1.9dvh,.95rem)}
-@media(max-height:640px){#screen-login .card{margin-top:0}}
-
-/* LOBBY */
-#screen-lobby{flex-direction:column;align-items:center;justify-content:flex-start;gap:clamp(4px,1dvh,14px);overflow:hidden;
- padding:clamp(60px,19dvh,230px) 0 clamp(6px,1.5dvh,20px);
- background:url('assets/lobby-bg.png') center center / 100% 100% no-repeat !important;background-color:#0a46d6 !important}
-html:has(#screen-lobby.active),body:has(#screen-lobby.active){background:url('assets/lobby-bg.png') center center / 100% 100% no-repeat !important;background-color:#0a46d6 !important}
-#screen-lobby .grid{flex:1 1 auto;min-height:0;width:94vw;max-width:1120px;row-gap:clamp(30px,5.2dvh,46px);align-content:start;grid-template-rows:minmax(0,1fr) auto}
-#screen-lobby .panel{min-height:0;padding:clamp(24px,4.2dvh,34px) 18px clamp(8px,1.8dvh,18px);gap:clamp(4px,1.1dvh,10px)}
-#screen-lobby .panel>h2{top:-38px;height:clamp(30px,4.6dvh,40px);font-size:clamp(1rem,2.6dvh,1.3rem)}
-#screen-lobby input:not([type=radio]),#screen-lobby select{padding:clamp(6px,1.4dvh,12px) 16px;font-size:clamp(.9rem,2.1dvh,1.05rem)}
-#screen-lobby button:not(.ghost){padding:clamp(6px,1.2dvh,9px) 18px;font-size:clamp(.9rem,2.1dvh,1.05rem)}
-#screen-lobby #create{padding:clamp(7px,1.5dvh,12px) 18px;font-size:clamp(1rem,2.4dvh,1.15rem)}
-#screen-lobby .radios label{font-size:clamp(.9rem,2.2dvh,1.1rem)}
-#roomList{height:auto!important;flex:1 1 auto;min-height:clamp(70px,14dvh,120px);max-height:clamp(120px,29dvh,290px)}
-#screen-lobby .room{padding:clamp(6px,1.2dvh,12px) 14px}
-#screen-lobby #who{top:clamp(4px,1dvh,10px)}
-@media(max-width:760px){#screen-lobby{overflow-y:auto}#screen-lobby .grid{flex:none}}
-
-/* CANCHA: columna flexible 100dvh (marcador / canvas / chat) */
-#screen-game{flex-direction:column;align-items:center;justify-content:flex-start;gap:0;padding:clamp(2px,.6dvh,6px) 0}
-.stage{position:relative;display:flex;flex-direction:column;align-items:center;flex:1 1 auto;min-height:0;height:100%;width:96vw;max-width:1440px}
-#sb,#penbar{flex:none;margin:0 auto clamp(2px,.6dvh,6px)}
-#sb{gap:10px}
-#zoomSel{width:auto;padding:2px 4px;font-size:.72rem;border-radius:6px;background:rgba(12,18,34,.7);color:#cfe3ff;border:1px solid #2a3760;opacity:.75;cursor:pointer}
-#zoomSel:hover,#zoomSel:focus{opacity:1}
-canvas#c{flex:1 1 0;min-height:0;width:100%;height:auto;aspect-ratio:auto;object-fit:contain;max-height:100%}
-#ev{top:50%}
-/* Canvas a pantalla completa entre marcador y chat */
-#screen-game{padding:0}
-.stage{width:100vw;max-width:none;height:100%}
-#sb,#penbar{margin-top:clamp(2px,.5dvh,5px)}
-canvas#c{width:100%;height:100%;max-width:none;max-height:none;border-radius:0;border:0;object-fit:cover}
-.ov{border-radius:0}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script></head><body>
 
@@ -196,7 +145,7 @@ canvas#c{width:100%;height:100%;max-width:none;max-height:none;border-radius:0;b
 
 <div id="screen-game" class="screen">
   <div class="stage">
-    <div id="sb"><div class="t" id="tL">LOCAL</div><div><div id="score">0:0</div><div id="clock">00:00</div></div><div class="t" id="tV">VISITANTE</div><button id="mute" title="Sonido" style="padding:2px 6px;font-size:.9rem;background:none;color:inherit;border:1px solid #2a3760">🔊</button><select id="zoomSel" title="Zoom de cámara" aria-label="Zoom de cámara"><option value="1.2">120%</option><option value="1" selected>100% (Normal)</option><option value="0.85">85%</option><option value="0.7">70%</option></select></div>
+    <div id="sb"><div class="t" id="tL">LOCAL</div><div><div id="score">0:0</div><div id="clock">00:00</div></div><div class="t" id="tV">VISITANTE</div><button id="mute" title="Sonido" style="padding:2px 6px;font-size:.9rem;background:none;color:inherit;border:1px solid #2a3760">🔊</button></div>
     <div id="ev"></div>
     <div id="penbar" class="hidden"><div id="pRow"><div class="pt"><b id="pL">LOCAL</b><span id="pbR"></span></div><div id="pTimer"></div><div class="pt"><span id="pbB"></span><b id="pV">VISITANTE</b></div></div><div id="pInfo"></div></div>
     <canvas id="c" width="1000" height="600" tabindex="0"></canvas>
@@ -672,7 +621,7 @@ $('c').addEventListener('mousedown',()=>$('c').focus());
 /* Render */
 const cv=$('c'),ctx=cv.getContext('2d');
 function draw(){ctx.filter=(G.paused||G.cd>0)?'grayscale(100%)':'none';ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#0f1626';ctx.fillRect(0,0,1000,600);
- const{w:W,h:H,gT,gB,gh}=G,Z=1.05*(window.ZF||1),vw=500/Z,vh=300/Z,x0=-GD-80,x1=W+GD+80,y0=-100,y1=H+100,bl=G.pen?{x:G.pen.gx+G.pen.din*G.w*.22,y:G.h/2}:(me&&me.team!=='spec'?me:G.ball); /* sigue a tu personaje; si eres espectador, a la pelota */
+ const{w:W,h:H,gT,gB,gh}=G,Z=.9,vw=500/Z,vh=300/Z,x0=-GD-80,x1=W+GD+80,y0=-100,y1=H+100,bl=G.pen?{x:G.pen.gx+G.pen.din*G.w*.22,y:G.h/2}:(me&&me.team!=='spec'?me:G.ball); /* sigue a tu personaje; si eres espectador, a la pelota */
  const fx=x1-x0<=2*vw?(x0+x1)/2:clamp(bl.x,x0+vw,x1-vw),fy=y1-y0<=2*vh?(y0+y1)/2:clamp(bl.y,y0+vh,y1-vh); /* cámara sigue la pelota sin salir del estadio */
  if(!G.cam)G.cam={x:fx,y:fy};G.cam.x+=(fx-G.cam.x)*.1;G.cam.y+=(fy-G.cam.y)*.1;
  ctx.setTransform(Z,0,0,Z,500-G.cam.x*Z,300-G.cam.y*Z);
@@ -797,10 +746,4 @@ function cliSmooth(){const sm=o=>{if(o.tx===undefined)return;const dx=o.tx-o.x,d
 let last=performance.now(),acc=0;
 (function loop(t){acc+=Math.min(.05,(t-last)/1000);last=t;
  if(inGame&&G){if(NET.role==='client')cliSmooth();else while(acc>=DT){step();acc-=DT;if(NET.role==='host')netState()}draw()}else acc=0;requestAnimationFrame(loop)})(last);
-</script><script>
-/* Zoom de cámara (solo visual): 100% / 80% / 65% */
-(()=>{const z=document.getElementById('zoomSel');if(!z)return;window.ZF=1;
- z.addEventListener('change',()=>{window.ZF=parseFloat(z.value)||1;z.blur();const c=document.getElementById('c');if(c)c.focus()});
- z.addEventListener('keydown',e=>e.stopPropagation())})();
-</script>
-</body></html>
+</script></body></html>
