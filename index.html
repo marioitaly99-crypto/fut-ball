@@ -329,7 +329,10 @@ function botAI(p){const b=G.ball,W=G.w,H=G.h,dir=p.team==='red'?1:-1,ownX=dir>0?
  const fx=f=>ownX+dir*f*W,dB=q=>Math.hypot(q.x-b.x,q.y-b.y),db=dB(p),minFoe=(x,y)=>Math.min(...foes.map(f=>Math.hypot(f.x-x,f.y-y)),999),bf=clamp(Math.abs(b.x-ownX)/W,0,1),lp=(a,c,k)=>a+(c-a)*clamp(k,0,1);
  const owner=all.reduce((a,q)=>dB(q)<dB(a)?q:a,all[0]),atk=owner.team===p.team,ps=posture(p.team),lf=liftOf(p.team);
  /* disputa: solo acude el más cercano de su equipo entre quienes tienen la pelota en su zona (los demás mantienen su puesto) */
- const elig=(G.ko===p.team||(G.sp&&G.sp.team===p.team))?mine:mine.filter(q=>!q.bot||zoneHit(q)),pool=elig.length?elig:mine.filter(q=>q.role!=='arquero'),near=pool.length?pool.reduce((a,q)=>dB(q)<dB(a)?q:a):null;
+ const elig=(G.ko===p.team||(G.sp&&G.sp.team===p.team))?mine:mine.filter(q=>!q.bot||zoneHit(q)),pool=elig.length?elig:mine.filter(q=>q.role!=='arquero'),near0=pool.length?pool.reduce((a,q)=>dB(q)<dB(a)?q:a):null,
+  contested=owner.team!==p.team&&!G.ko, /* la pelota la tiene un rival: presión firme */
+  mateHas=owner.team===p.team&&owner!==p&&dB(owner)<owner.r+b.r+36&&!G.ko&&!G.sp, /* un compañero (humano o bot) tiene la posesión */
+  near=mateHas?owner:near0,near2=contested&&pool.length>1?pool.filter(q=>q!==near0).reduce((a,q)=>dB(q)<dB(a)?q:a):null;
  if(near!==p)p.hold=Math.max(0,(p.hold||0)-DT*2);
  /* flexibilidad posicional: cubre el puesto de un compañero que subió, baja a defender, se suma al contraataque */
  let role=p.role||'mediocampista',sd=p.side;
@@ -353,6 +356,15 @@ function botAI(p){const b=G.ball,W=G.w,H=G.h,dir=p.team==='red'?1:-1,ownX=dir>0?
   if(!atk&&owner.team!==p.team&&(role==='lateral'||role==='mediocampista'||role==='extremo')){ /* cierra la línea de pase: se interpone entre el poseedor y el rival que marca */
    let mf=null,md=260;foes.forEach(f=>{if(f===owner)return;const dd=Math.hypot(f.x-x,f.y-y);if(dd<md){md=dd;mf=f}});
    if(mf){x=clamp(mf.x+(owner.x-mf.x)*.3,x-120,x+120);y=mf.y+(owner.y-mf.y)*.3}}
+  if(contested&&!G.sp&&(role==='defensor_central'||role==='mediocampista')&&Math.abs(owner.x-ownX)<W*.55){ /* bloquea el ángulo de tiro: se interpone entre el poseedor rival y su arco */
+   const k=role==='defensor_central'?.34:.5;x=lp(x,owner.x+(ownX-owner.x)*k,.6);y=lp(y,owner.y+(H/2-owner.y)*k,.6)}
+  if(mateHas&&role!=='arquero'&&role!=='defensor_central'&&bf>.3){ /* compañero con la pelota en ataque: se abre a espacios libres y diagonales de pase (no se amontona) */
+   p.sc=(p.sc||0)-1;
+   if(p.sc<=0||p.so!==owner.id||p.rx===undefined){p.sc=18+Math.floor(Math.random()*12);p.so=owner.id;let best=-1e9;const ox=owner.x,oy=owner.y,ms=mine.filter(q=>q!==p&&q!==owner);
+    [-1,1].forEach(sy=>[110,190,270].forEach(fw=>[130,240,350].forEach(lat=>{const cx=clamp(ox+dir*fw,40,W-40),cy=clamp(oy+sy*lat,40,H-40),
+     fr=Math.min(minFoe(cx,cy),240),mt=ms.length?Math.min(...ms.map(q=>Math.hypot(q.x-cx,q.y-cy)),240):240,lane=!foes.some(f=>segD(ox,oy,cx,cy,f.x,f.y)<36),
+     s=fr+mt*.7+(lane?120:0)-Math.hypot(cx-x,cy-y)*.25;if(s>best){best=s;p.rx=cx-ox;p.ry=cy-oy}})))}
+   x=owner.x+p.rx;y=owner.y+p.ry}
   return[clamp(x,30,W-30),clamp(y,30,H-30)]};
  const cornerT=far=>{const cs=[[oppX,G.gT+G.gh*.12],[oppX,G.gB-G.gh*.12]];return far?cs[p.y<H/2?1:0]:cs.reduce((a,c)=>minFoe(c[0],c[1])>minFoe(a[0],a[1])?c:a)};
  const chaseT=()=>{const dG=Math.hypot(oppX-p.x,H/2-p.y),tm=mine.filter(q=>q!==p),free=q=>minFoe(q.x,q.y),clear=!foes.some(f=>segD(b.x,b.y,oppX,H/2,f.x,f.y)<40),
@@ -389,18 +401,19 @@ function botAI(p){const b=G.ball,W=G.w,H=G.h,dir=p.team==='red'?1:-1,ownX=dir>0?
  else if(G.sp&&G.sp.team===p.team&&near===p){const S=G.sp,tm=mine.filter(q=>q!==p),fr=q=>minFoe(q.x,q.y);let T; /* sacador: se ubica detrás/afuera y pasa */
   if(S.type==='corner')T=[oppX-dir*W*.04,H/2];
   else{const fw=tm.filter(q=>(q.x-p.x)*dir>(S.type==='arco'?W*.15:0)),pk=fw.length?fw.reduce((a,c)=>fr(c)>fr(a)?c:a):null;T=pk?[clamp(pk.x+dir*50,20,W-20),pk.y]:[W/2,S.y<H/2?H*.3:H*.7]}
-  if(S.type==='lateral'){tx=S.x;ty=S.y+(S.y<H/2?-30:30)}else if(S.type==='corner'){tx=S.x+(S.x<W/2?26:-26);ty=S.y}else{tx=S.x-dir*31;ty=S.y}
+  const sdx=S.x<W/2?30:-30;if(S.type==='lateral'){tx=S.x+sdx;ty=S.y<H/2?0:H}else if(S.type==='corner'){tx=S.x+sdx;ty=S.y}else{tx=S.x-dir*31;ty=S.y}
+  if(S.type!=='arco'){tx=clamp(tx,p.r,W-p.r);ty=clamp(ty,-6,H+6)} /* pasillo transitable: nunca detrás de las barreras */
   p.ct=db<p.r+b.r+6?(p.ct||0)+DT:0;
   if(db<p.r+b.r+5&&p.ct>.25&&Math.hypot(tx-p.x,ty-p.y)<14){const m=S.type==='arco'?1.65:S.type==='corner'?1.6:.95,ddx=T[0]-b.x,ddy=T[1]-b.y,l=Math.hypot(ddx,ddy)||1;
    b.vx=ddx/l*KS*m;b.vy=ddy/l*KS*m;p.flash=FL;p.cd=KCD;G.lastT=p.team;thump()}}
  else if(p.bk>0){p.bk-=DT;p.ct=0;tx=clamp(p.x-(b.x-p.x)*3,30,W-30);ty=clamp(p.y-(b.y-p.y)*3,30,H-30)} /* retroceso anti-traba */
-  else if(near===p){chase=true;const D=decide(),T=D.T,ux=T[0]-b.x,uy=T[1]-b.y,ul=Math.hypot(ux,uy)||1,u=[ux/ul,uy/ul],al=((b.x-p.x)*u[0]+(b.y-p.y)*u[1])/(db||1),o=al>.3?15:50;p.why=D.why;
-  tx=b.x-u[0]*o;ty=b.y-u[1]*o;p.ct=db<p.r+b.r+6?(p.ct||0)+DT:0;p.hold=db<p.r+b.r+24?Math.min(3,(p.hold||0)+DT):Math.max(0,(p.hold||0)-DT*2);
-  p.kick=db<p.r+b.r+4&&p.ct>.03&&(al>.55||p.ct>.3)&&p.hold>=D.min}
+  else if(near===p||(contested&&near2===p&&db<170)){chase=true;const D=decide(),T=D.T,ux=T[0]-b.x,uy=T[1]-b.y,ul=Math.hypot(ux,uy)||1,u=[ux/ul,uy/ul],al=((b.x-p.x)*u[0]+(b.y-p.y)*u[1])/(db||1),o=contested?0:(al>.3?15:50);p.why=D.why;
+  tx=b.x-u[0]*o+(contested?b.vx*3:0);ty=b.y-u[1]*o+(contested?b.vy*3:0); /* con rival en posesión: va de frente a la pelota, sin rodear ni ceder espacio */p.ct=db<p.r+b.r+6?(p.ct||0)+DT:0;p.hold=db<p.r+b.r+24?Math.min(3,(p.hold||0)+DT):Math.max(0,(p.hold||0)-DT*2);
+  p.kick=contested?(db<p.r+b.r+4&&al>.15):(db<p.r+b.r+4&&p.ct>.03&&(al>.55||p.ct>.3)&&p.hold>=D.min)}
  else{p.ct=0;[tx,ty]=pos()} /* vuelve fluido a su zona táctica */
  /* steering: llegar al punto táctico, nunca por debajo de MINV */
  const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);let hx,hy,spd;
- if(d>10){hx=dx/d;hy=dy/d;spd=chase?MAXV:clamp(d/60*MAXV,MINV,MAXV)}else{hx=Math.cos(p.wander);hy=Math.sin(p.wander);spd=MINV}
+ if(d>10){hx=dx/d;hy=dy/d;spd=chase?MAXV:(contested&&role!=='arquero'&&!G.sp&&!G.ko?clamp(d/25*MAXV,MINV,MAXV):clamp(d/60*MAXV,MINV,MAXV))}else{hx=Math.cos(p.wander);hy=Math.sin(p.wander);spd=MINV}
  let sx=0,sy=0; /* separación SOLO con compañeros (a los rivales se les marca de frente, nunca se les abre paso) */
  all.forEach(q=>{if(q===p||q.team!==p.team)return;const ex=p.x-q.x,ey=p.y-q.y,e=Math.hypot(ex,ey);
   if(e>0&&e<65){const w=(65-e)/65*(chase&&db<60?.4:1),rx=ex/e,ry=ey/e,sg=Math.sign(hx*ry-hy*rx)||1;sx+=rx*w*1.2-hy*sg*w*.8;sy+=ry*w*1.2+hx*sg*w*.8}});
@@ -429,6 +442,7 @@ function spWall(p){const S=G.sp;if(!S||p.team===S.team)return;
  if(S.type==='arco'){const ad=areaD(),ah=areaH(),dx=Math.abs(p.x-S.gx),dy=Math.abs(p.y-G.h/2),sg=S.gx?-1:1; /* rivales fuera del área grande */
   if(dx<ad+p.r&&dy<ah/2+p.r){if(ad+p.r-dx<ah/2+p.r-dy)p.x=S.gx+sg*(ad+p.r);else p.y=G.h/2+(p.y>=G.h/2?1:-1)*(ah/2+p.r)}return}
  const dx=p.x-S.x,dy=p.y-S.y,d=Math.hypot(dx,dy);if(d<S.rad){const nx=d?dx/d:0,ny=d?dy/d:(S.y<G.h/2?1:-1);p.x=S.x+nx*S.rad;p.y=S.y+(d?ny:Math.abs(ny)*(S.y<G.h/2?1:-1))*S.rad;
+  if(p.x<p.r||p.x>G.w-p.r){p.x=clamp(p.x,p.r,G.w-p.r);const ddx=p.x-S.x;p.y=S.y+(S.y<G.h/2?1:-1)*Math.sqrt(Math.max(0,S.rad*S.rad-ddx*ddx))} /* no empuja a nadie fuera de la cancha: desliza por el borde del círculo */
   const dot=p.vx*nx+p.vy*ny;if(dot<0){p.vx-=dot*nx;p.vy-=dot*ny}}}
 /* Saque pendiente: el rival no cruza la mitad ni entra al círculo central */
 function koWall(p){if(!G.ko||p.team===G.ko)return;const cx=G.w/2,cy=G.h/2,R=G.h*.14+p.r,own=p.team==='red'?-1:1;
@@ -442,6 +456,18 @@ function segPush(p,ax,ay,bx,by){const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy||1,t=clamp
 function wallsP(p){const{w,h,gT,gB}=G;
  [[0,gT],[0,gB],[w,gT],[w,gB]].forEach(([px,py])=>{const d=Math.hypot(p.x-px,p.y-py),m=p.r+PR;if(d>0&&d<m){const nx=(p.x-px)/d,ny=(p.y-py)/d;p.x=px+nx*m;p.y=py+ny*m;const dot=p.vx*nx+p.vy*ny;if(dot<0){p.vx-=dot*nx;p.vy-=dot*ny}}});
  [[0,0,0,gT],[0,gB,0,h],[w,0,w,gT],[w,gB,w,h],[-GD,gT,0,gT],[-GD,gB,0,gB],[-GD,gT,-GD,gB],[w,gT,w+GD,gT],[w,gB,w+GD,gB],[w+GD,gT,w+GD,gB]].forEach(q=>segPush(p,...q))}
+/* Pasillo del sacador (lateral/córner): solo en el eje de la banda y cerca de la pelota; nunca hacia las redes ni detrás de los postes */
+function spExt(p){const S=G.sp;if(!S||S.type==='arco'||p.team!==S.team)return 0;return Math.hypot(p.x-S.x,p.y-S.y)<S.rad+300?p.r+6:0}
+function moveY(p,ny){const e=spExt(p),lo=p.r-e,hi=G.h-p.r+e;
+ if(p.y<lo){if(p.vy<0)p.vy=0;return Math.min(lo,p.y+Math.max(5,p.vy))} /* quedó afuera (p. ej. tras patear el saque): vuelve suave hacia adentro */
+ if(p.y>hi){if(p.vy>0)p.vy=0;return Math.max(hi,p.y+Math.min(-5,p.vy))}
+ return clamp(ny,lo,hi)}
+/* Contención final: si un choque lo dejó fuera del rectángulo transitable, vuelve adentro (solo la boca del arco permite x fuera de la cancha) */
+function contain(p){const{w,h,gT,gB}=G,r=p.r,e=spExt(p);
+ if(p.y<r-e){p.y=Math.min(r-e,p.y+6);if(p.vy<0)p.vy=0}else if(p.y>h-r+e){p.y=Math.max(h-r+e,p.y-6);if(p.vy>0)p.vy=0}
+ if(!(p.y>gT&&p.y<gB)){if(p.x<r){p.x=r;if(p.vx<0)p.vx=0}else if(p.x>w-r){p.x=w-r;if(p.vx>0)p.vx=0}}
+ p.x=clamp(p.x,-GD+r,w+GD-r)}
+function fence(p){wallsP(p);penLock(p);koWall(p);spWall(p);contain(p)}
 /* Anti-traba: pelota casi quieta con 2+ jugadores en contacto > 0,6 s → impulso a espacio libre y bots retroceden 0,4 s */
 function antiJam(){const b=G.ball,c=act().filter(p=>Math.hypot(p.x-b.x,p.y-b.y)<p.r+b.r+3);
  if(c.length>=2&&Math.hypot(b.vx,b.vy)<.4)G.jam=(G.jam||0)+DT;else G.jam=0;
@@ -512,7 +538,7 @@ function penWinner(){const R=G.pen.res,gr=R.red.filter(x=>x==='g').length,gb=R.b
  if(Math.max(nr,nb)<=5){if(gr>gb+(5-nb))return'red';if(gb>gr+(5-nr))return'blue'} /* definición anticipada */
  if(nr===nb&&nr>=5&&gr!==gb)return gr>gb?'red':'blue'; /* tras 5 tiros o muerte súbita */
  return null}
-function penDone(g){const P=G.pen;P.res[P.team].push(g?'g':'m');P.ph='res';P.t=0;showEv(g?'⚽ ¡GOL!':'❌ ¡ATAJADO / ERRADO!',1300);if(g)chime();penBar();P.win=penWinner()}
+function penDone(g){const P=G.pen;if(P.ph==='res')return;P.res[P.team].push(g?'g':'m');P.ph='res';P.t=0;showEv(g?'⚽ ¡GOL!':'❌ ¡ATAJADO / ERRADO!',1300);if(g)chime();penBar();P.win=penWinner()}
 function penNext(){const P=G.pen;if(P.win)return end(`🏆 ¡GANADOR POR PENALES: ${P.win==='red'?'LOCAL':'VISITANTE'}!`);
  P.team=other(P.team);penTurn();showTurn()}
 function penLock(p){if(G.pen&&p===G.pen.k){p.x=G.pen.kx;p.vx=0;p.y=clamp(p.y,G.gT+p.r,G.gB-p.r)}} /* arquero: sobre la línea, entre los postes */
@@ -536,7 +562,8 @@ function penStep(){const P=G.pen,b=G.ball,s=P.s;P.t+=DT;
   if(P.ph==='aim'&&P.t>7)penDone(false)}
  else if(P.ph==='ball'){const k=P.k,out=(b.x-P.gx)*P.din,inMouth=b.y>G.gT&&b.y<G.gB; /* out = distancia a la línea de gol, hacia adentro de la cancha */
   if(Math.hypot(k.x-b.x,k.y-b.y)<k.r+b.r+1)P.touch=true; /* el arquero la tocó: NO es atajada todavía; sigue la física del rebote y, si la pelota cruza la línea, goal() lo valida como GOL */
-  if(!inMouth&&out<=b.r+.5)penDone(false); /* sale por la línea de fondo fuera de los postes */
+  if(inMouth&&out<-b.r)penDone(true); /* la pelota traspasó TODA la línea de gol hacia adentro del arco: GOL válido aunque el arquero la haya tocado antes */
+  else if(!inMouth&&out<=b.r+.5)penDone(false); /* sale por la línea de fondo fuera de los postes */
   else if(out>P.sd+80)penDone(false); /* rebota hacia afuera del área */
   else if(P.t>.5&&Math.hypot(b.vx,b.vy)<.4)penDone(false); /* se detiene sin haber cruzado la línea */
   else if(P.t>2.5)penDone(false)} /* tiempo máximo de resolución del disparo */
@@ -577,8 +604,8 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
  G.players.forEach(p=>{if(p.bot)return;const k=p===me?keys:(p.keys||{}),ix=(k.right|0)-(k.left|0),iy=(k.down|0)-(k.up|0),l=Math.hypot(ix,iy)||1;p.ax=ix/l;p.ay=iy/l;p.kick=!!k.kick;if(G.pen&&G.pen.k===p)p.ax=0}); /* teclas de cada humano; arquero: solo vertical */
  act().forEach(p=>{if(p.bot)G.pen?penAI(p):botAI(p);
   const dm=p.kick?KPD:PD;p.vx=(p.vx+p.ax*ACC)*dm;p.vy=(p.vy+p.ay*ACC)*dm;
-  const ex=G.sp&&p.team===G.sp.team?60:0; /* el sacador puede salir del campo */
-  p.x=clamp(p.x+p.vx,-GD+p.r-ex,w+GD-p.r+ex);p.y=clamp(p.y+p.vy,p.r-ex,h-p.r+ex);wallsP(p);penLock(p);koWall(p);spWall(p);p.cd=Math.max(0,p.cd-DT);p.flash=Math.max(0,p.flash-DT);
+  /* el sacador solo puede pisar el pasillo junto a la banda/línea (spExt); jamás la zona de redes ni detrás de los postes */
+  p.x=clamp(p.x+p.vx,-GD+p.r,w+GD-p.r);p.y=moveY(p,p.y+p.vy);fence(p);p.cd=Math.max(0,p.cd-DT);p.flash=Math.max(0,p.flash-DT);
   if(p.kick&&!p.kd)p.flash=FL; /* destello 150 ms al presionar patear, toque o no la pelota */
   p.kd=p.kick;if(p.kick&&p.cd<=0)tryKick(p)});
  const L=act();
@@ -587,6 +614,7 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
    let nx,ny;if(dist<.001){const g=((i*7+j*13)%628)/100;nx=Math.cos(g);ny=Math.sin(g)}else{nx=dx/dist;ny=dy/dist}
    dist=Math.max(dist,.001);const o=(m-dist)/2;a.x-=nx*o;a.y-=ny*o;c.x+=nx*o;c.y+=ny*o}
   if(!hit)break}
+ L.forEach(fence); /* tras los choques entre jugadores se reaplican postes, red, paredes y barreras: nadie queda del otro lado */
  b.x+=b.vx;b.y+=b.vy;b.vx*=bdf;b.vy*=bdf;if(Math.hypot(b.vx,b.vy)<.01)b.vx=b.vy=0;
  for(let pass=0;pass<3;pass++){let hit=false; /* máx. 3 pasadas jugador↔balón por frame */
   L.forEach(p=>{if(G.sp&&p.bot&&p.team===G.sp.team)return; /* un bot sacador no empuja la pelota: la libera con su pase */
