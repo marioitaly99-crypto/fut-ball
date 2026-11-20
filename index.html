@@ -331,11 +331,16 @@ function botAI(p){const b=G.ball,W=G.w,H=G.h,dir=p.team==='red'?1:-1,ownX=dir>0?
  const fx=f=>ownX+dir*f*W,dB=q=>Math.hypot(q.x-b.x,q.y-b.y),db=dB(p),minFoe=(x,y)=>Math.min(...foes.map(f=>Math.hypot(f.x-x,f.y-y)),999),bf=clamp(Math.abs(b.x-ownX)/W,0,1),lp=(a,c,k)=>a+(c-a)*clamp(k,0,1);
  const owner=all.reduce((a,q)=>dB(q)<dB(a)?q:a,all[0]),atk=owner.team===p.team,ps=posture(p.team),lf=liftOf(p.team);
  /* disputa: solo acude el más cercano de su equipo entre quienes tienen la pelota en su zona (los demás mantienen su puesto) */
- const elig=(G.ko===p.team||(G.sp&&G.sp.team===p.team))?mine:mine.filter(q=>!q.bot||zoneHit(q)),pool0=elig.filter(q=>q.role!=='arquero'),pool=pool0.length?pool0:mine.filter(q=>q.role!=='arquero'), /* el arquero bot jamás sale a disputar */
+ const spOwn=G.ko===p.team||!!(G.sp&&G.sp.team===p.team),elig=spOwn?mine:mine.filter(q=>!q.bot||zoneHit(q)),pool0=elig.filter(q=>q.role!=='arquero'),pool=pool0.length?pool0:(mine.some(q=>q.role!=='arquero')?mine.filter(q=>q.role!=='arquero'):(spOwn?mine:[])), /* el arquero bot jamás sale a disputar */
  near0=pool.length?pool.reduce((a,q)=>dB(q)<dB(a)?q:a):null,
   contested=owner.team!==p.team&&!G.ko, /* la pelota la tiene un rival: presión firme */
   mateHas=owner.team===p.team&&owner!==p&&dB(owner)<owner.r+b.r+36&&!G.ko&&!G.sp, /* un compañero (humano o bot) tiene la posesión */
   near=mateHas?owner:near0;
+ /* Saque detenido: UN único ejecutante. Saque de arco → arquero bot (si no, central más cercano); lateral/córner/medio → el jugador de campo más cercano al balón */
+ let taker=near;
+ if(G.sp&&G.sp.team===p.team&&G.sp.type==='arco'){const gkb=mine.find(q=>q.bot&&q.role==='arquero'),dcs=mine.filter(q=>q.bot&&q.role==='defensor_central'),hu=mine.find(q=>!q.bot&&dB(q)<90);
+  taker=hu||gkb||(dcs.length?dcs.reduce((a,q)=>dB(q)<dB(a)?q:a):null)||near}
+ const sw0=p.sw||0;p.sw=0;
  if(near!==p)p.hold=Math.max(0,(p.hold||0)-DT*2);
  /* flexibilidad posicional: cubre el puesto de un compañero que subió, baja a defender, se suma al contraataque */
  let role=p.role||'mediocampista',sd=p.side;
@@ -404,22 +409,28 @@ function botAI(p){const b=G.ball,W=G.w,H=G.h,dir=p.team==='red'?1:-1,ownX=dir>0?
  else if(G.sp&&p.team!==G.sp.team){p.ct=0;let[a,c]=pos();const S=G.sp,dd=Math.hypot(a-S.x,c-S.y),Rr=S.rad+30; /* rivales fuera de la zona de reanudación */
   if(S.type==='arco'){if(Math.abs(a-S.gx)<areaD()+30&&Math.abs(c-H/2)<areaH()/2+30)a=S.gx+(S.gx?-1:1)*(areaD()+60)}
   else if(dd<Rr&&role!=='arquero'){a=S.x+(a-S.x)/(dd||1)*Rr;c=S.y+(c-S.y)/(dd||1)*Rr}tx=clamp(a,30,W-30);ty=clamp(c,30,H-30)}
- else if(G.sp&&G.sp.team===p.team&&near===p){const S=G.sp,tm=mine.filter(q=>q!==p),fr=q=>minFoe(q.x,q.y);let T; /* sacador: se ubica detrás/afuera y pasa */
+ else if(G.sp&&G.sp.team===p.team&&taker===p){p.sw=sw0+DT;const S=G.sp,tm=mine.filter(q=>q!==p),fr=q=>minFoe(q.x,q.y);let T; /* sacador: se ubica detrás/afuera y pasa */
   if(S.type==='corner')T=[oppX-dir*W*.04,H/2];
-  else{const fw=tm.filter(q=>(q.x-p.x)*dir>(S.type==='arco'?W*.15:0)),pk=fw.length?fw.reduce((a,c)=>fr(c)>fr(a)?c:a):null;T=pk?[clamp(pk.x+dir*50,20,W-20),pk.y]:[W/2,S.y<H/2?H*.3:H*.7]}
+  else{const fw=tm.filter(q=>(q.x-p.x)*dir>(S.type==='arco'?Math.min(W*.15,areaD()*.5):0)&&Math.hypot(q.x-b.x,q.y-b.y)>110),pk=fw.length?fw.reduce((a,c)=>fr(c)>fr(a)?c:a):null;T=pk?[clamp(pk.x+dir*50,20,W-20),pk.y]:[W/2,S.y<H/2?H*.3:H*.7]}
   const sdx=S.x<W/2?30:-30;if(S.type==='lateral'){tx=S.x+sdx;ty=S.y<H/2?0:H}else if(S.type==='corner'){tx=S.x+sdx;ty=S.y}else{tx=S.x-dir*31;ty=S.y}
   if(S.type!=='arco'){tx=clamp(tx,p.r,W-p.r);ty=clamp(ty,-6,H+6)} /* pasillo transitable: nunca detrás de las barreras */
   p.ct=db<p.r+b.r+6?(p.ct||0)+DT:0;
-  if(db<p.r+b.r+5&&p.ct>.25&&Math.hypot(tx-p.x,ty-p.y)<14){const m=S.type==='arco'?1.65:S.type==='corner'?1.6:.95,ddx=T[0]-b.x,ddy=T[1]-b.y,l=Math.hypot(ddx,ddy)||1;
+  const late=p.sw>1.8; /* en cuanto queda detrás del balón saca de inmediato; si se demora, saca igual */
+  if(db<p.r+b.r+(late?14:5)&&(p.ct>.06||late)&&Math.hypot(tx-p.x,ty-p.y)<(late?45:16)){const m=S.type==='arco'?1.65:S.type==='corner'?1.6:.95,ddx=T[0]-b.x,ddy=T[1]-b.y,l=Math.hypot(ddx,ddy)||1;
    b.vx=ddx/l*KS*m;b.vy=ddy/l*KS*m;p.flash=FL;p.cd=KCD;G.lastT=p.team;thump()}}
+ else if(spOwn&&taker!==p){p.ct=0;let[a,c]=pos();const S=G.sp; /* resto del equipo: NO se acerca al balón, se abre en su zona a más de 140 px ofreciendo pase */
+  if(S&&S.type==='arco'&&(role==='defensor_central'||role==='lateral'||role==='mediocampista')){ /* saque de arco: laterales y centrales se abren a los costados del área grande */
+   const sg=role==='defensor_central'?(p.rk%2?1:-1):(sd||(p.y<H/2?-1:1)),ad=areaD(),ah=areaH();a=ownX+dir*ad*(role==='mediocampista'?1.5:.9);c=H/2+sg*(ah/2+(role==='lateral'?70:role==='defensor_central'?25+p.rk*20:110))}
+  let ex=a-b.x,ey=c-b.y,el=Math.hypot(ex,ey);if(el<150){if(el<1){ex=dir;ey=0;el=1}a=b.x+ex/el*150;c=b.y+ey/el*150}
+  tx=clamp(a,30,W-30);ty=clamp(c,30,H-30)}
  else if(p.bk>0&&role!=='arquero'){p.bk-=DT;p.ct=0;tx=clamp(p.x-(b.x-p.x)*3,30,W-30);ty=clamp(p.y-(b.y-p.y)*3,30,H-30)} /* retroceso anti-traba */
-  else if(role!=='arquero'&&near===p){chase=true;const D=decide(),T=D.T,ux=T[0]-b.x,uy=T[1]-b.y,ul=Math.hypot(ux,uy)||1,u=[ux/ul,uy/ul],al=((b.x-p.x)*u[0]+(b.y-p.y)*u[1])/(db||1),o=contested?0:(al>.3?15:50);p.why=D.why;
+  else if((role!=='arquero'||G.ko===p.team)&&near===p){chase=true;const D=decide(),T=D.T,ux=T[0]-b.x,uy=T[1]-b.y,ul=Math.hypot(ux,uy)||1,u=[ux/ul,uy/ul],al=((b.x-p.x)*u[0]+(b.y-p.y)*u[1])/(db||1),o=contested?0:(al>.3?15:50);p.why=D.why;
   tx=b.x-u[0]*o+(contested?b.vx*3:0);ty=b.y-u[1]*o+(contested?b.vy*3:0); /* con rival en posesión: va de frente a la pelota, sin rodear ni ceder espacio */p.ct=db<p.r+b.r+6?(p.ct||0)+DT:0;p.hold=db<p.r+b.r+24?Math.min(3,(p.hold||0)+DT):Math.max(0,(p.hold||0)-DT*2);
   p.kick=contested?(db<p.r+b.r+4&&al>.15):(db<p.r+b.r+4&&p.ct>.03&&(al>.55||p.ct>.3)&&p.hold>=D.min)}
  else{p.ct=0;[tx,ty]=pos(); /* vuelve fluido a su zona táctica */
   if(role==='arquero'&&!G.sp&&!G.ko&&db<p.r+b.r+4&&Math.abs(b.x-ownX)<smallD()+b.r+8&&Math.abs(b.y-H/2)<smallH()/2+10)p.kick=true} /* despeja solo con la pelota pegada, desde su línea */
 
- if(!(G.sp&&G.sp.team===p.team&&near===p)&&db>0&&db<p.r+b.r+90&&(b.x-p.x)/db*dir<-.1){ /* el golpe saldría hacia su propio arco/fondo: PROHIBIDO el disparo directo */
+ if(!(G.sp&&G.sp.team===p.team&&taker===p)&&db>0&&db<p.r+b.r+90&&(b.x-p.x)/db*dir<-.1){ /* el golpe saldría hacia su propio arco/fondo: PROHIBIDO el disparo directo */
   p.kick=false;if(role!=='arquero'){const sd2=Math.sign(p.y-b.y)||(p.y<H/2?-1:1),lat=p.r+b.r+34; /* rodea la pelota sin tocarla hasta quedar del lado del arco propio */
    if(Math.abs(p.y-b.y)<lat-6){tx=p.x+dir*10;ty=clamp(b.y+sd2*lat,30,H-30)}else{tx=clamp(b.x-dir*48,30,W-30);ty=clamp(b.y+sd2*lat*.9,30,H-30)}}}
  /* steering: llegar al punto táctico, nunca por debajo de MINV */
