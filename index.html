@@ -301,7 +301,7 @@ function enter(r,admin){netReset();updateInvite();cur=r;isAdmin=admin;me=mk(user
 function sizeUp(){[G.w,G.h]=SIZES[G.size];G.gh=GHT[G.size];G.gT=(G.h-G.gh)/2;G.gB=G.gT+G.gh;G.k=G.size==='gigante'?1.2:G.size==='grande'?1.1:1;G.cam=null}
 function kickoff(){G.sp=null;G.outImm=0;G.lastT=null;G.ko=G.koTeam||'red';G.ball={x:G.w/2,y:G.h/2,vx:0,vy:0,r:BRAD*G.k};G.players.forEach(p=>p.r=PRAD*G.k);
  ['red','blue'].forEach(t=>{const l=G.players.filter(p=>p.team===t);l.forEach((p,i)=>{p.x=t==='red'?G.w*.3:G.w*.7;p.y=G.h*(i+1)/(l.length+1);p.vx=p.vy=0;p.cd=p.flash=0})})}
-function restart(){G.pw=null;G.players.forEach(p=>{p.slCd=0;p.sl=null;p.kh=0;p.khK=false;p.yc=0;p.rc=0;if(p.rt){if(p.team==='spec')p.team=p.rt;p.rt=null}});$('pbR').style.display=$('pbB').style.display='';clearTimeout(evT);$('ev').classList.remove('show');assignRoles();G.koTeam='red';G.pen=null;$('penbar').classList.add('hidden');$('sb').classList.remove('hidden');$('sb').appendChild($('mute'));G.vote=null;G.golden=false;$('vote').classList.add('hidden');G.paused=false;G.cd=0;G.score={red:0,blue:0};G.clock=0;G.gp=0;G.over=false;kickoff();hud()}
+function restart(){G.pw=null;G.players.forEach(p=>{p.slCd=0;p.sl=null;p.kh=0;p.khK=false;p.yc=0;p.fc=0;p.rc=0;if(p.rt){if(p.team==='spec')p.team=p.rt;p.rt=null}});$('pbR').style.display=$('pbB').style.display='';clearTimeout(evT);$('ev').classList.remove('show');assignRoles();G.koTeam='red';G.pen=null;$('penbar').classList.add('hidden');$('sb').classList.remove('hidden');$('sb').appendChild($('mute'));G.vote=null;G.golden=false;$('vote').classList.add('hidden');G.paused=false;G.cd=0;G.score={red:0,blue:0};G.clock=0;G.gp=0;G.over=false;kickoff();hud()}
 /* Etiquetas LOCAL/VISITANTE con los colores del uniforme: 1 color → palabra completa; 2 colores → mitad y mitad */
 function teamLabel(el,team,txt){const u=(G&&G.uni&&G.uni[team])||{n:1,c1:team==='red'?'#ff5d5d':'#3b9cff'},key=u.n+'|'+u.c1+'|'+u.c2;if(el._k===key)return;el._k=key;el.textContent=txt;
  el.style.cssText=u.n===2?`background:linear-gradient(90deg,${u.c1} 50%,${u.c2} 50%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;-webkit-text-stroke:.5px rgba(255,255,255,.35)`
@@ -624,20 +624,25 @@ function refFoul(p,q,s){const W=G.w,H=G.h,b=G.ball,O=p.team,T=q.team,ownX=O==='r
  const rel=s.dx*ux+s.dy*uy,relV=Math.hypot(p.vx-q.vx,p.vy-q.vy),db=Math.hypot(b.x-q.x,b.y-q.y); /* rel > 0.55: la barrida viene de atrás */
  const behind=rel>.55,
   lastMan=Math.abs(q.x-ownX)<W*.32&&Math.abs(q.y-H/2)<areaH()*.8&&db<q.r+b.r+110&&ux*dirG>.4&&!G.players.some(d=>d!==p&&d.team===O&&d.role!=='arquero'&&(d.x-q.x)*dirG>0&&Math.abs(d.y-q.y)<260); /* último hombre cortando ocasión manifiesta */
- let lvl=0,why='';
+ let lvl=0,why='',warn=false;
  if(behind){lvl=2;why='behind'}else if(lastMan){lvl=2;why='last'}
- else if(db>q.r+b.r+70||relV>=8.2||(Math.abs(fx-ownX)<W*.3&&relV>=6.8))lvl=1; /* a destiempo / violenta / cortando ataque cerca del arco */
+ else if(db>q.r+b.r+70||relV>=8.2||(Math.abs(fx-ownX)<W*.3&&relV>=6.8)){if(Math.random()<Math.min(.9,.45+.15*(p.fc||0)))lvl=1;else warn=true} /* gravedad media (a destiempo / violenta / cortando ataque): ~45 % amarilla (más si ya cometió faltas), ~55 % solo advertencia verbal */
+ p.fc=(p.fc||0)+1;
  if(lvl===1){p.yc=(p.yc||0)+1;if(p.yc>=2){lvl=2;why='double'}}
  const area=pen?' en el área':'',res=pen?`¡Penal para ${tn(T)}!`:`Tiro libre para ${tn(T)}`;
  let txt;
- if(lvl===0)txt=`Falta de ${p.name} sobre ${q.name}${area}. ${res}`;
+ if(lvl===0)txt=warn?`Falta de ${p.name} sobre ${q.name}${area}. Siga, sin tarjeta — ${pen?`¡penal para ${tn(T)}!`:`tiro libre para ${tn(T)}`}`:`Falta de ${p.name} sobre ${q.name}${area}. ${res}`;
  else if(lvl===1)txt=`Entrada temeraria de ${p.name} 🟨${area}. ${res}`;
  else txt=(why==='behind'?`Falta por detrás${area} de ${p.name} 🟥`:why==='last'?`Falta de último hombre${area} de ${p.name} 🟥`:`Segunda amarilla para ${p.name} 🟥${area}`)+` · Expulsado hasta el final del partido. ${res}`;
  whistle();refSay('🧑‍⚖️ Árbitro: '+txt);
  showEv(lvl===1?`🟨 TARJETA AMARILLA · ${p.name}`:lvl===2?`🟥 TARJETA ROJA · ${p.name}`:`🚫 FALTA · ${pen?'PENAL':'TIRO LIBRE'} ${tn(T)}`,2600);
  G.pw=null;if(lvl===2)expel(p);
  if(pen&&startFoulPen(q,O)){if(lvl<2){p.sl=null;p.vx=p.vy=0;p.slCd=30;notifySl(p,30,false)}return}
- G.ko=null;G.sp={type:'libre',team:T,x:fx,y:fy,rad:SPR,g:.9};b.x=fx;b.y=fy;b.vx=b.vy=0} /* Tiro libre en el punto exacto de la infracción (balón detenido: 95 px libre / 150 px rivales) */
+ G.ko=null;G.sp={type:'libre',team:T,x:fx,y:fy,rad:SPR,g:.9};b.x=fx;b.y=fy;b.vx=b.vy=0;
+ if(Math.hypot(ownX-fx,H/2-fy)<420){ /* barrera: 2 o 3 bots de campo rivales más cercanos, hombro con hombro (34 px) a 150 px del balón, perpendicular a la línea balón-arco */
+  const gx=ownX-fx,gy=H/2-fy,gl=Math.hypot(gx,gy)||1,ux=gx/gl,uy=gy/gl,cand=G.players.filter(d=>d.team===O&&d.bot&&d.role!=='arquero').sort((a,c)=>Math.hypot(a.x-fx,a.y-fy)-Math.hypot(c.x-fx,c.y-fy)),
+   k=Math.min(cand.length,Math.random()<.5?2:3);
+  G.sp.wall=cand.slice(0,k).map((d,i)=>{const o=(i-(k-1)/2)*34;return[d,clamp(fx+ux*150.5-uy*o,d.r,W-d.r),clamp(fy+uy*150.5+ux*o,d.r,H-d.r)]})}} /* Tiro libre en el punto exacto de la infracción (balón detenido: 95 px libre / 150 px rivales) */
 /* Penal por falta: reutiliza la mecánica de penales (pateador, arquero, 7 s); un solo tiro y se reanuda el juego */
 function startFoulPen(q,O){const T=q.team,defs=G.players.filter(d=>d.team===O),ownX=O==='red'?0:G.w,
   k=defs.find(d=>d.bot&&d.role==='arquero')||defs.reduce((a,c)=>!a||Math.abs(c.x-ownX)<Math.abs(a.x-ownX)?c:a,null);
@@ -655,7 +660,7 @@ function foulPenEnd(){const P=G.pen,t=P.team,gl=P.g===true;G.pen=null;
  hud()}
 function tryKick(p){const b=G.ball,d=Math.hypot(b.x-p.x,b.y-p.y);if(d>p.r+b.r+4||!d)return;const pwOn=RL()&&G.pw&&G.pw.on&&G.pw.id===p.id,m=kMult(p)*(pwOn?1.6:1)*(RL()&&G.sp&&(G.sp.type==='corner'||G.sp.type==='libre')&&p.team===G.sp.team?1.38:1);p.khK=true; /* Power Shot 1.60x · Tiro Libre / Córner 1.38x */
  b.vx+=(b.x-p.x)/d*KS*m;b.vy+=(b.y-p.y)/d*KS*m;const s=Math.hypot(b.vx,b.vy);if(s>BMAX*m){b.vx*=BMAX*m/s;b.vy*=BMAX*m/s}G.lastT=p.team;p.cd=KCD;p.flash=FL;if(G.pw)G.pw=null;if(pwOn)powerThump();else thump()}
-function end(msg){G.over=true;G.players.forEach(p=>{p.yc=0;p.rc=0});G.endT=3;Object.keys(keys).forEach(k=>keys[k]=0);const{red:a,blue:b}=G.score;
+function end(msg){G.over=true;G.players.forEach(p=>{p.yc=0;p.fc=0;p.rc=0});G.endT=3;Object.keys(keys).forEach(k=>keys[k]=0);const{red:a,blue:b}=G.score;
  showEv(msg||(a>b?`🏆 ¡FINAL! GANÓ LOCAL (${a} - ${b})`:b>a?`🏆 ¡FINAL! GANÓ VISITANTE (${a} - ${b})`:`🤝 ¡FINAL! EMPATE (${a} - ${b})`),3000);hud()}
 /* Tanda de penales */
 const rnd=a=>a[Math.floor(Math.random()*a.length)],sh=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -760,7 +765,8 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
    let nx,ny;if(dist<.001){const g=((i*7+j*13)%628)/100;nx=Math.cos(g);ny=Math.sin(g)}else{nx=dx/dist;ny=dy/dist}
    dist=Math.max(dist,.001);const o=(m-dist)/2;a.x-=nx*o;a.y-=ny*o;c.x+=nx*o;c.y+=ny*o}
   if(!hit)break}
- L.forEach(fence); /* tras los choques entre jugadores se reaplican postes, red, paredes y barreras: nadie queda del otro lado */
+ L.forEach(fence);if(G.sp&&G.sp.wall)G.sp.wall.forEach(([d,x,y])=>{if(d.team!=='spec'){d.x=x;d.y=y;d.vx=d.vy=0}}); /* barrera de bots: se mantiene hasta que se ejecuta el tiro */
+ /* tras los choques entre jugadores se reaplican postes, red, paredes y barreras: nadie queda del otro lado */
  b.x+=b.vx;b.y+=b.vy;b.vx*=bdf;b.vy*=bdf;if(Math.hypot(b.vx,b.vy)<.01)b.vx=b.vy=0;
  for(let pass=0;pass<3;pass++){let hit=false; /* máx. 3 pasadas jugador↔balón por frame */
   L.forEach(p=>{if(G.sp&&p.bot&&p.team===G.sp.team)return; /* un bot sacador no empuja la pelota: la libera con su pase */
