@@ -95,6 +95,43 @@ canvas{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;max-width:n
 .pc.g{background:#22c55e}.pc.m{background:#ef4444}.pc.cur{border-color:#fff}
 #pInfo{color:#fbbf24;font-size:.72rem}
 #menu{background:rgba(5,8,16,.38)} /* ventana superpuesta semitransparente: se ve el partido detrás */
+
+/* ===== Botón Actualizar (Lobby) ===== */
+#screen-lobby #refreshRooms{margin-left:6px;padding:4px 12px;font-size:.78rem;font-weight:800;font-style:normal;border-radius:999px;white-space:nowrap;box-shadow:none;transition:filter .15s}
+#screen-lobby #refreshRooms:disabled{opacity:.75;cursor:progress}
+/* ===== Interfaz táctil (solo con html.is-touch; en PC no cambia nada) ===== */
+.tc,#rot{display:none}
+html.is-touch .tc{display:block}
+html.is-touch #hint{display:none}
+html.is-touch #screen-game{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+html.is-touch #chatIn{-webkit-user-select:text;user-select:text;font-size:16px;padding:4px 8px}
+html.is-touch #chat{top:calc(env(safe-area-inset-top,0px) + 6px);left:calc(env(safe-area-inset-left,0px) + 8px);bottom:auto;transform:none;width:min(280px,36vw);background:rgba(8,12,24,.45);padding:4px 5px;gap:3px}
+html.is-touch #log{max-height:64px;font-size:.7rem}
+html.is-touch #chatTog{align-self:flex-start;padding:2px 9px;font-size:.68rem;border-radius:999px;background:rgba(31,42,72,.85);color:#cfe3ff;border:1px solid rgba(255,255,255,.18)}
+html.is-touch #chat.min{background:transparent;border-color:transparent;width:auto;padding:0}
+html.is-touch #chat.min #log,html.is-touch #chat.min #chatIn{display:none}
+html.is-touch #sb{left:auto;transform:none;top:calc(env(safe-area-inset-top,0px) + 6px);right:calc(env(safe-area-inset-right,0px) + 96px);padding:2px 8px;gap:6px}
+html.is-touch #sb .t{font-size:.6rem;letter-spacing:.5px}
+html.is-touch #score{font-size:1.1rem;letter-spacing:2px}
+html.is-touch #clock{font-size:.62rem}
+html.is-touch #sb #mute{padding:1px 4px;font-size:.75rem}
+html.is-touch #penbar{left:auto;transform:none;top:calc(env(safe-area-inset-top,0px) + 6px);right:calc(env(safe-area-inset-right,0px) + 96px);padding:3px 8px}
+html.is-touch #pRow{gap:8px}html.is-touch .pt{font-size:.62rem;gap:4px}
+html.is-touch .pc{width:12px;height:12px;margin:0 1px}
+html.is-touch #pTimer{font-size:1.2rem;min-width:30px}html.is-touch #pInfo{font-size:.62rem}
+html.is-touch #tMenu{position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);right:calc(env(safe-area-inset-right,0px) + 8px);z-index:120;padding:6px 10px;font-size:.78rem;border-radius:10px;background:rgba(11,15,26,.82);color:#fff;border:1px solid #2a3760;white-space:nowrap}
+html.is-touch #joy{position:fixed;left:calc(env(safe-area-inset-left,0px) + 24px);bottom:calc(env(safe-area-inset-bottom,0px) + 24px);width:132px;height:132px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.35);touch-action:none;z-index:30}
+#joyKnob{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:rgba(255,255,255,.38);border:2px solid rgba(255,255,255,.7);pointer-events:none}
+html.is-touch #kickWrap{position:fixed;right:calc(env(safe-area-inset-right,0px) + 24px);bottom:calc(env(safe-area-inset-bottom,0px) + 16px);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:30;touch-action:none}
+#kickBtn{width:96px;height:96px;border-radius:50%;padding:0;font-size:2.4rem;line-height:1;background:rgba(34,197,94,.45);color:#fff;border:3px solid rgba(255,255,255,.6);box-shadow:0 0 14px rgba(0,0,0,.35);touch-action:none;transition:transform .08s,background .15s}
+#kickBtn.on{background:rgba(34,197,94,.85);transform:scale(.94)}
+#kickBtn.slide{background:rgba(249,115,22,.9);border-color:#fed7aa}
+#kickWrap .klbl{font-size:.62rem;font-weight:700;letter-spacing:.4px;color:rgba(255,255,255,.78);text-shadow:0 1px 2px #000;white-space:nowrap;pointer-events:none}
+@media(max-height:420px){html.is-touch #joy{width:112px;height:112px}#joyKnob{width:48px;height:48px;margin:-24px 0 0 -24px}#kickBtn{width:82px;height:82px;font-size:2rem}}
+#rot{position:fixed;inset:0;z-index:150;background:rgba(5,8,16,.93);color:#fff;align-items:center;justify-content:center;text-align:center;font-size:1.15rem;font-weight:800;padding:24px;line-height:1.6}
+#rot .ph{display:inline-block;animation:rotph 1.8s ease-in-out infinite}
+@keyframes rotph{0%,20%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
+@media (orientation:portrait){html.is-touch #rot{display:flex}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script></head><body>
 
@@ -123,7 +160,7 @@ canvas{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;max-width:n
 <div id="screen-lobby" class="screen">
   <h1 class="sr-only">Fut-ball Online</h1><div id="who" class="label"></div>
   <div class="grid">
-    <section class="panel"><h2>Salas activas</h2><div id="roomList" style="display:flex;flex-direction:column;gap:9px"></div></section>
+    <section class="panel"><h2><span>Salas activas</span><button id="refreshRooms" type="button" class="ghost">🔄 Actualizar</button></h2><div id="roomList" style="display:flex;flex-direction:column;gap:9px"></div></section>
     <section class="panel"><h2>Crear nueva sala</h2>
       <input id="rName" maxlength="24" placeholder="Nombre de la sala" autocomplete="off">
       <div class="radios"><label><input type="radio" name="vis" value="pub" checked> Pública</label><label><input type="radio" name="vis" value="priv"> Privada 🔒</label></div>
@@ -151,7 +188,11 @@ canvas{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;max-width:n
     <div id="ev"></div>
     <div id="penbar" class="hidden"><div id="pRow"><div class="pt"><b id="pL">LOCAL</b><span id="pbR"></span></div><div id="pTimer"></div><div class="pt"><span id="pbB"></span><b id="pV">VISITANTE</b></div></div><div id="pInfo"></div></div>
     <canvas id="c" width="1000" height="600" tabindex="0"></canvas>
-    <div id="chat"><div id="log"></div><input id="chatIn" maxlength="120" placeholder="Enter o Tab para chatear…" autocomplete="off"></div>
+    <div id="chat"><button id="chatTog" type="button" class="tc">👁 Ocultar</button><div id="log"></div><input id="chatIn" maxlength="120" placeholder="Enter o Tab para chatear…" autocomplete="off"></div>
+    <div id="rot"><div><span class="ph">📱</span> Girá tu teléfono en horizontal para jugar</div></div>
+    <button id="tMenu" type="button" class="tc">☰ Menú</button>
+    <div id="joy" class="tc"><div id="joyKnob"></div></div>
+    <div id="kickWrap" class="tc"><button id="kickBtn" type="button" aria-label="Patear / Barrida">⚽</button><div class="klbl">PATEAR / MANTENER: BARRIDA</div></div>
     <div id="vote" class="ov hidden"><div class="card" style="width:min(660px,94%);text-align:center">
       <h2 style="font-size:1.2rem;color:#facc15">⚖️ ¡EMPATE! VOTACIÓN DE DESEMPATE</h2>
       <div id="vTime" style="font-size:2.6rem;font-weight:900;line-height:1">8</div>
@@ -186,6 +227,10 @@ canvas{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;max-width:n
 
 <script>
 const $=id=>document.getElementById(id);
+/* Plataforma: táctil/móvil (📱) o PC (🖥️) */
+const IS_TOUCH=('ontouchstart' in window)||navigator.maxTouchPoints>0,PLAT=IS_TOUCH?'m':'d',
+ platIcon=t=>t==='m'?'📱 ':t==='d'?'🖥️ ':'';
+document.documentElement.classList.toggle('is-touch',IS_TOUCH);
 const SIZES={chica:[800,420],mediana:[1150,600],grande:[1700,900],gigante:[2300,1300],realista:[2100,1250]},GHT={chica:110,mediana:140,grande:190,gigante:220,realista:210};
 const ACC=.224,PD=.94,KPD=.93,BD=.975,REST=.6,PREST=.1,KS=9,PR=6,KCD=.1,FL=.15,GD=34,MAXB=10,LOCK=4,PRAD=18,BRAD=10,BMAX=20;
 const SPF=95,SPR=150,RL=()=>G.size==='realista',areaD=()=>RL()?G.w*.157:G.gh*1.2,areaH=()=>RL()?G.h*.593:G.gh*2.6,smallD=()=>RL()?G.w*.0524:G.gh*.55,smallH=()=>RL()?G.h*.27:G.gh*1.4,spotD=()=>(RL()?G.w*.1048:G.gh*.75)*1.2; /* punto penal 20 % más atrás */
@@ -237,12 +282,12 @@ function roster(){const el=$('teams'),T=[['red','Local','#ff5d5d'],['spec','Espe
    if(isAdmin){r.draggable=true;r.style.cursor='grab';r.ondragstart=e=>{dragP=p;e.dataTransfer.setData('text/plain',p.name);e.dataTransfer.effectAllowed='move'};r.ondragend=()=>{dragP=null}}
    const b=(t,to)=>{const x=document.createElement('button');x.className='ghost';x.textContent=t;x.style.cssText='padding:1px 6px;font-size:.75rem';x.onclick=()=>movePlayer(p,to);return x};
    if(isAdmin&&ci>0)r.appendChild(b('◀',T[ci-1][0]));
-   const n=document.createElement('span');n.style.cssText='flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';const ad=p.id==='host'&&(isAdmin||NET.role==='client');n.textContent=`${p.flag||'🌐'} ${p.bot?'🤖 ':ad?'👑 ':''}${p.name}`;if(ad){n.style.color='#ffd166';n.style.fontWeight='800'}r.appendChild(n);const ms=document.createElement('span');ms.style.cssText='font-size:.7rem;color:#8aa0c8;white-space:nowrap';ms.textContent='ms : '+(p.ping|0);r.appendChild(ms);
+   const n=document.createElement('span');n.style.cssText='flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';const ad=p.id==='host'&&(isAdmin||NET.role==='client');n.textContent=`${p.flag||'🌐'} ${p.bot?'🤖 ':(ad?'👑 ':'')+platIcon(p.plat)}${p.name}`;if(ad){n.style.color='#ffd166';n.style.fontWeight='800'}r.appendChild(n);const ms=document.createElement('span');ms.style.cssText='font-size:.7rem;color:#8aa0c8;white-space:nowrap';ms.textContent='ms : '+(p.ping|0);r.appendChild(ms);
    if(isAdmin&&ci<2)r.appendChild(b('▶',T[ci+1][0]));col.appendChild(r)});
   el.appendChild(col)})}
 let rooms=[{id:1,name:'SALA DE PRUEBA',max:12,priv:false,pass:'',n:0,owner:'Sistema',size:'mediana',test:true}];
 let user={nick:'',num:'10'},G=null,me=null,isAdmin=false,cur=null,pending=null,inGame=false,menuOpen=false,botSeq=1,evT;
-const keys={up:0,down:0,left:0,right:0,kick:0};
+const keys={up:0,down:0,left:0,right:0,kick:0,jx:0,jy:0}; /* jx/jy: joystick analógico táctil (-1..1) */
 /* Dorsales únicos: ningún bot repite el número/emoji de un humano (ni el de otro bot) */
 const normNum=v=>{v=String(v==null?'':v).trim();return /^\d+$/.test(v)?String(+v):v};
 const NUM_POOL=['2','3','4','6','7','8','9','11','5','1','10',...Array.from({length:88},(_,i)=>String(i+12)).filter(n=>n!=='11'),'⚽','🔥','⚡','🚀','🦁','⭐','🏆','👑'];
@@ -290,12 +335,12 @@ $('create').onclick=()=>{const priv=document.querySelector('input[name=vis]:chec
  const r={id:Date.now(),name:$('rName').value.trim()||`Sala de ${user.nick}`,max:+$('rMax').value,priv,pass,n:1,owner:user.nick,size:'mediana'};
  r.online=true;r.mine=true;r.flag=FLAG;r.ping=0;rooms.push(r);$('lobbyErr').textContent='';enter(r,true);startHost(r)};
 $('jNo').onclick=()=>{$('modal').classList.add('hidden');if(pending&&pending.net)netLeave()};
-$('jOk').onclick=()=>{if(pending&&pending.net){csend({t:'join',nick:user.nick,num:user.num,pass:$('jPass').value,flag:FLAG});return}if($('jPass').value===pending.pass){$('modal').classList.add('hidden');enter(pending,false)}else $('jErr').textContent='Contraseña incorrecta.'};
+$('jOk').onclick=()=>{if(pending&&pending.net){csend({t:'join',nick:user.nick,num:user.num,pass:$('jPass').value,flag:FLAG,pt:PLAT});return}if($('jPass').value===pending.pass){$('modal').classList.add('hidden');enter(pending,false)}else $('jErr').textContent='Contraseña incorrecta.'};
 $('jPass').addEventListener('keydown',e=>e.key==='Enter'&&$('jOk').click());
 
 /* Partida local (misma física que el servidor) */
 const mk=(name,num,team,bot,id)=>({id:id||'b'+Math.random().toString(36).slice(2,7),name,num,team,bot,flag:'🌐',ping:0,x:0,y:0,vx:0,vy:0,r:PRAD,cd:0,flash:0,ax:0,ay:0,kick:false,wander:Math.random()*10});
-function enter(r,admin){netReset();updateInvite();cur=r;isAdmin=admin;me=mk(user.nick,user.num,'red',false,'host');me.flag=FLAG;
+function enter(r,admin){netReset();updateInvite();cur=r;isAdmin=admin;me=mk(user.nick,user.num,'red',false,'host');me.flag=FLAG;me.plat=PLAT;
  G={uni:defUni(),size:r.size||'mediana',duration:180,goalLimit:0,players:[me,...(r.test?[mk('Bot 1','7','red',true),mk('Bot 2','9','blue',true),mk('Bot 3','3','blue',true)]:[])]};botSeq=r.test?4:1;uniqueBotNums();
  sizeUp();restart();show('screen-game');$('log').textContent='';$('c').focus()}
 function sizeUp(){[G.w,G.h]=SIZES[G.size];G.gh=GHT[G.size];G.gT=(G.h-G.gh)/2;G.gB=G.gT+G.gh;G.k=G.size==='gigante'?1.2:G.size==='grande'?1.1:1;G.cam=null}
@@ -751,7 +796,7 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
  const nf=v=>!Number.isFinite(v); /* anti-congelamiento: ningún valor NaN/Infinity queda en el estado */
  if(nf(b.x)||nf(b.y)||nf(b.vx)||nf(b.vy)){b.x=w/2;b.y=h/2;b.vx=b.vy=0}
  G.players.forEach(p=>{if(nf(p.x)||nf(p.y)||nf(p.vx)||nf(p.vy)){p.x=w/2;p.y=h/2;p.vx=p.vy=0}if(nf(p.ax))p.ax=0;if(nf(p.ay))p.ay=0});
- G.players.forEach(p=>{if(p.bot)return;const k=p===me?keys:(p.keys||{}),ix=(k.right|0)-(k.left|0),iy=(k.down|0)-(k.up|0),l=Math.hypot(ix,iy)||1;p.ax=ix/l;p.ay=iy/l;p.kick=!!k.kick;if(G.pen&&G.pen.k===p)p.ax=0}); /* teclas de cada humano; arquero: solo vertical */
+ G.players.forEach(p=>{if(p.bot)return;const k=p===me?keys:(p.keys||{}),ix=(k.right|0)-(k.left|0)+clamp(+k.jx||0,-1,1),iy=(k.down|0)-(k.up|0)+clamp(+k.jy||0,-1,1),l=Math.max(1,Math.hypot(ix,iy));p.ax=ix/l;p.ay=iy/l;p.kick=!!k.kick;if(G.pen&&G.pen.k===p)p.ax=0}); /* teclas de cada humano; arquero: solo vertical */
  G.fr=(G.fr||0)+1;
  act().forEach(p=>{if(p.bot)G.pen?penAI(p):botAI(p);
   const dm=p.kick?KPD:PD;p.vx=(p.vx+p.ax*ACC)*dm;p.vy=(p.vy+p.ay*ACC)*dm;if(!p.bot)slideTick(p);
@@ -830,8 +875,8 @@ function slideNotice(n,live){n=Math.max(1,Math.ceil(n));const L=$('log'),now=per
   if(t>=S.end||r<=0){clearInterval(S.iv);el.remove();if(slN===S)slN=null;return}
   el.textContent=`Espera ${r} segundo${r===1?'':'s'} para deslizarte de nuevo`;L.scrollTop=L.scrollHeight};
  upd();S.iv=setInterval(upd,250)}
-function addMsg(name,team,text,flag){const d=document.createElement('div'),b=document.createElement('b');
- b.style.color=team==='red'?'#ff5d5d':team==='blue'?'#3b9cff':'#9aa8c7';b.textContent=(flag?flag+' ':'')+name+': ';
+function addMsg(name,team,text,flag,plat){const d=document.createElement('div'),b=document.createElement('b');
+ b.style.color=team==='red'?'#ff5d5d':team==='blue'?'#3b9cff':'#9aa8c7';b.textContent=(flag?flag+' ':'')+platIcon(plat)+name+': ';
  d.append(b,document.createTextNode(text));const L=$('log');L.appendChild(d);while(L.children.length>40)L.firstChild.remove();L.scrollTop=L.scrollHeight}
 chatIn.addEventListener('keydown',e=>{
  if(e.code==='Tab')e.preventDefault();
@@ -892,7 +937,7 @@ window.addEventListener('beforeunload',delRoom);window.addEventListener('pagehid
 function netLeave(){delRoom();clearInterval(NET.roomT);if(NET.role==='host')bc({t:'bye'});if(NET.role==='client'){try{NET.conn.close()}catch(e){}}netReset();updateInvite()}
 const csend=m=>safeSend(NET.conn,m); /* envío seguro: ignora si la conexión ya se cerró */
 const sendKeys=()=>{if(NET.role==='client'&&NET.conn&&NET.conn.open)csend({t:'k',k:{...keys}})};
-function sendChat(t){if(NET.role==='client')csend({t:'chat',x:t});else{addMsg(me.name,me.team,t,me.flag);bc({t:'chat',n:me.name,tm:me.team,x:t,f:me.flag})}}
+function sendChat(t){if(NET.role==='client')csend({t:'chat',x:t});else{addMsg(me.name,me.team,t,me.flag,me.plat);bc({t:'chat',n:me.name,tm:me.team,x:t,f:me.flag,pt:me.plat})}}
 const cfgMsg=()=>({t:'cfg',size:G.size,d:G.duration,g:G.goalLimit,uni:G.uni,name:cur.name,code:NET.code,rf:cur.flag||'🌐',pl:G.players.map(p=>[p.id,p.flag||'🌐',p.ping|0])});
 /* --- Host --- */
 function startHost(r){if(typeof Peer==='undefined'){showEv('Online no disponible: sala solo local',2400);return}
@@ -909,13 +954,13 @@ function hostData(c,m){if(!m||typeof m!=='object'||NET.role!=='host')return;
   if(r.priv&&m.pass!==r.pass){safeSend(c,m.pass?{t:'err',m:'Contraseña incorrecta.'}:{t:'need'});return}
   if(hum()>=r.max){safeSend(c,{t:'err',m:'La sala está llena.'});return}
   const rc=G.players.filter(p=>p.team==='red').length,bl=G.players.filter(p=>p.team==='blue').length,tm=rc<=bl?'red':'blue',p=mk(nick,num,tm,false,c.peer);
-  p.flag=safeFlag(m.flag);p.keys={};p.x=G.pen?G.w/2:(tm==='red'?G.w*.3:G.w*.7);p.y=G.pen?G.h/2:G.h*(.2+Math.random()*.6);G.players.push(p);c.pl=p;NET.conns.push(c);uniqueBotNums();
+  p.flag=safeFlag(m.flag);p.plat=m.pt==='m'?'m':'d';p.keys={};p.x=G.pen?G.w/2:(tm==='red'?G.w*.3:G.w*.7);p.y=G.pen?G.h/2:G.h*(.2+Math.random()*.6);G.players.push(p);c.pl=p;NET.conns.push(c);uniqueBotNums();
   safeSend(c,{t:'welcome',id:c.peer,cfg:cfgMsg()});safeSend(c,{t:'ping',ts:Date.now()});showEv(`➕ ${nick} se unió`,1400)}
  else if(!c.pl)return;
  else if(m.t==='pong'){const r=Math.max(1,Date.now()-m.ts);c.pl.ping=c.pl.ping?Math.round(c.pl.ping*.5+r*.5):r}
  else if(m.t==='flag')c.pl.flag=safeFlag(m.f);
  else if(m.t==='k')c.pl.keys=m.k&&typeof m.k==='object'?m.k:{};
- else if(m.t==='chat'){const x=String(m.x||'').slice(0,120);if(x){addMsg(c.pl.name,c.pl.team,x,c.pl.flag);bc({t:'chat',n:c.pl.name,tm:c.pl.team,x,f:c.pl.flag})}}
+ else if(m.t==='chat'){const x=String(m.x||'').slice(0,120);if(x){addMsg(c.pl.name,c.pl.team,x,c.pl.flag,c.pl.plat);bc({t:'chat',n:c.pl.name,tm:c.pl.team,x,f:c.pl.flag,pt:c.pl.plat})}}
  else if(m.t==='vote'){if(G.vote&&[1,2,3].includes(m.n)&&G.vote.voters.includes(c.pl))c.pl.vc=m.n}}
 function hostGone(c){const p=c.pl;if(!p)return;c.pl=null;NET.conns=NET.conns.filter(x=>x!==c);
  const i=G.players.indexOf(p);if(i>=0)G.players.splice(i,1);
@@ -924,7 +969,7 @@ function hostGone(c){const p=c.pl;if(!p)return;c.pl=null;NET.conns=NET.conns.fil
  else if(G.pen&&(G.pen.parts.includes(p)||G.pen.list.red.includes(p)||G.pen.list.blue.includes(p)))end('🤝 ¡PARTIDO FINALIZADO EN EMPATE! (jugador desconectado)');
  showEv(`➖ ${p.name} salió`,1400)}
 function netState(){if(!NET.conns.length)return;const P=G.pen,V=G.vote,f=n=>+n.toFixed(1);
- bc({t:'s',bp:(G.pw&&G.pw.on)?1:0,p:G.players.map(p=>[p.id,f(p.x),f(p.y),p.team,p.num,p.name,p.flash>0?+p.flash.toFixed(2):0,p.bot?1:0]),b:[f(G.ball.x),f(G.ball.y),G.ball.r],sc:[G.score.red,G.score.blue],
+ bc({t:'s',bp:(G.pw&&G.pw.on)?1:0,p:G.players.map(p=>[p.id,f(p.x),f(p.y),p.team,p.num,p.name,p.flash>0?+p.flash.toFixed(2):0,p.bot?1:0,p.bot?'':(p.plat||'')]),b:[f(G.ball.x),f(G.ball.y),G.ball.r],sc:[G.score.red,G.score.blue],
   ck:+G.clock.toFixed(2),d:G.duration,gd:G.golden?1:0,pa:G.paused?1:0,cd:+(G.cd||0).toFixed(2),
   vt:V?{t:+V.t.toFixed(2),c:[0,vCount(1),vCount(2),vCount(3)]}:0,
   ko:G.ko==='red'?1:G.ko==='blue'?2:0,sp:G.sp?{k:G.sp.type,t:G.sp.team==='red'?1:2,x:Math.round(G.sp.x),y:Math.round(G.sp.y),r:G.sp.rad}:0,pn:P?{side:P.side,gx:P.gx,din:P.din,res:P.res,team:P.team,ph:P.ph,t:+P.t.toFixed(2),sn:P.s?P.s.name:'',win:P.win||null,single:P.single?1:0}:0});
@@ -938,7 +983,7 @@ function joinCode(raw){const code=norm(raw),err=m=>{$('codeErr').textContent=m};
  const tm=setTimeout(()=>{if(!ok)fail('No se encontró la sala (revisa la contraseña).')},9000);clearTimeout(NET.jt);NET.jt=tm;
  pr.on('error',e=>{clearTimeout(tm);fail(e.type==='peer-unavailable'?'No se encontró la sala (revisa la contraseña).':'No se pudo conectar al servidor online.')});
  pr.on('open',()=>{const c=pr.connect(code,{reliable:true,serialization:'json'});NET.conn=c;
-  c.on('open',()=>safeSend(c,{t:'join',nick:user.nick,num:user.num,pass:'',flag:FLAG}));
+  c.on('open',()=>safeSend(c,{t:'join',nick:user.nick,num:user.num,pass:'',flag:FLAG,pt:PLAT}));
   c.on('data',m=>{try{if(NET.conn!==c||!m||typeof m!=='object')return;if(m.t==='welcome'){ok=true;clearTimeout(tm);enterClient(m)}
    else if(m.t==='need'){clearTimeout(tm);pending={net:1};$('jName').textContent='Sala '+code;$('jPass').value='';$('jErr').textContent='';$('modal').classList.remove('hidden');$('jPass').focus()}
    else if(m.t==='err'){clearTimeout(tm);if($('modal').classList.contains('hidden'))fail(m.m);else $('jErr').textContent=m.m}
@@ -947,7 +992,7 @@ function joinCode(raw){const code=norm(raw),err=m=>{$('codeErr').textContent=m};
 $('codeGo').onclick=()=>joinCode($('codeIn').value);
 $('codeIn').addEventListener('keydown',e=>e.key==='Enter'&&$('codeGo').click());
 function enterClient(m){NET.role='client';NET.myId=m.id;NET.pm=new Map();NET.code=NET.target;const c=m.cfg;isAdmin=false;menuOpen=false;cur={name:c.name,test:true,client:true};
- me={id:m.id,name:user.nick,num:user.num,team:'red',x:0,y:0,r:PRAD,flash:0,vc:0};
+ me={id:m.id,name:user.nick,num:user.num,team:'red',x:0,y:0,r:PRAD,flash:0,vc:0,plat:PLAT};
  G={uni:c.uni,size:c.size,duration:c.d,goalLimit:c.g,players:[me],ball:{x:500,y:300,r:BRAD},score:{red:0,blue:0},clock:0,golden:false,paused:false,cd:0,vote:null,pen:null,over:false};
  NET.pm.set(m.id,me);sizeUp();$('modal').classList.add('hidden');$('codeErr').textContent='';$('menu').classList.add('hidden');
  $('vote').classList.add('hidden');$('penbar').classList.add('hidden');$('sb').classList.remove('hidden');$('sb').appendChild($('mute'));$('log').textContent='';
@@ -958,14 +1003,14 @@ function cliData(m){
  else if(m.t==='ping')csend({t:'pong',ts:m.ts});
  else if(m.t==='ev')showEv(m.x,m.ms);
  else if(m.t==='snd')m.k==='t'?thump(m.v):m.k==='p'?powerThump():m.k==='w'?whistle():chime();
- else if(m.t==='chat')addMsg(m.n,m.tm,m.x,m.f);
+ else if(m.t==='chat')addMsg(m.n,m.tm,m.x,m.f,m.pt);
  else if(m.t==='sys')addSys(String(m.x||'').slice(0,60),Math.min(60000,+m.ms||0));
  else if(m.t==='ref')addRef(String(m.x||'').slice(0,220));
  else if(m.t==='sw')slideNotice(+m.n||1,!!m.l);
  else if(m.t==='bye'){netLeave();show('screen-lobby');$('codeErr').textContent='La sala fue cerrada por el Host.'}}
 function applyState(m){const seen=new Set();
- m.p.forEach(([id,x,y,team,num,name,fl,bot])=>{let p=NET.pm.get(id);if(!p){p={id,x,y,vx:0,vy:0};NET.pm.set(id,p);G.players.push(p)}
-  Object.assign(p,{tx:x,ty:y,team,num,name,flash:fl,bot:!!bot,r:PRAD*G.k});pfApply(p);seen.add(id)});
+ m.p.forEach(([id,x,y,team,num,name,fl,bot,plat])=>{let p=NET.pm.get(id);if(!p){p={id,x,y,vx:0,vy:0};NET.pm.set(id,p);G.players.push(p)}
+  Object.assign(p,{tx:x,ty:y,team,num,name,flash:fl,bot:!!bot,plat:plat==='m'?'m':plat==='d'?'d':'',r:PRAD*G.k});pfApply(p);seen.add(id)});
  G.players=G.players.filter(p=>seen.has(p.id)||(NET.pm.delete(p.id),false));
  const b=G.ball;b.tx=m.b[0];b.ty=m.b[1];b.r=m.b[2];G.pw=m.bp?{id:'',t:5,on:true}:null;
  G.score={red:m.sc[0],blue:m.sc[1]};G.clock=m.ck;G.duration=m.d;G.golden=!!m.gd;G.paused=!!m.pa;G.cd=m.cd;G.ko=m.ko===1?'red':m.ko===2?'blue':null;G.sp=m.sp?{type:m.sp.k,team:m.sp.t===1?'red':'blue',x:m.sp.x,y:m.sp.y,rad:m.sp.r}:null;
@@ -984,4 +1029,58 @@ let last=performance.now(),acc=0;
  try{if(inGame&&G){if(NET.role==='client')cliSmooth();else{let n=0;while(acc>=DT&&n++<5){step();acc-=DT;if(NET.role==='host')netState()}if(acc>DT*5)acc=0}draw()}else acc=0}
  catch(e){console.error('loop',e);acc=0} /* un error aislado no detiene el juego */
  requestAnimationFrame(loop)})(last);
-</script></body></html>
+</script>
+<script>
+/* ===== Mejoras: Actualizar salas · interfaz táctil ===== */
+(()=>{
+ /* 1) 🔄 Actualizar salas (PC y móvil): consulta /api/salas ya, cooldown 2 s */
+ const rb=$('refreshRooms');let rcd=false;
+ rb.onclick=async()=>{if(rcd)return;rcd=true;rb.disabled=true;rb.textContent='Actualizando...';
+  try{await pollRooms()}catch(e){}
+  setTimeout(()=>{rcd=false;rb.disabled=false;rb.textContent='🔄 Actualizar'},2000)};
+
+ /* 2) Interfaz táctil: solo móvil/táctil. En PC no se registra nada. */
+ if(!IS_TOUCH)return;
+ const joy=$('joy'),knob=$('joyKnob'),kb=$('kickBtn'),tMenu=$('tMenu'),chat=$('chat'),tog=$('chatTog');
+ $('chatIn').placeholder='Tocá para escribir…';
+
+ /* Chat: plegar / mostrar */
+ tog.onclick=()=>{const m=chat.classList.toggle('min');tog.textContent=m?'💬 Mostrar':'👁 Ocultar';if(m)chatIn.blur()};
+ /* Teclado virtual: el "Enter/Ir" de algunos teclados móviles no trae e.code==='Enter' */
+ chatIn.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.code!=='Enter'){e.preventDefault();e.stopPropagation();const t=chatIn.value.trim();if(t)sendChat(t);chatIn.value='';chatIn.blur()}});
+
+ /* Joystick analógico (Pointer Events, multitáctil con el botón de acción) */
+ let jp=null,jx=0,jy=0,jLast=0,jTm=null;
+ const jSend=force=>{const n=performance.now();
+  if(force||n-jLast>=40){jLast=n;clearTimeout(jTm);jTm=null;sendKeys()}
+  else if(!jTm)jTm=setTimeout(()=>{jTm=null;jLast=performance.now();sendKeys()},40-(n-jLast))};
+ const jSet=(x,y)=>{if(x===jx&&y===jy)return;jx=x;jy=y;keys.jx=x;keys.jy=y;const t=joy.offsetWidth*.31;knob.style.transform=`translate(${x*t}px,${y*t}px)`;jSend(x===0&&y===0)};
+ const jMove=e=>{if(menuOpen||!G||G.vote)return jSet(0,0);
+  const r=joy.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),d=Math.hypot(dx,dy),m=d/(r.width/2);
+  if(m<.12||!d)return jSet(0,0);
+  const sp=Math.min(1,(m-.12)/.68);jSet(Math.round(dx/d*sp*100)/100,Math.round(dy/d*sp*100)/100)};
+ const jRelease=()=>{jp=null;jSet(0,0)};
+ joy.addEventListener('pointerdown',e=>{if(jp!==null)return;e.preventDefault();jp=e.pointerId;try{joy.setPointerCapture(jp)}catch(_){}jMove(e)});
+ joy.addEventListener('pointermove',e=>{if(e.pointerId===jp){e.preventDefault();jMove(e)}});
+ ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>joy.addEventListener(ev,e=>{if(e.pointerId===jp)jRelease()}));
+
+ /* Botón ⚽: igual que X / Espacio. Toque rápido = patear; mantener ≥0,35 s = barrida (la lógica del juego respeta el modo y el cooldown de 30 s) */
+ let kp=null,kTm=null;
+ const kPress=()=>{if(menuOpen||!G||G.vote)return;keys.kick=1;sendKeys();kb.classList.add('on');
+  clearTimeout(kTm);kTm=setTimeout(()=>{if(RL())kb.classList.add('slide')},350)};
+ const kRelease=()=>{kp=null;clearTimeout(kTm);kb.classList.remove('on','slide');if(keys.kick){keys.kick=0;sendKeys()}};
+ kb.addEventListener('pointerdown',e=>{if(kp!==null)return;e.preventDefault();kp=e.pointerId;try{kb.setPointerCapture(kp)}catch(_){}kPress()});
+ ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>kb.addEventListener(ev,e=>{if(e.pointerId===kp)kRelease()}));
+ kb.addEventListener('contextmenu',e=>e.preventDefault());
+ joy.addEventListener('contextmenu',e=>e.preventDefault());
+
+ /* ☰ Menú: abre / cierra el menú ESC */
+ tMenu.onclick=()=>{if(!inGame||(G&&G.vote))return;if(document.activeElement===chatIn)chatIn.blur();toggleMenu()};
+ new MutationObserver(()=>{tMenu.textContent=menuOpen?'✕ Cerrar':'☰ Menú';jRelease();kRelease()}).observe($('menu'),{attributes:true,attributeFilter:['class']});
+
+ /* Seguridad: soltar controles al perder foco o al enfocar el chat */
+ addEventListener('blur',()=>{jRelease();kRelease()});
+ chatIn.addEventListener('focus',()=>{jRelease();kRelease();Object.keys(keys).forEach(k=>keys[k]=0);sendKeys()});
+})();
+</script>
+</body></html>
