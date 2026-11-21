@@ -258,6 +258,20 @@ html.is-touch #pwrI{font-size:1rem}html.is-touch #pwrN{font-size:.72rem;letter-s
       <div id="adm" style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--line);padding-top:11px">
         <div class="label">⭐ Ajustes de administrador</div>
         <div id="uni" style="display:flex;flex-direction:column;gap:6px"></div>
+        <div id="stad" style="display:flex;flex-direction:column;gap:6px;background:var(--in);border:1px solid #243056;border-radius:10px;padding:6px 8px">
+          <b style="font-size:.8rem">🏟️ Personalizar Estadio</b>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="stOn" style="width:auto"> Activar estadio personalizado</label>
+          <div id="stBox" class="hidden" style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><b style="font-size:.8rem;width:100%">Butacas</b>
+              <select id="stSn" style="width:auto;padding:5px"><option value="1">1 color</option><option value="2">2 colores</option></select>
+              <span class="label">Color 1</span><input id="stSc1" type="color" style="width:38px;height:30px;padding:0">
+              <span class="label stSt2">Color 2</span><input id="stSc2" type="color" class="stSt2" style="width:38px;height:30px;padding:0"></div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><b style="font-size:.8rem;width:100%">Banderas</b>
+              <select id="stFn" style="width:auto;padding:5px"><option value="1">1 color</option><option value="2">2 colores</option></select>
+              <span class="label">Color 1</span><input id="stFc1" type="color" style="width:38px;height:30px;padding:0">
+              <span class="label stFt2">Color 2</span><input id="stFc2" type="color" class="stFt2" style="width:38px;height:30px;padding:0"></div>
+          </div>
+        </div>
         <select id="aMode"><option value="clasico">Modo Clásico</option><option value="realista">🏟️ Modo Realista (11v11 · 2100×1250)</option><option value="super">⚡ Modo Superpoderes (eventos aleatorios)</option></select>
         <select id="aSize"><option value="chica">Chica · 2v2 (800×420)</option><option value="mediana">Mediana · 3v3 (1150×600)</option><option value="grande">Grande · 5v5/6v6 (1700×900)</option><option value="gigante">Gigante · hasta 22 jugadores (2300×1300)</option></select>
         <div style="display:flex;gap:6px"><select id="aTime" style="flex:1"><option value="0">Duración: Sin límite</option><option value="1">1 min</option><option value="2">2 min</option><option value="3">3 min</option><option value="4">4 min</option><option value="5">5 min</option><option value="6">6 min</option><option value="7">7 min</option><option value="8">8 min</option><option value="9">9 min</option><option value="10">10 min</option><option value="c">Más de 10 min…</option></select><input id="aTimeN" type="number" min="11" max="120" placeholder="min" class="hidden" style="width:84px"></div>
@@ -401,7 +415,7 @@ $('jPass').addEventListener('keydown',e=>e.key==='Enter'&&$('jOk').click());
 
 /* Partida local (misma física que el servidor) */
 const mk=(name,num,team,bot,id)=>({id:id||'b'+Math.random().toString(36).slice(2,7),name,num,team,bot,flag:'🌐',ping:0,x:0,y:0,vx:0,vy:0,r:PRAD,cd:0,flash:0,ax:0,ay:0,kick:false,wander:Math.random()*10});
-function enter(r,admin){netReset();updateInvite();cur=r;isAdmin=admin;me=mk(user.nick,user.num,'red',false,'host');me.flag=FLAG;me.plat=PLAT;
+function enter(r,admin){netReset();updateInvite();cur=r;isAdmin=admin;STAD=admin?stadLoad():stadDef();STAD_CF.length=0;me=mk(user.nick,user.num,'red',false,'host');me.flag=FLAG;me.plat=PLAT;
  G={uni:defUni(),size:r.size||'mediana',super:r.mode==='super',duration:180,goalLimit:0,players:[me,...(r.test?[mk('Bot 1','7','red',true),mk('Bot 2','9','blue',true),mk('Bot 3','3','blue',true)]:[])]};botSeq=r.test?4:1;uniqueBotNums();
  sizeUp();restart();show('screen-game');$('log').textContent='';$('c').focus()}
 function sizeUp(){[G.w,G.h]=SIZES[G.size];G.gh=GHT[G.size];G.gT=(G.h-G.gh)/2;G.gB=G.gT+G.gh;G.k=G.size==='gigante'?1.2:G.size==='grande'?1.1:1;G.cam=null}
@@ -558,6 +572,128 @@ function pauseFx(){ctx.filter='none';
  ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.strokeStyle='#0b0f1a';ctx.fillStyle='#fff';
  const cd=G.cd>0,h=cd?String(Math.ceil(G.cd)):'PAUSADO',cx=VW/2,cy=VH/2,hy=cd?cy-30:cy-20;ctx.lineWidth=8;ctx.font=cd?'900 150px "Segoe UI",sans-serif':'900 84px "Segoe UI",sans-serif';ctx.strokeText(h,cx,hy);ctx.fillText(h,cx,hy);
  const t=cd?'3... 2... 1...':'Vuelve a presionar la letra P para reanudar el partido',y=cd?cy+80:cy+42;ctx.lineWidth=5;ctx.font='600 22px "Segoe UI",sans-serif';ctx.strokeText(t,cx,y);ctx.fillText(t,cx,y)}
+/* ===== 🏟️ Estadio personalizado (solo visual): estado, persistencia, panel del admin, tribunas, banderas y confeti ===== */
+const STAD_KEY='futball_stadium',hexOk=v=>/^#[0-9a-f]{6}$/i.test(String(v||'')),
+ stadDef=()=>({enabled:false,seats:{n:1,c1:'#64748b',c2:'#64748b'},flags:{n:1,c1:'#64748b',c2:'#64748b'}});
+function stadClean(o){const d=stadDef();if(!o||typeof o!=='object')return d;
+ const g=k=>{const q=o[k]&&typeof o[k]==='object'?o[k]:{};return{n:+q.n===2?2:1,c1:hexOk(q.c1)?q.c1:d[k].c1,c2:hexOk(q.c2)?q.c2:d[k].c2}};
+ return{enabled:o.enabled===true,seats:g('seats'),flags:g('flags')}}
+function stadLoad(){try{const v=localStorage.getItem(STAD_KEY);if(v)return stadClean(JSON.parse(v))}catch(e){}return stadDef()}
+let STAD=stadDef();
+function stadSave(){try{localStorage.setItem(STAD_KEY,JSON.stringify(STAD))}catch(e){}}
+function stadUI(){if(!$('stOn'))return;const S=STAD;$('stOn').checked=S.enabled;$('stBox').classList.toggle('hidden',!S.enabled);
+ $('stSn').value=S.seats.n;$('stSc1').value=S.seats.c1;$('stSc2').value=S.seats.c2;$('stFn').value=S.flags.n;$('stFc1').value=S.flags.c1;$('stFc2').value=S.flags.c2;
+ document.querySelectorAll('.stSt2').forEach(e=>e.classList.toggle('hidden',S.seats.n!==2));document.querySelectorAll('.stFt2').forEach(e=>e.classList.toggle('hidden',S.flags.n!==2))}
+function stadChanged(){if(!isAdmin)return;STAD=stadClean(STAD);stadSave();stadUI();if(NET.role==='host')bc(cfgMsg())} /* el Host reenvía el tema al instante; los invitados lo reciben también en cada cfg periódico */
+(()=>{if(!$('stOn'))return;
+ $('stOn').onchange=e=>{if(!isAdmin)return;STAD.enabled=e.target.checked;stadChanged();if(!STAD.enabled)STAD_CF.length=0};
+ [['stSn','seats','n'],['stSc1','seats','c1'],['stSc2','seats','c2'],['stFn','flags','n'],['stFc1','flags','c1'],['stFc2','flags','c2']].forEach(([id,g,k])=>{
+  const el=$(id),f=()=>{if(!isAdmin)return;STAD[g][k]=k==='n'?+el.value:el.value;stadChanged()};el.oninput=f;el.onchange=f})})();
+/* ===== Tribunas v2: estructura estática pre-renderizada en canvas auxiliares (se regenera solo al cambiar colores / tamaño / escala) + público animado liviano ===== */
+const ST_ROWS=7,ST_RH=18,ST_FW=26,ST_D=ST_FW+ST_ROWS*ST_RH,ST_PAD=ST_D+38,ST_AW=16,ST_TW=150; /* ST_FW: muro/alambrado frontal · ST_PAD: espacio extra que ve la cámara con el estadio activo */
+let STAD_CEL=-1e9;const STAD_C={key:'',t:0,sc:1,strips:[],fans:[],spr:null};
+function stShade(hex,p){const n=parseInt(String(hex).slice(1),16),t=Math.abs(p)/100,f=p<0?0:255,m=v=>Math.round(v+(f-v)*t);return`rgb(${m(n>>16)},${m(n>>8&255)},${m(n&255)})`}
+function stRowCol(S,i){return S.n===2?((i<2||i>=ST_ROWS-2)?S.c1:S.c2):S.c1} /* 2 colores: Color 1 arriba y abajo, Color 2 en el medio */
+function stPalette(T){T=T||STAD;const p=[T.seats.c1,T.flags.c1];if(T.seats.n===2)p.push(T.seats.c2);if(T.flags.n===2)p.push(T.flags.c2);return[...new Set(p)]}
+/* Pasillos / escaleras que dividen las tribunas en sectores (plateas y cabeceras) */
+function stAisles(a,b,c,d){const L=c-a,Hd=d-b,D=ST_D,F=ST_FW,A=ST_AW,r=[];
+ [0,.2,.36,.64,.8,1].forEach(f=>r.push({x:a+L*f-A/2,y:b-D,w:A,h:D-F,v:1})); /* tribuna superior (centro libre: túnel) */
+ [0,.2,.36,.5,.64,.8,1].forEach(f=>r.push({x:a+L*f-A/2,y:d+F,w:A,h:D-F,v:1})); /* tribuna inferior */
+ [0,.33,.66,1].forEach(f=>{const y=b+Hd*f-A/2;r.push({x:a-D,y,w:D-F,h:A,v:0});r.push({x:c+F,y,w:D-F,h:A,v:0})}); /* cabeceras izquierda / derecha */
+ return r}
+function stFlagPath(g,w,h,sg){g.beginPath();g.moveTo(-w/2,0);g.lineTo(w/2,0);g.lineTo(w/2,h);g.bezierCurveTo(w*.3,h+4*sg,w*.15,h-4*sg,0,h);g.bezierCurveTo(-w*.15,h+4*sg,-w*.3,h-4*sg,-w/2,h);g.closePath()}
+/* Trapo colgante: se ancla arriba (borde del muro hacia las gradas) y cuelga sobre la cara del muro que mira a la cancha */
+function stFlag(g,S,x,y,rot,k){g.save();g.translate(x,y);g.rotate(rot+((k%3)-1)*.025);const w=32,h=ST_FW-4,sg=k%2?1:-1;
+ stFlagPath(g,w,h,sg);g.save();g.clip();
+ if(S.n===2){const t=h/3;g.fillStyle=S.c1;g.fillRect(-w/2,-2,w,t+2);g.fillStyle=S.c2;g.fillRect(-w/2,t,w,t);g.fillStyle=S.c1;g.fillRect(-w/2,2*t,w,t+8)}
+ else{g.fillStyle=S.c1;g.fillRect(-w/2,-2,w,h+8)}
+ g.fillStyle='rgba(0,0,0,.16)';g.fillRect(-w*.18,0,3,h+6);g.fillRect(w*.2,0,3,h+6);g.fillStyle='rgba(255,255,255,.14)';g.fillRect(-w*.18+3,0,2,h+6);g.fillRect(w*.2+3,0,2,h+6); /* pliegues */
+ g.restore();stFlagPath(g,w,h,sg);g.lineWidth=1.6;g.lineJoin='round';g.strokeStyle='#0b1220';g.stroke();
+ g.beginPath();g.moveTo(-w/2-2,0);g.lineTo(w/2+2,0);g.lineWidth=2.2;g.strokeStyle='#e5e7eb';g.stroke();g.restore()}
+/* Dibuja TODA la estructura estática (en coordenadas de mundo) sobre el contexto g */
+function paintRing(g,a,b,c,d,T){const D=ST_D,F=ST_FW,RH=ST_RH,L=c-a,Hd=d-b,cx=(a+c)/2,tw=ST_TW,tx=cx-tw/2,
+ ringFill=(oo,oi,col)=>{g.beginPath();g.rect(a-oo,b-oo,L+2*oo,Hd+2*oo);g.rect(a-oi,b-oi,L+2*oi,Hd+2*oi);g.fillStyle=col;g.fill('evenodd')},
+ ringStroke=(o,lw,col)=>{g.lineWidth=lw;g.strokeStyle=col;g.strokeRect(a-o,b-o,L+2*o,Hd+2*o)};
+ g.lineJoin='miter';g.setLineDash([]);
+ ringFill(D+16,0,'#1b2433'); /* hormigón */
+ ringFill(F,0,'#3a4557');ringFill(F,F-5,'#5b6b82'); /* muro frontal + labio superior */
+ for(let i=0;i<ST_ROWS;i++){const o=F+i*RH+RH/2,col=stRowCol(T.seats,i);
+  g.setLineDash([]);ringStroke(o,RH,'#2a3447'); /* escalón de cemento: separa las filas */
+  g.setLineDash([11,3]);ringStroke(o,RH-4,stShade(col,-42));ringStroke(o,RH-8,col);ringStroke(o,RH-14,stShade(col,24)); /* respaldo en sombra, asiento y brillo */
+  g.setLineDash([])}
+ ringFill(F+9,F,'rgba(0,0,0,.28)'); /* sombra del muro sobre la primera fila */
+ stAisles(a,b,c,d).forEach(r=>{g.fillStyle='#707b8e';g.fillRect(r.x,r.y,r.w,r.h);g.strokeStyle='#4a5466';g.lineWidth=1.4;g.beginPath();
+  if(r.v){for(let y=r.y+3;y<r.y+r.h;y+=5){g.moveTo(r.x,y);g.lineTo(r.x+r.w,y)}}else{for(let x=r.x+3;x<r.x+r.w;x+=5){g.moveTo(x,r.y);g.lineTo(x,r.y+r.h)}}g.stroke();
+  g.lineWidth=2;g.strokeStyle='#a3adbd';g.strokeRect(r.x,r.y,r.w,r.h);g.lineWidth=1.6;g.strokeStyle='#d5dbe5';g.beginPath();
+  if(r.v){g.moveTo(r.x+r.w/2,r.y);g.lineTo(r.x+r.w/2,r.y+r.h)}else{g.moveTo(r.x,r.y+r.h/2);g.lineTo(r.x+r.w,r.y+r.h/2)}g.stroke()}); /* escalones + baranda central */
+ ringStroke(D+5,10,'#0f172a');ringStroke(D+.5,1.5,'#475569'); /* muro trasero */
+ /* Túnel de salida de jugadores (tribuna superior, centrado): techo de cemento + boca oscura con marco */
+ {const my=b-F-8,rt=b-D-14;
+  g.fillStyle='rgba(0,0,0,.35)';g.fillRect(tx-14,rt+6,tw+36,my-rt+4);
+  g.fillStyle='#5d6b80';g.fillRect(tx-18,rt,tw+36,my-rt);
+  g.strokeStyle='#4b586b';g.lineWidth=1.5;g.beginPath();for(let y=rt+8;y<my;y+=12){g.moveTo(tx-18,y);g.lineTo(tx+tw+18,y)}g.stroke();
+  g.fillStyle='#7d8aa0';g.fillRect(cx-3,rt,6,my-rt);g.lineWidth=2.5;g.strokeStyle='#94a3b8';g.strokeRect(tx-18,rt,tw+36,my-rt);
+  g.fillStyle='#cbd5e1';g.fillRect(tx-18,my-5,tw+36,6); /* dintel */
+  const gr=g.createLinearGradient(0,my,0,b+2);gr.addColorStop(0,'#02040a');gr.addColorStop(.7,'#0c1220');gr.addColorStop(1,'#26324a');g.fillStyle=gr;g.fillRect(tx,my+1,tw,b+2-my);
+  g.fillStyle='rgba(0,0,0,.4)';g.fillRect(tx,my+1,tw,8);
+  g.fillStyle='#aab4c5';g.fillRect(tx-14,my,14,b+6-my);g.fillRect(tx+tw,my,14,b+6-my);g.lineWidth=1.5;g.strokeStyle='#1e293b';g.strokeRect(tx-14,my,14,b+6-my);g.strokeRect(tx+tw,my,14,b+6-my);
+  g.fillStyle='rgba(253,224,71,.85)';[.2,.5,.8].forEach(f=>{g.beginPath();g.arc(tx+tw*f,my+7,2.6,0,7);g.fill()})}
+ /* Banderas en el frente: cuelgan sobre el muro que mira a la cancha (4 lados, respetando el hueco del túnel) */
+ {const SP=38,Fl=T.flags,PI=Math.PI,gap=x=>Math.abs(x-cx)<tw/2+26;let k=0;
+  for(let x=a-F+19;x<=c+F-19;x+=SP,k++){if(!gap(x))stFlag(g,Fl,x,b-F+2,0,k);stFlag(g,Fl,x,d+F-2,PI,k+1)}
+  for(let y=b+19;y<=d-19;y+=SP,k++){stFlag(g,Fl,a-F+2,y,-PI/2,k);stFlag(g,Fl,c+F-2,y,PI/2,k+1)}}
+ /* Alambrado interior (borde del muro hacia el césped): malla + riel + postes; abierto en la boca del túnel */
+ {const gl=tx-14,gr2=tx+tw+14,sides=[[a,b,gl,b],[gr2,b,c,b],[c,b,c,d],[c,d,a,d],[a,d,a,b]],seg=(x1,y1,x2,y2)=>{g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke()};
+  g.setLineDash([2,3]);g.lineWidth=7;g.strokeStyle='rgba(226,232,240,.28)';sides.forEach(q=>seg(...q));
+  g.setLineDash([]);g.lineWidth=2.4;g.strokeStyle='#e2e8f0';sides.forEach(q=>seg(...q));
+  g.fillStyle='#94a3b8';g.lineWidth=1;g.strokeStyle='#1e293b';
+  sides.forEach(([x1,y1,x2,y2])=>{const len=Math.hypot(x2-x1,y2-y1),n=Math.floor(len/80);for(let k=0;k<=n;k++){const t=n?k/n:0;g.beginPath();g.arc(x1+(x2-x1)*t,y1+(y2-y1)*t,3.2,0,7);g.fill();g.stroke()}})}}
+/* Hinchas: posiciones orgánicas fijas (generadas con semilla) y sprites pequeños pre-dibujados (brazos abajo / arriba) */
+function stSprites(T){const sh=stPalette(T),skins=['#f1c9a5','#d9a066','#a86b3c','#6b4226'],hairs=['#1a1a1a','#3b2314','#7a4a1e','#d4a82b'],S=2,N=16,out=[[],[]];
+ for(let m=0;m<1;m++)for(let si=0;si<sh.length;si++)for(let k=0;k<4;k++){const cv=document.createElement('canvas');cv.width=cv.height=N*S;const g=cv.getContext('2d');g.scale(S,S);g.lineJoin='round';g.lineCap='round';
+  if(m){g.strokeStyle=sh[si];g.lineWidth=2.2;g.beginPath();g.moveTo(3.5,9);g.lineTo(2.6,3.6);g.moveTo(12.5,9);g.lineTo(13.4,3.6);g.stroke();g.fillStyle=skins[k];[[2.6,3],[13.4,3]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,1.7,0,7);g.fill()})}
+  g.beginPath();g.ellipse(8,10,5.8,4.3,0,0,7);g.fillStyle=sh[si];g.fill();g.lineWidth=1.1;g.strokeStyle='rgba(0,0,0,.6)';g.stroke();
+  g.beginPath();g.arc(8,7.2,3.3,0,7);g.fillStyle=skins[k];g.fill();g.beginPath();g.arc(8,7.2,3.3,Math.PI,0);g.closePath();g.fillStyle=hairs[k];g.fill();g.beginPath();g.arc(8,7.2,3.3,0,7);g.stroke();
+  out[m][si*4+k]=cv}
+ return{out,n:sh.length}}
+function stBuildFans(a,b,c,d,n){let sd=20261121;const rnd=()=>{sd|=0;sd=sd+0x6D2B79F5|0;let t=Math.imul(sd^sd>>>15,1|sd);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+ const F=ST_FW,ai=stAisles(a,b,c,d),tx=(a+c)/2-ST_TW/2,fans=[],bad=(x,y)=>ai.some(r=>x>r.x-8&&x<r.x+r.w+8&&y>r.y-8&&y<r.y+r.h+8)||(x>tx-26&&x<tx+ST_TW+26&&y<b+4&&y>b-ST_D-16);
+ for(let i=0;i<ST_ROWS;i++){const o=F+i*ST_RH+ST_RH/2,pf=.8-i*.04;
+  [[a-o,b-o,c+o,b-o],[c+o,b-o,c+o,d+o],[c+o,d+o,a-o,d+o],[a-o,d+o,a-o,b-o]].forEach(([x1,y1,x2,y2],sg)=>{const len=Math.hypot(x2-x1,y2-y1),m=Math.floor(len/14),ux=(x2-x1)/len,uy=(y2-y1)/len;
+   for(let k=1;k<m;k++){const t=k*14+7+(rnd()-.5)*3,x=x1+ux*t,y=y1+uy*t;if(bad(x,y))continue;
+    fans.push({x:x+(rnd()-.5)*2,y:y+(rnd()-.5)*2,v:Math.floor(rnd()*n)*4+Math.floor(rnd()*4),g:(k+i)&1})}})}
+ return fans}
+/* Regenera el pre-render SOLO si cambió algo (colores, cantidad de colores, tamaño de cancha, escala); throttle de 150 ms al arrastrar un color */
+function stEnsure(a,b,c,d){const sc=clamp(Math.round(.78*DPR*10)/10,.7,1.6),T=STAD,key=[G.w,G.h,sc,T.seats.n,T.seats.c1,T.seats.c2,T.flags.n,T.flags.c1,T.flags.c2].join('|'),now=performance.now();
+ if(STAD_C.key===key)return;if(STAD_C.strips.length&&now-STAD_C.t<150)return;
+ STAD_C.t=now;STAD_C.key=key;STAD_C.sc=sc;
+ const D2=ST_D+16,L=c-a,Hd=d-b;
+ const RC=[[a-D2,b-D2,L+2*D2,D2+8],[a-D2,d-8,L+2*D2,D2+8],[a-D2,b,D2+8,Hd],[c-8,b,D2+8,Hd]];
+ STAD_C.strips=RC.map(([x,y,w,h])=>{ /* 4 franjas (arriba, abajo, izq., der.): ocupan mucha menos memoria que un único lienzo del estadio entero */
+  const cv=document.createElement('canvas');cv.width=Math.ceil(w*sc);cv.height=Math.ceil(h*sc);const g=cv.getContext('2d');g.setTransform(sc,0,0,sc,-x*sc,-y*sc);g.beginPath();g.rect(x,y,w,h);g.clip();paintRing(g,a,b,c,d,T);
+  return{cv,x,y,w:cv.width/sc,h:cv.height/sc}});
+ /* Público repleto PRE-DIBUJADO: 2 capas estáticas (grupos alternados A/B) con todos los cuerpos de los hinchas; en el juego solo se desplaza cada capa entera */
+ const scF=Math.min(sc,1.2),spr=stSprites(T),fans=stBuildFans(a,b,c,d,spr.n);
+ STAD_C.fl=[0,1].map(gp=>RC.map(([x,y,w,h])=>{const cv=document.createElement('canvas');cv.width=Math.ceil(w*scF);cv.height=Math.ceil(h*scF);const g=cv.getContext('2d');g.setTransform(scF,0,0,scF,-x*scF,-y*scF);
+  for(let i=0;i<fans.length;i++){const f=fans[i];if(f.g!==gp||f.x+8<x||f.x-8>x+w||f.y+8<y||f.y-8>y+h)continue;g.drawImage(spr.out[0][f.v],f.x-7.5,f.y-7.5,15,15)}
+  return{cv,x,y,w:cv.width/scF,h:cv.height/scF}}))}
+function drawStands(a,b,c,d,vx0,vy0,vx1,vy1){stEnsure(a,b,c,d);STAD_C.strips.forEach(s=>{if(s.x+s.w<vx0||s.x>vx1||s.y+s.h<vy0||s.y>vy1)return;ctx.drawImage(s.cv,s.x,s.y,s.w,s.h)})}
+/* Público: solo se mueven 2 capas pre-renderizadas (nada de formas individuales por frame). Ambiente: vaivén mínimo en contrafase · Festejo del Local: las capas saltan 3 px alternadas + sacudida lateral */
+function drawCrowd(vx0,vy0,vx1,vy1){const C=STAD_C;if(!C.fl)return;const t=performance.now(),e=Math.pow(Math.max(0,1-(t-STAD_CEL)/5000),.8),ph=t*.013,amb=Math.sin(t*.0024)*.5,wx=Math.sin(t*.02)*e*1.2;
+ for(let g=0;g<2;g++){const oy=-(g?Math.abs(Math.cos(ph)):Math.abs(Math.sin(ph)))*3*e+(g?-amb:amb),ox=g?-wx:wx;
+  C.fl[g].forEach(s=>{if(s.x+s.w+6<vx0||s.x-6>vx1||s.y+s.h+6<vy0||s.y-6>vy1)return;ctx.drawImage(s.cv,s.x+ox,s.y+oy,s.w,s.h)})}}
+/* Confeti / papelitos al hacer un gol (colores de butacas + banderas) */
+const STAD_CF=[];let STAD_CFT=0;
+function spawnConfetti(scorer){if(!STAD.enabled||!G||!G.w)return;const U=G.uni&&G.uni.blue,pal=scorer==='red'?stPalette():(U?(U.n===2?[U.c1,U.c2]:[U.c1]):['#3b9cff']),W=G.w,H=G.h,gx=scorer==='red'?W:0,din=scorer==='red'?-1:1,R=Math.random;
+ if(scorer==='red')STAD_CEL=performance.now(); /* solo festeja (salta) la hinchada cuando anota el Local */
+ for(let i=0;i<150;i++){const an=(R()-.5)*2.4,sp=3+R()*11,vx=Math.cos(an)*sp*din,vy=Math.sin(an)*sp;
+  STAD_CF.push({x:gx+din*R()*30,y:H/2+(R()-.5)*G.gh,vx,vy,s:6+R()*6,a:R()*6.283,va:(R()-.5)*.4,f:R()*6.283,l:2.6+R()*1.8,c:pal[Math.floor(R()*pal.length)]})} /* ráfaga desde el arco */
+ for(let i=0;i<130;i++){STAD_CF.push({x:-GD-80-ST_D+R()*(W+2*(GD+80+ST_D)),y:-100-ST_D+R()*(H+200+2*ST_D),vx:(R()-.5)*1.4,vy:.6+R()*1.6,s:6+R()*6,a:R()*6.283,va:(R()-.5)*.3,f:R()*6.283,l:3+R()*2.2,c:pal[Math.floor(R()*pal.length)]})} /* lluvia de papelitos */
+ if(STAD_CF.length>520)STAD_CF.splice(0,STAD_CF.length-520)}
+function drawConfetti(){if(!STAD.enabled){STAD_CF.length=0;STAD_CFT=0;return}const t=performance.now(),dt=STAD_CFT?Math.min(.05,(t-STAD_CFT)/1000):0;STAD_CFT=t;if(!STAD_CF.length)return;
+ const adv=!G.paused&&!(G.cd>0),k=dt*60;
+ for(let i=STAD_CF.length-1;i>=0;i--){const q=STAD_CF[i];if(adv){q.l-=dt;if(q.l<=0){STAD_CF.splice(i,1);continue}q.x+=q.vx*k;q.y+=q.vy*k;q.vx*=Math.pow(.965,k);q.vy*=Math.pow(.985,k);q.vy+=.02*k;q.a+=q.va*k;q.f+=.2*k}
+  ctx.save();ctx.globalAlpha=Math.min(1,q.l);ctx.translate(q.x,q.y);ctx.rotate(q.a);ctx.scale(1,Math.max(.15,Math.abs(Math.cos(q.f))));ctx.fillStyle=q.c;ctx.fillRect(-q.s/2,-q.s/3,q.s,q.s*.66);ctx.restore()}}
 /* Uniformes */
 const defUni=()=>({red:{n:1,c1:'#ff5d5d',c2:'#ffffff',st:'v1'},blue:{n:1,c1:'#3b9cff',c2:'#ffffff',st:'v1'}});
 function jersey(p){const u=G.uni[p.team]||G.uni.red,x=p.x-p.r,y=p.y-p.r,d=p.r*2,k=d/5;
@@ -888,8 +1024,9 @@ function resolveVote(){const c=[0,vCount(1),vCount(2),vCount(3)],pick=[1,2,3].re
  if(pick===3)end('🤝 ¡PARTIDO FINALIZADO EN EMPATE!');
  else if(pick===2)startPens();
  else{G.golden=true;showEv('⚡ ¡GOL GANA ACTIVADO! El próximo gol define el partido',2800);hud()}}
-function goal(t){if(G.pen){const P=G.pen;if((P.ph==='ball'||P.ph==='aim')&&(t==='blue')===(P.side==='left'))penDone(true);return}
- G.koTeam=other(t);G.score[t]++;G.ball.vx=G.ball.vy=0;showEv('¡GOOOOL!',1800);chime();hud();if(G.golden){end(`🏆 ¡GOL DE ORO! GANÓ ${t==='red'?'LOCAL':'VISITANTE'} (${G.score.red} - ${G.score.blue})`);return}
+function goalFx(t){if(!STAD.enabled)return;spawnConfetti(t);if(NET.role==='host')bc({t:'cf',tm:t})}
+function goal(t){if(G.pen){const P=G.pen;if((P.ph==='ball'||P.ph==='aim')&&(t==='blue')===(P.side==='left')){goalFx(t);penDone(true)}return}
+ G.koTeam=other(t);goalFx(t);G.score[t]++;G.ball.vx=G.ball.vy=0;showEv('¡GOOOOL!',1800);chime();hud();if(G.golden){end(`🏆 ¡GOL DE ORO! GANÓ ${t==='red'?'LOCAL':'VISITANTE'} (${G.score.red} - ${G.score.blue})`);return}
  if(G.goalLimit&&G.score[t]>=G.goalLimit)return end();G.gp=2}
 const DT=1/60;
 function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO!',1200)}return} /* reinicio automático tras 3 s */
@@ -952,7 +1089,7 @@ function botUI(){const lock=hum()>=LOCK;['aBotTeam','bAdd','bDel'].forEach(i=>$(
  $('botInfo').textContent=`Bots · Local: ${nb('red').length} · Visitante: ${nb('blue').length}`;roster()}
 function toggleMenu(f){menuOpen=typeof f==='boolean'?f:!menuOpen;$('menu').classList.toggle('hidden',!menuOpen);
  if(menuOpen){
-  $('adm').classList.toggle('hidden',!isAdmin);$('aMode').value=RL()?'realista':G.super?'super':'clasico';$('aSize').value=RL()?(G.cs||'mediana'):G.size;$('aSize').classList.toggle('hidden',RL());$('aDiff').value=BOT_DIFF;syncNum();botUI();uniUI();updateInvite();
+  $('adm').classList.toggle('hidden',!isAdmin);$('aMode').value=RL()?'realista':G.super?'super':'clasico';$('aSize').value=RL()?(G.cs||'mediana'):G.size;$('aSize').classList.toggle('hidden',RL());$('aDiff').value=BOT_DIFF;syncNum();botUI();uniUI();stadUI();updateInvite();
   Object.keys(keys).forEach(k=>keys[k]=0);sendKeys()}else $('c').focus()}
 $('v1').onclick=()=>castVote(1);$('v2').onclick=()=>castVote(2);$('v3').onclick=()=>castVote(3);
 $('mResume').onclick=()=>toggleMenu(false);
@@ -1013,10 +1150,11 @@ let VW=1000,VH=600,DPR=1; /* tamaño interno del canvas = ventana (1 px de canva
 function resizeCanvas(){VW=Math.max(1,Math.floor(window.innerWidth));VH=Math.max(1,Math.floor(window.innerHeight));DPR=Math.min(window.devicePixelRatio||1,2.5);const w=Math.round(VW*DPR),h=Math.round(VH*DPR);if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}} /* VW/VH = px CSS (coordenadas lógicas); el búfer interno se multiplica por DPR para nitidez Retina/HD */
 resizeCanvas();addEventListener('resize',resizeCanvas);addEventListener('orientationchange',resizeCanvas);
 function draw(){if(VW!==Math.floor(window.innerWidth)||VH!==Math.floor(window.innerHeight)||DPR!==Math.min(window.devicePixelRatio||1,2.5))resizeCanvas();ctx.filter=(G.paused||G.cd>0)?'grayscale(100%)':'none';ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='#2a8f4f';ctx.fillRect(0,0,VW,VH);
- const{w:W,h:H,gT,gB,gh}=G,Z=.9,vw=VW/2/Z,vh=VH/2/Z,x0=-GD-80,x1=W+GD+80,y0=-100,y1=H+100,bl=G.pen?{x:G.pen.gx+G.pen.din*G.w*.22,y:G.h/2}:(me&&me.team!=='spec'?me:G.ball); /* sigue a tu personaje; si eres espectador, a la pelota */
+ const{w:W,h:H,gT,gB,gh}=G,SO=STAD.enabled,SD=SO?ST_PAD:0,Z=.9,vw=VW/2/Z,vh=VH/2/Z,x0=-GD-80-SD,x1=W+GD+80+SD,y0=-100-SD,y1=H+100+SD,bl=G.pen?{x:G.pen.gx+G.pen.din*G.w*.22,y:G.h/2}:(me&&me.team!=='spec'?me:G.ball); /* sigue a tu personaje; si eres espectador, a la pelota */
  const fx=x1-x0<=2*vw?(x0+x1)/2:clamp(bl.x,x0+vw,x1-vw),fy=y1-y0<=2*vh?(y0+y1)/2:clamp(bl.y,y0+vh,y1-vh); /* cámara sigue la pelota sin salir del estadio */
  if(!G.cam)G.cam={x:fx,y:fy};G.cam.x+=(fx-G.cam.x)*.1;G.cam.y+=(fy-G.cam.y)*.1;
  ctx.setTransform(Z*DPR,0,0,Z*DPR,(VW/2-G.cam.x*Z)*DPR,(VH/2-G.cam.y*Z)*DPR);
+ if(SO){const vx0=G.cam.x-vw,vy0=G.cam.y-vh,vx1=G.cam.x+vw,vy1=G.cam.y+vh;drawStands(-GD-80,-100,W+GD+80,H+100,vx0,vy0,vx1,vy1);drawCrowd(vx0,vy0,vx1,vy1)}
  for(let i=0;i<12;i++){ctx.fillStyle=i%2?'#36ab61':'#30a05a';ctx.fillRect(i*W/12,0,W/12+1,H)}
  powerGround(W,H);
  ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.strokeRect(0,0,W,H);
@@ -1040,7 +1178,7 @@ function draw(){if(VW!==Math.floor(window.innerWidth)||VH!==Math.floor(window.in
   ctx.strokeStyle=p.flash>0?'#fff':'#111';ctx.lineWidth=p.flash>0?3.5:1.5;ctx.stroke();
   ctx.fillStyle='#fff';ctx.font=`bold ${17*G.k}px "Segoe UI",sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.lineJoin='round';ctx.strokeStyle='#0b0f1a';ctx.strokeText(p.num,p.x,p.y+1);ctx.fillText(p.num,p.x,p.y+1);
   ctx.font='600 12px "Segoe UI",sans-serif';ctx.lineWidth=3;ctx.strokeStyle='rgba(8,12,22,.85)';ctx.lineJoin='round';
-  ctx.strokeText(p.name,p.x,p.y+p.r+10);ctx.fillText(p.name,p.x,p.y+p.r+10);ctx.globalAlpha=1;powerPlayerFx(p)});if(G.paused||G.cd>0)pauseFx()}
+  ctx.strokeText(p.name,p.x,p.y+p.r+10);ctx.fillText(p.name,p.x,p.y+p.r+10);ctx.globalAlpha=1;powerPlayerFx(p)});drawConfetti();if(G.paused||G.cd>0)pauseFx()}
 
 /* ===== Online con PeerJS: el Host simula todo; los invitados envían teclas, chat y votos ===== */
 const norm=s=>{s=String(s||'').trim();const m=s.match(/[?&]sala=([^&#\s]+)/);return decodeURIComponent(m?m[1]:s).toLowerCase()};
@@ -1055,7 +1193,7 @@ function netLeave(){delRoom();clearInterval(NET.roomT);if(NET.role==='host')bc({
 const csend=m=>safeSend(NET.conn,m); /* envío seguro: ignora si la conexión ya se cerró */
 const sendKeys=()=>{if(NET.role==='client'&&NET.conn&&NET.conn.open){const ch=NET.fconn&&NET.fconn.open?NET.fconn:NET.conn;safeSend(ch,{t:'k',q:NET.kq=(NET.kq||0)+1,k:{...keys}})}}; /* q: secuencia → el canal no ordenado nunca aplica teclas viejas */
 function sendChat(t){if(NET.role==='client')csend({t:'chat',x:t});else{addMsg(me.name,me.team,t,me.flag,me.plat);bc({t:'chat',n:me.name,tm:me.team,x:t,f:me.flag,pt:me.plat})}}
-const cfgMsg=()=>({t:'cfg',sm:G.super?1:0,size:G.size,d:G.duration,g:G.goalLimit,uni:G.uni,name:cur.name,code:NET.code,rf:cur.flag||'🌐',pl:G.players.map(p=>[p.id,p.flag||'🌐',p.ping|0])});
+const cfgMsg=()=>({t:'cfg',sm:G.super?1:0,size:G.size,d:G.duration,g:G.goalLimit,uni:G.uni,st:STAD,name:cur.name,code:NET.code,rf:cur.flag||'🌐',pl:G.players.map(p=>[p.id,p.flag||'🌐',p.ping|0])});
 /* --- Host --- */
 function startHost(r){if(typeof Peer==='undefined'){showEv('Online no disponible: sala solo local',2400);return}
  const attempt=n=>{const id='futball-'+(1000+Math.floor(Math.random()*9000)),pr=new Peer(id);let done=false;
@@ -1111,7 +1249,7 @@ function joinCode(raw){const code=norm(raw),err=m=>{$('codeErr').textContent=m};
   c.on('close',()=>{if(NET.peer===pr)fail('El Host cerró la sala.')});c.on('error',()=>{})})}
 $('codeGo').onclick=()=>joinCode($('codeIn').value);
 $('codeIn').addEventListener('keydown',e=>e.key==='Enter'&&$('codeGo').click());
-function enterClient(m){NET.role='client';NET.myId=m.id;NET.pm=new Map();NET.code=NET.target;const c=m.cfg;isAdmin=false;menuOpen=false;cur={name:c.name,test:true,client:true};
+function enterClient(m){NET.role='client';NET.myId=m.id;NET.pm=new Map();NET.code=NET.target;const c=m.cfg;isAdmin=false;menuOpen=false;STAD=stadClean(c.st);STAD_CF.length=0;cur={name:c.name,test:true,client:true};
  me={id:m.id,name:user.nick,num:user.num,team:'red',x:0,y:0,vx:0,vy:0,r:PRAD,flash:0,vc:0,plat:PLAT};NET.lq=0;NET.kq=0;NET.hist=[];
  G={uni:c.uni,size:c.size,super:!!c.sm,duration:c.d,goalLimit:c.g,players:[me],ball:{x:500,y:300,r:BRAD},score:{red:0,blue:0},clock:0,golden:false,paused:false,cd:0,vote:null,pen:null,over:false};
  NET.pm.set(m.id,me);sizeUp();$('modal').classList.add('hidden');$('codeErr').textContent='';$('menu').classList.add('hidden');
@@ -1119,9 +1257,10 @@ function enterClient(m){NET.role='client';NET.myId=m.id;NET.pm=new Map();NET.cod
  show('screen-game');$('c').focus();hud();updateInvite()}
 function cliData(m){
  if(m.t==='s')applyState(m);
- else if(m.t==='cfg'){G.super=!!m.sm;if(m.size!==G.size){G.size=m.size;sizeUp()}G.duration=m.d;G.goalLimit=m.g;G.uni=m.uni;cur.name=m.name;NET.pf=new Map(m.pl.map(a=>[a[0],a]));G.players.forEach(pfApply)}
+ else if(m.t==='cfg'){G.super=!!m.sm;if(m.size!==G.size){G.size=m.size;sizeUp()}G.duration=m.d;G.goalLimit=m.g;G.uni=m.uni;STAD=stadClean(m.st);cur.name=m.name;NET.pf=new Map(m.pl.map(a=>[a[0],a]));G.players.forEach(pfApply)}
  else if(m.t==='ping')csend({t:'pong',ts:m.ts});
  else if(m.t==='ev')showEv(m.x,m.ms);
+ else if(m.t==='cf')spawnConfetti(m.tm==='blue'?'blue':'red');
  else if(m.t==='snd')m.k==='t'?thump(m.v):m.k==='p'?powerThump():m.k==='w'?whistle():chime();
  else if(m.t==='chat')addMsg(m.n,m.tm,m.x,m.f,m.pt);
  else if(m.t==='sys')addSys(String(m.x||'').slice(0,60),Math.min(60000,+m.ms||0));
