@@ -173,7 +173,54 @@ html.is-touch:not(.is-standalone) .pwaBtn{display:flex}
 html.is-touch #pwrB{top:calc(env(safe-area-inset-top,0px) + 46px);min-width:0;width:min(300px,44vw);padding:3px 8px 5px;border-radius:10px}
 html.is-touch #pwrI{font-size:1rem}html.is-touch #pwrN{font-size:.72rem;letter-spacing:.5px}html.is-touch #pwrT{font-size:.8rem;min-width:30px;padding:0 5px}html.is-touch #pwrS{display:none}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script></head><body>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script><style>
+/* ===== ❓ ¿Cómo jugar? (Lobby) ===== */
+#screen-lobby #helpLobby{position:absolute;top:8px;right:12px;padding:5px 12px;font-size:.78rem;border-radius:999px;background:rgba(4,18,48,.88);color:#fff;border:1.5px solid #38bdf8;box-shadow:none;z-index:5;white-space:nowrap}
+html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
+#helpModal{z-index:260}
+#helpModal .card{width:min(660px,95vw);max-height:92vh;max-height:92dvh;overflow-y:auto;gap:14px;padding:18px 20px;background:rgba(8,26,72,.97);border:2px solid #38bdf8;border-radius:18px;box-shadow:0 0 28px rgba(56,189,248,.4);color:#fff;-webkit-overflow-scrolling:touch}
+#helpModal h2.hT{font-size:1.15rem;font-weight:900;text-align:center;color:#fff;letter-spacing:.3px;line-height:1.3}
+#helpModal .hSel{display:flex;gap:10px;justify-content:center}
+#helpModal .hSel button{flex:1;max-width:210px;padding:10px 12px;font-size:1.05rem;border-radius:12px;background:rgba(4,18,48,.9);color:#cfe3ff;border:2px solid #1d4ed8;box-shadow:none}
+#helpModal .hSel button.on{background:linear-gradient(180deg,#4ade80,#22c55e);color:#04210f;border-color:#052e16;box-shadow:0 3px 0 #052e16,0 0 12px rgba(74,222,128,.45)}
+#helpModal .hBox{background:rgba(4,18,48,.75);border:1.5px solid #1d4ed8;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+#helpModal .hBox h3{font-size:.95rem;font-weight:900;color:#9fd5ff;letter-spacing:.3px}
+#helpModal .hRow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#helpModal .hLbl{min-width:92px;font-weight:800;font-size:.95rem;color:#fff}
+#helpModal .hTxt{font-size:.85rem;color:#c7d8f5;line-height:1.45}
+#helpModal .hOr{font-size:.8rem;font-weight:800;color:#8aa0c8}
+#helpModal .kg{display:inline-grid;gap:4px}
+#helpModal .kc{min-width:38px;height:38px;padding:0 8px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;background:linear-gradient(180deg,#f8fafc,#cbd5e1);color:#0f172a;font-weight:900;font-size:.95rem;border:1px solid #64748b;box-shadow:0 4px 0 #475569,0 5px 6px rgba(0,0,0,.4)}
+#helpModal .kc.sp{min-width:150px}
+#helpModal .kc.em{visibility:hidden}
+#helpModal .wasd{grid-template-columns:repeat(3,38px)}#helpModal .wasd .kc{padding:0;min-width:0}
+#helpModal .wasd .w{grid-column:2}
+#helpModal .pad{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#helpModal .phone{position:relative;width:100%;max-width:420px;aspect-ratio:2/1;margin:0 auto;border-radius:22px;background:linear-gradient(180deg,#0f3d1f,#14532d);border:5px solid #0b1220;box-shadow:0 0 0 2px #334155,0 6px 14px rgba(0,0,0,.5);overflow:hidden}
+#helpModal .phone .ln{position:absolute;inset:8% 6%;border:2px solid rgba(255,255,255,.28);border-radius:6px}
+#helpModal .phone .mid{position:absolute;left:50%;top:8%;bottom:8%;border-left:2px solid rgba(255,255,255,.28)}
+#helpModal .phone .jy{position:absolute;left:9%;bottom:12%;width:30%;aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.6)}
+#helpModal .phone .jy i{position:absolute;left:50%;top:50%;width:42%;height:42%;margin:-21% 0 0 -21%;border-radius:50%;background:rgba(255,255,255,.55);border:2px solid #fff}
+#helpModal .phone .kb{position:absolute;right:10%;bottom:12%;width:24%;aspect-ratio:1;border-radius:50%;background:linear-gradient(180deg,#4ade80,#16a34a);border:3px solid #052e16;display:flex;align-items:center;justify-content:center;font-size:clamp(1.2rem,5.4vw,2rem);box-shadow:0 0 14px rgba(74,222,128,.6)}
+#helpModal .phone .pz{position:absolute;right:4%;top:8%;padding:2px 7px;border-radius:8px;background:#1f2a48;border:1px solid #475569;font-size:.7rem;font-weight:800}
+#helpModal .phone .tg{position:absolute;font-size:.68rem;font-weight:900;color:#fff;background:rgba(0,0,0,.6);padding:2px 7px;border-radius:999px;white-space:nowrap}
+#helpModal .adm{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#helpModal .ai{display:flex;align-items:flex-start;gap:9px;background:rgba(250,204,21,.08);border:1px solid rgba(250,204,21,.35);border-radius:10px;padding:8px 10px;font-size:.84rem;color:#fff3c4;line-height:1.4}
+#helpModal .ai b{display:block;color:#fde68a}
+#helpModal .ai .ic{font-size:1.4rem;line-height:1}
+#helpModal .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+#helpModal .mc{border-radius:12px;padding:10px 11px;display:flex;flex-direction:column;gap:6px;border:2px solid;font-size:.8rem;line-height:1.4;color:#e8f0ff}
+#helpModal .mc h4{font-size:.95rem;font-weight:900;color:#fff}
+#helpModal .mc ul{list-style:none;display:flex;flex-direction:column;gap:3px}
+#helpModal .mc.c{background:rgba(34,197,94,.12);border-color:#22c55e}
+#helpModal .mc.r{background:rgba(250,204,21,.1);border-color:#facc15}
+#helpModal .mc.s{background:rgba(168,85,247,.14);border-color:#a855f7}
+#helpModal .chips{display:flex;flex-wrap:wrap;gap:4px}
+#helpModal .chips span{font-size:.7rem;font-weight:700;background:rgba(0,0,0,.35);border-radius:999px;padding:2px 7px;white-space:nowrap}
+#helpModal #helpOk{width:100%;padding:12px 18px;font-size:1.1rem}
+@media(max-width:640px){#helpModal .modes,#helpModal .adm,#helpModal .pad{grid-template-columns:1fr}#helpModal .hLbl{min-width:0;width:100%}}
+</style>
+</head><body>
 
 <div id="screen-login" class="screen active"><div class="card">
   <h1 class="sr-only">Fut-ball</h1>
@@ -199,7 +246,7 @@ html.is-touch #pwrI{font-size:1rem}html.is-touch #pwrN{font-size:.72rem;letter-s
 </script>
 
 <div id="screen-lobby" class="screen">
-  <h1 class="sr-only">Fut-ball Online</h1><div id="who" class="label"></div><button id="pwaLobby" type="button" class="pwaBtn">📲 Crear Acceso Directo</button>
+  <h1 class="sr-only">Fut-ball Online</h1><div id="who" class="label"></div><button id="pwaLobby" type="button" class="pwaBtn">📲 Crear Acceso Directo</button><button id="helpLobby" type="button">❓ ¿Cómo jugar?</button>
   <div class="grid">
     <section class="panel"><h2><span>Salas activas</span><button id="refreshRooms" type="button" class="ghost">🔄 Actualizar</button></h2><div id="roomList" style="display:flex;flex-direction:column;gap:9px"></div></section>
     <section class="panel"><h2>Crear nueva sala</h2>
@@ -218,6 +265,56 @@ html.is-touch #pwrI{font-size:1rem}html.is-touch #pwrN{font-size:.72rem;letter-s
   </div>
 </div>
 
+<div id="helpModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="helpT"><div class="card">
+  <h2 id="helpT" class="hT">BIENVENIDO A FUT-BALL ⚽ — ¿DÓNDE VAS A JUGAR?</h2>
+  <div class="hSel"><button type="button" id="hPC" data-p="d">🖥️ PC</button><button type="button" id="hMO" data-p="m">📱 Celular</button></div>
+
+  <div id="hpD" class="hBox">
+    <h3>🖥️ CONTROLES EN PC</h3>
+    <div class="hRow"><span class="hLbl">🏃 Moverse</span>
+      <div class="kg wasd"><span class="kc w">W</span><span class="kc">A</span><span class="kc">S</span><span class="kc">D</span></div>
+      <span class="hOr">o</span>
+      <div class="kg wasd"><span class="kc w">↑</span><span class="kc">←</span><span class="kc">↓</span><span class="kc">→</span></div>
+      <span class="hTxt">Flechas direccionales</span></div>
+    <div class="hRow"><span class="hLbl">⚽ Patear</span>
+      <span class="kc">X</span><span class="hOr">o</span><span class="kc sp">BARRA ESPACIADORA</span></div>
+    <div class="hRow"><span class="hLbl">🟨 Barrida</span>
+      <span class="hTxt"><b>Solo en Modo Realista:</b> mantené apretado <span class="kc" style="min-width:28px;height:26px;font-size:.8rem">X</span> o <span class="kc" style="min-width:60px;height:26px;font-size:.8rem">ESPACIO</span> un instante (~½ s) para deslizarte hacia donde corrés. Recarga de 30 s.</span></div>
+  </div>
+
+  <div id="hpM" class="hBox">
+    <h3>📱 CONTROLES EN CELULAR</h3>
+    <div class="phone" aria-hidden="true"><div class="ln"></div><div class="mid"></div>
+      <div class="jy"><i></i></div><div class="kb">⚽</div><div class="pz">⏸</div>
+      <span class="tg" style="left:6%;bottom:46%">🕹️ MOVERSE</span>
+      <span class="tg" style="right:5%;bottom:40%">PATEAR / BARRIDA</span></div>
+    <div class="hRow"><span class="hLbl">🏃 Moverse</span><span class="hTxt">Joystick virtual <b>izquierdo</b>: arrastralo hacia donde querés ir.</span></div>
+    <div class="hRow"><span class="hLbl">⚽ Patear</span><span class="hTxt">Botón de pelota <b>derecho</b>: un toque rápido.</span></div>
+    <div class="hRow"><span class="hLbl">🟨 Deslizar</span><span class="hTxt"><b>Solo en Modo Realista:</b> mantené apretado el botón de pelota un momento (~½ s) y tu jugador se desliza. Recarga de 30 s.</span></div>
+  </div>
+
+  <div class="hBox">
+    <h3>👑 SI CREÁS SALA (ADMIN):</h3>
+    <div class="adm">
+      <div class="ai"><span class="ic">👕</span><div><b>Camisetas y estadio</b>Personalizá los uniformes de cada equipo y el estadio.</div></div>
+      <div class="ai"><span class="ic">🔀</span><div><b>Mover jugadores</b>Pasá a cualquiera de un equipo a otro.</div></div>
+      <div class="ai"><span class="ic">🤖</span><div><b>Agregar BOTS</b>Sumalos como compañeros o como rivales.</div></div>
+      <div class="ai"><span class="ic">⏸</span><div><b>Pausar el juego</b>Tecla <b>P</b> en PC · botón <b>⏸</b> en Teléfono.</div></div>
+    </div>
+  </div>
+
+  <div class="hBox">
+    <h3>🎮 LOS 3 MODOS DE JUEGO</h3>
+    <div class="modes">
+      <div class="mc c"><h4>⚽ Clásico</h4><ul><li>🥅 Cancha cerrada: la pelota rebota en las líneas y nunca sale.</li><li>🏃 Fútbol rápido y directo, sin reglas extra.</li><li>🤝 Si hay empate: votación (Gol gana / Penales / Empate).</li></ul></div>
+      <div class="mc r"><h4>🟨 Realista</h4><ul><li>🏟️ 11 vs 11 en cancha grande.</li><li>📏 Límites: laterales, córners y saques de arco.</li><li>🚫 Faltas, 🟨 amarillas y 🟥 rojas.</li><li>🛷 Barridas, tiros libres y penales.</li></ul></div>
+      <div class="mc s"><h4>⚡ Superpoderes</h4><ul><li>🌀 9 eventos caóticos al azar durante el partido:</li></ul>
+        <div class="chips"><span>⚽ Pelota Gigante</span><span>🧊 Cancha de Hielo</span><span>🔬 Rayo Encogedor</span><span>🥅 Arcos Gigantes</span><span>⚡ Turbo Total</span><span>🔥 Pelota de Fuego</span><span>🔄 Reversa</span><span>🖤 Pelota Mancha</span><span>🧲 Jugador Imán</span></div>
+        <ul><li>🏆 Empate → ⚡ Gol de Oro (muerte súbita).</li></ul></div>
+    </div>
+  </div>
+  <button id="helpOk" type="button">¡Entendido, a jugar!</button>
+</div></div>
 <div id="pwaModal" class="modal hidden"><div class="card"><h2 id="pwaTitle">📲 Crear Acceso Directo</h2><div id="pwaBody"></div><button id="pwaOk" type="button">Entendido</button></div></div>
 <div id="toast"></div>
 <div id="modal" class="modal hidden"><div class="card" style="width:min(340px,90vw)">
@@ -1407,6 +1504,19 @@ let last=performance.now(),acc=0;
  /* --- Service Worker (requiere HTTPS o localhost) --- */
  if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))
   addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+})();
+</script>
+<script>
+/* ===== ❓ ¿Cómo jugar? · solo UI del Lobby (no toca cancha, física, modos ni red) ===== */
+(()=>{
+ const M=$('helpModal'),pc=$('hpD'),mo=$('hpM'),bD=$('hPC'),bM=$('hMO');
+ const setP=p=>{const d=p==='d';pc.classList.toggle('hidden',!d);mo.classList.toggle('hidden',d);bD.classList.toggle('on',d);bM.classList.toggle('on',!d);bD.setAttribute('aria-pressed',d);bM.setAttribute('aria-pressed',!d)};
+ const open=()=>{setP(IS_TOUCH?'m':'d');M.classList.remove('hidden');M.querySelector('.card').scrollTop=0};
+ const close=()=>M.classList.add('hidden');
+ bD.onclick=()=>setP('d');bM.onclick=()=>setP('m');
+ $('helpLobby').onclick=open;$('helpOk').onclick=close;
+ M.addEventListener('click',e=>{if(e.target===M)close()});
+ addEventListener('keydown',e=>{if(e.key==='Escape'&&!M.classList.contains('hidden')){e.preventDefault();close()}});
 })();
 </script>
 </body>
