@@ -156,6 +156,9 @@ html.is-touch:has(#screen-game.active) #fsTop{display:none}
 #pwaModal ol{text-align:left;padding-left:22px;line-height:1.7;font-size:1rem}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);transform:translateX(-50%);z-index:300;max-width:90vw;padding:9px 16px;border-radius:12px;background:rgba(11,15,26,.95);border:1px solid #38bdf8;color:#fff;font-size:.85rem;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.show{opacity:1}
+/* Fullscreen sobre <html>: todo el documento (canvas, controles, chat y modales) queda dentro de la capa fullscreen */
+html:fullscreen{width:100%;height:100%;background:var(--bg)}
+html:-webkit-full-screen{width:100%;height:100%;background:var(--bg)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script></head><body>
 
@@ -1120,19 +1123,33 @@ let last=performance.now(),acc=0;
  /* --- Pantalla completa (solo táctil) --- */
  if(IS_TOUCH){
   const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement,btns=[$('fsTop'),$('fsBtn')];
-  const sync=()=>btns.forEach(b=>b.classList.toggle('on',!!fsEl()));
+  const sync=()=>{const on=!!(document.fullscreenElement||document.webkitFullscreenElement);btns.forEach(b=>b.classList.toggle('on',on))};
+  const unlockOr=()=>{try{if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock()}catch(e){}};
+  const lockLand=()=>{try{if(screen.orientation&&screen.orientation.lock){const r=screen.orientation.lock('landscape');if(r&&r.catch)r.catch(()=>{})}}catch(e){}};
+  /* Re-sincroniza tamaño del canvas y devicePixelRatio (algunos móviles cambian la ventana unos ms después) */
+  const refit=()=>{
+   try{[cv,document.documentElement,document.body].forEach(el=>['width','height','transform','top','left','margin','position'].forEach(k=>el.style.removeProperty(k)))}catch(e){}
+   try{window.scrollTo(0,0)}catch(e){}
+   try{resizeCanvas()}catch(e){}
+   sync()};
+  let rt=[];
+  const refitAll=()=>{rt.forEach(clearTimeout);refit();rt=[150,400].map(ms=>setTimeout(refit,ms))};
   const toggle=async()=>{
    try{
-    if(fsEl()){const ex=document.exitFullscreen||document.webkitExitFullscreen;if(ex)await ex.call(document);try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock()}catch(e){}}
+    if(fsEl()){const ex=document.exitFullscreen||document.webkitExitFullscreen;if(ex){const r=ex.call(document);if(r&&r.catch)r.catch(()=>{});await r}unlockOr()}
     else{const el=H,rq=el.requestFullscreen||el.webkitRequestFullscreen;
      if(!rq)return toast('Tu navegador no permite pantalla completa. En iPhone: Compartir ⬆️ → Agregar a inicio.',4200);
      await rq.call(el);
-     try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape')}catch(e){}}
+     lockLand()}
    }catch(e){toast('No se pudo activar la pantalla completa.')}
-   sync()};
+   refitAll()};
   btns.forEach(b=>b.addEventListener('click',toggle));
-  ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,sync));
+  /* También cuando se entra/sale sin tocar el botón (gesto del borde, botón Atrás, etc.) */
+  ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{if(!fsEl())unlockOr();refitAll()}));
+  addEventListener('resize',refitAll);addEventListener('orientationchange',refitAll);
+  try{if(screen.orientation&&screen.orientation.addEventListener)screen.orientation.addEventListener('change',refitAll)}catch(e){}
  }
+
  /* --- Acceso Directo (PWA) --- */
  const standalone=()=>(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
  const setSA=()=>H.classList.toggle('is-standalone',standalone());setSA();
