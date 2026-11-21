@@ -117,12 +117,12 @@ html.is-touch #log{max-height:64px;font-size:.7rem}
 html.is-touch #chatTog{align-self:flex-start;padding:2px 9px;font-size:.68rem;border-radius:999px;background:rgba(31,42,72,.85);color:#cfe3ff;border:1px solid rgba(255,255,255,.18)}
 html.is-touch #chat.min{background:transparent;border-color:transparent;width:auto;padding:0}
 html.is-touch #chat.min #log,html.is-touch #chat.min #chatIn{display:none}
-html.is-touch #sb{left:auto;transform:none;top:calc(env(safe-area-inset-top,0px) + 6px);right:calc(env(safe-area-inset-right,0px) + 142px);padding:2px 8px;gap:6px}
+html.is-touch #sb{top:calc(env(safe-area-inset-top,0px) + 6px);padding:2px 8px;gap:6px}
 html.is-touch #sb .t{font-size:.6rem;letter-spacing:.5px}
 html.is-touch #score{font-size:1.1rem;letter-spacing:2px}
 html.is-touch #clock{font-size:.62rem}
 html.is-touch #sb #mute{padding:1px 4px;font-size:.75rem}
-html.is-touch #penbar{left:auto;transform:none;top:calc(env(safe-area-inset-top,0px) + 6px);right:calc(env(safe-area-inset-right,0px) + 142px);padding:3px 8px}
+html.is-touch #penbar{top:calc(env(safe-area-inset-top,0px) + 6px);padding:3px 8px}
 html.is-touch #pRow{gap:8px}html.is-touch .pt{font-size:.62rem;gap:4px}
 html.is-touch .pc{width:12px;height:12px;margin:0 1px}
 html.is-touch #pTimer{font-size:1.2rem;min-width:30px}html.is-touch #pInfo{font-size:.62rem}
@@ -140,14 +140,9 @@ html.is-touch #kickWrap{position:fixed;right:calc(env(safe-area-inset-right,0px)
 @keyframes rotph{0%,20%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
 @media (orientation:portrait){html.is-touch #rot{display:flex}}
 
-/* ===== Pantalla completa (⛶) y Acceso Directo PWA: solo móvil/táctil ===== */
-.fsb,.pwaBtn{display:none}
-html.is-touch .fsb{display:flex}
+/* ===== Acceso Directo PWA: solo móvil/táctil ===== */
+.pwaBtn{display:none}
 html.is-touch:not(.is-standalone) .pwaBtn{display:flex}
-.fsb{position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);right:calc(env(safe-area-inset-right,0px) + 8px);z-index:40;width:34px;height:30px;padding:0;align-items:center;justify-content:center;font-size:1rem;line-height:1;border-radius:10px;background:rgba(11,15,26,.82);color:#fff;border:1px solid #2a3760}
-.fsb.on{background:rgba(21,128,61,.9);border-color:#4ade80}
-html.is-touch #fsBtn{right:calc(env(safe-area-inset-right,0px) + 102px);z-index:120}
-html.is-touch:has(#screen-game.active) #fsTop{display:none}
 .pwaBtn{align-items:center;justify-content:center;gap:8px;padding:8px 14px;font-size:.9rem;font-weight:800;border-radius:12px;background:rgba(4,18,48,.88);color:#fff;border:1.5px solid #38bdf8;white-space:nowrap}
 #screen-login #pwaLogin{width:100%;margin-top:2px}
 #screen-lobby #pwaLobby{position:absolute;top:8px;right:52px;padding:5px 12px;font-size:.78rem;border-radius:999px;background:rgba(4,18,48,.88);color:#fff;border:1.5px solid #38bdf8;box-shadow:none;z-index:5}
@@ -156,13 +151,9 @@ html.is-touch:has(#screen-game.active) #fsTop{display:none}
 #pwaModal ol{text-align:left;padding-left:22px;line-height:1.7;font-size:1rem}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);transform:translateX(-50%);z-index:300;max-width:90vw;padding:9px 16px;border-radius:12px;background:rgba(11,15,26,.95);border:1px solid #38bdf8;color:#fff;font-size:.85rem;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.show{opacity:1}
-/* Fullscreen sobre <html>: todo el documento (canvas, controles, chat y modales) queda dentro de la capa fullscreen */
-html:fullscreen{width:100%;height:100%;background:var(--bg)}
-html:-webkit-full-screen{width:100%;height:100%;background:var(--bg)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script></head><body>
 
-<button id="fsTop" type="button" class="fsb" title="Pantalla completa" aria-label="Pantalla completa">⛶</button>
 <div id="screen-login" class="screen active"><div class="card">
   <h1 class="sr-only">Fut-ball</h1>
   <label class="lbl" for="nick"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.5" r="4.5"/><path d="M3 22c0-5 4-8 9-8s9 3 9 8z"/></svg>Apodo</label>
@@ -221,7 +212,6 @@ html:-webkit-full-screen{width:100%;height:100%;background:var(--bg)}
     <canvas id="c" width="1000" height="600" tabindex="0"></canvas>
     <div id="chat"><button id="chatTog" type="button" class="tc">👁 Ocultar</button><div id="log"></div><input id="chatIn" maxlength="120" placeholder="Enter o Tab para chatear…" autocomplete="off"></div>
     <div id="rot"><div><span class="ph">📱</span> Girá tu teléfono en horizontal para jugar</div></div>
-    <button id="fsBtn" type="button" class="fsb" title="Pantalla completa" aria-label="Pantalla completa">⛶</button>
     <button id="tMenu" type="button" class="tc">☰ Menú</button>
     <div id="joy" class="tc"><div id="joyKnob"></div></div>
     <div id="kickWrap" class="tc"><button id="kickBtn" type="button" aria-label="Patear / Barrida">⚽</button><div class="klbl">PATEAR / MANTENER: BARRIDA</div></div>
@@ -1117,39 +1107,9 @@ let last=performance.now(),acc=0;
 </script>
 
 <script>
-/* ===== Pantalla completa · Acceso Directo PWA ===== */
+/* ===== Acceso Directo PWA ===== */
 (()=>{
  const H=document.documentElement,toast=(t,ms=3200)=>{const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),ms)};
- /* --- Pantalla completa (solo táctil) --- */
- if(IS_TOUCH){
-  const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement,btns=[$('fsTop'),$('fsBtn')];
-  const sync=()=>{const on=!!(document.fullscreenElement||document.webkitFullscreenElement);btns.forEach(b=>b.classList.toggle('on',on))};
-  const unlockOr=()=>{try{if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock()}catch(e){}};
-  const lockLand=()=>{try{if(screen.orientation&&screen.orientation.lock){const r=screen.orientation.lock('landscape');if(r&&r.catch)r.catch(()=>{})}}catch(e){}};
-  /* Re-sincroniza tamaño del canvas y devicePixelRatio (algunos móviles cambian la ventana unos ms después) */
-  const refit=()=>{
-   try{[cv,document.documentElement,document.body].forEach(el=>['width','height','transform','top','left','margin','position'].forEach(k=>el.style.removeProperty(k)))}catch(e){}
-   try{window.scrollTo(0,0)}catch(e){}
-   try{resizeCanvas()}catch(e){}
-   sync()};
-  let rt=[];
-  const refitAll=()=>{rt.forEach(clearTimeout);refit();rt=[150,400].map(ms=>setTimeout(refit,ms))};
-  const toggle=async()=>{
-   try{
-    if(fsEl()){const ex=document.exitFullscreen||document.webkitExitFullscreen;if(ex){const r=ex.call(document);if(r&&r.catch)r.catch(()=>{});await r}unlockOr()}
-    else{const el=H,rq=el.requestFullscreen||el.webkitRequestFullscreen;
-     if(!rq)return toast('Tu navegador no permite pantalla completa. En iPhone: Compartir ⬆️ → Agregar a inicio.',4200);
-     await rq.call(el);
-     lockLand()}
-   }catch(e){toast('No se pudo activar la pantalla completa.')}
-   refitAll()};
-  btns.forEach(b=>b.addEventListener('click',toggle));
-  /* También cuando se entra/sale sin tocar el botón (gesto del borde, botón Atrás, etc.) */
-  ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{if(!fsEl())unlockOr();refitAll()}));
-  addEventListener('resize',refitAll);addEventListener('orientationchange',refitAll);
-  try{if(screen.orientation&&screen.orientation.addEventListener)screen.orientation.addEventListener('change',refitAll)}catch(e){}
- }
-
  /* --- Acceso Directo (PWA) --- */
  const standalone=()=>(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
  const setSA=()=>H.classList.toggle('is-standalone',standalone());setSA();
