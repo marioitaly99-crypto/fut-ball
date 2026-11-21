@@ -655,6 +655,29 @@ function contain(p){const S=G.sp,[qx,qy]=rectPt(p),dx=qx-p.x,dy=qy-p.y,dd=Math.h
  if(dd>8){p.x+=dx/dd*8;p.y+=dy/dd*8}else{p.x=qx;p.y=qy}
  if(dx*p.vx<0)p.vx=0;if(dy*p.vy<0)p.vy=0}
 function fence(p){wallsP(p);penLock(p);koWall(p);spWall(p);contain(p)}
+/* Anti-pisado: la pelota nunca queda debajo de un jugador ni trabada contra pared/esquina/poste.
+   Hasta 4 pasadas por frame de jugador↔balón + límites de cancha: el balón siempre queda fuera del radio del jugador; si quedó apretado entre un jugador y la pared/esquina,
+   se empuja al JUGADOR hacia atrás y la pelota recibe una leve fuerza de escape lateral/interior. Solo posiciones: no altera rebotes ni la física normal. */
+function ballConfine(b){const w=G.w,h=G.h,r=b.r,rl=RL()&&!G.pen;
+ if(!rl){if(b.y-r<0)b.y=r;if(b.y+r>h)b.y=h-r;if(!(b.y>G.gT&&b.y<G.gB)){if(b.x-r<0)b.x=r;if(b.x+r>w)b.x=w-r}} /* sin pared en Realista (la pelota sale) ni en la boca del arco */
+ [[0,G.gT],[0,G.gB],[w,G.gT],[w,G.gB]].forEach(([px,py])=>{const d=Math.hypot(b.x-px,b.y-py),m=r+PR;if(d>0&&d<m){b.x=px+(b.x-px)/d*m;b.y=py+(b.y-py)/d*m}})} /* postes */
+function squeezeBall(L){const b=G.ball;if(G.sp||G.pen||!L.length)return;let sq=false,sp=null;
+ for(let pass=0;pass<4;pass++){let hit=false;
+  for(const p of L){const m=p.r+b.r;let dx=b.x-p.x,dy=b.y-p.y,d=Math.hypot(dx,dy);if(d>=m-.001)continue;hit=true;
+   let nx,ny;if(d<.001){const g=(p.x*13.7+p.y*7.3)%6.283;nx=Math.cos(g);ny=Math.sin(g)}else{nx=dx/d;ny=dy/d}
+   b.x=p.x+nx*m;b.y=p.y+ny*m;ballConfine(b); /* 1) la pelota sale del radio del jugador y se vuelve a confinar a la cancha */
+   dx=b.x-p.x;dy=b.y-p.y;d=Math.hypot(dx,dy);
+   if(d<m-.001){sq=true;sp=p;if(d>.001){nx=dx/d;ny=dy/d} /* 2) apretada contra pared/esquina/poste: se empuja al jugador hacia atrás */
+    p.x=b.x-nx*m;p.y=b.y-ny*m;const dot=p.vx*nx+p.vy*ny;if(dot>0){p.vx-=dot*nx;p.vy-=dot*ny}fence(p);
+    L.forEach(q=>{if(q===p)return;const qx=q.x-p.x,qy=q.y-p.y,qm=p.r+q.r,qd=Math.hypot(qx,qy);if(qd<qm&&qd>.001){const o=(qm-qd)/2,ux=qx/qd,uy=qy/qd;p.x-=ux*o;p.y-=uy*o;q.x+=ux*o;q.y+=uy*o;fence(p);fence(q)}})}}
+  if(!hit)break}
+ const cx=G.w/2,cy=G.h/2;
+ for(let k=0,again=true;again&&k<5;k++){again=false;for(const p of L){const m=p.r+b.r;let dx=b.x-p.x,dy=b.y-p.y,d=Math.hypot(dx,dy);if(d>=m-.01)continue;again=true; /* 3) último recurso: aún pisada → sale de costado hacia el interior */
+  sq=true;sp=p;const nx=d>.001?dx/d:1,ny=d>.001?dy/d:0,ix=cx-b.x,iy=cy-b.y;let tx=-ny,ty=nx;if(tx*ix+ty*iy<0){tx=-tx;ty=-ty}
+  b.x=p.x+tx*m;b.y=p.y+ty*m;ballConfine(b);dx=b.x-p.x;dy=b.y-p.y;if(Math.hypot(dx,dy)<m-.01){const il=Math.hypot(ix,iy)||1;b.x=p.x+ix/il*m;b.y=p.y+iy/il*m;ballConfine(b);dx=b.x-p.x;dy=b.y-p.y;d=Math.hypot(dx,dy)
+   if(d<m-.01){const ux=d>.001?dx/d:ix/il,uy=d>.001?dy/d:iy/il;p.x=b.x-ux*m;p.y=b.y-uy*m;fence(p)}}}} /* sin lugar para la pelota (varios jugadores): se retira al jugador */
+ if(sq&&sp&&Math.hypot(b.vx,b.vy)<5){const ix=cx-b.x,iy=cy-b.y,il=Math.hypot(ix,iy)||1,dx=b.x-sp.x,dy=b.y-sp.y,dl=Math.hypot(dx,dy)||1;let tx=-dy/dl,ty=dx/dl;if(tx*ix+ty*iy<0){tx=-tx;ty=-ty}
+  const ex=ix/il*.6+tx*.8,ey=iy/il*.6+ty*.8,el=Math.hypot(ex,ey)||1;b.vx+=ex/el*1.1;b.vy+=ey/el*1.1}} /* leve fuerza de escape lateral/interior */
 /* Anti-traba: pelota casi quieta con 2+ jugadores en contacto > 0,6 s → impulso a espacio libre y bots retroceden 0,4 s */
 function antiJam(){const b=G.ball,c=act().filter(p=>Math.hypot(p.x-b.x,p.y-b.y)<p.r+b.r+3);
  if(c.length>=2&&Math.hypot(b.vx,b.vy)<.4)G.jam=(G.jam||0)+DT;else G.jam=0;
@@ -899,12 +922,14 @@ function end(msg){G.over=true;powerReset();G.players.forEach(p=>{p.yc=0;p.fc=0;p
  showEv(msg||(a>b?`🏆 ¡FINAL! GANÓ LOCAL (${a} - ${b})`:b>a?`🏆 ¡FINAL! GANÓ VISITANTE (${a} - ${b})`:`🤝 ¡FINAL! EMPATE (${a} - ${b})`),3000);hud()}
 /* Tanda de penales */
 const rnd=a=>a[Math.floor(Math.random()*a.length)],sh=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+/* Arquero de la tanda: sorteo uniforme entre TODOS los integrantes activos del equipo (humanos y bots por igual); si es bot, penAI() lo maneja con su IA de arquero */
+function penPickKeeper(L){const a=L.filter(p=>G.players.includes(p)&&p.team!=='spec');return rnd(a.length?a:L)}
 function startPens(){const lists={red:sh(act().filter(p=>p.team==='red')),blue:sh(act().filter(p=>p.team==='blue'))}; /* orden de pateadores al azar */
  if(!lists.red.length||!lists.blue.length){end('🤝 ¡PARTIDO FINALIZADO EN EMPATE!');return}
  const side=Math.random()<.5?'left':'right',din=side==='left'?1:-1,gx=side==='left'?0:G.w; /* sorteo de arco */
- G.ko=null;G.sp=null;G.pen={side,gx,din,sd:spotD(),kx:gx,list:lists,keeper:{red:rnd(lists.red),blue:rnd(lists.blue)},n:{red:0,blue:0},res:{red:[],blue:[]},team:'red',ph:'intro',t:0,parts:[]};
+ G.ko=null;G.sp=null;G.pen={side,gx,din,sd:spotD(),kx:gx,list:lists,keeper:{red:penPickKeeper(lists.red),blue:penPickKeeper(lists.blue)},n:{red:0,blue:0},res:{red:[],blue:[]},team:'red',ph:'intro',t:0,parts:[]};
  $('penbar').classList.remove('hidden');$('sb').classList.add('hidden');$('pRow').appendChild($('mute'));$('pbR').style.display=$('pbB').style.display='';penTurn();G.pen.ph='intro';G.pen.t=0;showEv('🥅 ¡TANDA DE PENALES!',2000);hud()}
-function penTurn(){const P=G.pen,t=P.team,o=other(t),L=P.list[t];P.s=L[P.n[t]++%L.length];P.k=P.keeper[o];P.parts=[P.s,P.k];P.ph='aim';P.t=0;P.err=0;P.zone=Math.floor(Math.random()*3);P.feint=Math.random()<.65;P.fd=Math.random()<.5?-1:1; /* zona de tiro, amague y lado */
+function penTurn(){const P=G.pen,t=P.team,o=other(t),L=P.list[t];P.s=L[P.n[t]++%L.length];if(!P.keeper[o]||!G.players.includes(P.keeper[o])||P.keeper[o].team==='spec')P.keeper[o]=penPickKeeper(P.list[o]);P.k=P.keeper[o];P.parts=[P.s,P.k];P.ph='aim';P.t=0;P.err=0;P.zone=Math.floor(Math.random()*3);P.feint=Math.random()<.65;P.fd=Math.random()<.5?-1:1; /* zona de tiro, amague y lado */
  const pr=PRAD*G.k,sx=P.gx+P.din*(areaD()+pr+4+spotD()/6); /* el pateador se desplaza lo mismo que el punto penal */
  G.ball={x:P.gx+P.din*P.sd,y:G.h/2,vx:0,vy:0,r:BRAD*G.k}; /* pelota en el punto penal */
  P.s.x=sx;P.s.y=G.h/2;P.k.x=P.kx;P.k.y=G.h/2; /* pateador: borde exterior del área grande · arquero: sobre la línea, al centro */
@@ -1179,6 +1204,7 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
  antiJam();const r=b.r,mouth=b.y>G.gT&&b.y<G.gB,rl=RL()&&!G.pen; /* Modo Realista: la pelota no rebota en las líneas, sale del campo */
  if(!rl){if(b.y-r<0){b.y=r;b.vy*=-REST}if(b.y+r>h){b.y=h-r;b.vy*=-REST}}
  if(!mouth&&!rl){if(b.x-r<0){b.x=r;b.vx*=-REST}if(b.x+r>w){b.x=w-r;b.vx*=-REST}}
+ squeezeBall(L); /* anti-pisado: tras los rebotes, la pelota queda siempre fuera del radio de cualquier jugador */
  if(b.x+r<0&&mouth)goal('blue');else if(b.x-r>w&&mouth)goal('red');else{hud();if(rl&&!G.sp&&!(G.outImm>0))ballOut()}if(G.pen)penStep()}
 
 /* Menú ESC */
@@ -1193,15 +1219,17 @@ $('mResume').onclick=()=>toggleMenu(false);
 $('mute').onclick=()=>{audio();muted=!muted;$('mute').textContent=muted?'🔇':'🔊';$('c').focus()};
 $('aSize').onchange=e=>{G.size=e.target.value;G.cs=G.size;cur.size=G.size;sizeUp();kickoff()};
 $('aMode').onchange=e=>{if(!isAdmin)return;const v=e.target.value;G.super=v==='super';powerReset();if(v==='realista'){if(!RL())G.cs=G.size;G.size='realista'}else if(RL())G.size=G.cs&&G.cs!=='realista'?G.cs:'mediana';
- cur.size=G.size;cur.mode=v;sizeUp();kickoff();$('aSize').value=RL()?(G.cs||'mediana'):G.size;$('aSize').classList.toggle('hidden',RL());showEv(RL()?'🏟️ MODO REALISTA':G.super?'⚡ MODO SUPERPODERES':'Modo Clásico',1400);hud()};
+ cur.size=G.size;cur.mode=v;sizeUp();$('aSize').value=RL()?(G.cs||'mediana'):G.size;$('aSize').classList.toggle('hidden',RL());const mn=RL()?'🏟️ MODO REALISTA':G.super?'⚡ MODO SUPERPODERES':'Modo Clásico';adminRestart(mn,`🔄 El admin cambió el modo a ${mn.replace(/^\S+\s/,'')}: el partido se reinició (0 - 0).`)};
 function numSel(sid,iid,max,apply){const s=$(sid),n=$(iid);
  const go=()=>{n.classList.toggle('hidden',s.value!=='c');if(s.value==='c'){n.value=clamp(Math.round(+n.value)||11,11,max);apply(+n.value)}else apply(+s.value)};
  s.onchange=()=>{go();if(s.value==='c')n.focus()};n.onchange=go}
-numSel('aTime','aTimeN',120,v=>{G.duration=v*60;hud()});numSel('aGoals','aGoalsN',99,v=>{G.goalLimit=v});
+numSel('aTime','aTimeN',120,v=>{G.duration=v*60;const lb=v?`${v} min`:'sin límite';adminRestart(`⏱ Duración: ${lb}`,`🔄 El admin cambió la duración a ${lb}: el partido se reinició (0 - 0).`)});numSel('aGoals','aGoalsN',99,v=>{G.goalLimit=v});
 function syncNum(){const m=G.duration/60,g=G.goalLimit,T=$('aTime'),Gl=$('aGoals');
  T.value=m<=10?String(m):'c';$('aTimeN').value=m>10?Math.round(m):'';$('aTimeN').classList.toggle('hidden',m<=10);
  Gl.value=g<=10?String(g):'c';$('aGoalsN').value=g>10?g:'';$('aGoalsN').classList.toggle('hidden',g<=10)}
 $('aRestart').onclick=()=>{toggleMenu(false);restart();showEv('¡PARTIDO REINICIADO!')};
+/* Cambio de modo / duración desde el menú del admin: misma función de reinicio completo (restart(): 0-0, reloj en 0, saque del medio, limpia tarjetas/faltas/pelota parada/eventos y tanda activa) + aviso en pantalla y chat */
+function adminRestart(ev,chat){restart();showEv(`${ev} · 🔄 PARTIDO REINICIADO`,2200);refSay(chat);hud()}
 $('aDiff').onchange=e=>{if(!isAdmin)return;setBotDiff(e.target.value);showEv(`🤖 Dificultad bots: ${BOT_DLBL[BOT_DIFF]}`,1200)};
 $('bAdd').onclick=()=>{const t=$('aBotTeam').value;if(hum()>=LOCK||nb(t).length>=(RL()?11:MAXB))return;const n=botSeq++;if(G.pen)return showEv('Espera: tanda de penales en curso',1500);const nb2=mk(`Bot ${n}`,String(n%99),t,true);placeFree(nb2);G.players.push(nb2);uniqueBotNums();assignRoles(t);botUI();showEv(`+1 bot · ${t==='red'?'Local':'Visitante'}`,900)};
 $('bDel').onclick=()=>{const b=nb($('aBotTeam').value).pop();if(b){G.players.splice(G.players.indexOf(b),1);botUI()}};
