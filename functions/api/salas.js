@@ -7,6 +7,8 @@ const KEY = "salas_activas";
 const TTL_MS = 35000;
 const MAX_ROOMS = 200;
 const ID_RE = /^[\w-]{1,64}$/;
+const MODES = ["classic", "realistic", "super"]; // modos de juego válidos
+const DEFAULT_MODE = "classic";
 const JSON_HEADERS = { "Content-Type": "application/json", "Cache-Control": "no-store" };
 
 const json = (data, status = 200) =>
@@ -26,7 +28,8 @@ async function load(kv) {
 const save = (kv, list) =>
   kv.put(KEY, JSON.stringify(list), { expirationTtl: 60 });
 
-const publicView = ({ ts, ...r }) => r; // no se expone el timestamp interno
+// no se expone el timestamp interno; las salas guardadas antes de existir "mode" salen como "classic" (sin tocar KV)
+const publicView = ({ ts, ...r }) => ({ ...r, mode: MODES.includes(r.mode) ? r.mode : DEFAULT_MODE });
 
 // GET /api/salas → lista de salas vigentes (solo lectura, no escribe en KV)
 export async function onRequestGet({ env }) {
@@ -50,6 +53,7 @@ export async function onRequestPost({ request, env }) {
     n: Math.max(0, Math.min(99, +b.n || 0)),
     max: Math.max(1, Math.min(99, +b.max || 12)),
     priv: !!b.priv,
+    mode: MODES.includes(b.mode) ? b.mode : DEFAULT_MODE,
     code: b.peerId,
     ts: Date.now(),
   };
