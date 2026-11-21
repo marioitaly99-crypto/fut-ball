@@ -130,6 +130,7 @@ html.is-touch #pRow{gap:8px}html.is-touch .pt{font-size:.62rem;gap:4px}
 html.is-touch .pc{width:12px;height:12px;margin:0 1px}
 html.is-touch #pTimer{font-size:1.2rem;min-width:30px}html.is-touch #pInfo{font-size:.62rem}
 html.is-touch #tMenu{position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);right:calc(env(safe-area-inset-right,0px) + 8px);z-index:120;padding:6px 10px;font-size:.78rem;border-radius:10px;background:rgba(11,15,26,.82);color:#fff;border:1px solid #2a3760;white-space:nowrap}
+html.is-touch #tPause{position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);right:calc(env(safe-area-inset-right,0px) + 90px);z-index:120;padding:6px 10px;font-size:.78rem;line-height:1.2;border-radius:10px;background:rgba(11,15,26,.82);color:#fff;border:1px solid #2a3760;white-space:nowrap;width:auto}
 html.is-touch #joy{position:fixed;left:calc(env(safe-area-inset-left,0px) + 24px);bottom:calc(env(safe-area-inset-bottom,0px) + 24px);width:132px;height:132px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.35);touch-action:none;z-index:30}
 #joyKnob{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:rgba(255,255,255,.38);border:2px solid rgba(255,255,255,.7);pointer-events:none}
 html.is-touch #kickWrap{position:fixed;right:calc(env(safe-area-inset-right,0px) + 24px);bottom:calc(env(safe-area-inset-bottom,0px) + 16px);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:30;touch-action:none}
@@ -235,6 +236,7 @@ html.is-touch #pwrI{font-size:1rem}html.is-touch #pwrN{font-size:.72rem;letter-s
     <canvas id="c" width="1000" height="600" tabindex="0"></canvas>
     <div id="chat"><button id="chatTog" type="button" class="tc">👁 Ocultar</button><div id="log"></div><input id="chatIn" maxlength="120" placeholder="Enter o Tab para chatear…" autocomplete="off"></div>
     <div id="rot"><div><span class="ph">📱</span> Girá tu teléfono en horizontal para jugar</div></div>
+    <button id="tPause" type="button" class="tc" aria-label="Pausar / reanudar" style="display:none">⏸</button>
     <button id="tMenu" type="button" class="tc">☰ Menú</button>
     <div id="joy" class="tc"><div id="joyKnob"></div></div>
     <div id="kickWrap" class="tc"><button id="kickBtn" type="button" aria-label="Patear / Barrida">⚽</button><div class="klbl">PATEAR / MANTENER: BARRIDA</div></div>
@@ -1230,6 +1232,12 @@ let last=performance.now(),acc=0;
  /* ☰ Menú: abre / cierra el menú ESC */
  tMenu.onclick=()=>{if(!inGame||(G&&G.vote))return;if(document.activeElement===chatIn)chatIn.blur();toggleMenu()};
  new MutationObserver(()=>{tMenu.textContent=menuOpen?'✕ Cerrar':'☰ Menú';jRelease();kRelease()}).observe($('menu'),{attributes:true,attributeFilter:['class']});
+ /* ⏸ / ▶ solo para el anfitrión: misma acción que la tecla P en PC */
+ const tPause=$('tPause');
+ tPause.onclick=()=>{if(isAdmin===true&&G&&!G.over){if(G.paused){G.paused=false;G.cd=3}else{G.paused=true;G.cd=0}Object.keys(keys).forEach(k=>keys[k]=0);syncPause();$('c').focus()}};
+ function syncPause(){const ok=isAdmin===true&&inGame&&!!G&&!G.over;tPause.style.display=ok?'':'none';
+  if(ok){const t=G.paused?'▶':'⏸';if(tPause.textContent!==t)tPause.textContent=t;tPause.style.right=`calc(env(safe-area-inset-right,0px) + ${8+tMenu.offsetWidth+6}px)`}}
+ setInterval(syncPause,200);syncPause();
 
  /* Seguridad: soltar controles al perder foco o al enfocar el chat */
  addEventListener('blur',()=>{jRelease();kRelease()});
