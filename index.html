@@ -207,6 +207,7 @@ html.is-touch #pwrI{font-size:1rem}html.is-touch #pwrN{font-size:.72rem;letter-s
       <input id="rPass" type="password" class="hidden" placeholder="Contraseña de la sala" autocomplete="new-password">
       <select id="rMode" title="Modo de juego"><option value="clasico">Modo Clásico</option><option value="realista">🏟️ Modo Realista (11v11)</option><option value="super">⚡ Modo Superpoderes</option></select>
       <select id="rMax"><option>6</option><option selected>12</option><option>20</option><option>22</option></select>
+      <select id="rDiff" title="Dificultad de los bots"><option value="easy">🤖 Dificultad Bots: Fácil</option><option value="normal" selected>🤖 Dificultad Bots: Normal</option><option value="hard">🤖 Dificultad Bots: Difícil</option></select>
       <button id="create">Crear sala</button><div id="lobbyErr" class="err"></div>
     </section>
     <section class="panel" style="grid-column:1/-1"><h2>🌐 Unirse a una sala online</h2>
@@ -251,6 +252,7 @@ html.is-touch #pwrI{font-size:1rem}html.is-touch #pwrN{font-size:.72rem;letter-s
       <h2 style="text-align:center">Menú de sala</h2>
       <div id="teams" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px"></div>
       <button id="mResume">Continuar</button><button id="mCopy" class="ghost hidden">📋 Copiar Link / Contraseña de Invitación</button><div id="mCode" class="label" style="text-align:center"></div>
+      <div id="extBox" style="display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--line);padding-top:10px"><div class="label">📡 Extrapolación (ms): <b id="extV">60</b> <span style="opacity:.7">· suaviza el lag cuando juegas como invitado</span></div><input id="extR" type="range" min="0" max="200" step="5" value="60" style="width:100%"></div>
       <div id="adm" style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--line);padding-top:11px">
         <div class="label">⭐ Ajustes de administrador</div>
         <div id="uni" style="display:flex;flex-direction:column;gap:6px"></div>
@@ -260,6 +262,7 @@ html.is-touch #pwrI{font-size:1rem}html.is-touch #pwrN{font-size:.72rem;letter-s
         <div style="display:flex;gap:6px"><select id="aGoals" style="flex:1"><option value="0">Goles: Sin límite</option><option value="1">1 gol(es)</option><option value="2">2 gol(es)</option><option value="3">3 gol(es)</option><option value="4">4 gol(es)</option><option value="5">5 gol(es)</option><option value="6">6 gol(es)</option><option value="7">7 gol(es)</option><option value="8">8 gol(es)</option><option value="9">9 gol(es)</option><option value="10">10 gol(es)</option><option value="c">Más de 10 goles…</option></select><input id="aGoalsN" type="number" min="11" max="99" placeholder="goles" class="hidden" style="width:84px"></div>
         <button id="aRestart" class="ghost">Reiniciar partido</button>
         <select id="aBotTeam"><option value="red">Bots: Local</option><option value="blue" selected>Bots: Visitante</option></select>
+        <select id="aDiff" title="Dificultad de los bots"><option value="easy">🤖 Dificultad Bots: Fácil</option><option value="normal" selected>🤖 Dificultad Bots: Normal</option><option value="hard">🤖 Dificultad Bots: Difícil</option></select>
         <div style="display:flex;gap:8px"><button id="bAdd" style="flex:1">+ Bot</button><button id="bDel" class="danger" style="flex:1">− Bot</button></div>
         <div id="botInfo" class="label"></div>
       </div>
@@ -269,6 +272,7 @@ html.is-touch #pwrI{font-size:1rem}html.is-touch #pwrN{font-size:.72rem;letter-s
   <div id="hint">ESC: menú · Enter/Tab: chat · P: pausa (Admin) · Flechas / WASD: mover · Espacio / X: patear</div>
 </div>
 
+<script src="/BotAIController.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 /* Plataforma: táctil/móvil (📱) o PC (🖥️) */
@@ -276,10 +280,15 @@ const IS_TOUCH=('ontouchstart' in window)||navigator.maxTouchPoints>0,PLAT=IS_TO
  platIcon=t=>t==='m'?'📱 ':t==='d'?'🖥️ ':'';
 document.documentElement.classList.toggle('is-touch',IS_TOUCH);
 const SIZES={chica:[800,420],mediana:[1150,600],grande:[1700,900],gigante:[2300,1300],realista:[2100,1250]},GHT={chica:110,mediana:140,grande:190,gigante:220,realista:210};
-const ACC=.224,PD=.94,KPD=.93,BD=.975,KS=9,PR=6,KCD=.1,FL=.15,GD=34,MAXB=10,LOCK=4,PRAD=18,BRAD=10,BMAX=20;
+/* Agarre estilo Haxball: damping .925 (antes .94) y aceleración compensada (.2845 = 3.509·.075/.925) → MISMA velocidad punta (≈3.51; pateando ≈2.98).
+   BRAKE: freno extra al soltar controles · TURN: más empuje al invertir dirección (no se aplican en Cancha de Hielo, que conserva ACC_ICE original) */
+const ACC=.2845,PD=.925,KPD=.9127,ACC_ICE=.224,BRAKE=.94,TURN=1.5,BD=.975,KS=9,PR=6,KCD=.1,FL=.15,GD=34,MAXB=10,LOCK=4,PRAD=18,BRAD=10,BMAX=20;
 let REST=.6,PREST=.1; /* Superpoderes: el evento Pelota Gigante los sube temporalmente */
 const SPF=95,SPR=150,RL=()=>G.size==='realista',areaD=()=>RL()?G.w*.157:G.gh*1.2,areaH=()=>RL()?G.h*.593:G.gh*2.6,smallD=()=>RL()?G.w*.0524:G.gh*.55,smallH=()=>RL()?G.h*.27:G.gh*1.4,spotD=()=>(RL()?G.w*.1048:G.gh*.75)*1.2; /* punto penal 20 % más atrás */
-const NET={role:'local',peer:null,conn:null,conns:[],code:'',pm:new Map(),pk:'',tick:0},bc=m=>NET.conns.forEach(c=>{try{if(c&&c.open&&c.pl)c.send(m)}catch(e){}}),
+const NET={role:'local',peer:null,conn:null,fconn:null,fast:new Map(),conns:[],code:'',pm:new Map(),pk:'',tick:0},bc=m=>NET.conns.forEach(c=>{try{if(c&&c.open&&c.pl)c.send(m)}catch(e){}}),
+ bcFast=m=>NET.conns.forEach(c=>{try{if(!c||!c.pl)return;const f=NET.fast.get(c.peer),ch=f&&f.open?f:c; /* estado por el canal rápido (reliable:false); si no hay, por el principal */
+  if(ch===f&&f.dataChannel&&f.dataChannel.bufferedAmount>65536)return; /* red congestionada: descarta este estado (llega el siguiente) */
+  if(ch&&ch.open)ch.send(m)}catch(e){}}),
  safeSend=(c,m)=>{try{if(c&&c.open){c.send(m);return true}}catch(e){}return false};
 let AUTO=new URLSearchParams(location.search).get('sala')||'',FLAG='🌐';
 const flagOf=c=>/^[A-Za-z]{2}$/.test(c||'')?String.fromCodePoint(...[...c.toUpperCase()].map(ch=>127397+ch.charCodeAt(0))):'🌐'; /* AR → 🇦🇷 (indicadores regionales) */
@@ -381,6 +390,7 @@ document.addEventListener('visibilitychange',syncPoll);
 document.querySelectorAll('input[name=vis]').forEach(r=>r.onchange=()=>$('rPass').classList.toggle('hidden',document.querySelector('input[name=vis]:checked').value!=='priv'));
 $('create').onclick=()=>{const priv=document.querySelector('input[name=vis]:checked').value==='priv',pass=$('rPass').value;
  if(priv&&!pass)return $('lobbyErr').textContent='Las salas privadas necesitan contraseña.';
+ setBotDiff($('rDiff').value);
  const md=$('rMode').value,r={id:Date.now(),name:$('rName').value.trim()||`Sala de ${user.nick}`,max:+$('rMax').value,priv,pass,n:1,owner:user.nick,size:md==='realista'?'realista':'mediana',mode:md};
  r.online=true;r.mine=true;r.flag=FLAG;r.ping=0;rooms.push(r);$('lobbyErr').textContent='';enter(r,true);startHost(r)};
 $('jNo').onclick=()=>{$('modal').classList.add('hidden');if(pending&&pending.net)netLeave()};
@@ -437,153 +447,48 @@ function chaserOf(team){G.cc=G.cc||{};const c=G.cc[team];if(c&&c.f===G.fr)return
  act().forEach(q=>{if(q.team!==team||!q.bot||q.role==='arquero')return;if(hasDef&&!isDefR(q.role))return; /* en peligro cerca del área propia presiona un defensor (central o lateral) */
   const d=Math.hypot(q.x-b.x,q.y-b.y)*(dg?1:(zoneHit(q)?1:1.25))*(prev&&q.id===prev.id?.85:1);if(d<bs){bs=d;best=q}});
  G.cc[team]={f:G.fr,q:best};return best}
-function botAI(p){const b=G.ball,W=G.w,H=G.h,dir=p.team==='red'?1:-1,ownX=dir>0?0:W,oppX=dir>0?W:0,all=act(),mine=all.filter(q=>q.team===p.team),foes=all.filter(q=>q.team!==p.team),MAXV=3.5*PWSM(),MINV=.7*Math.min(1,PWSM()); /* velocidad máxima acorde al evento (encogedor 0.475x · turbo 1.75x · hielo 1.2x) */
- const fx=f=>ownX+dir*f*W,dB=q=>Math.hypot(q.x-b.x,q.y-b.y),db=dB(p),minFoe=(x,y)=>Math.min(...foes.map(f=>Math.hypot(f.x-x,f.y-y)),999),bf=clamp(Math.abs(b.x-ownX)/W,0,1),lp=(a,c,k)=>a+(c-a)*clamp(k,0,1);
- const owner=all.reduce((a,q)=>dB(q)<dB(a)?q:a,all[0]),atk=owner.team===p.team,ps=posture(p.team),lf=liftOf(p.team);
- /* disputa: solo acude el más cercano de su equipo entre quienes tienen la pelota en su zona (los demás mantienen su puesto) */
- const spOwn=G.ko===p.team||!!(G.sp&&G.sp.team===p.team),elig=spOwn?mine:mine.filter(q=>!q.bot||zoneHit(q)),pool0=elig.filter(q=>q.role!=='arquero'),pool=pool0.length?pool0:(mine.some(q=>q.role!=='arquero')?mine.filter(q=>q.role!=='arquero'):(spOwn?mine:[])), /* el arquero bot jamás sale a disputar */
- near0=spOwn?(pool.length?pool.reduce((a,q)=>dB(q)<dB(a)?q:a):null):chaserOf(p.team),
-  contested=owner.team!==p.team&&!G.ko, /* la pelota la tiene un rival: presión firme */
-  mateHas=owner.team===p.team&&owner!==p&&dB(owner)<owner.r+b.r+36&&!G.ko&&!G.sp, /* un compañero (humano o bot) tiene la posesión */
-  near=mateHas?owner:near0;
- /* Saque detenido: UN único ejecutante. Saque de arco → arquero bot (si no, central más cercano); lateral/córner/medio → el jugador de campo más cercano al balón */
- let taker=near;
- if(G.sp&&G.sp.team===p.team&&G.sp.type==='arco'){const gkb=mine.find(q=>q.bot&&q.role==='arquero'),dcs=mine.filter(q=>q.bot&&q.role==='defensor_central'),hu=mine.find(q=>!q.bot&&dB(q)<90);
-  taker=hu||gkb||(dcs.length?dcs.reduce((a,q)=>dB(q)<dB(a)?q:a):null)||near}
- const sw0=p.sw||0;p.sw=0;
- /* relevo entre zonas: el que seguía la pelota no frena hasta que el compañero que la toma esté cerca (< 95 px) */
- const wasCh=!!p.isCh;p.isCh=!spOwn&&near0===p;p.hoT=Math.max(0,(p.hoT||0)-DT);
- if(wasCh&&!p.isCh&&near0&&!spOwn){p.hoT=1.6;p.hoTo=near0}
- const nmF=Math.min(...mine.filter(q=>q!==p&&q.role!=='arquero').map(dB),999);
- if(near!==p)p.hold=Math.max(0,(p.hold||0)-DT*2);
- /* flexibilidad posicional: cubre el puesto de un compañero que subió, baja a defender, se suma al contraataque */
- let role=p.role||'mediocampista',sd=p.side;
- const up=mine.find(q=>q!==p&&q.bot&&(q.role==='defensor_central'||q.role==='lateral')&&Math.abs(q.x-ownX)/W>ZONA[q.role][1]+.16);
- if(up&&role==='mediocampista'&&near!==p){role=up.role;sd=up.side}p.eff=role;
- const drop=(!atk&&bf<.5&&(role==='mediocampista'||role==='extremo'||role==='delantero'))?.22:0,
-  counter=(atk&&bf>.3&&bf<.65&&(role==='defensor_central'||role==='lateral'||role==='mediocampista'))?.08:0,F=f=>fx(clamp(f+lf-drop+counter,.05,.96));
- let tx,ty,chase=false;p.kick=false;p.wander=(p.wander||0)+.05;
- const sit=role==='arquero'?gkSit(p):null;
- /* MARCA FÉRREA: en peligro cerca del área propia, el defensor más cercano al balón encima al portador (chaserOf); el 2.º cierra el ángulo balón→centro del arco; el resto marca al atacante más cercano por el lado del arco */
- const dgr=isDefR(role)&&defDanger(p.team),defs=dgr?mine.filter(q=>q.bot&&isDefR(q===p?role:(q.eff||q.role))).sort((a,c)=>dB(a)-dB(c)):[],oth=defs.filter(q=>q!==near0),dIdx=oth.indexOf(p);
- const pos=()=>{const by=sd<0?H*.14:H*.86,off=p.rk?(p.rk%2?1:-1)*Math.ceil(p.rk/2)*H*.1:0;let x,y;
-  if(role==='arquero'){const xmin=p.r+8,xmax=Math.max(xmin,smallD()-p.r-4),dist=Math.abs(b.x-ownX),adv=clamp(1-dist/(areaD()*1.6),0,1); /* se adelanta solo dentro del área chica según la cercanía del balón; nunca la abandona ni se abre */
-   x=ownX+dir*(xmin+(xmax-xmin)*adv);const tw=b.vx*dir<-.4;y=clamp(tw?b.y+b.vy*((x-b.x)/b.vx):b.y,G.gT+p.r+8,G.gB-p.r-8)} /* Y proyectada sobre la pelota, entre los postes: siempre interpuesto entre la pelota y el arco */
-  else if(role==='defensor_central'){const zm=(atk||ps==='ataque')?.45:.32;x=F(lp(.15,zm,bf*1.3));
-   const m=foes.length?foes.reduce((a,q)=>Math.hypot(q.x-p.x,q.y-p.y)<Math.hypot(a.x-p.x,a.y-p.y)?q:a):null; /* marca al atacante más cercano, del lado de su arco */
-   const nc=mine.filter(q=>q.bot&&q.role==='defensor_central').length,lane=nc<2?0:(p.rk%2?1:-1)*(1+Math.floor(p.rk/2)*.6),ly=H/2+lane*H*.17; /* cada central cubre su carril frente al área */
-   if(m){x=clamp(m.x-dir*45,Math.min(F(.15),F(zm)),Math.max(F(.15),F(zm)));y=ly*.55+m.y*.25+b.y*.2}else y=ly*.7+b.y*.3}
-  else if(role==='lateral'){x=F(lp(.22,.55,bf*1.1+(atk?.15:0)));y=by;if(Math.sign(b.y-H/2)===sd&&bf>.15&&bf<.7)y=by+(b.y-by)*.35}
-  else if(role==='mediocampista'){x=F(atk?lp(.35,.68,bf*1.1):lp(.25,.5,bf*1.1));y=H/2+(b.y-H/2)*.6+off}
-  else if(role==='extremo'){x=F(lp(.52,.88,(bf-.2)*1.3+(atk?.2:0)));y=by}
-  else{x=F(lp(.65,.92,bf*1.2+(atk?.2:0)));p.lc=(p.lc||0)-1; /* delantero: busca espacio libre entre defensores */
-   if(p.lc<=0||p.ly===undefined){p.lc=40;let best=-1;[H*.22,H*.5,H*.78,clamp(b.y,40,H-40)].forEach(yy=>{const sc=minFoe(x,yy);if(sc>best){best=sc;p.ly=yy}})}y=p.ly+off*.5}
-  if(!atk&&owner.team!==p.team&&(role==='lateral'||role==='mediocampista'||role==='extremo')){ /* cierra la línea de pase: se interpone entre el poseedor y el rival que marca */
-   let mf=null,md=260;foes.forEach(f=>{if(f===owner)return;const dd=Math.hypot(f.x-x,f.y-y);if(dd<md){md=dd;mf=f}});
-   if(mf){x=clamp(mf.x+(owner.x-mf.x)*.3,x-120,x+120);y=mf.y+(owner.y-mf.y)*.3}}
-  if(contested&&!G.sp&&(role==='defensor_central'||role==='mediocampista')&&Math.abs(owner.x-ownX)<W*.55){ /* bloquea el ángulo de tiro: se interpone entre el poseedor rival y su arco */
-   const k=role==='defensor_central'?.34:.5;x=lp(x,owner.x+(ownX-owner.x)*k,.6);y=lp(y,owner.y+(H/2-owner.y)*k,.6)}
-  if(mateHas&&role!=='arquero'&&role!=='defensor_central'&&bf>.3){ /* compañero con la pelota en ataque: se abre a espacios libres y diagonales de pase (no se amontona) */
-   p.sc=(p.sc||0)-1;
-   if(p.sc<=0||p.so!==owner.id||p.rx===undefined){p.sc=18+Math.floor(Math.random()*12);p.so=owner.id;let best=-1e9;const ox=owner.x,oy=owner.y,ms=mine.filter(q=>q!==p&&q!==owner);
-    [-1,1].forEach(sy=>[110,190,270].forEach(fw=>[130,240,350].forEach(lat=>{const cx=clamp(ox+dir*fw,40,W-40),cy=clamp(oy+sy*lat,40,H-40),
-     fr=Math.min(minFoe(cx,cy),240),mt=ms.length?Math.min(...ms.map(q=>Math.hypot(q.x-cx,q.y-cy)),240):240,lane=!foes.some(f=>segD(ox,oy,cx,cy,f.x,f.y)<36),
-     s=fr+mt*.7+(lane?120:0)-Math.hypot(cx-x,cy-y)*.25;if(s>best){best=s;p.rx=cx-ox;p.ry=cy-oy}})))}
-   x=owner.x+p.rx;y=owner.y+p.ry}
-  if(dgr&&dIdx>=0){const gx0=ownX,gy0=H/2,gd=Math.hypot(gx0-b.x,gy0-b.y)||1,gu=[(gx0-b.x)/gd,(gy0-b.y)/gd];
-   if(dIdx===0){const L=Math.max(Math.min(gd*.55,170),Math.min(gd,70)); /* cierra el ángulo: se interpone físicamente entre el balón y el centro del arco propio */
-    x=b.x+gu[0]*L;y=b.y+gu[1]*L}
-   else{const m=foes.length?foes.reduce((a,q)=>Math.hypot(q.x-ownX,q.y-gy0)<Math.hypot(a.x-ownX,a.y-gy0)?q:a):null; /* resto: marca al atacante más peligroso (más cercano a su arco) por el lado del arco */
-    if(m){const md=Math.hypot(ownX-m.x,gy0-m.y)||1;x=m.x+(ownX-m.x)/md*55;y=m.y+(gy0-m.y)/md*55}}}
-  if(role!=='arquero'&&!(dgr&&dIdx>=0)){const ZL={defensor_central:[.08,.45],lateral:[.12,.52],mediocampista:[.3,.72],extremo:[.5,.95],delantero:[.52,.95]}[role];
-   if(ZL){const fr=(x-ownX)*dir/W;x=ownX+dir*clamp(fr,ZL[0],ZL[1])*W}} /* ownHalf / midfield / attackHalf: nadie abandona su zona salvo el único que presiona */
-  return[clamp(x,30,W-30),clamp(y,30,H-30)]};
- /* ARQUERO: objetivo del pase largo (sin presión) o despeje de emergencia (rival a < 90 px y pase al frente bloqueado) */
- const gkTgt=force=>{const FM=140,tm=mine.filter(q=>q!==p&&q.role!=='arquero'),cs=Math.min(...foes.map(f=>Math.min(Math.hypot(f.x-b.x,f.y-b.y),Math.hypot(f.x-p.x,f.y-p.y))),999),danger=!force&&cs<90,
-   lane=(x,y)=>!foes.some(f=>segD(b.x,b.y,x,y,f.x,f.y)<40),
-   cands=tm.filter(q=>(q.x-ownX)*dir>W*.12&&minFoe(q.x,q.y)>=90&&(!danger||lane(q.x,q.y))).map(q=>{const fr=Math.min(minFoe(q.x,q.y),260),ad=(q.x-ownX)*dir/W;
-    return{q,s:fr+ad*220+((q.role==='mediocampista'||q.role==='delantero'||q.role==='extremo')?40:0)+(lane(q.x,q.y)?100:0)-(q.y<FM||q.y>H-FM?40:0)}});
-  if(cands.length){const q=cands.reduce((a,c)=>c.s>a.s?c:a).q;return{T:[clamp(q.x+dir*40,20,W-20),clamp(q.y,FM,H-FM)],danger}} /* pase largo al mejor ubicado, a ≥ 140 px de las bandas */
-  if(!danger)return{T:[W/2,H/2],danger}; /* sin compañeros libres: al centro del campo */
-  const bx=clamp(b.x+dir*Math.max(areaD(),260),20,W-20),ts=[[bx,0],[bx,H]],clr=t=>Math.min(...foes.map(f=>segD(b.x,b.y,t[0],t[1],f.x,f.y)),999);
-  return{T:clr(ts[0])>=clr(ts[1])?ts[0]:ts[1],danger} /* emergencia: revienta la pelota hacia afuera (lateral) */};
- /* toque del arquero: se coloca detrás de la pelota alineado con el objetivo y patea (o despeja de inmediato si hay peligro) */
- const gkTouch=()=>{const P=gkTgt(),T=P.T,ux=T[0]-b.x,uy=T[1]-b.y,ul=Math.hypot(ux,uy)||1,u=[ux/ul,uy/ul],ad=areaD(),ah=areaH(),x1=ownX+dir*(p.r+6),x2=ownX+dir*(ad-p.r-8),
-   gx=clamp(b.x+b.vx*3-u[0]*(12+exR()),Math.min(x1,x2),Math.max(x1,x2)),gy=clamp(b.y+b.vy*3-u[1]*(12+exR()),H/2-ah/2+p.r+6,H/2+ah/2-p.r-6),
-   al=db>0?((b.x-p.x)*u[0]+(b.y-p.y)*u[1])/db:0,touch=db<p.r+b.r+5,foeOn=foes.some(f=>Math.hypot(f.x-b.x,f.y-b.y)<p.r+b.r+30);
-  p.gt=db<p.r+b.r+16?(p.gt||0)+DT:0;
-  return[gx,gy,touch&&(P.danger?(al>.2||foeOn||p.gt>.5):(al>.85||p.gt>.6))]};
- const cornerT=far=>{const cs=[[oppX,G.gT+G.gh*.12],[oppX,G.gB-G.gh*.12]];return far?cs[p.y<H/2?1:0]:cs.reduce((a,c)=>minFoe(c[0],c[1])>minFoe(a[0],a[1])?c:a)};
- const chaseT=()=>{const dG=Math.hypot(oppX-p.x,H/2-p.y),tm=mine.filter(q=>q!==p),free=q=>minFoe(q.x,q.y),clear=!foes.some(f=>segD(b.x,b.y,oppX,H/2,f.x,f.y)<40),
-   bestOf=fn=>{const l=tm.filter(fn);return l.length?l.reduce((a,c)=>free(c)>free(a)?c:a):null},toQ=q=>[clamp(q.x+dir*60,20,W-20),q.y];
-  if(G.ko){const q=bestOf(()=>true);return q?[q.x,q.y]:[oppX,H/2]} /* saque: pase a un compañero */
-  if(role==='arquero'||role==='defensor_central'){const q=role==='defensor_central'?bestOf(c=>c.role==='mediocampista'):null;if(q&&free(q)>90)return[q.x,q.y];
-   return[ownX+dir*W*.4,minFoe(b.x,H*.1)>minFoe(b.x,H*.9)?H*.1:H*.9]} /* despeje a la banda o al medio */
-  if(role==='lateral'){const q=bestOf(c=>(c.x-p.x)*dir>20&&['extremo','delantero','mediocampista'].includes(c.role));return q?toQ(q):[clamp(b.x+dir*220,20,W-20),sd<0?H*.14:H*.86]}
-  if(role==='mediocampista'){const q=bestOf(c=>c.role==='extremo'||c.role==='delantero')||bestOf(c=>(c.x-p.x)*dir>20); /* pase filtrado */
-   if(q&&(dG>420||!clear))return toQ(q);return dG<520&&clear?cornerT(false):(q?toQ(q):[oppX,H/2])}
-  if(role==='extremo'){if(dG<320)return cornerT(true); /* define cruzado */
-   if(Math.abs(p.x-ownX)/W>.72)return[oppX-dir*W*.07,H/2]; /* centro al área */
-   const q=bestOf(c=>c.role==='delantero')||bestOf(c=>(c.x-p.x)*dir>20);return q?toQ(q):[oppX,H/2]}
-  if(dG<420||clear)return cornerT(false);const q=bestOf(c=>(c.x-p.x)*dir>0);return q?toQ(q):[oppX,H/2]}; /* delantero: remata rápido a las esquinas */
- /* con la pelota: la conduce y evalúa la salida (despejar, pasar, pared/apoyo, disparar) antes de patear */
- const decide=()=>{const T0=chaseT();if(G.ko)return{T:T0,min:0,why:'saque'};if(role==='arquero')return{T:T0,min:.15,why:'despeje'};
-  const dG=Math.hypot(oppX-p.x,H/2-p.y),dOwn=Math.abs(p.x-ownX)/W,fd=minFoe(p.x,p.y),press=fd<95,wall=Math.min(b.y,H-b.y),cornered=fd<75&&(wall<70||(fd<55&&wall<110)),
-   laneOK=q=>!foes.some(f=>segD(b.x,b.y,q.x,q.y,f.x,f.y)<38),mates=mine.filter(q=>q!==p&&(q.x-p.x)*dir>35&&laneOK(q)&&minFoe(q.x,q.y)>85),
-   better=mates.length?mates.reduce((a,c)=>minFoe(c.x,c.y)>minFoe(a.x,a.y)?c:a):null,clr=!foes.some(f=>segD(b.x,b.y,oppX,H/2,f.x,f.y)<40),
-   shootD=(RL()?620:470)*(1+((G.gm||1)-1)*.35)*(G.activePowerEvent==='fire'?1.3:1)*(ps==='ataque'?1.15:ps==='defensa'?.7:1)*(role==='delantero'||role==='extremo'?1.2:1),hold=p.hold||0,
-   shots=[G.gT+G.gh*.14,H/2,G.gB-G.gh*.14].filter(y=>!foes.some(f=>segD(b.x,b.y,oppX,y,f.x,f.y)<38)), /* ángulos de remate libres */
-   shotT=shots.length?[oppX,shots.reduce((a,y)=>minFoe(oppX,y)>minFoe(oppX,a)?y:a)]:null;
-  if((dOwn<.22||(isDefR(role)&&dOwn<.33))&&press)return{T:[ownX+dir*W*.4,minFoe(b.x,H*.1)>minFoe(b.x,H*.9)?H*.1:H*.9],min:.05,why:'despeje'};
-  if(dG<shootD&&shotT)return{T:shotT,min:0,why:'tiro'}; /* buen ángulo: remata él mismo */
-  if(dG<shootD*.55)return{T:shotT||[oppX,H/2],min:.05,why:'tiro'}; /* cerca del arco: dispara igual, sin dudar */
-  if(better&&(press||hold>.2||(fd<135&&Math.abs(b.x-oppX)/W<.5)||minFoe(better.x,better.y)>fd+60))return{T:[clamp(better.x+dir*60,20,W-20),better.y],min:0,why:'pase'}; /* pase filtrado al mejor ubicado */
-  if(cornered){if(!RL())return{T:[clamp(b.x+dir*260,20,W-20),b.y<H/2?0:H],min:.2,why:'pared'}; /* rebote contra la banda (Clásico) */
-   const q=mine.filter(o=>o!==p).sort((a,c)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(c.x-p.x,c.y-p.y))[0];return q?{T:[q.x,q.y],min:.2,why:'apoyo'}:{T:T0,min:.1,why:'despeje'}}
-  if(hold>.45||fd<135||(Math.abs(b.x-oppX)/W<.5&&hold>.2))return{T:T0,min:fd<135?0:.2,why:'rol'}; /* rival cerca o zona de ataque: define ya (disparo, pase firme adelante) */
-  return{T:[oppX,H/2],min:9,why:'conducir'}};
- if(G.ko&&p.team!==G.ko){p.ct=0;const[a,c]=pos(),lim=W/2-dir*(H*.14+45);tx=dir>0?Math.min(a,lim):Math.max(a,lim);ty=c} /* rivales esperan en su campo, cada uno en su puesto */
- else if(G.sp&&p.team!==G.sp.team){p.ct=0;let[a,c]=pos();const S=G.sp,dd=Math.hypot(a-S.x,c-S.y),Rr=S.rad+30; /* rivales fuera de la zona de reanudación */
-  if(S.type==='arco'){if(Math.abs(a-S.gx)<areaD()+30&&Math.abs(c-H/2)<areaH()/2+30)a=S.gx+(S.gx?-1:1)*(areaD()+60)}
-  if(dd<Rr&&role!=='arquero'){a=S.x+(a-S.x)/(dd||1)*Rr;c=S.y+(c-S.y)/(dd||1)*Rr}tx=clamp(a,30,W-30);ty=clamp(c,30,H-30)}
- else if(G.sp&&G.sp.team===p.team&&taker===p){p.sw=sw0+DT;const S=G.sp,tm=mine.filter(q=>q!==p),fr=q=>minFoe(q.x,q.y);let T; /* sacador: se ubica detrás/afuera y pasa */
-  if(S.type==='corner')T=[oppX-dir*W*.04,H/2];
-  else if(S.type==='arco')T=gkTgt(true).T; /* saque de arco: pase largo al compañero libre mejor ubicado (≥ 140 px de las bandas) o al centro */
-  else{const fw=tm.filter(q=>(q.x-p.x)*dir>(S.type==='arco'?Math.min(W*.15,areaD()*.5):0)&&Math.hypot(q.x-b.x,q.y-b.y)>110),pk=fw.length?fw.reduce((a,c)=>fr(c)>fr(a)?c:a):null;T=pk?[clamp(pk.x+dir*50,20,W-20),pk.y]:[W/2,S.y<H/2?H*.3:H*.7]}
-  const sdx=S.x<W/2?30:-30;if(S.type==='lateral'){tx=S.x+sdx;ty=S.y<H/2?0:H}else if(S.type==='corner'){tx=S.x+sdx;ty=S.y}else{tx=S.x-dir*31;ty=S.y}
-  if(S.type!=='arco'){tx=clamp(tx,p.r,W-p.r);ty=clamp(ty,-6,H+6)} /* pasillo transitable: nunca detrás de las barreras */
-  p.ct=db<p.r+b.r+6?(p.ct||0)+DT:0;
-  const late=p.sw>1.8; /* en cuanto queda detrás del balón saca de inmediato; si se demora, saca igual */
-  if(db<p.r+b.r+(late?14:5)&&(p.ct>.06||late)&&Math.hypot(tx-p.x,ty-p.y)<(late?45:16)){const m=S.type==='arco'?1.65:S.type==='corner'||S.type==='libre'?1.38:.95,ddx=T[0]-b.x,ddy=T[1]-b.y,l=Math.hypot(ddx,ddy)||1;
-   b.vx=ddx/l*KS*m;b.vy=ddy/l*KS*m;p.flash=FL;p.cd=KCD;G.lastT=p.team;G.lastP=p;thump()}}
- else if(spOwn&&taker!==p){p.ct=0;let[a,c]=pos();const S=G.sp; /* resto del equipo: NO se acerca al balón, se abre en su zona a más de 140 px ofreciendo pase */
-  if(S&&S.type==='arco'&&(role==='defensor_central'||role==='lateral'||role==='mediocampista')){ /* saque de arco: laterales y centrales se abren a los costados del área grande */
-   const sg=role==='defensor_central'?(p.rk%2?1:-1):(sd||(p.y<H/2?-1:1)),ad=areaD(),ah=areaH();a=ownX+dir*ad*(role==='mediocampista'?1.5:.9);c=H/2+sg*(ah/2+(role==='lateral'?70:role==='defensor_central'?25+p.rk*20:110))}
-  let ex=a-b.x,ey=c-b.y,el=Math.hypot(ex,ey);if(el<150){if(el<1){ex=dir;ey=0;el=1}a=b.x+ex/el*150;c=b.y+ey/el*150}
-  tx=clamp(a,30,W-30);ty=clamp(c,30,H-30)}
- else if(p.bk>0&&role!=='arquero'){p.bk-=DT;p.ct=0;tx=clamp(p.x-(b.x-p.x)*3,30,W-30);ty=clamp(p.y-(b.y-p.y)*3,30,H-30)} /* retroceso anti-traba */
-  else if((role!=='arquero'||G.ko===p.team)&&(near===p||(p.hoT>0&&p.hoTo&&dB(p.hoTo)>95&&!mateHas&&!spOwn))){chase=true;const D=decide(),T=D.T,ux=T[0]-b.x,uy=T[1]-b.y,ul=Math.hypot(ux,uy)||1,u=[ux/ul,uy/ul],al=((b.x-p.x)*u[0]+(b.y-p.y)*u[1])/(db||1),o=(contested?0:(al>.3?15:50))+exR();p.why=D.why;
-  tx=b.x-u[0]*o+(contested?b.vx*3:0);ty=b.y-u[1]*o+(contested?b.vy*3:0); /* con rival en posesión: va de frente a la pelota, sin rodear ni ceder espacio */p.ct=db<p.r+b.r+6?(p.ct||0)+DT:0;p.hold=db<p.r+b.r+24?Math.min(3,(p.hold||0)+DT):Math.max(0,(p.hold||0)-DT*2);
-  p.kick=contested?(db<p.r+b.r+4&&al>.15):(db<p.r+b.r+4&&p.ct>.02&&(al>.45||p.ct>.14)&&p.hold>=D.min)}
- else if(role==='arquero'&&!G.sp&&!G.ko&&(sit==='mano'||(sit==='suelto'&&db<=nmF))){ /* mano a mano / balón suelto en su área grande: sale con decisión hacia el balón, sin abandonar nunca el área grande */
-  chase=true;p.ct=0;const g=gkTouch();tx=g[0];ty=g[1];p.kick=g[2]}
- else{p.ct=0;[tx,ty]=pos(); /* vuelve fluido a su zona táctica */
-  if(role==='arquero'&&!G.sp&&!G.ko&&db<p.r+b.r+40&&Math.abs(b.x-ownX)<smallD()+b.r+8&&Math.abs(b.y-H/2)<smallH()/2+10){const g=gkTouch();tx=g[0];ty=g[1];p.kick=g[2]}} /* despeja solo con la pelota pegada, desde su línea */
-
- if(!(G.sp&&G.sp.team===p.team&&taker===p)&&db>0&&db<p.r+b.r+90&&(b.x-p.x)/db*dir<-.1){ /* el golpe saldría hacia su propio arco/fondo: PROHIBIDO el disparo directo */
-  p.kick=false;if(role!=='arquero'){const sd2=Math.sign(p.y-b.y)||(p.y<H/2?-1:1),lat=p.r+b.r+34; /* rodea la pelota sin tocarla hasta quedar del lado del arco propio */
-   if(Math.abs(p.y-b.y)<lat-6){tx=p.x+dir*10;ty=clamp(b.y+sd2*lat,30,H-30)}else{tx=clamp(b.x-dir*48,30,W-30);ty=clamp(b.y+sd2*lat*.9,30,H-30)}}}
- /* steering: llegar al punto táctico, nunca por debajo de MINV */
- const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);let hx,hy,spd;
- if(d>10){hx=dx/d;hy=dy/d;spd=chase?MAXV:(contested&&role!=='arquero'&&!G.sp&&!G.ko?clamp(d/25*MAXV,MINV,MAXV):clamp(d/60*MAXV,MINV,MAXV))}else{hx=Math.cos(p.wander);hy=Math.sin(p.wander);spd=MINV}
- if(G.activePowerEvent==='ice'&&!chase&&d>10)spd=Math.min(spd,Math.max(MINV,Math.sqrt(2*ACC*.14*Math.max(0,d-16)))); /* hielo: frenan con anticipación */
- let sx=0,sy=0; /* separación SOLO con compañeros (a los rivales se les marca de frente, nunca se les abre paso) */
- all.forEach(q=>{if(q===p||q.team!==p.team)return;const ex=p.x-q.x,ey=p.y-q.y,e=Math.hypot(ex,ey);
-  if(e>0&&e<65){const w=(65-e)/65*(chase&&db<60?.4:1),rx=ex/e,ry=ey/e,sg=Math.sign(hx*ry-hy*rx)||1;sx+=rx*w*1.2-hy*sg*w*.8;sy+=ry*w*1.2+hx*sg*w*.8}});
- let vx=hx*spd+sx*MAXV,vy=hy*spd+sy*MAXV;const vl=Math.hypot(vx,vy);
- if(vl>MAXV){vx*=MAXV/vl;vy*=MAXV/vl}else if(vl<MINV){if(vl<1e-3){vx=hx*MINV;vy=hy*MINV}else{vx*=MINV/vl;vy*=MINV/vl}}
- let ax=(vx+(vx-p.vx)*.6)/MAXV,ay=(vy+(vy-p.vy)*.6)/MAXV;const am=Math.hypot(ax,ay);if(am>1){ax/=am;ay/=am}
- p.ax=ax;p.ay=ay}
+/* ===== IA de bots · adaptador hacia window.BotAIController (/BotAIController.js) ===== */
+const BOT_DIFFS=['easy','normal','hard'],BOT_DLBL={easy:'Fácil',normal:'Normal',hard:'Difícil'};
+let BOT_DIFF='normal',BOT_AI=null,BOT_WARN=0,BOT_OUT=null,BOT_OUT_G=null,BOT_OUT_FR=-1;
+const botWarn=(k,m,e)=>{if(BOT_WARN&k)return;BOT_WARN|=k;console.warn('[BotAI] '+m,e||'')}; /* un solo aviso por tipo de problema */
+const botN=v=>Number.isFinite(+v)?+v:0;
+function setBotDiff(v){BOT_DIFF=BOT_DIFFS.includes(v)?v:'normal';
+ if(BOT_AI){if(typeof BOT_AI.setDifficulty==='function'){try{BOT_AI.setDifficulty(BOT_DIFF)}catch(e){BOT_AI=null}}else BOT_AI=null} /* sin setDifficulty: se recrea la instancia con la nueva dificultad */
+ ['rDiff','aDiff'].forEach(id=>{const el=$(id);if(el&&el.value!==BOT_DIFF)el.value=BOT_DIFF})}
+function botAIInst(){if(BOT_AI)return BOT_AI;const C=window.BotAIController;
+ if(typeof C!=='function'){botWarn(1,'BotAIController no está cargado: los bots usan la IA de respaldo.');return null}
+ try{BOT_AI=new C({difficulty:BOT_DIFF})}catch(e){botWarn(2,'No se pudo crear BotAIController: los bots usan la IA de respaldo.',e)}return BOT_AI}
+/* gameState con las variables reales del juego: cancha 0..G.w × 0..G.h, arcos entre G.gT y G.gB */
+function botState(){const b=G.ball;return{
+ stadium:{left:0,top:0,width:G.w,height:G.h},
+ ball:{x:b.x,y:b.y,vx:b.vx,vy:b.vy,r:b.r},
+ players:act().map(q=>({id:q.id,team:q.team,x:q.x,y:q.y,vx:q.vx,vy:q.vy,r:q.r,isBot:!!q.bot,frozen:q.fz>0,slideCooldown:q.slCd||0})),
+ goalTop:G.gT,goalBottom:G.gB,isRealistic:RL(),
+ setPiece:G.sp?{type:G.sp.type,team:G.sp.team}:(G.ko?{type:'kickoff',team:G.ko}:null),
+ activePowerEvent:G.activePowerEvent||null}}
+/* respaldo suave si el módulo no cargó o falló: el bot más cercano va por la pelota, el resto mantiene su zona */
+function botFallback(p){const b=G.ball,W=G.w,H=G.h,dir=p.team==='red'?1:-1,ownX=dir>0?0:W,dB=q=>Math.hypot(q.x-b.x,q.y-b.y),
+ mine=act().filter(q=>q.team===p.team&&q.bot&&!(q.fz>0)),ch=mine.reduce((a,q)=>dB(q)<dB(a)?q:a,p);let tx,ty;p.kick=false;
+ if(ch===p){const behind=(p.x-b.x)*dir>0; /* ya pasó la pelota: la rodea para pegarle de frente al arco rival */
+  tx=behind?b.x-dir*(p.r+b.r+26):b.x;ty=behind?b.y+(p.y<b.y?-1:1)*(p.r+b.r+10):b.y;p.kick=!behind&&dB(p)<p.r+b.r+8}
+ else{tx=ownX+dir*W*.3;ty=H/2+(b.y-H/2)*.5}
+ const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy)||1,k=Math.min(1,d/40);p.ax=dx/d*k;p.ay=dy/d*k;botSlide(p,false)}
+/* barrida de bot (solo Modo Realista): misma mecánica que la del jugador humano (slideTick), disparada por la IA en vez de por mantener patear */
+function botSlide(p,want){
+ if(p.sl){slideTick(p);return}
+ p.slCd=Math.max(0,(p.slCd||0)-DT);
+ if(want&&RL()&&!G.pen&&!G.sp&&!G.ko&&!p.slCd&&!(p.fz>0)){const b=G.ball;
+  let dx=p.vx,dy=p.vy,l=Math.hypot(dx,dy);if(l<.6){dx=p.ax;dy=p.ay;l=Math.hypot(dx,dy)}if(l<.05){dx=b.x-p.x;dy=b.y-p.y;l=Math.hypot(dx,dy)||1}
+  p.sl={t:0,dx:dx/l,dy:dy/l,hit:false,bad:false,rec:false};slideTick(p)}}
+/* aplica { ix, iy, kick, slide } al bot: mismo formato de entrada que un humano (ax/ay normalizados + kick) */
+function botApply(p,o){const ix=botN(o.ix),iy=botN(o.iy),l=Math.max(1,Math.hypot(ix,iy));
+ p.ax=ix/l;p.ay=iy/l;p.kick=!!o.kick;botSlide(p,!!o.slide)}
+function botAI(p){const ai=botAIInst();
+ if(!ai){botFallback(p);return}
+ if(BOT_OUT_G!==G||BOT_OUT_FR!==G.fr){BOT_OUT_G=G;BOT_OUT_FR=G.fr;BOT_OUT=null; /* una sola llamada a update() por frame para todos los bots */
+  try{BOT_OUT=ai.update(botState())}catch(e){botWarn(4,'BotAIController.update falló: los bots usan la IA de respaldo.',e)}}
+ const o=BOT_OUT&&BOT_OUT[p.id];
+ if(o)botApply(p,o);else botFallback(p)}
 
 const segD=(ax,ay,bx,by,px,py)=>{const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy||1,t=clamp(((px-ax)*dx+(py-ay)*dy)/l,0,1);return Math.hypot(px-ax-t*dx,py-ay-t*dy)};
 /* Cambios en vivo (Admin): nadie se teletransporta ni se reinicia la jugada */
@@ -835,10 +740,14 @@ const powerGapRoll=()=>POWER_GAP_MIN+Math.random()*(POWER_GAP_MAX-POWER_GAP_MIN)
 const powerTargets=()=>{const e=G.activePowerEvent;return{bm:e==='giant'?3.75:1,pm:e==='shrink'?.55:1,gm:e==='goals'?2:1}};
 /* Física de movimiento de jugadores por evento (null = física normal). La velocidad máxima es proporcional a la aceleración (ACC·dm/(1−dm)). */
 function powerMove(p){const e=G.activePowerEvent;if(!e)return null;
- if(e==='ice')return{dm:p.kick?.995:.9965,ac:ACC*.2,cap:6}; /* hielo real: damping 0.9965, aceleración baja y tope de velocidad */
+ if(e==='ice')return{dm:p.kick?.995:.9965,ac:ACC_ICE*.2,cap:6}; /* hielo real: damping 0.9965, aceleración baja y tope de velocidad */
  if(e==='shrink')return{dm:p.kick?KPD:PD,ac:ACC*.475,cap:0}; /* velocidad máx. y aceleración al 47.5 % */
  if(e==='turbo')return{dm:p.kick?KPD:PD,ac:ACC*1.75,cap:0}; /* velocidad máx. y aceleración ×1.75 */
  return null}
+/* Integración de velocidad compartida por el Host y la predicción local del invitado */
+function velStep(p,pmv){const ice=G.activePowerEvent==='ice';let dm=pmv?pmv.dm:(p.kick?KPD:PD),ac=pmv?pmv.ac:ACC;
+ if(!ice){const sp=Math.hypot(p.vx,p.vy);if(sp<5){if(!p.ax&&!p.ay)dm*=BRAKE;else if(p.vx*p.ax+p.vy*p.ay<0)ac*=TURN}} /* frenado en seco y giros instantáneos (no en Hielo) */
+ p.vx=(p.vx+p.ax*ac)*dm;p.vy=(p.vy+p.ay*ac)*dm;if(pmv&&pmv.cap){const sp=Math.hypot(p.vx,p.vy);if(sp>pmv.cap){p.vx*=pmv.cap/sp;p.vy*=pmv.cap/sp}}}
 /* Escala de velocidad máxima que usan los bots (coherente con powerMove) y radio extra de la pelota */
 const PWSM=()=>{const e=G.activePowerEvent;return e==='shrink'?.475:e==='turbo'?1.75:e==='ice'?1.2:1};
 const exR=()=>Math.max(0,G.ball.r-BRAD*G.k);
@@ -1001,7 +910,7 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
  if(G.pen&&G.pen.k===p)p.ax=0}); /* teclas de cada humano; arquero: solo vertical */
  G.fr=(G.fr||0)+1;
  act().forEach(p=>{if(p.bot){if(p.fz>0){p.ax=p.ay=0;p.kick=false}else{G.pen?penAI(p):botAI(p);if(G.activePowerEvent==='reverse'&&!G.pen)botDisorient(p)}}
-  const pmv=powerMove(p),dm=pmv?pmv.dm:(p.kick?KPD:PD),ac=pmv?pmv.ac:ACC;p.vx=(p.vx+p.ax*ac)*dm;p.vy=(p.vy+p.ay*ac)*dm;if(pmv&&pmv.cap){const sp=Math.hypot(p.vx,p.vy);if(sp>pmv.cap){p.vx*=pmv.cap/sp;p.vy*=pmv.cap/sp}}if(!p.bot)slideTick(p);if(p.fz>0){p.vx=p.vy=0;p.sl=null} /* bloque de hielo: inmóvil pero con colisión sólida */
+  velStep(p,powerMove(p));if(!p.bot)slideTick(p);if(p.fz>0){p.vx=p.vy=0;p.sl=null} /* bloque de hielo: inmóvil pero con colisión sólida */
   /* el ejecutante se mueve libre en 95 px alrededor del balón (spFree/contain); el resto, dentro de la cancha */
   {const nx=p.x+p.vx;p.x=spFree(p)?nx:clamp(nx,Math.min(-GD+p.r,p.x),Math.max(w+GD-p.r,p.x))}p.y=moveY(p,p.y+p.vy);fence(p);p.cd=Math.max(0,p.cd-DT);p.flash=Math.max(0,p.flash-DT);
   if(p.kick&&!p.kd)p.flash=FL; /* destello 150 ms al presionar patear, toque o no la pelota */
@@ -1041,7 +950,7 @@ function botUI(){const lock=hum()>=LOCK;['aBotTeam','bAdd','bDel'].forEach(i=>$(
  $('botInfo').textContent=`Bots · Local: ${nb('red').length} · Visitante: ${nb('blue').length}`;roster()}
 function toggleMenu(f){menuOpen=typeof f==='boolean'?f:!menuOpen;$('menu').classList.toggle('hidden',!menuOpen);
  if(menuOpen){
-  $('adm').classList.toggle('hidden',!isAdmin);$('aMode').value=RL()?'realista':G.super?'super':'clasico';$('aSize').value=RL()?(G.cs||'mediana'):G.size;$('aSize').classList.toggle('hidden',RL());syncNum();botUI();uniUI();updateInvite();
+  $('adm').classList.toggle('hidden',!isAdmin);$('aMode').value=RL()?'realista':G.super?'super':'clasico';$('aSize').value=RL()?(G.cs||'mediana'):G.size;$('aSize').classList.toggle('hidden',RL());$('aDiff').value=BOT_DIFF;syncNum();botUI();uniUI();updateInvite();
   Object.keys(keys).forEach(k=>keys[k]=0);sendKeys()}else $('c').focus()}
 $('v1').onclick=()=>castVote(1);$('v2').onclick=()=>castVote(2);$('v3').onclick=()=>castVote(3);
 $('mResume').onclick=()=>toggleMenu(false);
@@ -1057,6 +966,7 @@ function syncNum(){const m=G.duration/60,g=G.goalLimit,T=$('aTime'),Gl=$('aGoals
  T.value=m<=10?String(m):'c';$('aTimeN').value=m>10?Math.round(m):'';$('aTimeN').classList.toggle('hidden',m<=10);
  Gl.value=g<=10?String(g):'c';$('aGoalsN').value=g>10?g:'';$('aGoalsN').classList.toggle('hidden',g<=10)}
 $('aRestart').onclick=()=>{toggleMenu(false);restart();showEv('¡PARTIDO REINICIADO!')};
+$('aDiff').onchange=e=>{if(!isAdmin)return;setBotDiff(e.target.value);showEv(`🤖 Dificultad bots: ${BOT_DLBL[BOT_DIFF]}`,1200)};
 $('bAdd').onclick=()=>{const t=$('aBotTeam').value;if(hum()>=LOCK||nb(t).length>=(RL()?11:MAXB))return;const n=botSeq++;if(G.pen)return showEv('Espera: tanda de penales en curso',1500);const nb2=mk(`Bot ${n}`,String(n%99),t,true);placeFree(nb2);G.players.push(nb2);uniqueBotNums();assignRoles(t);botUI();showEv(`+1 bot · ${t==='red'?'Local':'Visitante'}`,900)};
 $('bDel').onclick=()=>{const b=nb($('aBotTeam').value).pop();if(b){G.players.splice(G.players.indexOf(b),1);botUI()}};
 $('mLeave').onclick=()=>{netLeave();if(isAdmin&&!cur.test)rooms=rooms.filter(r=>r!==cur);menuOpen=false;$('menu').classList.add('hidden');$('vote').classList.add('hidden');renderRooms();show('screen-lobby')};
@@ -1136,12 +1046,12 @@ const linkOf=c=>location.href.split('#')[0].split('?')[0]+'?sala='+c;
 async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch(e){try{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();const ok=document.execCommand('copy');a.remove();return ok}catch(e2){return false}}}
 function updateInvite(){const c=NET.code;$('mCopy').classList.toggle('hidden',!c);$('mCode').textContent=c?'Sala online: '+c:''}
 $('mCopy').onclick=async()=>{const ok=await copyText(linkOf(NET.code));showEv(ok?'📋 Link copiado':'Contraseña: '+NET.code,1600)};
-function netReset(){clearInterval(NET.pingT);clearInterval(NET.roomT);clearTimeout(NET.jt);clearTimeout(NET.ht);const p=NET.peer;if(p)setTimeout(()=>{try{p.destroy()}catch(e){}},300);Object.assign(NET,{role:'local',peer:null,conn:null,conns:[],code:'',pm:new Map(),pk:''})}
+function netReset(){clearInterval(NET.pingT);clearInterval(NET.roomT);clearTimeout(NET.jt);clearTimeout(NET.ht);const p=NET.peer;if(p)setTimeout(()=>{try{p.destroy()}catch(e){}},300);Object.assign(NET,{role:'local',peer:null,conn:null,fconn:null,fast:new Map(),conns:[],code:'',pm:new Map(),pk:''})}
 const delRoom=()=>{if(NET.role==='host'&&NET.code)fetch('/api/salas',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({peerId:NET.code}),keepalive:true}).catch(()=>{})};
 window.addEventListener('beforeunload',delRoom);window.addEventListener('pagehide',delRoom);
 function netLeave(){delRoom();clearInterval(NET.roomT);if(NET.role==='host')bc({t:'bye'});if(NET.role==='client'){try{NET.conn.close()}catch(e){}}netReset();updateInvite()}
 const csend=m=>safeSend(NET.conn,m); /* envío seguro: ignora si la conexión ya se cerró */
-const sendKeys=()=>{if(NET.role==='client'&&NET.conn&&NET.conn.open)csend({t:'k',k:{...keys}})};
+const sendKeys=()=>{if(NET.role==='client'&&NET.conn&&NET.conn.open){const ch=NET.fconn&&NET.fconn.open?NET.fconn:NET.conn;safeSend(ch,{t:'k',q:NET.kq=(NET.kq||0)+1,k:{...keys}})}}; /* q: secuencia → el canal no ordenado nunca aplica teclas viejas */
 function sendChat(t){if(NET.role==='client')csend({t:'chat',x:t});else{addMsg(me.name,me.team,t,me.flag,me.plat);bc({t:'chat',n:me.name,tm:me.team,x:t,f:me.flag,pt:me.plat})}}
 const cfgMsg=()=>({t:'cfg',sm:G.super?1:0,size:G.size,d:G.duration,g:G.goalLimit,uni:G.uni,name:cur.name,code:NET.code,rf:cur.flag||'🌐',pl:G.players.map(p=>[p.id,p.flag||'🌐',p.ping|0])});
 /* --- Host --- */
@@ -1152,7 +1062,8 @@ function startHost(r){if(typeof Peer==='undefined'){showEv('Online no disponible
    const pub=()=>{if(NET.role!=='host'||NET.code!==id){clearInterval(NET.roomT);return}fetch('/api/salas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({peerId:id,name:r.name,owner:r.owner,flag:r.flag||FLAG,ping:0,n:hum(),max:r.max,priv:r.priv,code:id,mode:G.super?'super':RL()?'realistic':'classic'})}).catch(()=>{})};
    pub();clearInterval(NET.roomT);NET.roomT=setInterval(pub,15000)});
   pr.on('error',e=>{if(done)return;clearTimeout(tm);done=true;if(e.type==='unavailable-id'&&n<5)attempt(n+1);else showEv('No se pudo abrir la sala online: sala solo local',2800)});
-  pr.on('connection',c=>{c.on('data',m=>{try{hostData(c,m)}catch(e){console.warn('hostData',e)}});c.on('close',()=>hostGone(c));c.on('error',()=>hostGone(c))})};
+  pr.on('connection',c=>{if(c.label==='fast'){NET.fast.set(c.peer,c);c.on('data',m=>{try{if(m&&m.t==='k'){const mc=NET.conns.find(x=>x.peer===c.peer);if(mc)hostData(mc,m)}}catch(e){}});c.on('close',()=>{if(NET.fast.get(c.peer)===c)NET.fast.delete(c.peer)});c.on('error',()=>{});return}
+  c.on('data',m=>{try{hostData(c,m)}catch(e){console.warn('hostData',e)}});c.on('close',()=>hostGone(c));c.on('error',()=>hostGone(c))})};
  attempt(0)}
 function hostData(c,m){if(!m||typeof m!=='object'||NET.role!=='host')return;
  if(m.t==='join'){if(c.pl)return;const r=cur,nick=String(m.nick||'').slice(0,16).trim()||'Jugador',num=Array.from(String(m.num||'')).slice(0,2).join('')||'10';
@@ -1164,17 +1075,17 @@ function hostData(c,m){if(!m||typeof m!=='object'||NET.role!=='host')return;
  else if(!c.pl)return;
  else if(m.t==='pong'){const r=Math.max(1,Date.now()-m.ts);c.pl.ping=c.pl.ping?Math.round(c.pl.ping*.5+r*.5):r}
  else if(m.t==='flag')c.pl.flag=safeFlag(m.f);
- else if(m.t==='k')c.pl.keys=m.k&&typeof m.k==='object'?m.k:{};
+ else if(m.t==='k'){if(m.q===undefined||!(m.q<=(c.pl.kq||0))){if(m.q!==undefined)c.pl.kq=m.q;c.pl.keys=m.k&&typeof m.k==='object'?m.k:{}}}
  else if(m.t==='chat'){const x=String(m.x||'').slice(0,120);if(x){addMsg(c.pl.name,c.pl.team,x,c.pl.flag,c.pl.plat);bc({t:'chat',n:c.pl.name,tm:c.pl.team,x,f:c.pl.flag,pt:c.pl.plat})}}
  else if(m.t==='vote'){if(G.vote&&[1,2,3].includes(m.n)&&G.vote.voters.includes(c.pl))c.pl.vc=m.n}}
-function hostGone(c){const p=c.pl;if(!p)return;c.pl=null;NET.conns=NET.conns.filter(x=>x!==c);
+function hostGone(c){const p=c.pl;if(!p)return;c.pl=null;{const f=NET.fast.get(c.peer);if(f){NET.fast.delete(c.peer);try{f.close()}catch(e){}}}NET.conns=NET.conns.filter(x=>x!==c);
  const i=G.players.indexOf(p);if(i>=0)G.players.splice(i,1);
  if(G.vote){const j=G.vote.voters.indexOf(p);if(j>=0)G.vote.voters.splice(j,1)}
  if(G.pen&&G.pen.single&&(G.pen.parts.includes(p)||G.pen.list.red.includes(p)||G.pen.list.blue.includes(p))){G.pen.g=false;foulPenEnd()} /* penal por falta: se cancela y se reanuda */
  else if(G.pen&&(G.pen.parts.includes(p)||G.pen.list.red.includes(p)||G.pen.list.blue.includes(p)))end('🤝 ¡PARTIDO FINALIZADO EN EMPATE! (jugador desconectado)');
  showEv(`➖ ${p.name} salió`,1400)}
-function netState(){if(!NET.conns.length)return;const P=G.pen,V=G.vote,f=n=>+n.toFixed(1);
- bc({t:'s',bp:(G.pw&&G.pw.on)?1:0,p:G.players.map(p=>[p.id,f(p.x),f(p.y),p.team,p.num,p.name,p.flash>0?+p.flash.toFixed(2):0,p.bot?1:0,p.bot?'':(p.plat||''),p.fz>0?+p.fz.toFixed(1):0,p.im>0?+p.im.toFixed(1):0]),mg:G.magnetId||0,b:[f(G.ball.x),f(G.ball.y),G.ball.r],sc:[G.score.red,G.score.blue],
+function netState(){if(!NET.conns.length)return;const P=G.pen,V=G.vote,f=n=>Math.round(n*10)/10; /* 1 decimal: menos datos móviles */
+ bcFast({t:'s',q:NET.sq=(NET.sq||0)+1,hz:(G.gp>0||G.over)?1:0,bp:(G.pw&&G.pw.on)?1:0,p:G.players.map(p=>[p.id,f(p.x),f(p.y),p.team,p.num,p.name,p.flash>0?+p.flash.toFixed(2):0,p.bot?1:0,p.bot?'':(p.plat||''),p.fz>0?f(p.fz):0,p.im>0?f(p.im):0,f(p.vx||0),f(p.vy||0)]),mg:G.magnetId||0,b:[f(G.ball.x),f(G.ball.y),f(G.ball.r),f(G.ball.vx||0),f(G.ball.vy||0)],sc:[G.score.red,G.score.blue],
   ck:+G.clock.toFixed(2),d:G.duration,gd:G.golden?1:0,pe:G.activePowerEvent||0,pt:+(G.powerEventTimer||0).toFixed(2),pa:G.paused?1:0,cd:+(G.cd||0).toFixed(2),
   vt:V?{t:+V.t.toFixed(2),c:[0,vCount(1),vCount(2),vCount(3)]}:0,
   ko:G.ko==='red'?1:G.ko==='blue'?2:0,sp:G.sp?{k:G.sp.type,t:G.sp.team==='red'?1:2,x:Math.round(G.sp.x),y:Math.round(G.sp.y),r:G.sp.rad}:0,pn:P?{side:P.side,gx:P.gx,din:P.din,res:P.res,team:P.team,ph:P.ph,t:+P.t.toFixed(2),sn:P.s?P.s.name:'',win:P.win||null,single:P.single?1:0}:0});
@@ -1187,7 +1098,9 @@ function joinCode(raw){const code=norm(raw),err=m=>{$('codeErr').textContent=m};
  const fail=m=>{if(NET.peer!==pr)return;const wasIn=NET.role==='client';netLeave();$('modal').classList.add('hidden');if(wasIn)show('screen-lobby');err(m)};
  const tm=setTimeout(()=>{if(!ok)fail('No se encontró la sala (revisa la contraseña).')},9000);clearTimeout(NET.jt);NET.jt=tm;
  pr.on('error',e=>{clearTimeout(tm);fail(e.type==='peer-unavailable'?'No se encontró la sala (revisa la contraseña).':'No se pudo conectar al servidor online.')});
- pr.on('open',()=>{const c=pr.connect(code,{reliable:true,serialization:'json'});NET.conn=c;
+ pr.on('open',()=>{const c=pr.connect(code,{reliable:true,serialization:'json'});NET.conn=c; /* canal principal fiable: join, chat, votos, cfg */
+  const fc=pr.connect(code,{label:'fast',reliable:false,serialization:'json'});NET.fconn=fc; /* canal rápido (tipo UDP): inputs y estados */
+  fc.on('data',m=>{try{if(NET.fconn===fc&&m&&m.t==='s')cliData(m)}catch(e){console.warn('fast',e)}});fc.on('close',()=>{if(NET.fconn===fc)NET.fconn=null});fc.on('error',()=>{});
   c.on('open',()=>safeSend(c,{t:'join',nick:user.nick,num:user.num,pass:'',flag:FLAG,pt:PLAT}));
   c.on('data',m=>{try{if(NET.conn!==c||!m||typeof m!=='object')return;if(m.t==='welcome'){ok=true;clearTimeout(tm);enterClient(m)}
    else if(m.t==='need'){clearTimeout(tm);pending={net:1};$('jName').textContent='Sala '+code;$('jPass').value='';$('jErr').textContent='';$('modal').classList.remove('hidden');$('jPass').focus()}
@@ -1197,7 +1110,7 @@ function joinCode(raw){const code=norm(raw),err=m=>{$('codeErr').textContent=m};
 $('codeGo').onclick=()=>joinCode($('codeIn').value);
 $('codeIn').addEventListener('keydown',e=>e.key==='Enter'&&$('codeGo').click());
 function enterClient(m){NET.role='client';NET.myId=m.id;NET.pm=new Map();NET.code=NET.target;const c=m.cfg;isAdmin=false;menuOpen=false;cur={name:c.name,test:true,client:true};
- me={id:m.id,name:user.nick,num:user.num,team:'red',x:0,y:0,r:PRAD,flash:0,vc:0,plat:PLAT};
+ me={id:m.id,name:user.nick,num:user.num,team:'red',x:0,y:0,vx:0,vy:0,r:PRAD,flash:0,vc:0,plat:PLAT};NET.lq=0;NET.kq=0;NET.hist=[];
  G={uni:c.uni,size:c.size,super:!!c.sm,duration:c.d,goalLimit:c.g,players:[me],ball:{x:500,y:300,r:BRAD},score:{red:0,blue:0},clock:0,golden:false,paused:false,cd:0,vote:null,pen:null,over:false};
  NET.pm.set(m.id,me);sizeUp();$('modal').classList.add('hidden');$('codeErr').textContent='';$('menu').classList.add('hidden');
  $('vote').classList.add('hidden');$('penbar').classList.add('hidden');$('sb').classList.remove('hidden');$('sb').appendChild($('mute'));$('log').textContent='';
@@ -1213,12 +1126,14 @@ function cliData(m){
  else if(m.t==='ref')addRef(String(m.x||'').slice(0,220));
  else if(m.t==='sw')slideNotice(+m.n||1,!!m.l);
  else if(m.t==='bye'){netLeave();show('screen-lobby');$('codeErr').textContent='La sala fue cerrada por el Host.'}}
-function applyState(m){const seen=new Set();
+function applyState(m){if(m.q!==undefined){if(m.q<=(NET.lq||0))return;NET.lq=m.q} /* descarta estados viejos del canal no ordenado */
+ G.hz=m.hz?1:0;const seen=new Set(),meAu={};
  G.magnetId=m.mg||0;
- m.p.forEach(([id,x,y,team,num,name,fl,bot,plat,fz,im])=>{let p=NET.pm.get(id);if(!p){p={id,x,y,vx:0,vy:0};NET.pm.set(id,p);G.players.push(p)}
-  Object.assign(p,{tx:x,ty:y,team,num,name,flash:fl,fz:fz||0,im:im||0,bot:!!bot,plat:plat==='m'?'m':plat==='d'?'d':'',r:PRAD*G.k*(G.pm||1)});pfApply(p);seen.add(id)});
+ m.p.forEach(([id,x,y,team,num,name,fl,bot,plat,fz,im,vx,vy])=>{let p=NET.pm.get(id);if(!p){p={id,x,y,vx:0,vy:0};NET.pm.set(id,p);G.players.push(p)}
+  if(p===me){meAu.x=x;meAu.y=y;meAu.vx=vx||0;meAu.vy=vy||0}
+  Object.assign(p,{tx:x,ty:y,avx:vx||0,avy:vy||0,team,num,name,flash:fl,fz:fz||0,im:im||0,bot:!!bot,plat:plat==='m'?'m':plat==='d'?'d':'',r:PRAD*G.k*(G.pm||1)});pfApply(p);seen.add(id)});
  G.players=G.players.filter(p=>seen.has(p.id)||(NET.pm.delete(p.id),false));
- const b=G.ball;b.tx=m.b[0];b.ty=m.b[1];b.r=m.b[2];G.pw=m.bp?{id:'',t:5,on:true}:null;
+ const b=G.ball;b.tx=m.b[0];b.ty=m.b[1];b.r=m.b[2];b.avx=m.b[3]||0;b.avy=m.b[4]||0;G.pw=m.bp?{id:'',t:5,on:true}:null;
  G.score={red:m.sc[0],blue:m.sc[1]};G.clock=m.ck;G.duration=m.d;G.golden=!!m.gd;G.activePowerEvent=m.pe||null;G.powerEventTimer=+m.pt||0;G.paused=!!m.pa;G.cd=m.cd;G.ko=m.ko===1?'red':m.ko===2?'blue':null;G.sp=m.sp?{type:m.sp.k,team:m.sp.t===1?'red':'blue',x:m.sp.x,y:m.sp.y,rad:m.sp.r}:null;
  const hadV=!!G.vote;G.vote=m.vt?{t:m.vt.t,c:m.vt.c}:null;
  if(G.vote){if(!hadV){me.vc=0;$('vote').classList.remove('hidden')}voteUI()}else if(hadV)$('vote').classList.add('hidden');
@@ -1228,13 +1143,43 @@ function applyState(m){const seen=new Set();
  if(G.pen){const P=G.pen;$('pbR').style.display=$('pbB').style.display=P.single?'none':'';const k=JSON.stringify([P.res,P.team,P.ph==='res',P.win]);if(k!==NET.pk){NET.pk=k;penBar()}
   $('pTimer').textContent=P.ph==='aim'?Math.max(0,Math.ceil(7-P.t)):'';
   const info=P.ph==='aim'||P.ph==='intro'?`🥅 Patea ${P.s.name} (${P.team==='red'?'LOCAL':'VISITANTE'})`:'';if($('pInfo').textContent!==info)$('pInfo').textContent=info}
+ if(meAu.x!==undefined)reconcileMe(meAu);
  hud()}
+/* ===== Extrapolación estilo Haxball + predicción local del invitado ===== */
+let EXT_MS=60;try{const v=localStorage.getItem('futball_extrap_ms');if(v!==null&&v!==''&&isFinite(+v))EXT_MS=Math.max(0,Math.min(200,Math.round(+v)))}catch(e){}
+(()=>{const r=$('extR'),l=$('extV');if(!r)return;r.value=EXT_MS;l.textContent=EXT_MS;
+ r.oninput=()=>{EXT_MS=Math.max(0,Math.min(200,Math.round(+r.value)||0));l.textContent=EXT_MS;try{localStorage.setItem('futball_extrap_ms',String(EXT_MS))}catch(e){}}})();
+/* ¿se puede predecir mi ficha? (solo cuando el Host también la mueve libremente) */
+const predOn=()=>NET.role==='client'&&me&&G&&me.team!=='spec'&&!G.pen&&!G.vote&&!G.paused&&!(G.cd>0)&&!G.hz&&!G.ko&&!G.sp&&!G.over;
+function cliInput(){const ix=(keys.right|0)-(keys.left|0)+clamp(+keys.jx||0,-1,1),iy=(keys.down|0)-(keys.up|0)+clamp(+keys.jy||0,-1,1),l=Math.max(1,Math.hypot(ix,iy));
+ let ax=ix/l,ay=iy/l,k=!!keys.kick;if(G.activePowerEvent==='reverse'){ax=-ax;ay=-ay}if(me.fz>0){ax=ay=0;k=false}return{ax,ay,k}}
+/* un tick de física local (misma velStep que el Host, con límites simples de cancha) */
+function predAdvance(s,inp){s.ax=inp.ax;s.ay=inp.ay;s.kick=inp.k;if(s.fz>0){s.vx=s.vy=0;return}
+ velStep(s,powerMove(s));const r=s.r||PRAD,nx=s.x+s.vx,ny=clamp(s.y+s.vy,r,G.h-r),mouth=ny>G.gT&&ny<G.gB;
+ s.x=mouth?clamp(nx,-GD+r,G.w+GD-r):clamp(nx,r,G.w-r);s.y=ny}
+/* tick fijo a 60 Hz del invitado: guarda el input y avanza mi ficha al instante */
+function cliTick(){if(!me||!G)return;const inp=cliInput(),h=NET.hist||(NET.hist=[]);h.push(inp);if(h.length>45)h.shift();
+ if(!predOn())return;predAdvance(me,inp)}
+/* concilia con la posición autoritativa: reaplica los inputs de los últimos RTT ms sobre el estado del Host y corrige suavemente */
+function reconcileMe(au){if(!predOn()){me.vx=au.vx;me.vy=au.vy;return}
+ const h=NET.hist||[],N=Math.max(0,Math.min(h.length,Math.round(Math.min(400,me.ping||0)/16.67))),s={x:au.x,y:au.y,vx:au.vx,vy:au.vy,r:me.r,fz:me.fz};
+ for(let i=h.length-N;i<h.length;i++)predAdvance(s,h[i]);
+ const ex=s.x-me.x,ey=s.y-me.y;
+ if(Math.hypot(ex,ey)>100){me.x=s.x;me.y=s.y;me.vx=s.vx;me.vy=s.vy}else{me.x+=ex*.25;me.y+=ey*.25;me.vx+=(s.vx-me.vx)*.25;me.vy+=(s.vy-me.vy)*.25}}
 function cliSmooth(){powerGoals();
  const pm=G.activePowerEvent==='shrink'?.55:1;G.pm=G.pm||1;G.pm+=(pm-G.pm)*.12;if(Math.abs(pm-G.pm)<.004)G.pm=pm; /* Rayo Encogedor: transición suave del radio en el cliente */
- const sm=o=>{if(o.tx===undefined)return;const dx=o.tx-o.x,dy=o.ty-o.y;if(Math.hypot(dx,dy)>150){o.x=o.tx;o.y=o.ty}else{o.x+=dx*.5;o.y+=dy*.5}};G.players.forEach(sm);sm(G.ball)}
+ const K=EXT_MS/16.67*.85,predicting=predOn();
+ const sm=(o,isBall)=>{if(o.tx===undefined)return;if(o===me&&predicting)return; /* mi ficha la mueve la predicción local */
+  let ox=0,oy=0;
+  if(K>0&&o!==me&&o.avx!==undefined){let wx=o.avx*K,wy=o.avy*K;const l=Math.hypot(wx,wy),mx=isBall?70:45;if(l>mx){wx*=mx/l;wy*=mx/l} /* tope anti-saltos */
+   o.exx=(o.exx||0)+(wx-(o.exx||0))*.25;o.exy=(o.exy||0)+(wy-(o.exy||0))*.25;ox=o.exx;oy=o.exy}else{o.exx=o.exy=0} /* amortiguación del desplazamiento */
+  let tx=o.tx+ox,ty=o.ty+oy;
+  if(isBall&&!RL()&&(ox||oy)){const r=o.r||BRAD;ty=clamp(ty,r,G.h-r);if(!(ty>G.gT&&ty<G.gB))tx=clamp(tx,r,G.w-r)} /* la pelota extrapolada no atraviesa paredes */
+  const dx=tx-o.x,dy=ty-o.y;if(Math.hypot(dx,dy)>150){o.x=tx;o.y=ty}else{o.x+=dx*.5;o.y+=dy*.5}};
+ G.players.forEach(p=>sm(p,false));sm(G.ball,true)}
 let last=performance.now(),acc=0;
 (function loop(t){acc+=Math.min(.05,(t-last)/1000);last=t;
- try{if(inGame&&G){if(NET.role==='client')cliSmooth();else{let n=0;while(acc>=DT&&n++<5){step();acc-=DT;if(NET.role==='host')netState()}if(acc>DT*5)acc=0}draw()}else acc=0}
+ try{if(inGame&&G){if(NET.role==='client'){let n=0;while(acc>=DT&&n++<5){cliTick();acc-=DT}if(acc>DT*5)acc=0;cliSmooth()}else{let n=0;while(acc>=DT&&n++<5){step();acc-=DT;if(NET.role==='host')netState()}if(acc>DT*5)acc=0}draw()}else acc=0}
  catch(e){console.error('loop',e);acc=0} /* un error aislado no detiene el juego */
  requestAnimationFrame(loop)})(last);
 </script>
