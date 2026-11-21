@@ -17,6 +17,8 @@
  *   activePowerEvent : 'ice' | 'giant_ball' | 'big_goals' | 'fire_ball' | 'magnet' | 'tag' | { type, magnetId }
  *   teamDirs? : { [team]: +1 | -1 }  (+1 = ataca hacia +x). Por defecto: team 1 / 'red' / 'left' ataca hacia +x.
  *
+ * Movimiento: (ix, iy) se recalcula en CADA frame; los ticks de reacción solo refrescan decisiones tácticas.
+ *
  * Todas las distancias están expresadas como fracción de stadium.width / stadium.height.
  * Sin dependencias externas.
  */
@@ -29,9 +31,15 @@
   // Niveles de dificultad
   // ---------------------------------------------------------------------------
   const DIFFICULTY = {
-    easy:   { react: [14, 18], aim: 20, predict: 4,  slide: false, through: false, wallBounce: false, slideChance: 0,    kickTol: 0.55, precise: false },
-    normal: { react: [7, 9],   aim: 8,  predict: 12, slide: true,  through: false, wallBounce: false, slideChance: 0.35, kickTol: 0.32, precise: false },
-    hard:   { react: [3, 4],   aim: 2,  predict: 24, slide: true,  through: true,  wallBounce: true,  slideChance: 1,    kickTol: 0.16, precise: true  }
+    easy:   { react: [14, 18], aim: 20, predict: 4,  through: false, wallBounce: false, smartPass: false, passChance: 0.5, shootMul: 0.7,
+              kickTol: 0.55, alignTol: 1.0, precise: false,
+              slide: true, slideChance: 0.06, slideFront: -0.4, slideBallFirst: false, slideStrict: false, slideReach: 1.15, slideErr: 1.6 },
+    normal: { react: [7, 9],   aim: 8,  predict: 12, through: false, wallBounce: false, smartPass: false, passChance: 0.9, shootMul: 1,
+              kickTol: 0.32, alignTol: 0.85, precise: false,
+              slide: true, slideChance: 0.4,  slideFront: 0.0,  slideBallFirst: true,  slideStrict: false, slideReach: 1,    slideErr: 0.5 },
+    hard:   { react: [3, 4],   aim: 2,  predict: 24, through: true,  wallBounce: true,  smartPass: true,  passChance: 1,   shootMul: 1.15,
+              kickTol: 0.16, alignTol: 0.6, precise: true,
+              slide: true, slideChance: 1,    slideFront: 0.2,  slideBallFirst: true,  slideStrict: true,  slideReach: 0.85, slideErr: 0 }
   };
 
   // ---------------------------------------------------------------------------
@@ -90,36 +98,40 @@
       const key = bot.id != null ? bot.id : 'bot';
       let mem = this._mem.get(key);
       if (!mem) {
-        mem = { age: 0, nextAge: 0, cached: null, sig: '', aimErr: 0, slideRoll: false, spSig: '', spStart: 0, gkHold: -1 };
+        mem = { age: 0, nextAge: 0, sig: '', aimErr: 0, aimErrCur: 0, slideRoll: false, passRoll: true, spSig: '', spStart: 0,
+                gkHold: -1, vmax: 0, act: null, actUntil: 0, reactTicks: 6, passMate: null, shotSide: 0 };
         this._mem.set(key, mem);
       }
       mem.age++;
       const sp = this._normSP(gs.setPiece, gs);
       const sig = sp ? sp.type + sp.team : '';
+      if (mem.sig !== sig) { mem.sig = sig; mem.act = null; mem.nextAge = 0; }
 
-      if (mem.cached && mem.age < mem.nextAge && mem.sig === sig) {
-        const c = mem.cached, b = gs.ball;
-        const reach = (bot.r || 10) + (b.r || 8) + gs.stadium.width * 0.012;
-        const kick = c.kick && hyp(bot.x - b.x, bot.y - b.y) <= reach;
-        return { ix: c.ix, iy: c.iy, kick, slide: false };
+      // Solo las decisiones tácticas / el error de puntería se refrescan con el tiempo de reacción.
+      if (mem.age >= mem.nextAge) {
+        mem.reactTicks = cfg.react[0] + Math.floor(this.rng() * (cfg.react[1] - cfg.react[0] + 1));
+        mem.nextAge = mem.age + mem.reactTicks;
+        mem.aimErr = (this.rng() * 2 - 1) * cfg.aim * DEG;
+        mem.slideRoll = this.rng() < cfg.slideChance;
+        mem.passRoll = this.rng() < cfg.passChance;
       }
+      mem.aimErrCur += (mem.aimErr - mem.aimErrCur) * 0.2;       // el error cambia suave, sin saltos
 
-      mem.sig = sig;
-      mem.nextAge = mem.age + cfg.react[0] + Math.floor(this.rng() * (cfg.react[1] - cfg.react[0] + 1));
-      mem.aimErr = (this.rng() * 2 - 1) * cfg.aim * DEG;
-      mem.slideRoll = this.rng() < cfg.slideChance;
+      // Velocidad máxima observada (para la amortiguación de llegada)
+      const W = gs.stadium.width, spd = Math.hypot(bot.vx || 0, bot.vy || 0);
+      mem.vmax = Math.max(W * 0.004, mem.vmax * 0.998, Math.min(spd, Math.max(mem.vmax * 1.04, W * 0.004)));
 
-      const ctx = this._buildCtx(bot, gs);
+      // Movimiento (ix, iy) recalculado en cada frame hacia el objetivo actual
+      const ctx = this._buildCtx(bot, gs, mem);
       let dec = this._think(ctx.me, gs, ctx, cfg, mem, sp);
       dec = this.handleSuperpowers(bot, gs, dec);
-      mem.cached = dec;
       return { ix: dec.ix, iy: dec.iy, kick: dec.kick, slide: dec.slide };
     }
 
     // -------------------------------------------------------------------------
     // Contexto (todo proporcional al tamaño del estadio)
     // -------------------------------------------------------------------------
-    _buildCtx(bot, gs) {
+    _buildCtx(bot, gs, mem) {
       const st = gs.stadium, W = st.width, H = st.height;
       const L = st.left != null ? st.left : 0, T = st.top != null ? st.top : 0;
       const R = L + W, B = T + H, cx = L + W / 2, cy = T + H / 2;
@@ -149,6 +161,7 @@
       const opp = this._goalSpan(gs, st, dir > 0 ? 'right' : 'left', cy, H);
       own.x = ownX; opp.x = oppX;
 
+      const vmax = (mem && mem.vmax) || W * 0.005;
       let pt = gs.activePowerEvent;
       if (pt && typeof pt === 'object') pt = pt.type || pt.name;
 
@@ -158,7 +171,7 @@
         isRealistic: !!(gs.isRealistic || gs.mode === 'realistic'),
         depth: (x) => (x - ownX) * dir,          // distancia a la línea de fondo propia (+ hacia el rival)
         unDepth: (d) => ownX + d * dir,
-        deadzone: W * 0.006, gap: W * 0.012, kickReach: W * 0.010, brakeTicks: 5,
+        vmax, slowR: clamp(vmax * 12, W * 0.015, W * 0.15), deadzone: W * 0.006, gap: W * 0.012, kickReach: W * 0.010, brakeTicks: 5,
         cutDist: W * 0.055, pressR: W * 0.09, laneR: Math.max(H * 0.03, ball.r * 1.6),
         shootRange: W * 0.30,
         box: { depth: W * 0.16, halfH: H * 0.22, smallDepth: W * 0.07 }
@@ -236,21 +249,31 @@
       return { x: clamp(x, ctx.L + m, ctx.R - m), y: clamp(y, ctx.T + m, ctx.B - m) };
     }
 
-    /** Movimiento hacia un punto con deadzone anti-vibración y frenado anticipado. */
+    /**
+     * Movimiento hacia un punto. Se recalcula en cada frame.
+     *  - arrive:false → carga directa a máxima velocidad (solo se frena dentro de la deadzone).
+     *  - arrive:true  → amortiguación suave (arrival): el input se mezcla con (vel. deseada - bot.vx/vy),
+     *                   que además cancela la deriva lateral → sin pasarse de largo ni zigzaguear.
+     */
     _steer(me, tx, ty, ctx, o) {
       o = o || {};
       const dx = tx - me.x, dy = ty - me.y, d = hyp(dx, dy);
       const dead = o.dead != null ? o.dead : ctx.deadzone;
-      const sp = hyp(me.vx, me.vy);
-      if (d < dead) {
-        if (sp > 0.02 && o.arrive !== false) return { ix: (-me.vx / sp) * 0.6, iy: (-me.vy / sp) * 0.6, d };
-        return { ix: 0, iy: 0, d };
+      const vmax = ctx.vmax, sp = hyp(me.vx, me.vy);
+      if (d < dead) {                                           // deadzone: freno proporcional a la velocidad
+        if (sp < vmax * 0.05) return { ix: 0, iy: 0, d };
+        const k = Math.min(1, 1.2 * sp / vmax) / sp;
+        return { ix: -me.vx * k, iy: -me.vy * k, d };
       }
-      let ix = dx / d, iy = dy / d;
-      if (o.arrive !== false && sp > 0.02) {
-        const along = me.vx * ix + me.vy * iy;
-        if (along > 0 && along * ctx.brakeTicks > d) { ix = (-me.vx / sp) * 0.75; iy = (-me.vy / sp) * 0.75; }
-      }
+      const ux = dx / d, uy = dy / d;
+      if (o.arrive === false) return { ix: ux, iy: uy, d };
+      const slowR = o.slowR || ctx.slowR;
+      const k = clamp((d - dead) / Math.max(slowR - dead, 1e-6), 0, 1);   // 1 = lejos, 0 = llegando
+      const kk = Math.max(k, 0.12);
+      const ex = (ux * vmax * kk - me.vx) / vmax, ey = (uy * vmax * kk - me.vy) / vmax;
+      let ix = ux * k + ex * (1 - k) * 1.5, iy = uy * k + ey * (1 - k) * 1.5;
+      const m = hyp(ix, iy);
+      if (m > 1) { ix /= m; iy /= m; }
       return { ix, iy, d };
     }
 
@@ -261,47 +284,63 @@
     }
 
     /**
-     * Se perfila detrás de la pelota (predicha) alineado con `target` y la golpea.
-     * opts: { kick:false } para conducir/empujar sin patear, { soft:true } para impulso suave.
+     * Va a disputar/controlar la pelota y la golpea hacia `target`.
+     *  - Alineado (detrás de la pelota respecto de la línea de empuje) → carga recta y la conduce en contacto.
+     *  - Poco desalineado → va recto al punto de empuje, sin rodeos.
+     *  - Del lado equivocado → gira alrededor del radio de contacto (bot.r + ball.r) hasta quedar detrás.
+     * opts: { kick:false } conducir sin patear, { soft:true } toque suave, { direct:true } embestir la pelota
+     *       (barrida/marca), { kickOk:(dirBot→pelota)=>bool } filtro de seguridad para patear.
      */
     _strike(me, target, ctx, cfg, mem, opts, tag) {
       opts = opts || {};
       const ball = ctx.ball, contact = me.r + ball.r;
       const dBall = hyp(me.x - ball.x, me.y - ball.y);
-      const botSp = Math.max(hyp(me.vx, me.vy), ctx.W * 0.004);
-      const pt = clamp(dBall / (botSp * 1.4), 0, cfg.predict);
-      const pb = this._predBall(ctx, pt);
+      const vEff = Math.max(hyp(me.vx, me.vy), ctx.vmax * 0.85);
+      const pb = this._predBall(ctx, clamp(dBall / vEff, 0, cfg.predict));   // punto de intercepción
 
-      let dv = norm(target.x - pb.x, target.y - pb.y);
-      dv = rot(dv, mem.aimErr || 0);
+      let dv;
+      if (opts.direct) dv = norm(pb.x - me.x, pb.y - me.y);
+      else dv = rot(norm(target.x - pb.x, target.y - pb.y), mem.aimErrCur || 0);
 
-      const gap = contact + ctx.gap;
-      const behind = this._clampField(ctx, pb.x - dv.x * gap, pb.y - dv.y * gap);
-      const rx = me.x - pb.x, ry = me.y - pb.y;
+      const rx = me.x - pb.x, ry = me.y - pb.y, rd = hyp(rx, ry) || 1e-9;
       const along = rx * dv.x + ry * dv.y;
       const perp = -rx * dv.y + ry * dv.x;
-      const aligned = along < -contact * 0.2 && Math.abs(perp) < contact * (cfg.precise ? 0.7 : 0.9);
+      const aligned = !!opts.direct || (along < 0 && Math.abs(perp) < contact * cfg.alignTol);
 
-      let tx, ty, driving = false;
-      if (aligned || hyp(me.x - behind.x, me.y - behind.y) < ctx.deadzone) {
-        tx = pb.x + dv.x * contact * 0.6; ty = pb.y + dv.y * contact * 0.6; driving = true;
-      } else if (along > -gap && Math.abs(perp) < contact * 2.5) {
-        const side = perp >= 0 ? 1 : -1;               // rodear la pelota sin tocarla
-        tx = behind.x + -dv.y * side * contact * 2.4;
-        ty = behind.y + dv.x * side * contact * 2.4;
-      } else { tx = behind.x; ty = behind.y; }
+      let tx, ty, mode;
+      if (aligned) {
+        tx = pb.x + dv.x * contact * 0.5; ty = pb.y + dv.y * contact * 0.5; mode = 'drive';
+      } else {
+        const gap = contact + ctx.gap * 0.5;
+        const behind = this._clampField(ctx, pb.x - dv.x * gap, pb.y - dv.y * gap);
+        const ang = Math.acos(clamp(-along / rd, -1, 1));
+        const cuts = segDist(pb.x, pb.y, me.x, me.y, behind.x, behind.y).d < contact * 1.05;
+        if (ang < 1.75 && !cuts) { tx = behind.x; ty = behind.y; mode = 'behind'; }
+        else {                                                  // girar alrededor de la pelota
+          const a = Math.atan2(ry, rx), goal = Math.atan2(-dv.y, -dv.x);
+          let da = goal - a;
+          while (da > Math.PI) da -= 2 * Math.PI;
+          while (da < -Math.PI) da += 2 * Math.PI;
+          const step = (da >= 0 ? 1 : -1) * Math.min(Math.abs(da), 0.9);
+          const R0 = contact + ctx.W * 0.003;
+          const R = clamp(rd, R0, R0 * 2.2);
+          const p = this._clampField(ctx, pb.x + Math.cos(a + step) * R, pb.y + Math.sin(a + step) * R);
+          tx = p.x; ty = p.y; mode = 'orbit';
+        }
+      }
 
-      const s = this._steer(me, tx, ty, ctx, { arrive: !driving, dead: ctx.deadzone * 0.6 });
+      const s = this._steer(me, tx, ty, ctx, { arrive: false, dead: ctx.deadzone * 0.5 });
       let ix = s.ix, iy = s.iy;
-      if (opts.soft) { ix *= 0.7; iy *= 0.7; }
+      if (opts.soft && mode === 'drive' && dBall < contact * 2) { ix *= 0.85; iy *= 0.85; }
 
       let kick = false;
       if (opts.kick !== false && dBall <= contact + ctx.kickReach) {
         const bd = norm(ball.x - me.x, ball.y - me.y);
-        kick = bd.x * dv.x + bd.y * dv.y >= Math.cos(cfg.kickTol);
+        kick = opts.direct ? true : bd.x * dv.x + bd.y * dv.y >= Math.cos(cfg.kickTol);
+        if (kick && opts.kickOk && !opts.kickOk(bd)) kick = false;
       }
       return mk(ix, iy, kick, false, {
-        target: { x: tx, y: ty }, driving, aligned, tag,
+        target: { x: tx, y: ty }, driving: mode === 'drive', aligned, mode, tag,
         strike: { target, opts }, hasBall: dBall <= contact + ctx.kickReach * 2.5
       });
     }
@@ -333,11 +372,49 @@
     }
 
     _slideAllowed(me, cfg, ctx) {
-      return ctx.isRealistic && cfg.slide && me.canSlide;
+      return ctx.isRealistic && cfg.slide && me.canSlide;   // me.canSlide = slideCooldown nativo del juego (sin cooldown propio)
+    }
+
+    /**
+     * Barrida táctica: solo en la propia mitad, contra un rival con pelota que avanza hacia nuestro arco.
+     *  easy:   rara vez (tirada baja) y con margen de error en la dirección.
+     *  normal: moderada; solo cortes frontales/laterales con la pelota más cerca que el rival.
+     *  hard:   quirúrgica anti-faltas: ataca por delante/costado, pelota más cerca que el cuerpo, sin pasar por el rival.
+     */
+    _slideCheck(me, ctx, cfg, mem, carrier) {
+      if (!carrier || carrier.team === me.team || !this._slideAllowed(me, cfg, ctx)) return null;
+      const ball = ctx.ball, W = ctx.W, dir = ctx.dir;
+      if (ctx.depth(ball.x) > W * 0.5 || ctx.depth(me.x) > W * 0.5) return null;   // solo su mitad
+      if (carrier.vx * dir > -W * 0.0012) return null;                            // no avanza hacia nuestro arco
+      if (!cfg.slideStrict && !mem.slideRoll) return null;
+      const contact = me.r + ball.r;
+      const dBall = hyp(me.x - ball.x, me.y - ball.y);
+      if (dBall > ctx.cutDist * cfg.slideReach || dBall < contact * 1.05) return null;
+
+      const cs = hyp(carrier.vx, carrier.vy) || 1e-9;
+      const f = { x: carrier.vx / cs, y: carrier.vy / cs };                        // hacia dónde mira/avanza el rival
+      const rel = norm(me.x - carrier.x, me.y - carrier.y);
+      if (rel.x * f.x + rel.y * f.y < cfg.slideFront) return null;                 // nunca desde atrás
+
+      if (cfg.slideBallFirst) {                                                    // llega a la pelota antes que al cuerpo
+        const dBody = hyp(me.x - carrier.x, me.y - carrier.y);
+        const margin = cfg.slideStrict ? me.r * 0.3 : 0;
+        if (!(dBall - ball.r < dBody - carrier.r - margin)) return null;
+      }
+      const tb = this._predBall(ctx, cfg.slideStrict ? 2 : 0);
+      let dv = norm(tb.x - me.x, tb.y - me.y);
+      if (cfg.slideErr) dv = rot(dv, (mem.aimErrCur || 0) * cfg.slideErr);
+      const og = norm(ctx.ownX - ball.x, ctx.ownGoal.cy - ball.y);
+      if (dv.x * og.x + dv.y * og.y >= 0.35) return null;                          // no mandar la pelota a nuestro arco
+      if (cfg.slideStrict) {
+        if (me.vx * dv.x + me.vy * dv.y < 0) return null;                          // viene cerrando
+        if (segDist(carrier.x, carrier.y, me.x, me.y, tb.x, tb.y).d < carrier.r * 0.8) return null;
+      }
+      return mk(dv.x, dv.y, false, true, { target: tb, tag: 'slide' });
     }
 
     /** Tiro al arco rival: apunta al palo más alejado del arquero rival si el ángulo está libre. */
-    _shotTarget(fx, fy, ctx) {
+    _shotTarget(fx, fy, ctx, mem) {
       const g = ctx.oppGoal;
       let gk = null, bd = 1e9;
       for (const r of ctx.rivals) {
@@ -347,7 +424,13 @@
       const inset = Math.max(ctx.ball.r * 1.3, g.h * 0.14);
       const top = g.top + inset, bot = g.bottom - inset;
       const c = [];
-      if (gk) { if (Math.abs(gk.y - top) >= Math.abs(gk.y - bot)) c.push(top, bot); else c.push(bot, top); }
+      if (gk) {
+        const dt = Math.abs(gk.y - top), db = Math.abs(gk.y - bot);
+        let pickTop = dt >= db;
+        if (mem && mem.shotSide && Math.abs(dt - db) < g.h * 0.2) pickTop = mem.shotSide > 0;   // evita cambiar de palo
+        if (mem) mem.shotSide = pickTop ? 1 : -1;
+        if (pickTop) c.push(top, bot); else c.push(bot, top);
+      }
       else { if (fy > g.cy) c.push(top, bot); else c.push(bot, top); }
       c.push(g.cy);
       const skip = ctx.me.r + ctx.ball.r;
@@ -378,7 +461,7 @@
         }
         const prog = ctx.depth(m.x) - fd;
         if (o.minProgress != null && prog < o.minProgress) continue;
-        const score = prog + Math.min(free, ctx.W * 0.2) * 0.8 - hyp(m.x - fx, m.y - fy) * 0.2;
+        const score = prog + Math.min(free, ctx.W * 0.2) * 0.8 - hyp(m.x - fx, m.y - fy) * 0.2 + (o.prefer != null && m.id === o.prefer ? ctx.W * 0.15 : 0);
         if (score > bs) { bs = score; best = { mate: m, target: p, score }; }
       }
       return best;
@@ -457,74 +540,62 @@
       return this._openSpot(ctx, me, ctx.unDepth(d), by, H * 0.12);
     }
 
-    /** Presión: solo el más cercano al poseedor rival. Barrida en Realista. */
+    /** Presión: el más cercano al poseedor rival embiste la pelota (sin rodeos); barrida en Realista. */
     _press(me, ctx, cfg, mem, carrier) {
-      const ball = ctx.ball, W = ctx.W;
-      const contact = me.r + ball.r;
-      const dBall = hyp(me.x - ball.x, me.y - ball.y);
-      const dir = ctx.dir;
-      const cd = ctx.depth(carrier.x);
-      const advancing = (carrier.vx * dir < 0 || cd < W * 0.5) && cd < W * 0.75;
-
-      if (advancing && this._slideAllowed(me, cfg, ctx) && dBall <= ctx.cutDist) {
-        const tb = this._predBall(ctx, cfg.precise ? 2 : 0);
-        const dv = norm(tb.x - me.x, tb.y - me.y);
-        const toOwn = norm(ctx.ownX - ball.x, ctx.oppGoal.cy - ball.y); // aproximado; se corrige abajo
-        const og = norm(ctx.ownX - ball.x, ctx.ownGoal.cy - ball.y);
-        const clean = dv.x * og.x + dv.y * og.y < 0.35;          // no manda la pelota a nuestro arco
-        const closing = (me.vx * dv.x + me.vy * dv.y) >= 0;
-        const timing = cfg.precise ? (closing && dBall <= ctx.cutDist * 0.85 && dBall >= contact * 1.05) : mem.slideRoll;
-        void toOwn;
-        if (clean && timing) return mk(dv.x, dv.y, false, true, { target: tb, tag: 'slide' });
-      }
-
-      if (dBall < W * 0.07) {                                   // disputa la pelota
-        const t = { x: ctx.oppX, y: ctx.oppGoal.cy + (ball.y - ctx.cy) * 0.3 };
-        return this._strike(me, t, ctx, cfg, mem, { kick: true }, 'tackle');
-      }
-      // Se coloca del lado del arco propio respecto al poseedor
-      const g = norm(ctx.ownX - carrier.x, ctx.ownGoal.cy - carrier.y);
-      return this._goTo(me, carrier.x + g.x * W * 0.04, carrier.y + g.y * W * 0.04, ctx, { tag: 'press' });
+      const ball = ctx.ball;
+      const sl = this._slideCheck(me, ctx, cfg, mem, carrier);
+      if (sl) return sl;
+      const og = norm(ctx.ownX - ball.x, ctx.ownGoal.cy - ball.y);
+      return this._strike(me, { x: ctx.oppX, y: ctx.oppGoal.cy }, ctx, cfg, mem,
+        { direct: true, kick: true, kickOk: (b) => b.x * og.x + b.y * og.y < 0.35 }, 'tackle');
     }
 
-    /** Con la pelota: remate, centro, pase/pared, despeje o conducción. */
+    /** Con la pelota: remate, centro, pase/pared, despeje o conducción (decisión con histéresis por dificultad). */
     _withBall(me, ctx, cfg, mem, info) {
       const ball = ctx.ball, W = ctx.W, H = ctx.H, cy = ctx.cy;
       const dGoal = hyp(ball.x - ctx.oppX, ball.y - ctx.oppGoal.cy);
       const bd = ctx.depth(ball.x);
-      const pressured = this._nearestDist(ctx.rivals, ball) < ctx.pressR;
+      const rivalD = this._nearestDist(ctx.rivals, ball);
+      const pressured = rivalD < ctx.pressR;
+      const side = ball.y >= cy ? 1 : -1;
 
-      // 1) Remate
-      if (dGoal < ctx.shootRange) {
-        const shot = this._shotTarget(ball.x, ball.y, ctx);
-        if (shot) return this._strike(me, shot, ctx, cfg, mem, { kick: true }, 'shot');
-      }
-      // 2) Centro desde la banda cerca de la línea de fondo rival
-      if (Math.abs(ball.y - cy) > H * 0.30 && Math.abs(ball.x - ctx.oppX) < W * 0.22) {
-        const spot = { x: ctx.unDepth(W * 0.88), y: cy };
-        return this._strike(me, spot, ctx, cfg, mem, { kick: true }, 'cross');
-      }
-      // 3) Despeje en zona propia con presión
-      if (bd < W * 0.18 && pressured) {
-        const side = ball.y >= cy ? 1 : -1;
-        return this._strike(me, { x: ctx.unDepth(W * 0.5), y: cy + side * H * 0.48 }, ctx, cfg, mem, { kick: true }, 'clear');
-      }
-      // 4) Pase / pared / rebote
-      if (pressured) {
-        const pass = this._bestPass(me, ctx, cfg, ball.x, ball.y, { minProgress: -W * 0.05 });
-        if (pass) return this._strike(me, pass.target, ctx, cfg, mem, { kick: true }, 'pass');
-        const wallDist = Math.min(ball.y - ctx.T, ctx.B - ball.y);
-        if (cfg.wallBounce && wallDist < H * 0.09) {            // autopase contra la banda
+      const A = {
+        shot: () => (dGoal < ctx.shootRange * cfg.shootMul ? this._shotTarget(ball.x, ball.y, ctx, mem) : null),
+        cross: () => (Math.abs(ball.y - cy) > H * 0.30 && Math.abs(ball.x - ctx.oppX) < W * 0.22
+          ? { x: ctx.unDepth(W * 0.88), y: cy } : null),
+        clear: () => (bd < W * 0.18 && pressured ? { x: ctx.unDepth(W * 0.5), y: cy + side * H * 0.48 } : null),
+        pass: () => {
+          if (!pressured && !(cfg.smartPass && rivalD < ctx.pressR * 1.8)) return null;
+          if (pressured && !mem.passRoll) return null;                       // easy a veces no ve el pase
+          const p = this._bestPass(me, ctx, cfg, ball.x, ball.y,
+            { minProgress: pressured ? -W * 0.05 : W * 0.12, prefer: mem.passMate });
+          if (!p) return null;
+          mem.passMate = p.mate.id;
+          return p.target;
+        },
+        wall: () => {
+          if (!cfg.wallBounce || !pressured) return null;
+          if (Math.min(ball.y - ctx.T, ctx.B - ball.y) >= H * 0.09) return null;
           const wallY = ball.y - ctx.T < ctx.B - ball.y ? ctx.T : ctx.B;
           const py = ball.y + (cy - ball.y) * 0.4;
-          const tgt = { x: ball.x + ctx.dir * W * 0.30, y: 2 * wallY - py };
-          return this._strike(me, tgt, ctx, cfg, mem, { kick: true }, 'wall');
-        }
-        const close = this._nearestDist(ctx.rivals, ball) < (me.r + ball.r) * 2.2;
-        if (close) return this._strike(me, { x: ctx.oppX, y: ctx.oppGoal.cy }, ctx, cfg, mem, { kick: true }, 'forward');
+          return { x: ball.x + ctx.dir * W * 0.30, y: 2 * wallY - py };
+        },
+        forward: () => (pressured && rivalD < (me.r + ball.r) * 2.2 ? { x: ctx.oppX, y: ctx.oppGoal.cy } : null),
+        dribble: () => this._dribbleTarget(ctx)
+      };
+      const order = ['shot', 'cross', 'clear', 'pass', 'wall', 'forward', 'dribble'];
+
+      let pick = null;
+      for (const t of order) { const tg = A[t](); if (tg) { pick = { tag: t, target: tg }; break; } }
+      // Compromiso: mantiene la acción elegida durante el tiempo de reacción (salvo que aparezca un remate)
+      if (mem.act && mem.act !== 'dribble' && mem.age < mem.actUntil && pick.tag !== 'shot' && mem.act !== pick.tag) {
+        const tg = A[mem.act]();
+        if (tg) pick = { tag: mem.act, target: tg };
       }
-      // 5) Conducción: empuja hacia adelante sin patear fuerte
-      return this._strike(me, this._dribbleTarget(ctx), ctx, cfg, mem, { kick: false, soft: true }, 'dribble');
+      if (mem.act !== pick.tag) { mem.act = pick.tag; mem.actUntil = mem.age + mem.reactTicks; }
+
+      const o = pick.tag === 'dribble' ? { kick: false, soft: true } : { kick: true };
+      return this._strike(me, pick.target, ctx, cfg, mem, o, pick.tag);
     }
 
     _dribbleTarget(ctx) {
@@ -566,15 +637,16 @@
       const lineD = me.r * 1.2 + W * 0.008;
       const inArea = (p) => ctx.depth(p.x) < box.depth && Math.abs(p.y - g.cy) < box.halfH;
 
-      // 1) Atajar: la pelota viaja rápido hacia el arco → proyecta hasta la línea de gol
-      if (toward > W * 0.006 && bd > lineD) {
-        const t = (bd - lineD) / toward;
+      // 1) Atajar: en CADA frame, mientras la pelota avance hacia el arco, proyecta la intersección con la línea de gol
+      if (toward > W * 0.0012 && bd > 0) {
+        const t = bd / toward;
         const yLine = reflect(ball.y + ball.vy * t, ctx.T + ball.r, ctx.B - ball.r);
         if (yLine > g.top - ball.r * 2 && yLine < g.bottom + ball.r * 2) {
-          const ty = clamp(yLine, g.top + me.r * 0.3, g.bottom - me.r * 0.3);
-          const tx = ctx.unDepth(Math.max(lineD, Math.min(bd - contact, lineD + W * 0.02)));
-          const s = this._steer(me, tx, ty, ctx, { arrive: false, dead: 1 });
-          return mk(s.ix, s.iy, dBall <= reach, false, { target: { x: tx, y: ty }, tag: 'save', hasBall: dBall <= reach });
+          const targetY = clamp(yLine, g.top, g.bottom);
+          const goalX = ctx.unDepth(me.r * 0.6);                 // sobre la línea de gol (cuerpo apenas adentro)
+          const s = this._steer(me, goalX, targetY, ctx, { arrive: false, dead: 1.5 });   // directo, a máxima velocidad
+          const kick = dBall <= me.r + ball.r + 12;              // radio de alcance del atajo
+          return mk(s.ix, s.iy, kick, false, { target: { x: goalX, y: targetY }, tag: 'save', hasBall: kick });
         }
       }
 
@@ -590,9 +662,8 @@
           return md < cd + contact && segDist(m.x, m.y, carrier.x, carrier.y, ctx.ownX, g.cy).d < H * 0.07;
         });
         if (!covered) {
-          const dv = norm(ball.x - me.x, ball.y - me.y);
-          if (dBall <= ctx.cutDist && this._slideAllowed(me, cfg, ctx) && (cfg.precise || mem.slideRoll))
-            return mk(dv.x, dv.y, false, true, { target: { x: ball.x, y: ball.y }, tag: 'gk-slide' });
+          const sl = this._slideCheck(me, ctx, cfg, mem, carrier);
+          if (sl) { sl.meta.tag = 'gk-slide'; return sl; }
           if (dBall < W * 0.09) return this._strike(me, this._gkClearTarget(me, ctx), ctx, cfg, mem, { kick: true }, 'gk-clear');
           // achica el ángulo: sobre la línea carrier→arco
           const cdir = norm(ctx.ownX - carrier.x, g.cy - carrier.y);
