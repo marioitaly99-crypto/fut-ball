@@ -99,7 +99,8 @@
       let mem = this._mem.get(key);
       if (!mem) {
         mem = { age: 0, nextAge: 0, sig: '', aimErr: 0, aimErrCur: 0, slideRoll: false, passRoll: true, spSig: '', spStart: 0,
-                gkHold: -1, vmax: 0, act: null, actUntil: 0, reactTicks: 6, passMate: null, shotSide: 0 };
+                gkHold: -1, vmax: 0, act: null, actUntil: 0, reactTicks: 6, passMate: null, shotSide: 0,
+                spReady: null, spWait: 55, spAim: 0, spMate: null, spSpot: null, spSpotUntil: 0 };
         this._mem.set(key, mem);
       }
       mem.age++;
@@ -194,18 +195,30 @@
       return { top, bottom, cy: (top + bottom) / 2, h: bottom - top };
     }
 
+    /**
+     * Normaliza gameState.setPiece. Ignora mayúsculas, guiones y espacios.
+     *  throw_in : throw_in, throwin, throw, lateral, out
+     *  corner   : corner, corner_kick, cornerkick
+     *  free_kick: free_kick, freekick, foul
+     *  goal_kick: goal_kick, goalkick
+     *  kickoff  : kickoff, kick_off
+     *  generic  : setPiece con team válido pero type desconocido → saque genérico
+     */
     _normSP(sp, gs) {
       if (!sp) return null;
-      const t = String(sp.type || sp.kind || '').toLowerCase();
+      const obj = typeof sp === 'object';
+      const t = String((obj ? (sp.type || sp.kind || sp.name) : sp) || '').toLowerCase().replace(/[^a-z]/g, '');
       let type = null;
-      if (/throw|lateral|side/.test(t)) type = 'throw_in';
-      else if (/corner/.test(t)) type = 'corner';
-      else if (/goal.?kick|saque.?de.?arco|saque.?arco|goalkick/.test(t)) type = 'goal_kick';
-      else if (/free|libre|foul/.test(t)) type = 'free_kick';
+      if (/kickoff|saqueinicial|saquedecentro/.test(t)) type = 'kickoff';
+      else if (/corner|esquina/.test(t)) type = 'corner';
+      else if (/goalkick|saquedearco|saquearco|saquedemeta/.test(t)) type = 'goal_kick';
+      else if (/^out$|throw|lateral|^side/.test(t)) type = 'throw_in';
+      else if (/free|libre|foul|falta/.test(t)) type = 'free_kick';
+      else if (obj && sp.team != null && isPlaying(sp.team)) type = 'generic';
       if (!type) return null;
       const b = gs.ball;
       if (hyp(b.vx || 0, b.vy || 0) > gs.stadium.width * 0.004) return null; // ya se ejecutó
-      return { type, team: sp.team, executorId: sp.executorId };
+      return { type, team: obj ? sp.team : undefined, executorId: obj ? sp.executorId : undefined };
     }
 
     _roleInfo(me, ctx) {
@@ -298,9 +311,10 @@
       const vEff = Math.max(hyp(me.vx, me.vy), ctx.vmax * 0.85);
       const pb = this._predBall(ctx, clamp(dBall / vEff, 0, cfg.predict));   // punto de intercepción
 
+      const ae = opts.aimErr != null ? opts.aimErr : (mem.aimErrCur || 0);
       let dv;
       if (opts.direct) dv = norm(pb.x - me.x, pb.y - me.y);
-      else dv = rot(norm(target.x - pb.x, target.y - pb.y), mem.aimErrCur || 0);
+      else dv = rot(norm(target.x - pb.x, target.y - pb.y), ae);
 
       const rx = me.x - pb.x, ry = me.y - pb.y, rd = hyp(rx, ry) || 1e-9;
       const along = rx * dv.x + ry * dv.y;
@@ -308,7 +322,11 @@
       const aligned = !!opts.direct || (along < 0 && Math.abs(perp) < contact * cfg.alignTol);
 
       let tx, ty, mode;
-      if (aligned) {
+      if (aligned && opts.hold) {                               // se planta pegado a la pelota, sin tocarla
+        const gs = contact + Math.min(ctx.W * 0.002, 3);
+        const p = this._clampField(ctx, pb.x - dv.x * gs, pb.y - dv.y * gs);
+        tx = p.x; ty = p.y; mode = 'hold';
+      } else if (aligned) {
         tx = pb.x + dv.x * contact * 0.5; ty = pb.y + dv.y * contact * 0.5; mode = 'drive';
       } else {
         const gap = contact + ctx.gap * 0.5;
@@ -323,24 +341,25 @@
           while (da < -Math.PI) da += 2 * Math.PI;
           const step = (da >= 0 ? 1 : -1) * Math.min(Math.abs(da), 0.9);
           const R0 = contact + ctx.W * 0.003;
-          const R = clamp(rd, R0, R0 * 2.2);
+          const R = Math.max(R0, Math.min(rd * 0.85, R0 * 2.2));   // espiral hacia el radio de contacto
           const p = this._clampField(ctx, pb.x + Math.cos(a + step) * R, pb.y + Math.sin(a + step) * R);
           tx = p.x; ty = p.y; mode = 'orbit';
         }
       }
 
-      const s = this._steer(me, tx, ty, ctx, { arrive: false, dead: ctx.deadzone * 0.5 });
+      const s = this._steer(me, tx, ty, ctx, { arrive: mode === 'hold', dead: mode === 'hold' ? 1.5 : ctx.deadzone * 0.5 });
       let ix = s.ix, iy = s.iy;
       if (opts.soft && mode === 'drive' && dBall < contact * 2) { ix *= 0.85; iy *= 0.85; }
 
       let kick = false;
       if (opts.kick !== false && dBall <= contact + ctx.kickReach) {
         const bd = norm(ball.x - me.x, ball.y - me.y);
-        kick = opts.direct ? true : bd.x * dv.x + bd.y * dv.y >= Math.cos(cfg.kickTol);
+        kick = (opts.direct || opts.forceKick) ? true : bd.x * dv.x + bd.y * dv.y >= Math.cos(cfg.kickTol);
         if (kick && opts.kickOk && !opts.kickOk(bd)) kick = false;
       }
       return mk(ix, iy, kick, false, {
         target: { x: tx, y: ty }, driving: mode === 'drive', aligned, mode, tag,
+        dv, dBall, contact, along, perp,
         strike: { target, opts }, hasBall: dBall <= contact + ctx.kickReach * 2.5
       });
     }
@@ -727,7 +746,12 @@
     _setPieceLogic(me, ctx, cfg, mem, info, sp) {
       const ball = ctx.ball;
       const sig = sp.type + '|' + sp.team + '|' + Math.round(ball.x) + '|' + Math.round(ball.y);
-      if (mem.spSig !== sig) { mem.spSig = sig; mem.spStart = mem.age; }
+      if (mem.spSig !== sig) {
+        mem.spSig = sig; mem.spStart = mem.age;
+        mem.spReady = null; mem.spMate = null; mem.spSpot = null;
+        mem.spWait = 50 + Math.floor(this.rng() * 16);                       // ~50-65 ticks (≈1 s) de espera
+        mem.spAim = (this.rng() * 2 - 1) * cfg.aim * DEG * 0.5;              // error de puntería fijo durante el saque
+      }
       const weTake = sp.team === me.team;
 
       if (weTake) {
@@ -735,60 +759,185 @@
         let exec = null;
         if (sp.executorId != null) exec = team.find((p) => p.id === sp.executorId) || null;
         if (!exec && sp.type === 'goal_kick') exec = ctx.teamBots[0];
-        if (!exec) {
+        if (!exec) {                                                        // el bot más cercano a la pelota
           let bd = 1e9;
-          for (const p of team) { const d = hyp(p.x - ball.x, p.y - ball.y); if (d < bd) { bd = d; exec = p; } }
+          for (const b of ctx.teamBots) { const d = hyp(b.x - ball.x, b.y - ball.y); if (d < bd) { bd = d; exec = b; } }
+          for (const m of ctx.mates) {                                      // un humano claramente encima de la pelota la saca él
+            if (m.isBot || m.frozen) continue;
+            const d = hyp(m.x - ball.x, m.y - ball.y);
+            if (d < bd * 0.6 && d < ctx.W * 0.08) exec = m;
+          }
         }
         if (exec === me) return this._spExecute(me, ctx, cfg, mem, sp);
         if (info.isGK) return this._gkStance(me, ctx);
-        return this._spSupport(me, ctx, info, sp);
+        const supporters = info.fieldBots.filter((b) => b !== exec);
+        return this._spSupport(me, ctx, info, sp, supporters, mem);
       }
       if (info.isGK) return this._gkStance(me, ctx);
       return this._spDefend(me, ctx, info, sp);
     }
 
-    _spExecute(me, ctx, cfg, mem, sp) {
-      const ball = ctx.ball, W = ctx.W, H = ctx.H;
-      const dGoal = hyp(ball.x - ctx.oppX, ball.y - ctx.oppGoal.cy);
-      let target = null;
-
-      if (sp.type === 'corner') {
-        if (cfg.precise || cfg.predict > 6) {
-          const inArea = ctx.mates.filter((m) => ctx.depth(m.x) > W * 0.78 && this._nearestDist(ctx.rivals, m) > W * 0.05);
-          const saved = ctx.mates; ctx.mates = inArea;
-          const p = this._bestPass(me, ctx, cfg, ball.x, ball.y, { noThrough: true });
-          ctx.mates = saved;
-          if (p) target = p.target;
-        }
-        if (!target) target = { x: ctx.unDepth(W * 0.88), y: ctx.cy + (ball.y > ctx.cy ? -1 : 1) * H * 0.04 };
-      } else {
-        if (sp.type === 'free_kick' && dGoal < ctx.shootRange * 0.9) target = this._shotTarget(ball.x, ball.y, ctx);
-        if (!target) {
-          const p = this._bestPass(me, ctx, cfg, ball.x, ball.y, {});
-          if (p) target = p.target;
-        }
-        if (!target) {
-          const d = clamp(ctx.depth(ball.x) + W * 0.3, W * 0.3, W * 0.9);
-          target = { x: ctx.unDepth(d), y: ctx.cy + (ball.y - ctx.cy) * 0.4 };
-        }
-      }
-
-      const waited = mem.age - mem.spStart;
-      if (waited < 60) {                                          // espera ~1 s mientras busca opción
-        const dv = norm(target.x - ball.x, target.y - ball.y);
-        const g = me.r + ball.r + ctx.gap * 1.5;
-        return this._goTo(me, ball.x - dv.x * g, ball.y - dv.y * g, ctx, { tag: 'sp-wait' });
-      }
-      return this._strike(me, target, ctx, cfg, mem, { kick: true }, 'sp-kick');
+    _leadPoint(m, ctx, cfg) {
+      const lead = cfg.precise ? 8 : (cfg.predict > 6 ? 5 : 0);
+      return this._clampField(ctx, m.x + m.vx * lead, m.y + m.vy * lead);
     }
 
-    _spSupport(me, ctx, info, sp) {
+    /** Compañero más libre/desmarcado (línea de pase limpia, progreso y distancia razonable). Siempre devuelve alguno si existe. */
+    _spMateTarget(me, ctx, cfg, mem, sp, pool) {
+      const ball = ctx.ball, W = ctx.W;
+      const progW = sp.type === 'kickoff' ? 0.05 : 0.25;
+      let best = null, bs = -1e9;
+      for (const m of (pool || ctx.mates)) {
+        if (m.frozen) continue;
+        const free = Math.min(this._nearestDist(ctx.rivals, m), W * 0.22);
+        const lane = this._laneClear(ball.x, ball.y, m.x, m.y, ctx, ctx.laneR, me.r + ball.r) ? W * 0.10 : 0;
+        const prog = clamp(ctx.depth(m.x) - ctx.depth(ball.x), -W * 0.3, W * 0.3) * progW;
+        const d = hyp(m.x - ball.x, m.y - ball.y);
+        const sc = free + lane + prog - Math.abs(d - W * 0.2) * 0.3 + (mem.spMate === m.id ? W * 0.1 : 0);
+        if (sc > bs) { bs = sc; best = m; }
+      }
+      if (!best) return null;
+      mem.spMate = best.id;
+      return this._leadPoint(best, ctx, cfg);
+    }
+
+    /** Córner: mejor compañero dentro/borde del área rival; si todos están marcados, centro del área rival. */
+    _spCornerTarget(me, ctx, cfg, mem, sp) {
+      const ball = ctx.ball, W = ctx.W, H = ctx.H;
+      const center = { x: ctx.unDepth(W * 0.90), y: ctx.cy };
+      const inBox = ctx.mates.filter((m) => !m.frozen && ctx.depth(m.x) > W * 0.78 && Math.abs(m.y - ctx.cy) < H * 0.32);
+      if (inBox.length) {
+        let best = null, bs = -1e9, bf = 0;
+        for (const m of inBox) {
+          const free = Math.min(this._nearestDist(ctx.rivals, m), W * 0.22);
+          const lane = this._laneClear(ball.x, ball.y, m.x, m.y, ctx, ctx.laneR, me.r + ball.r) ? W * 0.06 : 0;
+          const sc = free + lane - hyp(m.x - center.x, m.y - center.y) * 0.1 + (mem.spMate === m.id ? W * 0.1 : 0);
+          if (sc > bs) { bs = sc; best = m; bf = free; }
+        }
+        if (best && bf >= W * 0.04) { mem.spMate = best.id; return this._leadPoint(best, ctx, cfg); }
+        return center;                                                      // todos marcados
+      }
+      return this._spMateTarget(me, ctx, cfg, mem, sp) || center;
+    }
+
+    _spTarget(me, ctx, cfg, mem, sp) {
+      const ball = ctx.ball, W = ctx.W;
+      const dGoal = hyp(ball.x - ctx.oppX, ball.y - ctx.oppGoal.cy);
+      let t = null;
+      if (sp.type === 'corner') t = this._spCornerTarget(me, ctx, cfg, mem, sp);
+      else {
+        if (sp.type === 'free_kick' && dGoal < ctx.shootRange * 0.9) t = this._shotTarget(ball.x, ball.y, ctx, mem);
+        if (!t && sp.type === 'goal_kick') { const p = this._bestPass(me, ctx, cfg, ball.x, ball.y, {}); if (p) t = p.target; }
+        if (!t) t = this._spMateTarget(me, ctx, cfg, mem, sp);
+      }
+      if (!t) {                                                             // sin compañeros: avanza hacia el medio
+        const d = clamp(ctx.depth(ball.x) + W * 0.3, W * 0.3, W * 0.9);
+        t = { x: ctx.unDepth(d), y: ctx.cy + (ball.y - ctx.cy) * 0.4 };
+      }
+      return t;
+    }
+
+    /** Pelota pegada a una línea: no se puede golpear "desde atrás" → apunta al rebote en la pared (decisión fija, sin parpadeo). */
+    _spMirror(tg, ctx, ball) {
+      const t = { x: tg.x, y: tg.y }, m = ctx.H * 0.02 + 8;
+      if (ball.x - ctx.L < m) t.x = 2 * ctx.L - t.x; else if (ctx.R - ball.x < m) t.x = 2 * ctx.R - t.x;
+      if (ball.y - ctx.T < m) t.y = 2 * ctx.T - t.y; else if (ctx.B - ball.y < m) t.y = 2 * ctx.B - t.y;
+      return t;
+    }
+
+    /**
+     * Ejecutante: va directo a la pelota hasta quedar en contacto (dist <= r + ball.r + 5), se frena, espera ~50-65 ticks,
+     * apunta al compañero más libre y patea. Fail-safe: a los 180 ticks fuerza kick:true hacia el compañero más cercano.
+     */
+    _spExecute(me, ctx, cfg, mem, sp) {
+      const ball = ctx.ball, W = ctx.W;
+      const contact = me.r + ball.r;
+      const dBall = hyp(me.x - ball.x, me.y - ball.y);
+      const elapsed = mem.age - mem.spStart;
+
+      if (elapsed > 180) {                                                  // anti-atasco
+        let near = null, nd = 1e9;
+        for (const m of ctx.mates) { if (m.frozen) continue; const d = hyp(m.x - ball.x, m.y - ball.y); if (d < nd) { nd = d; near = m; } }
+        const tg = near ? { x: near.x, y: near.y } : { x: ctx.unDepth(W * 0.5), y: ctx.cy };
+        const r = this._strike(me, this._spMirror(tg, ctx, ball), ctx, cfg, mem, { kick: true, forceKick: true, aimErr: 0 }, 'sp-force');
+        r.kick = true;
+        return r;
+      }
+
+      const target = this._spMirror(this._spTarget(me, ctx, cfg, mem, sp), ctx, ball);
+      const r = this._strike(me, target, ctx, cfg, mem, { hold: true, kick: false, aimErr: mem.spAim }, 'sp-approach');
+      const dv = r.meta.dv, bd = norm(ball.x - me.x, ball.y - me.y);
+      const inRange = dBall <= contact + 5;
+      const aimed = bd.x * dv.x + bd.y * dv.y >= Math.cos(Math.max(cfg.kickTol, 0.2));
+      const still = hyp(me.vx, me.vy) < ctx.vmax * 0.3;
+      if (inRange && aimed && still) { if (mem.spReady == null) mem.spReady = mem.age; }
+      else if (dBall > contact + 12) mem.spReady = null;
+      if (inRange && aimed && mem.spReady != null && mem.age - mem.spReady >= mem.spWait) r.kick = true;
+      return r;
+    }
+
+    /** Laterales (y saque genérico): punto a 0.12–0.28·W de la pelota, separado de marcadores, con línea de pase limpia. */
+    _spRingSpot(me, ctx, mem, k) {
+      if (mem.spSpot && mem.age < mem.spSpotUntil) return mem.spSpot;
+      const W = ctx.W, ball = ctx.ball;
+      const inward = Math.atan2(ctx.cy - ball.y, (ctx.cx - ball.x) * 0.6 + ctx.dir * W * 0.1);
+      const bias = [-0.6, 0.6, 0][k % 3];
+      let best = null, bs = -1e9;
+      for (const r of [0.12, 0.16, 0.20, 0.24, 0.28]) {
+        for (const da of [-1.2, -0.8, -0.4, 0, 0.4, 0.8, 1.2]) {
+          const a = inward + da;
+          const p = this._clampField(ctx, ball.x + Math.cos(a) * r * W, ball.y + Math.sin(a) * r * W);
+          const d = hyp(p.x - ball.x, p.y - ball.y);
+          if (d < W * 0.12 || d > W * 0.28) continue;
+          const free = Math.min(this._nearestDist(ctx.rivals, p), W * 0.2);
+          const lane = this._laneClear(ball.x, ball.y, p.x, p.y, ctx, ctx.laneR, 0) ? W * 0.10 : -W * 0.10;
+          const mm = this._nearestDist(ctx.mates, p);
+          const pen = mm < W * 0.08 ? (W * 0.08 - mm) * 2 : 0;
+          const prog = (ctx.depth(p.x) - ctx.depth(ball.x)) * 0.15;
+          const sc = free + lane + prog - pen - Math.abs(da - bias) * W * 0.03;
+          if (sc > bs) { bs = sc; best = p; }
+        }
+      }
+      if (!best) best = this._clampField(ctx, ball.x + Math.cos(inward) * W * 0.2, ball.y + Math.sin(inward) * W * 0.2);
+      mem.spSpot = best; mem.spSpotUntil = mem.age + mem.reactTicks * 3;
+      return best;
+    }
+
+    /** Córner: 2–3 compañeros entran escalonados (punto penal, segundo palo, primer palo). */
+    _spCornerSlot(me, ctx, k) {
+      const W = ctx.W, ball = ctx.ball, g = ctx.oppGoal;
+      const nearTop = Math.abs(ball.y - g.top) <= Math.abs(ball.y - g.bottom);
+      const nearY = nearTop ? g.top : g.bottom, farY = nearTop ? g.bottom : g.top;
+      const inset = me.r * 0.8, sgn = nearTop ? 1 : -1;
+      const slots = [
+        { x: ctx.unDepth(W * 0.86), y: ctx.cy },                 // punto penal
+        { x: ctx.unDepth(W * 0.90), y: farY - sgn * inset },     // segundo palo
+        { x: ctx.unDepth(W * 0.90), y: nearY + sgn * inset }     // primer palo
+      ];
+      return slots[k];
+    }
+
+    _spSupport(me, ctx, info, sp, supporters, mem) {
       const W = ctx.W, H = ctx.H, ball = ctx.ball;
+      const k = Math.max(0, supporters.indexOf(me));
+      if (sp.type === 'corner') {
+        if (k < 3) { const s = this._spCornerSlot(me, ctx, k); return this._goTo(me, s.x, s.y, ctx, { tag: 'sp-box' }); }
+        return this._goTo(me, ctx.unDepth(W * 0.70), ctx.cy + (ball.y > ctx.cy ? -1 : 1) * H * 0.12, ctx, { tag: 'sp-edge' });
+      }
+      if (sp.type === 'throw_in' || sp.type === 'generic') {
+        const p = this._spRingSpot(me, ctx, mem, k);
+        return this._goTo(me, p.x, p.y, ctx, { tag: 'sp-open' });
+      }
+      if (sp.type === 'kickoff') {                               // se mantienen en su mitad
+        const side = k % 2 ? 1 : -1;
+        const p = this._openSpot(ctx, me, ctx.unDepth(W * (0.30 + 0.06 * k)), ctx.cy + side * H * 0.16, H * 0.06);
+        return this._goTo(me, p.x, p.y, ctx, { tag: 'sp-kickoff' });
+      }
       const nearRivalGoal = hyp(ball.x - ctx.oppX, ball.y - ctx.oppGoal.cy) < W * 0.35;
       const ys = [-0.10, 0.10, 0, -0.2, 0.2];
-      if (sp.type === 'corner' || (sp.type === 'free_kick' && nearRivalGoal)) {
+      if (sp.type === 'free_kick' && nearRivalGoal) {
         if (info.role === 'MID' || info.solo) return this._goTo(me, ctx.unDepth(W * 0.70), ctx.cy + (ball.y > ctx.cy ? -1 : 1) * H * 0.12, ctx, { tag: 'sp-edge' });
-        if (sp.type === 'free_kick' && info.role === 'DEF') return this._goTo(me, ctx.unDepth(W * 0.55), ctx.cy, ctx, { tag: 'sp-back' });
+        if (info.role === 'DEF') return this._goTo(me, ctx.unDepth(W * 0.55), ctx.cy, ctx, { tag: 'sp-back' });
         const p = this._openSpot(ctx, me, ctx.unDepth(W * 0.88), ctx.cy + ys[info.fieldIdx % ys.length] * H, H * 0.04);
         return this._goTo(me, p.x, p.y, ctx, { tag: 'sp-box' });
       }
@@ -888,7 +1037,7 @@
         case 'fire_ball': {                                       // tiros desde mitad de cancha
           const far = ctx.shootRange * 1.7;
           const dGoal = hyp(ball.x - ctx.oppX, ball.y - ctx.oppGoal.cy);
-          if (meta.hasBall && !decision.kick && dGoal < far && dGoal >= ctx.shootRange * 0.9 && this._bearsToward(ctx)) {
+          if (meta.hasBall && !decision.kick && !(meta.tag && String(meta.tag).indexOf('sp-') === 0) && dGoal < far && dGoal >= ctx.shootRange * 0.9 && this._bearsToward(ctx)) {
             const shot = this._shotTarget(ball.x, ball.y, ctx);
             if (shot) {
               const r = this._strike(me, shot, ctx, cfg, mem, { kick: true }, 'long-shot');
