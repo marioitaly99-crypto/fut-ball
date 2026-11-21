@@ -286,7 +286,7 @@ const SIZES={chica:[800,420],mediana:[1150,600],grande:[1700,900],gigante:[2300,
    BRAKE: freno extra al soltar controles · TURN: más empuje al invertir dirección (no se aplican en Cancha de Hielo, que conserva ACC_ICE original) */
 const ACC=.2845,PD=.925,KPD=.9127,ACC_ICE=.224,BRAKE=.94,TURN=1.5,BD=.975,KS=9,PR=6,KCD=.1,FL=.15,GD=34,MAXB=10,LOCK=4,PRAD=18,BRAD=10,BMAX=20;
 let REST=.6,PREST=.1; /* Superpoderes: el evento Pelota Gigante los sube temporalmente */
-const SPF=95,SPR=150,RL=()=>G.size==='realista',areaD=()=>RL()?G.w*.157:G.gh*1.2,areaH=()=>RL()?G.h*.593:G.gh*2.6,smallD=()=>RL()?G.w*.0524:G.gh*.55,smallH=()=>RL()?G.h*.27:G.gh*1.4,spotD=()=>(RL()?G.w*.1048:G.gh*.75)*1.2; /* punto penal 20 % más atrás */
+const SPF=135,SPR=150,RL=()=>G.size==='realista',areaD=()=>RL()?G.w*.157:G.gh*1.2,areaH=()=>RL()?G.h*.593:G.gh*2.6,smallD=()=>RL()?G.w*.0524:G.gh*.55,smallH=()=>RL()?G.h*.27:G.gh*1.4,spotD=()=>(RL()?G.w*.1048:G.gh*.75)*1.2; /* punto penal 20 % más atrás */
 const NET={role:'local',peer:null,conn:null,fconn:null,fast:new Map(),conns:[],code:'',pm:new Map(),pk:'',tick:0},bc=m=>NET.conns.forEach(c=>{try{if(c&&c.open&&c.pl)c.send(m)}catch(e){}}),
  bcFast=m=>NET.conns.forEach(c=>{try{if(!c||!c.pl)return;const f=NET.fast.get(c.peer),ch=f&&f.open?f:c; /* estado por el canal rápido (reliable:false); si no hay, por el principal */
   if(ch===f&&f.dataChannel&&f.dataChannel.bufferedAmount>65536)return; /* red congestionada: descarta este estado (llega el siguiente) */
@@ -528,7 +528,7 @@ function segPush(p,ax,ay,bx,by){const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy||1,t=clamp
 function wallsP(p){const{w,h,gT,gB}=G;
  [[0,gT],[0,gB],[w,gT],[w,gB]].forEach(([px,py])=>{const d=Math.hypot(p.x-px,p.y-py),m=p.r+PR;if(d>0&&d<m){const nx=(p.x-px)/d,ny=(p.y-py)/d;p.x=px+nx*m;p.y=py+ny*m;const dot=p.vx*nx+p.vy*ny;if(dot<0){p.vx-=dot*nx;p.vy-=dot*ny}}});
  [[0,0,0,gT],[0,gB,0,h],[w,0,w,gT],[w,gB,w,h],[-GD,gT,0,gT],[-GD,gB,0,gB],[-GD,gT,-GD,gB],[w,gT,w+GD,gT],[w,gB,w+GD,gB],[w+GD,gT,w+GD,gB]].forEach((q,i)=>{if(i<4&&(spFree(p)||p.x<0||p.x>w))return;segPush(p,...q)})} /* muros de fondo: el ejecutante (y quien ya quedó afuera) no choca con muros invisibles; contain() lo regula */
-/* Zona libre del ejecutante (estilo HaxBall Real Soccer): mientras el balón espera el saque (lateral/córner), los jugadores del equipo que saca se mueven libres en un radio de 95 px alrededor del balón, incluso fuera de la banda/línea de fondo. Al patear/tocar se borra G.sp y vuelven las colisiones normales. */
+/* Zona libre del ejecutante (estilo HaxBall Real Soccer): mientras el balón espera el saque (lateral/córner), los jugadores del equipo que saca se mueven libres en un radio de SPF (135 px) alrededor del balón, incluso fuera de la banda/línea de fondo. Al patear/tocar se borra G.sp y vuelven las colisiones normales. */
 function spFree(p){const S=G.sp;return !!S&&S.type!=='arco'&&p.team===S.team}
 function moveY(p,ny){const lo=p.r,hi=G.h-p.r;if(spFree(p))return ny; /* contain() aplica cancha ∪ círculo libre */
  if(p.y<lo){if(p.vy<0)p.vy=0;return Math.min(lo,p.y+Math.max(5,p.vy))} /* quedó afuera (p. ej. tras patear el saque): vuelve suave hacia adentro */
@@ -539,7 +539,7 @@ function rectPt(p){const{w,h,gT,gB}=G,r=p.r,y=clamp(p.y,r,h-r);let x=p.x;if(!(p.
 /* Contención final: dentro de la cancha o, para el ejecutante, dentro del círculo libre; si quedó afuera (p. ej. tras patear) vuelve suave, sin teletransportes */
 function contain(p){const S=G.sp,[qx,qy]=rectPt(p),dx=qx-p.x,dy=qy-p.y,dd=Math.hypot(dx,dy);if(dd<.001)return;
  if(spFree(p)){const ex=p.x-S.x,ey=p.y-S.y,d=Math.hypot(ex,ey);
-  if(d<=SPF)return; /* dentro del círculo de 95 px: libre */
+  if(d<=SPF)return; /* dentro de la zona libre del ejecutante (SPF): libre */
   if(d-SPF<=dd){const nx=ex/d,ny=ey/d;p.x=S.x+nx*SPF;p.y=S.y+ny*SPF;const dot=p.vx*nx+p.vy*ny;if(dot>0){p.vx-=dot*nx;p.vy-=dot*ny}return}}
  if(dd>8){p.x+=dx/dd*8;p.y+=dy/dd*8}else{p.x=qx;p.y=qy}
  if(dx*p.vx<0)p.vx=0;if(dy*p.vy<0)p.vy=0}
@@ -660,7 +660,7 @@ function foulPenEnd(){const P=G.pen,t=P.team,gl=P.g===true;G.pen=null;
  P.save.forEach(([p,x,y])=>{if(G.players.includes(p)&&p.team!=='spec'){p.x=x;p.y=y;p.vx=p.vy=0}});
  if(gl)goal(t);else{const sd=smallD()*.55;setPiece({type:'arco',team:other(t),x:P.gx===0?sd:G.w-sd,y:G.h/2,rad:SPR,gx:P.gx},'🥅 SAQUE DE ARCO')} /* gol: saque del medio; atajado/errado: saque de arco */
  hud()}
-function tryKick(p){const b=G.ball,d=Math.hypot(b.x-p.x,b.y-p.y);if(d>p.r+b.r+4||!d)return;const pwOn=RL()&&G.pw&&G.pw.on&&G.pw.id===p.id,m=kMult(p)*(pwOn||G.activePowerEvent==='fire'?1.6:1)*(RL()&&G.sp&&(G.sp.type==='corner'||G.sp.type==='libre')&&p.team===G.sp.team?1.38:1);p.khK=true; /* Power Shot 1.60x · Tiro Libre / Córner 1.38x */
+function tryKick(p){const b=G.ball,d=Math.hypot(b.x-p.x,b.y-p.y);if(d>p.r+b.r+4||!d)return;const pwOn=RL()&&G.pw&&G.pw.on&&G.pw.id===p.id,m=kMult(p)*(pwOn||G.activePowerEvent==='fire'?1.6:1)*(RL()&&G.sp&&(G.sp.type==='corner'||G.sp.type==='libre')&&p.team===G.sp.team?2:1);p.khK=true; /* Power Shot 1.60x · Tiro Libre / Córner 2x (fuerza y velocidad; el lateral conserva la fuerza normal) */
  b.vx+=(b.x-p.x)/d*KS*m;b.vy+=(b.y-p.y)/d*KS*m;const s=Math.hypot(b.vx,b.vy);if(s>BMAX*m){b.vx*=BMAX*m/s;b.vy*=BMAX*m/s}G.lastT=p.team;G.lastP=p;p.cd=KCD;p.flash=FL;if(G.pw)G.pw=null;if(pwOn||G.activePowerEvent==='fire')powerThump();else thump()}
 function end(msg){G.over=true;powerReset();G.players.forEach(p=>{p.yc=0;p.fc=0;p.rc=0});G.endT=3;Object.keys(keys).forEach(k=>keys[k]=0);const{red:a,blue:b}=G.score;
  showEv(msg||(a>b?`🏆 ¡FINAL! GANÓ LOCAL (${a} - ${b})`:b>a?`🏆 ¡FINAL! GANÓ VISITANTE (${a} - ${b})`:`🤝 ¡FINAL! EMPATE (${a} - ${b})`),3000);hud()}
@@ -913,7 +913,7 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
  G.fr=(G.fr||0)+1;
  act().forEach(p=>{if(p.bot){if(p.fz>0){p.ax=p.ay=0;p.kick=false}else{G.pen?penAI(p):botAI(p);if(G.activePowerEvent==='reverse'&&!G.pen)botDisorient(p)}}
   velStep(p,powerMove(p));if(!p.bot)slideTick(p);if(p.fz>0){p.vx=p.vy=0;p.sl=null} /* bloque de hielo: inmóvil pero con colisión sólida */
-  /* el ejecutante se mueve libre en 95 px alrededor del balón (spFree/contain); el resto, dentro de la cancha */
+  /* el ejecutante se mueve libre en SPF px alrededor del balón (spFree/contain); el resto, dentro de la cancha */
   {const nx=p.x+p.vx;p.x=spFree(p)?nx:clamp(nx,Math.min(-GD+p.r,p.x),Math.max(w+GD-p.r,p.x))}p.y=moveY(p,p.y+p.vy);fence(p);p.cd=Math.max(0,p.cd-DT);p.flash=Math.max(0,p.flash-DT);
   if(p.kick&&!p.kd)p.flash=FL; /* destello 150 ms al presionar patear, toque o no la pelota */
   p.kd=p.kick;if(p.kick&&p.cd<=0&&!p.sl)tryKick(p)});
@@ -1022,7 +1022,7 @@ function draw(){if(VW!==Math.floor(window.innerWidth)||VH!==Math.floor(window.in
  ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.strokeRect(0,0,W,H);
  ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();ctx.beginPath();ctx.arc(W/2,H/2,H*.14,0,7);ctx.stroke();
  if(G.ko){ctx.save();ctx.setLineDash([8,10]);ctx.strokeStyle='rgba(250,204,21,.75)';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();ctx.beginPath();ctx.arc(W/2,H/2,H*.14,0,7);ctx.stroke();ctx.restore()}
- if(G.sp){ctx.save();ctx.setLineDash([8,10]);ctx.lineWidth=3;{ctx.strokeStyle=G.sp.team==='red'?'rgba(255,93,93,.7)':'rgba(59,156,255,.75)';ctx.beginPath();ctx.arc(G.sp.x,G.sp.y,SPF,0,7);ctx.stroke()} /* radio libre del ejecutante (95 px) */ ctx.strokeStyle='rgba(235,240,250,.45)';ctx.beginPath();ctx.arc(G.sp.x,G.sp.y,G.sp.rad||SPR,0,7);ctx.stroke();ctx.restore()} /* distancia reglamentaria de los rivales (150 px) */
+ if(G.sp){ctx.save();ctx.setLineDash([8,10]);ctx.lineWidth=3;{ctx.strokeStyle=G.sp.team==='red'?'rgba(255,93,93,.7)':'rgba(59,156,255,.75)';ctx.beginPath();ctx.arc(G.sp.x,G.sp.y,SPF,0,7);ctx.stroke()} /* zona libre del ejecutante (135 px): puede pisar fuera de banda/línea de fondo para perfilarse */ ctx.strokeStyle='rgba(235,240,250,.45)';ctx.beginPath();ctx.arc(G.sp.x,G.sp.y,G.sp.rad||SPR,0,7);ctx.stroke();ctx.restore()} /* distancia reglamentaria de los rivales (150 px) */
  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(W/2,H/2,4,0,7);ctx.fill();
  const pD=areaD(),pH=areaH();ctx.strokeRect(0,(H-pH)/2,pD,pH);ctx.strokeRect(W-pD,(H-pH)/2,pD,pH);
  if(RL()){const sD=smallD(),sH=smallH(),sp=spotD(),R=H*.146,a=Math.acos(clamp((pD-sp)/R,-1,1));ctx.strokeRect(0,(H-sH)/2,sD,sH);ctx.strokeRect(W-sD,(H-sH)/2,sD,sH);

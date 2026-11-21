@@ -828,7 +828,12 @@
       else {
         if (sp.type === 'free_kick' && dGoal < ctx.shootRange * 0.9) t = this._shotTarget(ball.x, ball.y, ctx, mem);
         if (!t && sp.type === 'goal_kick') { const p = this._bestPass(me, ctx, cfg, ball.x, ball.y, {}); if (p) t = p.target; }
-        if (!t) t = this._spMateTarget(me, ctx, cfg, mem, sp);
+        if (!t) {
+          const ln = this._spLineN(ctx, ball);
+          let pool;
+          if (ln) pool = ctx.mates.filter((m) => this._spInOk(norm(m.x - ball.x, m.y - ball.y), ln, 0.3));   // solo hacia adentro de la cancha
+          t = this._spMateTarget(me, ctx, cfg, mem, sp, pool && pool.length ? pool : undefined);
+        }
       }
       if (!t) {                                                             // sin compañeros: avanza hacia el medio
         const d = clamp(ctx.depth(ball.x) + W * 0.3, W * 0.3, W * 0.9);
@@ -845,6 +850,87 @@
       return t;
     }
 
+    /** Si la pelota está pegada a una banda/línea de fondo (lateral, córner), devuelve la normal hacia el interior de la cancha. */
+    _spLineN(ctx, ball) {
+      const m = ctx.H * 0.02 + 8;
+      const nx = ball.x - ctx.L < m ? 1 : ctx.R - ball.x < m ? -1 : 0;
+      const ny = ball.y - ctx.T < m ? 1 : ctx.B - ball.y < m ? -1 : 0;
+      return nx || ny ? { nx, ny } : null;
+    }
+
+    /** ¿La dirección v apunta hacia el interior de la cancha (todas las componentes de la normal con al menos `min`)? */
+    _spInOk(v, ln, min) {
+      if (!ln) return true;
+      min = min != null ? min : 0.2;
+      return (!ln.nx || v.x * ln.nx >= min) && (!ln.ny || v.y * ln.ny >= min);
+    }
+
+    /** Fuerza que la dirección de saque tenga componente hacia adentro (nunca hacia el borde exterior ni rebotando en la pared). */
+    _spInDir(v, ln) {
+      if (!ln) return v;
+      const mn = ln.nx && ln.ny ? 0.4 : 0.5;
+      let x = v.x, y = v.y;
+      if (ln.nx && x * ln.nx < mn) x = ln.nx * mn;
+      if (ln.ny && y * ln.ny < mn) y = ln.ny * mn;
+      const n = norm(x, y);
+      return { x: n.x, y: n.y };
+    }
+
+    /**
+     * Saque sobre la línea (lateral / córner): el ejecutante se coloca POR FUERA de la banda o la esquina, detrás de la pelota
+     * y mirando hacia el interior (sin _clampField), espera ~1 s y patea hacia un compañero desmarcado o el centro del área rival.
+     * El juego le permite pisar esa zona exterior al equipo que saca (spFree).
+     */
+    _spExecuteOnLine(me, ctx, cfg, mem, sp, ln) {
+      const ball = ctx.ball, W = ctx.W;
+      const contact = me.r + ball.r;
+      const dBall = hyp(me.x - ball.x, me.y - ball.y);
+      const elapsed = mem.age - mem.spStart;
+      const force = elapsed > 180;                                          // anti-atasco: sin espera ni error de puntería
+
+      let tg;
+      if (force) {
+        let near = null, nd = 1e9;
+        for (const m of ctx.mates) {
+          if (m.frozen) continue;
+          const d = hyp(m.x - ball.x, m.y - ball.y);
+          if (d < nd && this._spInOk(norm(m.x - ball.x, m.y - ball.y), ln, 0.3)) { nd = d; near = m; }
+        }
+        tg = near ? { x: near.x, y: near.y } : { x: ctx.unDepth(W * 0.9), y: ctx.cy };
+      } else tg = this._spTarget(me, ctx, cfg, mem, sp);
+
+      let dv = norm(tg.x - ball.x, tg.y - ball.y);
+      if (!force) dv = rot(dv, mem.spAim);                                   // error fijo durante todo el saque
+      dv = this._spInDir(dv, ln);                                           // siempre hacia adentro
+
+      // Punto de saque: detrás de la pelota respecto de la dirección de pase (queda fuera de la línea), sin clamp a la cancha
+      const gs = contact + Math.min(W * 0.002, 3);
+      const spot = { x: ball.x - dv.x * gs, y: ball.y - dv.y * gs };
+      let tx = spot.x, ty = spot.y;
+      const rx = me.x - ball.x, ry = me.y - ball.y;
+      const along = rx * dv.x + ry * dv.y;
+      if (along > -contact * 0.3 && segDist(ball.x, ball.y, me.x, me.y, spot.x, spot.y).d < contact * 1.3) {
+        // rodea la pelota para llegar al punto exterior sin pasar por encima
+        const px = -dv.y, py = dv.x, sg = rx * px + ry * py >= 0 ? 1 : -1;
+        tx = ball.x + px * sg * contact * 2.2 - dv.x * contact * 0.7;
+        ty = ball.y + py * sg * contact * 2.2 - dv.y * contact * 0.7;
+      }
+      const s = this._steer(me, tx, ty, ctx, { arrive: true, dead: 1.5 });
+
+      const bd = norm(ball.x - me.x, ball.y - me.y);
+      const inRange = dBall <= contact + 5;
+      const aimed = bd.x * dv.x + bd.y * dv.y >= Math.cos(Math.max(cfg.kickTol, 0.2)) && this._spInOk(bd, ln, 0.2);
+      const still = hyp(me.vx, me.vy) < ctx.vmax * 0.3;
+      if (inRange && aimed && still) { if (mem.spReady == null) mem.spReady = mem.age; }
+      else if (dBall > contact + 12) mem.spReady = null;
+      let kick = false;
+      if (inRange && aimed && mem.spReady != null && (force || mem.age - mem.spReady >= mem.spWait)) kick = true;
+      return mk(s.ix, s.iy, kick, false, {
+        target: { x: tx, y: ty }, tag: force ? 'sp-force' : 'sp-approach', dv, dBall, contact,
+        hasBall: dBall <= contact + ctx.kickReach * 2.5
+      });
+    }
+
     /**
      * Ejecutante: va directo a la pelota hasta quedar en contacto (dist <= r + ball.r + 5), se frena, espera ~50-65 ticks,
      * apunta al compañero más libre y patea. Fail-safe: a los 180 ticks fuerza kick:true hacia el compañero más cercano.
@@ -854,6 +940,9 @@
       const contact = me.r + ball.r;
       const dBall = hyp(me.x - ball.x, me.y - ball.y);
       const elapsed = mem.age - mem.spStart;
+
+      const ln = this._spLineN(ctx, ball);                                  // lateral / córner: sacar desde fuera de la línea, hacia adentro
+      if (ln) return this._spExecuteOnLine(me, ctx, cfg, mem, sp, ln);
 
       if (elapsed > 180) {                                                  // anti-atasco
         let near = null, nd = 1e9;
