@@ -882,18 +882,30 @@ function refFoul(p,q,s){const W=G.w,H=G.h,b=G.ball,O=p.team,T=q.team,ownX=O==='r
  const rel=s.dx*ux+s.dy*uy,relV=Math.hypot(p.vx-q.vx,p.vy-q.vy),db=Math.hypot(b.x-q.x,b.y-q.y); /* rel > 0.55: la barrida viene de atrás */
  const behind=rel>.55,
   lastMan=Math.abs(q.x-ownX)<W*.32&&Math.abs(q.y-H/2)<areaH()*.8&&db<q.r+b.r+110&&ux*dirG>.4&&!G.players.some(d=>d!==p&&d.team===O&&d.role!=='arquero'&&(d.x-q.x)*dirG>0&&Math.abs(d.y-q.y)<260); /* último hombre cortando ocasión manifiesta */
- let lvl=0,why='',warn=false;
- if(behind){lvl=2;why='behind'}else if(lastMan){lvl=2;why='last'}
- else if(db>q.r+b.r+70||relV>=8.2||(Math.abs(fx-ownX)<W*.3&&relV>=6.8)){if(Math.random()<Math.min(.9,.45+.15*(p.fc||0)))lvl=1;else warn=true} /* gravedad media (a destiempo / violenta / cortando ataque): ~45 % amarilla (más si ya cometió faltas), ~55 % solo advertencia verbal */
+/* ÁRBITRO REALISTA (criterio): sin roja directa; último hombre / por detrás = amarilla; reincidente ~20–25 % "última vida"; fuera del área ~15–20 % "¡Siga, siga!"; dentro del área penal siempre */
+ const grave=behind||lastMan,extremo=grave||relV>=10,ventaja=db<q.r+b.r+60&&Math.hypot(q.vx,q.vy)>1.2,
+  prog=G.duration>0&&!G.golden?clamp(G.clock/G.duration,0,1):clamp(G.clock/900,0,1); /* avance del partido (0 inicio → 1 cierre) */
+ if(!pen&&(!extremo||ventaja)&&Math.random()<.20-.05*prog){ /* ¡Siga, siga!: 20 % al inicio → 15 % al cierre; solo si el roce no es extremo o el atacante conserva la ventaja */
+  s.bad=true;refSay('🧑‍⚖️ Árbitro: 👋 ¡Siga, siga! El árbitro deja jugar');showEv('👋 ¡SIGA, SIGA! El árbitro deja jugar',1800);return}
+ let lvl=0,why='',warn=false,perdon=false,card=false;
+ if(grave){card=true;why=behind?'behind':'last'}
+ else if(db>q.r+b.r+70||relV>=8.2||(Math.abs(fx-ownX)<W*.3&&relV>=6.8)){if(Math.random()<Math.min(.9,.45+.15*(p.fc||0)))card=true;else warn=true} /* gravedad media: ~45 % amonestación (más si ya cometió faltas), ~55 % solo advertencia verbal */
  p.fc=(p.fc||0)+1;
- if(lvl===1){p.yc=(p.yc||0)+1;if(p.yc>=2){lvl=2;why='double'}}
+ if(card){
+  if(!(p.yc>0)){p.yc=1;lvl=1} /* primera infracción con tarjeta: SIEMPRE amarilla, nunca roja directa (ni siquiera de último hombre) */
+  else if(!p.rc&&Math.random()<.20+Math.random()*.05){p.rc=1;perdon=true} /* ya amonestado: ~20–25 % de "última vida" (segunda advertencia), una sola vez */
+  else{lvl=2;why='double'}} /* reincidente sin perdón (o tras la última vida): roja */
  const area=pen?' en el área':'',res=pen?`¡Penal para ${tn(T)}!`:`Tiro libre para ${tn(T)}`;
  let txt;
- if(lvl===0)txt=warn?`Falta de ${p.name} sobre ${q.name}${area}. Siga, sin tarjeta — ${pen?`¡penal para ${tn(T)}!`:`tiro libre para ${tn(T)}`}`:`Falta de ${p.name} sobre ${q.name}${area}. ${res}`;
- else if(lvl===1)txt=`Entrada temeraria de ${p.name} 🟨${area}. ${res}`;
- else txt=(why==='behind'?`Falta por detrás${area} de ${p.name} 🟥`:why==='last'?`Falta de último hombre${area} de ${p.name} 🟥`:`Segunda amarilla para ${p.name} 🟥${area}`)+` · Expulsado hasta el final del partido. ${res}`;
+ if(lvl===0)txt=perdon?`Falta de ${p.name} sobre ${q.name}${area}, merecía la segunda amarilla pero el árbitro lo perdona. ${res}`:warn?`Falta de ${p.name} sobre ${q.name}${area}. Advertencia verbal, sin tarjeta — ${res}`:`Falta de ${p.name} sobre ${q.name}${area}. ${res}`;
+ else if(lvl===1)txt=(why==='behind'?`Falta por detrás${area} de ${p.name} 🟨`:why==='last'?`Falta de último hombre${area} de ${p.name} 🟨`:`Entrada temeraria de ${p.name} 🟨${area}`)+`. ${res}`;
+ else txt=`Segunda amarilla para ${p.name} 🟥${area} · Expulsado hasta el final del partido. ${res}`;
  whistle();refSay('🧑‍⚖️ Árbitro: '+txt);
- showEv(lvl===1?`🟨 TARJETA AMARILLA · ${p.name}`:lvl===2?`🟥 TARJETA ROJA · ${p.name}`:`🚫 FALTA · ${pen?'PENAL':'TIRO LIBRE'} ${tn(T)}`,2600);
+ if(lvl===1&&grave)refSay(`🧑‍⚖️ Árbitro: ⚠️ ¡Advertencia! Próxima falta grave es expulsión (${p.name})`);
+ if(perdon)refSay(`🧑‍⚖️ Árbitro: ⚠️ ¡Última vida! El árbitro le perdona la expulsión (${p.name})`);
+ showEv(lvl===1?`🟨 TARJETA AMARILLA · ${p.name}`:lvl===2?`🟥 TARJETA ROJA · ${p.name}`:perdon?`⚠️ ¡ÚLTIMA VIDA! · ${p.name}`:`🚫 FALTA · ${pen?'PENAL':'TIRO LIBRE'} ${tn(T)}`,2200);
+ if(lvl===1&&grave)setTimeout(()=>showEv('⚠️ ¡Advertencia! Próxima falta grave es expulsión',2400),2300);
+ else if(perdon)setTimeout(()=>showEv('⚠️ ¡Última vida! El árbitro le perdona la expulsión',2400),2300);
  G.pw=null;if(lvl===2)expel(p);
  if(pen&&startFoulPen(q,O)){if(lvl<2){p.sl=null;p.vx=p.vy=0;p.slCd=30;notifySl(p,30,false)}return}
  G.ko=null;G.sp={type:'libre',team:T,x:fx,y:fy,rad:SPR,g:.9};b.x=fx;b.y=fy;b.vx=b.vy=0;
