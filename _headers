@@ -1,2 +1,4 @@
 /*
-  Content-Security-Policy: frame-ancestors 'self' https://*.itch.io https://*.hwcdn.net https://itch.io;
+  ! X-Frame-Options
+  Content-Security-Policy: frame-ancestors 'self' https://*.itch.io https://*.hwcdn.net https://itch.io
+
