@@ -99,7 +99,7 @@
       let mem = this._mem.get(key);
       if (!mem) {
         mem = { age: 0, nextAge: 0, sig: '', aimErr: 0, aimErrCur: 0, slideRoll: false, passRoll: true, spSig: '', spStart: 0,
-                gkHold: -1, vmax: 0, act: null, actUntil: 0, reactTicks: 6, passMate: null, shotSide: 0,
+                gkHold: -1, gkAdv: null, vmax: 0, act: null, actUntil: 0, reactTicks: 6, passMate: null, shotSide: 0,
                 spReady: null, spWait: 55, spAim: 0, spMate: null, spSpot: null, spSpotUntil: 0 };
         this._mem.set(key, mem);
       }
@@ -672,7 +672,7 @@
       // 2) Mano a mano
       let carrier = null;
       for (const r of ctx.rivals) {
-        if (hyp(r.x - ball.x, r.y - ball.y) <= r.r + ball.r + W * 0.04 && inArea(r)) { carrier = r; break; }
+        if (hyp(r.x - ball.x, r.y - ball.y) <= r.r + ball.r + W * 0.04 && (inArea(r) || inArea(ball))) { carrier = r; break; }
       }
       if (carrier) {
         const cd = ctx.depth(carrier.x);
@@ -680,15 +680,7 @@
           const md = ctx.depth(m.x);
           return md < cd + contact && segDist(m.x, m.y, carrier.x, carrier.y, ctx.ownX, g.cy).d < H * 0.07;
         });
-        if (!covered) {
-          const sl = this._slideCheck(me, ctx, cfg, mem, carrier);
-          if (sl) { sl.meta.tag = 'gk-slide'; return sl; }
-          if (dBall < W * 0.09) return this._strike(me, this._gkClearTarget(me, ctx), ctx, cfg, mem, { kick: true }, 'gk-clear');
-          // achica el ángulo: sobre la línea carrier→arco
-          const cdir = norm(ctx.ownX - carrier.x, g.cy - carrier.y);
-          const dist = Math.min(carrier.r * 0 + hyp(carrier.x - ctx.ownX, carrier.y - g.cy) * 0.55, box.depth);
-          return this._goTo(me, carrier.x + cdir.x * dist, carrier.y + cdir.y * dist, ctx, { tag: 'gk-rush' });
-        }
+        if (!covered) return this._gkOneOnOne(me, ctx, cfg, mem, carrier);
       }
 
       // 3) Pelota suelta en el área o en nuestro poder → distribuir
@@ -696,6 +688,7 @@
       const loose = bs < W * 0.004 || dBall <= reach * 1.5;
       if (inArea(ball) && loose && dBall < nearestRival) return this._gkDistribute(me, ctx, cfg, mem);
       mem.gkHold = -1;
+      mem.gkAdv = null;
 
       // 4) Anticipar centros: pelota en banda cerca de nuestro fondo
       if ((Math.abs(ball.y - ctx.cy) > H * 0.30) && bd < W * 0.30) {
@@ -704,6 +697,60 @@
       }
       // 5) Línea de arco
       return this._gkStance(me, ctx);
+    }
+
+    /**
+     * Mano a mano: el arquero SIEMPRE se mantiene sobre la recta pelota → centro del arco.
+     *  - Nunca se perfila detrás de la pelota ni rodea al atacante.
+     *  - Avanza de a pasos (mem.gkAdv = distancia al centro del arco sobre la recta) para achicar el ángulo, sin pasarse de largo.
+     *  - kick: true apenas la pelota entra en su radio de alcance (bot.r + ball.r + 12).
+     *  - slide: solo de frente y a quemarropa (dist <= bot.r + ball.r + 18), apuntando al centro de la pelota.
+     */
+    _gkOneOnOne(me, ctx, cfg, mem, carrier) {
+      const ball = ctx.ball, W = ctx.W, g = ctx.ownGoal, box = ctx.box;
+      const contact = me.r + ball.r;
+      const gx = ctx.ownX, gy = g.cy;
+      const dBall = hyp(me.x - ball.x, me.y - ball.y);
+
+      // Recta pelota → centro del arco (con una mínima anticipación de la pelota)
+      const pb = this._predBall(ctx, 2);
+      const v = norm(gx - pb.x, gy - pb.y);                       // de la pelota hacia el arco
+      const D = v.d;                                               // distancia pelota ↔ centro del arco
+      const lineD = me.r * 1.2 + W * 0.008;
+      const maxKd = Math.max(lineD, D - (contact + ctx.gap));      // nunca más allá de la pelota (sin pasarse de largo)
+
+      // Distancia deseada del arquero al centro del arco: achica el ángulo; a quemarropa se pega a la pelota
+      const close = dBall < W * 0.09 || D < box.depth;
+      let want = close ? maxKd : Math.min(D * 0.5, maxKd);
+      want = clamp(want, lineD, maxKd);
+
+      // Avance paso a paso (retroceder es inmediato)
+      const myKd = clamp(hyp(me.x - gx, me.y - gy), lineD, box.depth * 2);
+      if (mem.gkAdv == null) mem.gkAdv = myKd;
+      const step = Math.max(ctx.vmax * 1.2, W * 0.004);
+      mem.gkAdv += clamp(want - mem.gkAdv, -step * 4, step);
+      mem.gkAdv = Math.min(mem.gkAdv, maxKd);
+
+      // Punto estrictamente sobre la bisectriz: arco ← keeper ← pelota
+      const tp = this._clampField(ctx, gx - v.x * mem.gkAdv, gy - v.y * mem.gkAdv);
+      const s = this._steer(me, tp.x, tp.y, ctx, { arrive: true, dead: ctx.deadzone * 0.5 });
+
+      // Patada de atajo apenas la pelota entra en el radio de alcance
+      const kick = dBall <= me.r + ball.r + 12;
+
+      // Barrida: solo de frente y a quemarropa, interpuesto en la recta pelota→arco
+      let slide = false, ix = s.ix, iy = s.iy;
+      if (this._slideAllowed(me, cfg, ctx) && dBall <= contact + 18 && dBall > 1e-6) {
+        const bv = norm(gx - ball.x, gy - ball.y);                 // pelota → arco
+        const wx = me.x - ball.x, wy = me.y - ball.y;
+        const along = wx * bv.x + wy * bv.y;                       // >0: el arquero está entre la pelota y el arco
+        const perp = Math.abs(wx * bv.y - wy * bv.x);              // desvío respecto de la recta
+        if (along > 0 && perp <= contact * 0.6 && ctx.depth(ball.x) >= ctx.depth(me.x)) {
+          const dv = norm(ball.x - me.x, ball.y - me.y);           // directo al centro de la pelota (hacia afuera del arco)
+          ix = dv.x; iy = dv.y; slide = true;
+        }
+      }
+      return mk(ix, iy, kick, slide, { target: tp, positional: !kick && !slide, tag: slide ? 'gk-slide' : 'gk-rush', hasBall: kick });
     }
 
     _gkClearTarget(me, ctx) {
