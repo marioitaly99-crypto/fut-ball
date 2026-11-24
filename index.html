@@ -638,7 +638,7 @@ function enter(r,admin){netReset();updateInvite();cur=r;isAdmin=admin;STAD=admin
 function sizeUp(){[G.w,G.h]=SIZES[G.size];G.gh=GHT[G.size];G.gT=(G.h-G.gh)/2;G.gB=G.gT+G.gh;G.k=G.size==='gigante'?1.2:G.size==='grande'?1.1:1;G.cam=null}
 function kickoff(){G.sp=null;G.outImm=0;G.lastT=null;G.lastP=null;G.players.forEach(p=>{p.fz=p.im=0});G.ko=G.koTeam||'red';G.ball={x:G.w/2,y:G.h/2,vx:0,vy:0,r:BRAD*G.k};G.players.forEach(p=>p.r=PRAD*G.k);if(G.super)powerRadii(true);
  ['red','blue'].forEach(t=>{const l=G.players.filter(p=>p.team===t);l.forEach((p,i)=>{p.x=t==='red'?G.w*.3:G.w*.7;p.y=G.h*(i+1)/(l.length+1);p.vx=p.vy=0;p.cd=p.flash=0})})}
-function restart(){G.pw=null;G.players.forEach(p=>{injClear(p);p.slCd=0;p.sl=null;p.kh=0;p.khK=false;p.yc=0;p.fc=0;p.rc=0;if(p.rt){if(p.team==='spec')p.team=p.rt;p.rt=null}});$('pbR').style.display=$('pbB').style.display='';clearTimeout(evT);$('ev').classList.remove('show');assignRoles();G.koTeam='red';G.pen=null;$('penbar').classList.add('hidden');$('sb').classList.remove('hidden');$('sb').appendChild($('mute'));G.vote=null;G.golden=false;powerReset();$('vote').classList.add('hidden');G.paused=false;G.cd=0;G.score={red:0,blue:0};G.clock=0;G.gp=0;G.fp=0;G.fpA=null;G.over=false;kickoff();hud()}
+function restart(){if(G.addedDone&&G.baseDur&&G.duration===G.baseDur+G.addedMins*60)G.duration=G.baseDur;G.addedDone=false;G.addedMins=0;G.baseDur=0;G.pw=null;G.players.forEach(p=>{injClear(p);p.slCd=0;p.sl=null;p.kh=0;p.khK=false;p.yc=0;p.fc=0;p.rc=0;if(p.rt){if(p.team==='spec')p.team=p.rt;p.rt=null}});$('pbR').style.display=$('pbB').style.display='';clearTimeout(evT);$('ev').classList.remove('show');assignRoles();G.koTeam='red';G.pen=null;$('penbar').classList.add('hidden');$('sb').classList.remove('hidden');$('sb').appendChild($('mute'));G.vote=null;G.golden=false;powerReset();$('vote').classList.add('hidden');G.paused=false;G.cd=0;G.score={red:0,blue:0};G.clock=0;G.gp=0;G.fp=0;G.fpA=null;G.over=false;kickoff();hud()}
 /* Etiquetas LOCAL/VISITANTE con los colores del uniforme: 1 color → palabra completa; 2 colores → mitad y mitad */
 function teamLabel(el,team,txt){const u=(G&&G.uni&&G.uni[team])||{n:1,c1:team==='red'?'#ff5d5d':'#3b9cff'},key=u.n+'|'+u.c1+'|'+u.c2+'|'+(u.c3||'');if(el._k===key)return;el._k=key;el.textContent=txt;
  el.style.cssText=u.n===3?`background:linear-gradient(90deg,${u.c1} 33.34%,${u.c2} 33.34% 66.67%,${u.c3||'#ffffff'} 66.67%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;-webkit-text-stroke:.5px rgba(255,255,255,.35)`
@@ -646,7 +646,7 @@ function teamLabel(el,team,txt){const u=(G&&G.uni&&G.uni[team])||{n:1,c1:team===
   :`color:${u.c1};-webkit-text-fill-color:${u.c1};-webkit-text-stroke:.5px rgba(255,255,255,.35)`}
 function paintTeams(){teamLabel($('tL'),'red','LOCAL');teamLabel($('tV'),'blue','VISITANTE');teamLabel($('pL'),'red','LOCAL');teamLabel($('pV'),'blue','VISITANTE')}
 function hud(){paintTeams();powerUI();$('score').textContent=`${G.score.red}:${G.score.blue}`;
- $('clock').textContent=G.pen?'🥅 PENALES':G.golden?(G.super?'⚡ MUERTE SÚBITA':'⚡ GOL DE ORO'):G.duration?'⏱ '+fmt(Math.max(0,G.duration-G.clock)):fmt(G.clock)}
+ $('clock').textContent=G.pen?'🥅 PENALES':G.golden?(G.super?'⚡ MUERTE SÚBITA':'⚡ GOL DE ORO'):G.duration?'⏱ '+fmt(Math.max(0,G.duration-G.clock))+(G.addedMins&&!G.cET?` (+${G.addedMins}')`:''):fmt(G.clock)}
 const hum=()=>G.players.filter(p=>!p.bot).length,nb=t=>G.players.filter(p=>p.bot&&p.team===t);
 /* IA táctica de 6 roles: arquero, defensor_central, lateral, mediocampista, extremo, delantero.
    Local (rojo) defiende x=0 y ataca x=ancho; Visitante (azul) al revés. Fracciones = distancia desde el arco propio / ancho de cancha. */
@@ -810,6 +810,7 @@ function antiJam(){const b=G.ball,c=act().filter(p=>Math.hypot(p.x-b.x,p.y-b.y)<
 function pauseFx(){ctx.filter='none';
  if(!('filter' in ctx)){ctx.globalCompositeOperation='saturation';ctx.fillStyle='#000';ctx.fillRect(0,0,VW,VH);ctx.globalCompositeOperation='source-over'} /* respaldo sin ctx.filter */
  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='rgba(8,12,22,.5)';ctx.fillRect(0,0,VW,VH);
+ if(menuOpen&&!(G.cd>0))return; /* menú de sala abierto: mismo fondo gris, sin texto PAUSADO ni subtítulo de la tecla P */
  ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.strokeStyle='#0b0f1a';ctx.fillStyle='#fff';
  const cd=G.cd>0,h=cd?String(Math.ceil(G.cd)):'PAUSADO',cx=VW/2,cy=VH/2,hy=cd?cy-30:cy-20;ctx.lineWidth=8;ctx.font=cd?'900 150px "Segoe UI",sans-serif':'900 84px "Segoe UI",sans-serif';ctx.strokeText(h,cx,hy);ctx.fillText(h,cx,hy);
  const t=cd?'3... 2... 1...':'Vuelve a presionar la letra P para reanudar el partido',y=cd?cy+80:cy+42;ctx.lineWidth=5;ctx.font='600 22px "Segoe UI",sans-serif';ctx.strokeText(t,cx,y);ctx.fillText(t,cx,y)}
@@ -1368,7 +1369,13 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
  G.players.forEach(p=>{if(p.rt&&p.team!=='spec'){p.rt=null;p.rc=0}}); /* expulsados: siguen de Espectador hasta que termine o se reinicie el partido */
  if(G.pen&&G.pen.ph==='intro'){if((G.pen.t+=DT)>2){G.pen.ph='aim';G.pen.t=0;showTurn()}return}
  if(!G.pen)G.clock+=DT;
- if(!G.pen&&G.duration&&!G.golden&&G.clock>=G.duration){G.clock=G.duration;return G.score.red===G.score.blue?(G.super?startGolden():startVote()):end()}
+ if(!G.pen&&G.duration&&!G.golden&&G.clock>=G.duration){
+  if(!G.cET&&!G.addedDone){ /* tiempo añadido aleatorio (1 o 2 min), una sola vez; no aplica a penales, gol de oro ni tiempo extra */
+   G.addedDone=true;const addMin=Math.random()<0.5?1:2;G.baseDur=G.duration;G.addedMins=addMin;G.duration+=addMin*60;
+   showEv(`⏱️ +${addMin}' TIEMPO AÑADIDO`,2600);refSay(`🧑‍⚖️ Árbitro: ⏱️ Se adicionan ${addMin} minuto${addMin>1?'s':''} de tiempo añadido`);hud();
+  }
+  if(G.clock>=G.duration){G.clock=G.duration;return G.score.red===G.score.blue?(G.super?startGolden():startVote()):end()}
+ }
  if(G.gp>0){if((G.gp-=DT)<=0)kickoff();return hud()}
  if(G.outImm>0)G.outImm-=DT;
  G.players.forEach(p=>{if(p.inj>0){if((p.inj-=DT)<=0)injClear(p);else p.injG=gkSmall(p)}});
@@ -1828,7 +1835,8 @@ let last=performance.now(),acc=0;
    <div class="cRow"><div style="flex:1"><label class="cLbl" for="cName">Nombre / Apodo</label><input id="cName" maxlength="16" placeholder="Tu nombre o apodo" autocomplete="off"></div>
     <div class="num"><label class="cLbl" for="cNum">Dorsal</label><input id="cNum" maxlength="2" inputmode="numeric" value="10" placeholder="10" autocomplete="off"></div></div>
    <label class="cLbl" for="cDur">Duración de partido</label>
-   <select id="cDur"><option value="2">2 min</option><option value="3">3 min</option><option value="5" selected>5 min (Recomendado)</option><option value="7">7 min</option></select>
+   <div class="cRow"><select id="cDur" style="flex:1"><option value="3">3 min</option><option value="5" selected>5 min (Recomendado)</option><option value="7">7 min</option><option value="custom">Personalizado…</option></select>
+    <input type="number" id="cDurCustom" min="1" max="60" value="5" inputmode="numeric" title="Minutos por partido (1–60)" aria-label="Minutos personalizados" style="display:none;flex:0 0 96px"></div>
    <div class="cErr" id="cErr" role="alert"></div>
    <button id="cStart" type="button">⚽ INICIAR TEMPORADA</button>
   </section>
@@ -1838,6 +1846,8 @@ let last=performance.now(),acc=0;
    b.innerHTML=`<span class="bd">${badge(t)}</span><b>${E(t.shortName)}</b>`;b.onclick=()=>pick(t.id);grid.appendChild(b)});
   $('cRand').onclick=()=>{const t=D.teams[Math.floor(Math.random()*D.teams.length)];pick(t.id,true)};
   $('cStart').onclick=start;
+  $('cDur').onchange=()=>{const cu=$('cDur').value==='custom';$('cDurCustom').style.display=cu?'':'none';$('cErr').textContent='';if(cu)$('cDurCustom').focus()};
+  $('cDurCustom').oninput=()=>{$('cErr').textContent=''};
   $('cNum').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,2);if(sel)preview()};
   $('cName').oninput=()=>{$('cErr').textContent=''};
   $('cPais').onchange=()=>{};$('cLiga').onchange=()=>{};
@@ -1859,8 +1869,11 @@ let last=performance.now(),acc=0;
   if(!sel)return err.textContent='Elegí un club (o tocá Equipo Aleatorio) para continuar.';
   if(!name)return err.textContent='Escribí tu nombre o apodo.';
   const n=parseInt(num,10);if(!(n>=1&&n<=99))return err.textContent='El dorsal debe estar entre 1 y 99.';
+  let mins=5;
+  if($('cDur').value==='custom'){mins=parseInt($('cDurCustom').value,10);if(!(mins>=1&&mins<=60))return err.textContent='Los minutos personalizados deben estar entre 1 y 60.'}
+  else mins=parseInt($('cDur').value,10)||5;
   const z=D.generarZonasAleatorias();
-  state={v:1,country:COUNTRIES[0].id,league:D.league.id,teamId:sel,player:{name,num:n},matchMinutes:parseInt($('cDur').value,10)||5,
+  state={v:1,country:COUNTRIES[0].id,league:D.league.id,teamId:sel,player:{name,num:n},matchMinutes:mins,
    zones:{A:z.A,B:z.B},zonaDe:z.zonaDe,myZone:z.zonaDe[sel],fecha:1,createdAt:Date.now()};
   try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
   window.CAREER_STATE=state;
@@ -1873,7 +1886,7 @@ let last=performance.now(),acc=0;
    <div class="cNote">Tu clásico, ${E(rv.name)}, quedó en la Zona ${state.zonaDe[rv.id]}. El motor del torneo se conecta en el próximo paso.</div>
    <div class="cZones">${zl('A')}${zl('B')}</div>
    <button id="cBack" class="cDone" type="button">↺ Cambiar configuración</button></section>`;
-  $('cBack').onclick=()=>{const nm=state.player.name,nu=state.player.num,du=state.matchMinutes;form();$('cName').value=nm;$('cNum').value=nu;$('cDur').value=du;preview()}}
+  $('cBack').onclick=()=>{const nm=state.player.name,nu=state.player.num,du=state.matchMinutes;form();$('cName').value=nm;$('cNum').value=nu;const std=['3','5','7'].indexOf(String(du))>=0;$('cDur').value=std?String(du):'custom';$('cDurCustom').value=du;$('cDurCustom').style.display=std?'none':'';preview()}}
  /* Al abrir el Modo Carrera, precarga apodo/dorsal del login si el campo está vacío */
  $('homeCareer').addEventListener('click',()=>{if(!$('cName'))return;
   if(!$('cName').value&&$('nick').value.trim())$('cName').value=$('nick').value.trim().slice(0,16);

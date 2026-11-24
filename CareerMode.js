@@ -139,6 +139,8 @@
  /* Registra el resultado de tu partido y simula el resto de la fecha / ronda */
  function recordUser(m,res){
   m.hg=res.hg;m.ag=res.ag;m.done=true;
+  /* lesiones: leve 'l' → recuperado · grave 's' → baja a leve para el partido siguiente */
+  Object.keys(S.squad.info).forEach(id=>{const p=S.squad.info[id];if(p.inj==='l')p.inj=null;else if(p.inj==='s')p.inj='l'});
   if(S.phase==='regular'){
    S.fixture[S.fecha-1].forEach(x=>{if(!x.done)simRegular(x)});
    if(S.fecha<16)S.fecha++;else endRegular();
@@ -432,8 +434,9 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
  }
 
  /* ---- Mi Plantel ---- */
- function prHtml(p,k,i,sel){return '<button type="button" class="cmPr'+(sel?' sel':'')+'" data-k="'+k+'" data-i="'+i+'"><span class="n">#'+E(p.number)+'</span><span class="ps">'+(POSL[p.pos]||p.pos)+'</span><span class="nm">'+E(p.name)+'</span><span class="bar"><i style="width:'+p.stam+'%;background:'+stamCol(p.stam)+'"></i></span><b>'+p.stam+'%</b></button>'}
- function userRow(){return '<div class="cmPr me"><span class="n">#'+E(S.player.num)+'</span><span class="ps">CAP</span><span class="nm">'+E(S.player.name)+'</span><span class="bar"><i style="width:100%;background:#22c55e"></i></span><b>100%</b></div>'}
+ function injTag(p){return p.inj==='s'?' <span title="Lesión grave · Requiere cambio" style="color:#f87171;font-weight:900;font-size:.72rem">🚑 Cambio req.</span>':p.inj==='l'?' <span title="Jugador resentido" style="color:#fbbf24">🩹</span>':''}
+ function prHtml(p,k,i,sel){return '<button type="button" class="cmPr'+(sel?' sel':'')+'" data-k="'+k+'" data-i="'+i+'"><span class="n">#'+E(p.number)+'</span><span class="ps">'+(POSL[p.pos]||p.pos)+'</span><span class="nm">'+E(p.name)+injTag(p)+'</span><span class="bar"><i style="width:'+p.stam+'%;background:'+stamCol(p.stam)+'"></i></span><b>'+p.stam+'%</b></button>'}
+ function userRow(){return '<div class="cmPr me"><span class="n">#'+E(S.player.num)+'</span><span class="ps" style="color:#facc15;font-weight:900">TÚ</span><span class="nm">'+E(S.player.name)+'</span><span class="bar"><i style="width:100%;background:#22c55e"></i></span><b>100%</b></div>'}
  function tabSquad(){
   const q=S.squad;
   return '<div class="cmCard"><h2>Mi Plantel</h2>'+userRow()+
@@ -473,7 +476,23 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
   return m?{sp:m.sp*f,sh:m.sh}:{sp:f,sh:1};
  });
  /* c) lesiones de tus bots → desgaste mayor al terminar */
- hook('injure',o=>function(q){const r=o.apply(this,arguments);try{if(CM.live&&q&&q.cSlot&&q.inj>0)q.cInj=true}catch(e){}return r});
+ hook('injure',o=>function(q){const r=o.apply(this,arguments);try{if(CM.live&&q&&q.cSlot&&q.inj>0){q.cInj=true;
+  const p=S&&S.squad&&S.squad.info[q.cId];
+  if(p){const prev=p.inj,sev=q.injT==='s';
+   if(sev)p.inj='s';else if(prev!=='s')p.inj='l';
+   if(sev&&prev!=='s')showEv('🚑 '+p.name+' sufrió una lesión grave: requiere cambio',2600);
+   if(subOpen())renderSub();
+  }}}catch(e){}return r});
+
+ /* d2) menú de sala durante Carrera: pausa automática y reanudación con cuenta regresiva de 3 s */
+ hook('toggleMenu',o=>function(){
+  const was=!!menuOpen,r=o.apply(this,arguments);
+  try{if(CM.live&&LIVE&&!LIVE.res&&G&&!G.over&&!subOpen()){
+   if(menuOpen){G.paused=true;G.cd=0}
+   else if(was){G.paused=false;G.cd=3}
+  }}catch(e){}
+  return r;
+ });
  /* d) empate al terminar el tiempo: Fase Regular = fin; Playoffs = 1 min extra → penales */
  hook('startVote',o=>function(){
   if(!CM.live||!LIVE)return o.apply(this,arguments);
@@ -530,7 +549,7 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
  }
  function closeSub(){
   $('cmSub').classList.remove('on');
-  if(G&&!G.over&&CM.live){G.paused=false;G.cd=3}
+  if(G&&!G.over&&CM.live&&!menuOpen){G.paused=false;G.cd=3}
   Object.keys(keys).forEach(k=>keys[k]=0);try{$('c').focus()}catch(e){}
  }
  function renderSub(msg){
@@ -556,7 +575,7 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
   const now=G.clock||0;
   L.played[outId]=(L.played[outId]||0)+Math.max(0,now-sl.t0);
   L.inj[outId]=L.inj[outId]||!!sl.bot.cInj;
-  L.bench[bi]=outId;sl.id=inId;sl.t0=now;
+  out.inj=null;L.bench[bi]=outId;sl.id=inId;sl.t0=now;
   const b=sl.bot;b.name=inn.name;b.num=String(inn.number);b.pos=inn.pos;b.stam=inn.stam;b.cId=inId;b.cInj=false;
   try{injClear(b)}catch(e){}b.sl=null;
   L.subs++;
