@@ -1131,9 +1131,20 @@ function spToggle(p){if(!spCan(p))return;const S=G.sp,b=G.ball,ex=spExecutor();
  let a;if(S.type==='libre')a=fkAngles(S)[(S.aim|0)+1];else{if(S.aimAng==null)S.aimAng=spAimInit(S);a=S.aimAng}
  const gap=p.r+b.r+6;p.x=b.x-Math.cos(a)*gap;p.y=b.y-Math.sin(a)*gap;p.vx=p.vy=0;p.ax=p.ay=0;p.sl=null;
  if(ex&&ex.bot&&Math.hypot(ex.x-b.x,ex.y-b.y)<110*G.k){const gx=S.team==='red'?G.w:0,sg=S.team==='red'?-1:1;ex.x=gx+sg*areaD()*.65;ex.y=clamp(G.h/2+(Math.random()<.5?-1:1)*G.h*.08,ex.r,G.h-ex.r);ex.vx=ex.vy=0}}
-function reqBotTake(){if(!spHudCan())return;if(NET.role==='client'){keys.bt=1;sendKeys();keys.bt=0}else spToggle(me)}
-function spHudUpdate(){const el=$('spHud');if(!el)return;const can=spHudCan();
- if(can){const mine=spExecutor()===me,txt=mine?(IS_TOUCH?'🔄 Que lo ejecute otro pateador':'🔄 [E] Que lo ejecute otro pateador'):(IS_TOUCH?'⚽ Patearlo con mi jugador':'⚽ [E] Patearlo con mi jugador');if(el.textContent!==txt)el.textContent=txt}
+/* Penal por falta durante el partido (SOLO Carrera): el humano del equipo que patea puede tomar el penal en lugar del bot. Nunca en tanda (!single). */
+let PEN_OK_T=0;
+function penTakeCan(p){const P=G&&G.pen;return !!(p&&p===me&&carOn()&&P&&P.single===true&&(P.ph==='aim'||P.ph==='intro')&&P.team===p.team&&p.team!=='spec'&&P.s&&P.s.bot&&P.k&&p!==P.k&&G.players.includes(p))}
+function penTake(p){if(!penTakeCan(p))return;const P=G.pen,oldS=P.s,pr=PRAD*G.k,sx=P.gx+P.din*(areaD()+pr+4+spotD()/6); /* misma posición que penTurn() */
+ P.s=p;P.parts=[p,P.k];
+ p.x=sx;p.y=G.h/2;p.vx=p.vy=0;p.ax=p.ay=0;p.kick=false;p.sl=null;p.cd=0;p.flash=0;
+ const a=Math.random()*6.283,rr=G.h*.14*.55;oldS.x=G.w/2+Math.cos(a)*rr;oldS.y=G.h/2+Math.sin(a)*rr;oldS.vx=oldS.vy=0;oldS.ax=oldS.ay=0;oldS.kick=false; /* el bot anterior va al círculo central con el resto */
+ if(P.ph==='aim')P.t=0; /* 7 s completos para el humano */
+ PEN_OK_T=performance.now()+1500;$('pInfo').textContent=`🥅 Patea ${p.name}`}
+function reqBotTake(){if(penTakeCan(me)){penTake(me);return}if(!spHudCan())return;if(NET.role==='client'){keys.bt=1;sendKeys();keys.bt=0}else spToggle(me)}
+function spHudUpdate(){const el=$('spHud');if(!el)return;
+ if(PEN_OK_T>performance.now()&&G.pen&&G.pen.single===true&&carOn()){if(el.textContent!=='✅ Pateás vos')el.textContent='✅ Pateás vos';el.classList.remove('hidden');return} /* confirmación 1,5 s */
+ const pc=penTakeCan(me),can=pc||spHudCan();
+ if(can){const mine=!pc&&spExecutor()===me,txt=mine?(IS_TOUCH?'🔄 Que lo ejecute otro pateador':'🔄 [E] Que lo ejecute otro pateador'):(IS_TOUCH?'⚽ Patearlo con mi jugador':'⚽ [E] Patearlo con mi jugador');if(el.textContent!==txt)el.textContent=txt}
  el.classList.toggle('hidden',!can)}
 /* ejecutante que se le informa a BotAIController (lateral: fijo; libre/córner en Carrera: según la alternancia) */
 function spExecId(){const S=G.sp;if(!S)return undefined;
@@ -1207,6 +1218,7 @@ const rnd=a=>a[Math.floor(Math.random()*a.length)],sh=a=>{a=[...a];for(let i=a.l
 function penPickKeeper(L){const a=L.filter(p=>G.players.includes(p)&&p.team!=='spec');return rnd(a.length?a:L)}
 function startPens(){const lists={red:sh(act().filter(p=>p.team==='red')),blue:sh(act().filter(p=>p.team==='blue'))}; /* orden de pateadores al azar */
  if(!lists.red.length||!lists.blue.length){end('🤝 ¡PARTIDO FINALIZADO EN EMPATE!');return}
+ ['red','blue'].forEach(t=>{const L=lists[t],i=L.findIndex(p=>!p.bot);if(i<0)return;const j=Math.min(L.length-1,Math.floor(Math.random()*3));[L[i],L[j]]=[L[j],L[i]]}); /* el humano patea 1.º, 2.º o 3.º al azar */
  const side=Math.random()<.5?'left':'right',din=side==='left'?1:-1,gx=side==='left'?0:G.w; /* sorteo de arco */
  G.ko=null;G.sp=null;G.pen={side,gx,din,sd:spotD(),kx:gx,list:lists,keeper:{red:penPickKeeper(lists.red),blue:penPickKeeper(lists.blue)},n:{red:0,blue:0},res:{red:[],blue:[]},team:'red',ph:'intro',t:0,parts:[]};
  $('penbar').classList.remove('hidden');$('sb').classList.add('hidden');$('pRow').appendChild($('mute'));$('pbR').style.display=$('pbB').style.display='';penTurn();G.pen.ph='intro';G.pen.t=0;showEv('🥅 ¡TANDA DE PENALES!',2000);hud()}
