@@ -695,6 +695,13 @@ function setBotDiff(v){BOT_DIFF=BOT_DIFFS.includes(v)?v:'normal';
 function botAIInst(){if(BOT_AI)return BOT_AI;const C=window.BotAIController;
  if(typeof C!=='function'){botWarn(1,'BotAIController no está cargado: los bots usan la IA de respaldo.');return null}
  try{BOT_AI=new C({difficulty:BOT_DIFF})}catch(e){botWarn(2,'No se pudo crear BotAIController: los bots usan la IA de respaldo.',e)}return BOT_AI}
+/* Empuje táctico en vivo: ADN/tabla (Carrera) + marcador + tiempo restante */
+function teamTacticBias(team){let b=(G.teamTactics&&G.teamTactics[team])||0;
+ const diff=G.score[team]-G.score[other(team)],late=G.duration>0&&!G.golden&&(G.duration-G.clock)<=G.duration*.25;
+ if(diff<0)b+=late?.13:.07;
+ else if(diff>0)b+=late?-.11:-.06;
+ else if(late||G.golden)b+=.06;
+ return b}
 /* gameState con las variables reales del juego: cancha 0..G.w × 0..G.h, arcos entre G.gT y G.gB */
 function botState(){const b=G.ball;return{
  stadium:{left:0,top:0,width:G.w,height:G.h},
@@ -702,7 +709,8 @@ function botState(){const b=G.ball;return{
  players:act().map(q=>({id:q.id,team:q.team,x:q.x,y:q.y,vx:q.vx,vy:q.vy,r:q.r,isBot:!!q.bot,frozen:q.fz>0,slideCooldown:q.slCd||0})),
  goalTop:G.gT,goalBottom:G.gB,isRealistic:RL(),
  setPiece:G.sp?{type:G.sp.type,team:G.sp.team,botTake:!!G.sp.botTake,executorId:spExecId()}:(G.ko?{type:'kickoff',team:G.ko}:null),
- activePowerEvent:G.activePowerEvent||null}}
+ activePowerEvent:G.activePowerEvent||null,
+ tactics:{red:teamTacticBias('red'),blue:teamTacticBias('blue')}}}
 /* respaldo suave si el módulo no cargó o falló: el bot más cercano va por la pelota, el resto mantiene su zona */
 function botFallback(p){const b=G.ball,W=G.w,H=G.h,dir=p.team==='red'?1:-1,ownX=dir>0?0:W,dB=q=>Math.hypot(q.x-b.x,q.y-b.y),
  mine=act().filter(q=>q.team===p.team&&q.bot&&!(q.fz>0)),ch=mine.reduce((a,q)=>dB(q)<dB(a)?q:a,p);let tx,ty;p.kick=false;

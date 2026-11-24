@@ -59,6 +59,19 @@
  }
 
  const BIG=['boca','river','racing','independiente','sanlorenzo','estudiantes','velez','talleres','rosario','lanus'];
+ /* Tácticas por club (ADN): el resto es 'balanced' */
+ const CLUB_STYLE={river:'offensive',racing:'offensive',boca:'offensive',velez:'offensive',argentinos:'offensive',talleres:'offensive',defensa:'offensive',estudiantes:'defensive',sanlorenzo:'defensive',belgrano:'defensive',platense:'defensive',riestra:'defensive',sarmiento:'defensive',barracas:'defensive',central_cordoba:'defensive'};
+ const styleOf=id=>CLUB_STYLE[id]||'balanced';
+ function calcBias(id,isHome){
+  let b=({offensive:.08,balanced:0,defensive:-.08})[styleOf(id)];
+  if(S.phase==='regular'){
+   const pos=rankOf(id).pos;
+   if(pos>=1&&pos<=4)b+=.05;
+   else if(pos>=8&&pos<=11&&S.fecha>=12)b+=.08;
+   else if(pos>=12&&pos<=15){b-=.06;if(!isHome)b-=.03}
+  }else if(S.phase==='playoffs')b+=.04;
+  return b;
+ }
  function newSquad(teamId,num){
   const r=D.resolverPlantelCancha(teamId,num),info={};
   const st=r.starters.slice(0,5),bn=r.subs.slice(0,6); /* el 6.º titular del club es el lugar de tu jugador */
@@ -380,7 +393,8 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
    '<div class="mid">VS</div>'+
    '<div class="tm'+(!myHome?' me':'')+'"><span class="cmBd">'+badge(a)+'</span>'+E(a.name)+'<small>VISITANTE'+(!myHome?' · TU CLUB':'')+'</small>'+kitSvg(!myHome?myKit:kA,!myHome?S.player.num:'')+'</div></div>'+
    '<div class="cmRow"><span class="cmTag">'+(myHome?'🏟️ Jugás de LOCAL en el estadio de '+E(me.name):'✈️ Jugás de VISITANTE en el estadio de '+E(rv.name))+'</span>'+
-   '<span class="cmTag">⏱ '+S.minutes+' min · Realista 6v6</span></div>'+
+   '<span class="cmTag">⏱ '+S.minutes+' min · Realista 6v6</span>'+
+   '<span class="cmTag">'+({offensive:'⚔️ Rival ofensivo',defensive:'🛡️ Rival defensivo',balanced:'⚖️ Rival equilibrado'})[styleOf(rv.id)]+'</span></div>'+
    (rvSwapped?'<div class="cmNote">'+E(rv.name)+' usa su camiseta suplente para evitar el choque de colores.</div>':'')+
    '<div class="cmKits"><h3>👕 Camisetas del partido</h3><div class="cmKcols"><div><small>LOCAL · '+E(h.shortName)+'</small>'+kitPick('h',h,ks.sH)+'</div><div><small>VISITANTE · '+E(a.shortName)+'</small>'+kitPick('a',a,ks.sA)+'</div></div>'+(ks.clash?'<div class="cmNote">⚠️ Los colores de ambas camisetas son muy parecidos.</div>':'')+'</div>'+
    stand+
@@ -527,6 +541,7 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
   G.players=[me].concat(mine,rv);
   G.uni={red:Object.assign({},kH),blue:Object.assign({},kA)};
   G.duration=S.minutes*60;G.goalLimit=0;G.super=false;G.cET=false;
+  G.teamTactics={red:calcBias(m.h,true),blue:calcBias(m.a,false)};
   STAD=stadClean(m.neutral?null:hT.stadium);if(typeof STAD_CF!=='undefined')STAD_CF.length=0;
   CM.live=true;
   LIVE={m,slots:mine.map((b,i)=>({bot:b,id:S.squad.starters[i],t0:0})),bench:S.squad.bench.slice(),subs:0,played:{},inj:{},sel:null,res:null,done:false,timer:0};

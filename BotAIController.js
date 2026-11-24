@@ -169,6 +169,7 @@
       return {
         W, H, L, T, R, B, cx, cy, dir, ownX, oppX, ball, me, mates, rivals, teamBots,
         ownGoal: own, oppGoal: opp, power: pt || null,
+        tacticBias: clamp((gs.tactics && gs.tactics[bot.team]) || 0, -0.22, 0.25),
         isRealistic: !!(gs.isRealistic || gs.mode === 'realistic'),
         depth: (x) => (x - ownX) * dir,          // distancia a la línea de fondo propia (+ hacia el rival)
         unDepth: (d) => ownX + d * dir,
@@ -512,17 +513,24 @@
       const ourHas = poss && poss.team === me.team;
       const fb = info.fieldBots;
 
+      // Bloque bajo: con sesgo defensivo y la pelota lejos de nuestro arco, los DEF no salen a presionar/buscar
+      const lowBlock = ctx.tacticBias < -0.05 && ctx.depth(ball.x) > ctx.W * 0.58 && fb.length > 1;
+      const roleAt = (i) => (fb.length === 2 ? (i % 2 ? 'FWD' : 'DEF') : ['DEF', 'MID', 'FWD'][i % 3]);
+      const cand = lowBlock ? fb.filter((b, i) => roleAt(i) !== 'DEF') : fb;
+      const pool = cand.length ? cand : fb;
+      const meHeld = lowBlock && info.role === 'DEF';
+
       // Quién presiona (más cercano al poseedor rival) / quién busca la pelota
       if (rivalHas) {
         let pr = null, bd = 1e9;
-        for (const b of fb) { const d = hyp(b.x - poss.x, b.y - poss.y); if (d < bd) { bd = d; pr = b; } }
-        if (pr === me) return this._press(me, ctx, cfg, mem, poss);
+        for (const b of pool) { const d = hyp(b.x - poss.x, b.y - poss.y); if (d < bd) { bd = d; pr = b; } }
+        if (pr === me && !meHeld) return this._press(me, ctx, cfg, mem, poss);
       } else {
         const tb = this._predBall(ctx, 6);
         let ch = null, bd = 1e9;
-        for (const b of fb) { const d = hyp(b.x - tb.x, b.y - tb.y); if (d < bd) { bd = d; ch = b; } }
+        for (const b of pool) { const d = hyp(b.x - tb.x, b.y - tb.y); if (d < bd) { bd = d; ch = b; } }
         const humanNear = ctx.mates.some((m) => !m.isBot && hyp(m.x - ball.x, m.y - ball.y) < bd * 0.7);
-        if (ch === me && !humanNear && (!ourHas || poss === me)) return this._withBall(me, ctx, cfg, mem, info);
+        if (ch === me && !meHeld && !humanNear && (!ourHas || poss === me)) return this._withBall(me, ctx, cfg, mem, info);
       }
 
       // Sin pelota
@@ -540,7 +548,8 @@
       if (info.role === 'DEF') d = W * 0.14 + bd * 0.15;
       else if (info.role === 'MID') d = W * 0.25 + bd * 0.30;
       else d = W * 0.38 + bd * 0.40;
-      d = Math.min(d, bd + W * 0.05, W * 0.6);
+      d += ctx.tacticBias * W * 0.7;
+      d = Math.max(W * 0.04, Math.min(d, bd + W * 0.05, W * 0.6));
       const spread = (info.fieldIdx % 2 ? 1 : -1) * H * 0.07 * (info.role === 'MID' ? 1 : 1.4);
       const y = ctx.cy + (pb.y - ctx.cy) * clamp(d / bd, 0, 1) + spread;
       return this._clampField(ctx, ctx.unDepth(d), y);
@@ -554,6 +563,7 @@
       if (info.role === 'FWD') d = clamp(Math.max(bd + W * 0.12, W * 0.62), 0, W * 0.86);
       else if (info.role === 'MID') d = clamp(bd + W * 0.05, W * 0.25, W * 0.8);
       else d = clamp(bd - W * 0.22, W * 0.12, W * 0.6);
+      d = clamp(d + ctx.tacticBias * W * 0.7, W * 0.08, W * 0.9);
       const side = ctx.ball.y >= ctx.cy ? -1 : 1;
       const by = ctx.cy + side * H * (info.role === 'MID' ? 0.18 : 0.22);
       return this._openSpot(ctx, me, ctx.unDepth(d), by, H * 0.12);
@@ -579,7 +589,7 @@
       const side = ball.y >= cy ? 1 : -1;
 
       const A = {
-        shot: () => (dGoal < ctx.shootRange * cfg.shootMul ? this._shotTarget(ball.x, ball.y, ctx, mem) : null),
+        shot: () => (dGoal < ctx.shootRange * (1 + ctx.tacticBias * 0.9) * cfg.shootMul ? this._shotTarget(ball.x, ball.y, ctx, mem) : null),
         cross: () => (Math.abs(ball.y - cy) > H * 0.30 && Math.abs(ball.x - ctx.oppX) < W * 0.22
           ? { x: ctx.unDepth(W * 0.88), y: cy } : null),
         clear: () => (bd < W * 0.18 && pressured ? { x: ctx.unDepth(W * 0.5), y: cy + side * H * 0.48 } : null),
