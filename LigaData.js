@@ -20,15 +20,15 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-boca\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><g clip-path=\"url(#b-boca)\"><rect width=\"64\" height=\"64\" fill=\"#0a3c8f\"/><rect y=\"22\" width=\"64\" height=\"20\" fill=\"#f6c600\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#0a3c8f",
-   "c2": "#f6c600",
+   "c1": "#00338d",
+   "c2": "#f3b229",
    "c3": "#22c55e",
    "st": "h1"
   },
   "kitAway": {
    "n": 2,
-   "c1": "#f6c600",
-   "c2": "#0a3c8f",
+   "c1": "#f3b229",
+   "c2": "#00338d",
    "c3": "#22c55e",
    "st": "h1"
   },
@@ -138,8 +138,8 @@
   },
   "kitAway": {
    "n": 2,
-   "c1": "#111111",
-   "c2": "#e30613",
+   "c1": "#e30613",
+   "c2": "#111111",
    "c3": "#22c55e",
    "st": "dg"
   },
@@ -242,17 +242,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-independiente\"><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\"/></clipPath></defs><g clip-path=\"url(#b-independiente)\"><rect width=\"64\" height=\"64\" fill=\"#d8001c\"/><path d=\"M32 22l3 7 8 .6-6 5 2 8-7-4.3-7 4.3 2-8-6-5 8-.6z\" fill=\"#fff\" opacity=\".9\"/></g><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 1,
-   "c1": "#d8001c",
+   "c1": "#e30613",
    "c2": "#ffffff",
    "c3": "#22c55e",
    "st": "v1"
   },
   "kitAway": {
-   "n": 1,
-   "c1": "#12306b",
-   "c2": "#ffffff",
+   "n": 2,
+   "c1": "#ffffff",
+   "c2": "#e30613",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
@@ -353,17 +353,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-racing\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><g clip-path=\"url(#b-racing)\"><rect width=\"64\" height=\"64\" fill=\"#6ecff6\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#6ecff6",
+   "c1": "#6cabdd",
    "c2": "#ffffff",
    "c3": "#22c55e",
    "st": "vs"
   },
   "kitAway": {
-   "n": 1,
-   "c1": "#0b1f4a",
-   "c2": "#ffffff",
+   "n": 2,
+   "c1": "#0b1f3a",
+   "c2": "#6cabdd",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
@@ -464,17 +464,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-sanlorenzo\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><g clip-path=\"url(#b-sanlorenzo)\"><rect width=\"64\" height=\"64\" fill=\"#0b2a6b\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#c8102e\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#c8102e\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"28.6\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#0b2a6b",
-   "c2": "#c8102e",
+   "c1": "#0a1d4e",
+   "c2": "#d91e2a",
    "c3": "#22c55e",
    "st": "vs"
   },
   "kitAway": {
-   "n": 1,
+   "n": 3,
    "c1": "#ffffff",
-   "c2": "#ffffff",
-   "c3": "#22c55e",
-   "st": "v1"
+   "c2": "#0a1d4e",
+   "c3": "#d91e2a",
+   "st": "cb"
   },
   "stadium": {
    "enabled": true,
@@ -578,14 +578,14 @@
    "c1": "#ffffff",
    "c2": "#e30613",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
   },
   "kitAway": {
-   "n": 1,
+   "n": 2,
    "c1": "#e30613",
    "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
@@ -686,17 +686,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-estudiantes\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><g clip-path=\"url(#b-estudiantes)\"><rect width=\"64\" height=\"64\" fill=\"#e30613\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#e30613",
+   "c1": "#d91e2a",
    "c2": "#ffffff",
    "c3": "#22c55e",
    "st": "vs"
   },
   "kitAway": {
-   "n": 1,
-   "c1": "#ffffff",
-   "c2": "#ffffff",
+   "n": 2,
+   "c1": "#111111",
+   "c2": "#d91e2a",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "dg"
   },
   "stadium": {
    "enabled": true,
@@ -797,17 +797,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-gimnasia\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><g clip-path=\"url(#b-gimnasia)\"><rect width=\"64\" height=\"64\" fill=\"#0b3d91\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"28.6\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#0b3d91",
-   "c2": "#ffffff",
+   "c1": "#ffffff",
+   "c2": "#0b1f3a",
    "c3": "#22c55e",
-   "st": "vs"
+   "st": "h1"
   },
   "kitAway": {
    "n": 2,
-   "c1": "#f3f4f6",
-   "c2": "#0b3d91",
+   "c1": "#0b1f3a",
+   "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
@@ -914,11 +914,11 @@
    "st": "mv"
   },
   "kitAway": {
-   "n": 2,
-   "c1": "#111111",
+   "n": 3,
+   "c1": "#ffffff",
    "c2": "#e30613",
-   "c3": "#22c55e",
-   "st": "v1"
+   "c3": "#111111",
+   "st": "cb"
   },
   "stadium": {
    "enabled": true,
@@ -1019,17 +1019,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-rosario\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><g clip-path=\"url(#b-rosario)\"><rect width=\"64\" height=\"64\" fill=\"#0b3d91\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#f6c600\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#f6c600\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#0b3d91",
-   "c2": "#f6c600",
+   "c1": "#002d72",
+   "c2": "#f7b500",
    "c3": "#22c55e",
    "st": "vs"
   },
   "kitAway": {
    "n": 2,
-   "c1": "#f6c600",
-   "c2": "#0b3d91",
+   "c1": "#f7b500",
+   "c2": "#002d72",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "dg"
   },
   "stadium": {
    "enabled": true,
@@ -1130,17 +1130,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-talleres\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><g clip-path=\"url(#b-talleres)\"><rect width=\"64\" height=\"64\" fill=\"#0b1f4a\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"28.6\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#0b1f4a",
+   "c1": "#0b1f3a",
    "c2": "#ffffff",
    "c3": "#22c55e",
    "st": "vs"
   },
   "kitAway": {
    "n": 2,
-   "c1": "#ffffff",
-   "c2": "#0b1f4a",
+   "c1": "#071324",
+   "c2": "#5bc2e7",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
@@ -1241,17 +1241,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-belgrano\"><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\"/></clipPath></defs><g clip-path=\"url(#b-belgrano)\"><rect width=\"64\" height=\"64\" fill=\"#4aa8e8\"/><path d=\"M32 22l3 7 8 .6-6 5 2 8-7-4.3-7 4.3 2-8-6-5 8-.6z\" fill=\"#fff\" opacity=\".9\"/></g><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 1,
-   "c1": "#4aa8e8",
+   "c1": "#5bc2e7",
    "c2": "#ffffff",
    "c3": "#22c55e",
    "st": "v1"
   },
   "kitAway": {
-   "n": 1,
-   "c1": "#0b1f4a",
-   "c2": "#ffffff",
+   "n": 2,
+   "c1": "#111111",
+   "c2": "#5bc2e7",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
@@ -1352,17 +1352,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-lanus\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><g clip-path=\"url(#b-lanus)\"><rect width=\"64\" height=\"64\" fill=\"#7a0f2e\"/><path d=\"M32 22l3 7 8 .6-6 5 2 8-7-4.3-7 4.3 2-8-6-5 8-.6z\" fill=\"#fff\" opacity=\".9\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 1,
-   "c1": "#7a0f2e",
+   "c1": "#7a1c32",
    "c2": "#ffffff",
    "c3": "#22c55e",
    "st": "v1"
   },
   "kitAway": {
-   "n": 1,
+   "n": 2,
    "c1": "#ffffff",
-   "c2": "#ffffff",
+   "c2": "#7a1c32",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
@@ -1463,17 +1463,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-banfield\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><g clip-path=\"url(#b-banfield)\"><rect width=\"64\" height=\"64\" fill=\"#0a9a45\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"28.6\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#0a9a45",
+   "c1": "#007a33",
    "c2": "#ffffff",
    "c3": "#22c55e",
    "st": "vs"
   },
   "kitAway": {
-   "n": 1,
-   "c1": "#ffffff",
+   "n": 2,
+   "c1": "#004d20",
    "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "dg"
   },
   "stadium": {
    "enabled": true,
@@ -1575,13 +1575,13 @@
   "kitHome": {
    "n": 2,
    "c1": "#ffffff",
-   "c2": "#0b3d91",
+   "c2": "#004b9b",
    "c3": "#22c55e",
    "st": "vv"
   },
   "kitAway": {
    "n": 2,
-   "c1": "#0b3d91",
+   "c1": "#004b9b",
    "c2": "#ffffff",
    "c3": "#22c55e",
    "st": "vv"
@@ -1685,17 +1685,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-tigre\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><g clip-path=\"url(#b-tigre)\"><rect width=\"64\" height=\"64\" fill=\"#0a2a6b\"/><rect y=\"22\" width=\"64\" height=\"20\" fill=\"#e30613\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#0a2a6b",
+   "c1": "#004b9b",
    "c2": "#e30613",
    "c3": "#22c55e",
    "st": "h1"
   },
   "kitAway": {
-   "n": 1,
-   "c1": "#e30613",
-   "c2": "#ffffff",
-   "c3": "#22c55e",
-   "st": "v1"
+   "n": 3,
+   "c1": "#ffffff",
+   "c2": "#004b9b",
+   "c3": "#e30613",
+   "st": "cb"
   },
   "stadium": {
    "enabled": true,
@@ -1796,17 +1796,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-argentinos\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><g clip-path=\"url(#b-argentinos)\"><rect width=\"64\" height=\"64\" fill=\"#d71920\"/><rect x=\"22\" width=\"20\" height=\"64\" fill=\"#ffffff\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"28.6\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#d71920",
+   "c1": "#e30613",
    "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "dg"
   },
   "kitAway": {
    "n": 2,
    "c1": "#ffffff",
-   "c2": "#d71920",
+   "c2": "#e30613",
    "c3": "#22c55e",
-   "st": "h1"
+   "st": "dg"
   },
   "stadium": {
    "enabled": true,
@@ -1907,17 +1907,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-platense\"><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\"/></clipPath></defs><g clip-path=\"url(#b-platense)\"><rect width=\"64\" height=\"64\" fill=\"#5b3a29\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/></g><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#5b3a29",
-   "c2": "#ffffff",
+   "c1": "#ffffff",
+   "c2": "#5c3a21",
    "c3": "#22c55e",
-   "st": "vs"
+   "st": "h1"
   },
   "kitAway": {
-   "n": 1,
-   "c1": "#5b3a29",
+   "n": 2,
+   "c1": "#5c3a21",
    "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
@@ -2024,11 +2024,11 @@
    "st": "vs"
   },
   "kitAway": {
-   "n": 1,
-   "c1": "#111111",
-   "c2": "#ffffff",
-   "c3": "#22c55e",
-   "st": "v1"
+   "n": 3,
+   "c1": "#0b1f3a",
+   "c2": "#e30613",
+   "c3": "#ffffff",
+   "st": "cb"
   },
   "stadium": {
    "enabled": true,
@@ -2129,17 +2129,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-instituto\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><g clip-path=\"url(#b-instituto)\"><rect width=\"64\" height=\"64\" fill=\"#ffffff\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#e30613\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#e30613\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"28.6\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#ffffff",
-   "c2": "#e30613",
+   "c1": "#e30613",
+   "c2": "#ffffff",
    "c3": "#22c55e",
    "st": "vs"
   },
   "kitAway": {
-   "n": 1,
-   "c1": "#0b1f4a",
-   "c2": "#ffffff",
+   "n": 2,
+   "c1": "#111111",
+   "c2": "#e30613",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
@@ -2240,17 +2240,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-atletico_tucuman\"><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\"/></clipPath></defs><g clip-path=\"url(#b-atletico_tucuman)\"><rect width=\"64\" height=\"64\" fill=\"#6ecff6\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/></g><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#6ecff6",
+   "c1": "#5bc2e7",
    "c2": "#ffffff",
    "c3": "#22c55e",
    "st": "vs"
   },
   "kitAway": {
-   "n": 1,
-   "c1": "#0a1f44",
-   "c2": "#ffffff",
+   "n": 2,
+   "c1": "#0b1f3a",
+   "c2": "#5bc2e7",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
@@ -2357,11 +2357,11 @@
    "st": "vs"
   },
   "kitAway": {
-   "n": 1,
+   "n": 2,
    "c1": "#ffffff",
-   "c2": "#ffffff",
+   "c2": "#111111",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
@@ -2463,16 +2463,16 @@
   "kitHome": {
    "n": 2,
    "c1": "#ffffff",
-   "c2": "#0b3d91",
+   "c2": "#111111",
    "c3": "#22c55e",
    "st": "vs"
   },
   "kitAway": {
-   "n": 1,
-   "c1": "#0b3d91",
+   "n": 2,
+   "c1": "#111111",
    "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
@@ -2572,18 +2572,18 @@
   "classicRivalId": "gimnasia_mza",
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-independiente_riv\"><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\"/></clipPath></defs><g clip-path=\"url(#b-independiente_riv)\"><rect width=\"64\" height=\"64\" fill=\"#0a3a8f\"/><rect y=\"22\" width=\"64\" height=\"20\" fill=\"#ffffff\"/></g><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
-   "n": 2,
-   "c1": "#0a3a8f",
-   "c2": "#ffffff",
-   "c3": "#22c55e",
-   "st": "h1"
-  },
-  "kitAway": {
    "n": 1,
-   "c1": "#ffffff",
+   "c1": "#0b1f3a",
    "c2": "#ffffff",
    "c3": "#22c55e",
    "st": "v1"
+  },
+  "kitAway": {
+   "n": 2,
+   "c1": "#ffffff",
+   "c2": "#0b1f3a",
+   "c3": "#22c55e",
+   "st": "dg"
   },
   "stadium": {
    "enabled": true,
@@ -2684,17 +2684,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-defensa\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><g clip-path=\"url(#b-defensa)\"><rect width=\"64\" height=\"64\" fill=\"#0b8f3c\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#f6c600\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#f6c600\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#0b8f3c",
-   "c2": "#f6c600",
+   "c1": "#f7d117",
+   "c2": "#007a33",
    "c3": "#22c55e",
-   "st": "vs"
+   "st": "h1"
   },
   "kitAway": {
-   "n": 1,
-   "c1": "#f6c600",
-   "c2": "#ffffff",
+   "n": 2,
+   "c1": "#007a33",
+   "c2": "#f7d117",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
@@ -2795,17 +2795,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-barracas\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><g clip-path=\"url(#b-barracas)\"><rect width=\"64\" height=\"64\" fill=\"#d52b1e\"/><rect y=\"12.8\" width=\"64\" height=\"12.8\" fill=\"#ffffff\"/><rect y=\"38.4\" width=\"64\" height=\"12.8\" fill=\"#ffffff\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"28.6\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#d52b1e",
+   "c1": "#e30613",
    "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "hs"
+   "st": "vs"
   },
   "kitAway": {
-   "n": 1,
-   "c1": "#ffffff",
-   "c2": "#ffffff",
-   "c3": "#22c55e",
-   "st": "v1"
+   "n": 3,
+   "c1": "#004b9b",
+   "c2": "#e30613",
+   "c3": "#ffffff",
+   "st": "cb"
   },
   "stadium": {
    "enabled": true,
@@ -2906,17 +2906,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-sarmiento\"><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\"/></clipPath></defs><g clip-path=\"url(#b-sarmiento)\"><rect width=\"64\" height=\"64\" fill=\"#0a8f3c\"/><path d=\"M32 22l3 7 8 .6-6 5 2 8-7-4.3-7 4.3 2-8-6-5 8-.6z\" fill=\"#fff\" opacity=\".9\"/></g><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 1,
-   "c1": "#0a8f3c",
+   "c1": "#007a33",
    "c2": "#ffffff",
    "c3": "#22c55e",
    "st": "v1"
   },
   "kitAway": {
-   "n": 1,
+   "n": 2,
    "c1": "#ffffff",
-   "c2": "#ffffff",
+   "c2": "#007a33",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
@@ -3017,17 +3017,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-aldosivi\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><g clip-path=\"url(#b-aldosivi)\"><rect width=\"64\" height=\"64\" fill=\"#f6c600\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#0a8f3c\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#0a8f3c\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#f6c600",
-   "c2": "#0a8f3c",
+   "c1": "#007a33",
+   "c2": "#f7d117",
    "c3": "#22c55e",
    "st": "vs"
   },
   "kitAway": {
-   "n": 1,
-   "c1": "#0a8f3c",
-   "c2": "#ffffff",
-   "c3": "#22c55e",
-   "st": "v1"
+   "n": 3,
+   "c1": "#ffffff",
+   "c2": "#007a33",
+   "c3": "#f7d117",
+   "st": "cb"
   },
   "stadium": {
    "enabled": true,
@@ -3128,17 +3128,17 @@
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-riestra\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><g clip-path=\"url(#b-riestra)\"><rect width=\"64\" height=\"64\" fill=\"#ffffff\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#111111\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#111111\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"28.6\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
-   "c1": "#ffffff",
-   "c2": "#111111",
-   "c3": "#22c55e",
-   "st": "vs"
-  },
-  "kitAway": {
-   "n": 1,
    "c1": "#111111",
    "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "v1"
+   "st": "h1"
+  },
+  "kitAway": {
+   "n": 2,
+   "c1": "#ffffff",
+   "c2": "#111111",
+   "c3": "#22c55e",
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
@@ -3238,18 +3238,18 @@
   "classicRivalId": "riestra",
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-estudiantes_rc\"><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\"/></clipPath></defs><g clip-path=\"url(#b-estudiantes_rc)\"><rect width=\"64\" height=\"64\" fill=\"#5ec2f2\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#ffffff\"/></g><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
-   "n": 2,
-   "c1": "#5ec2f2",
-   "c2": "#ffffff",
-   "c3": "#22c55e",
-   "st": "vs"
-  },
-  "kitAway": {
    "n": 1,
-   "c1": "#0b1f4a",
+   "c1": "#5bc2e7",
    "c2": "#ffffff",
    "c3": "#22c55e",
    "st": "v1"
+  },
+  "kitAway": {
+   "n": 2,
+   "c1": "#111111",
+   "c2": "#5bc2e7",
+   "c3": "#22c55e",
+   "st": "h1"
   },
   "stadium": {
    "enabled": true,
