@@ -833,13 +833,19 @@ function jersey(p){const u=G.uni[p.team]||G.uni.red,x=p.x-p.r,y=p.y-p.r,d=p.r*2,
   else{ /* Franja cruzada: banda diagonal de esquina a esquina (estilo River / Perú) */
    ctx.strokeStyle=u.c2;ctx.lineWidth=p.r*.52;ctx.lineCap='butt';ctx.beginPath();
    ctx.moveTo(p.x-p.r*1.1,p.y-p.r*1.1);ctx.lineTo(p.x+p.r*1.1,p.y+p.r*1.1);ctx.stroke()}}
- else if(u.n===3){const t=d/3,c3=u.c3||'#ffffff';ctx.fillStyle=u.c2; /* Tricolor: 3 franjas iguales (33,3 %) */
-  if(u.st==='th'){ctx.fillRect(x,y+t,d,t);ctx.fillStyle=c3;ctx.fillRect(x,y+2*t,d,t+1)}else{ctx.fillRect(x+t,y,t,d);ctx.fillStyle=c3;ctx.fillRect(x+2*t,y,t+1,d)}}
+ else if(u.n===3){const t=d/3,c3=u.c3||'#ffffff',lw=Math.min(2,Math.max(1.5,d*.05)),st=u.st; /* 3 colores: camisetas reales de fútbol */
+  if(st==='bv'||st==='bh'){const v=st==='bv'; /* Bastones / franjas de Color 1 y 2 con líneas finas de Color 3 en cada unión (5 bandas) */
+   ctx.fillStyle=u.c2;for(let i=1;i<5;i+=2){if(v)ctx.fillRect(x+i*k,y,k,d);else ctx.fillRect(x,y+i*k,d,k)}
+   ctx.fillStyle=c3;for(let i=1;i<5;i++){if(v)ctx.fillRect(x+i*k-lw/2,y,lw,d);else ctx.fillRect(x,y+i*k-lw/2,d,lw)}}
+  else if(st==='cb'){ /* Franja central bicolor: base Color 1, pecho con Color 2 arriba y Color 3 abajo, separadas por una fina línea de Color 1 */
+   const bh=d*.15,y0=y+d*.5-(2*bh+lw)/2;ctx.fillStyle=u.c2;ctx.fillRect(x,y0,d,bh);ctx.fillStyle=c3;ctx.fillRect(x,y0+bh+lw,d,bh)}
+  else if(st==='th'){ctx.fillStyle=u.c2;ctx.fillRect(x,y+t,d,t);ctx.fillStyle=c3;ctx.fillRect(x,y+2*t,d,t+1)} /* (compatibilidad con salas antiguas) */
+  else{ctx.fillStyle=u.c2;ctx.fillRect(x+t,y,t,d);ctx.fillStyle=c3;ctx.fillRect(x+2*t,y,t+1,d)}} /* Tricolor en tercios (vertical) */
  ctx.restore()}
 function uniUI(){const el=$('uni');el.innerHTML='';
- const S2=[['v1','Franja vertical'],['h1','Franja horizontal'],['vs','Franjas verticales'],['hs','Franjas horizontales'],['vv','Franja en V'],['dg','Franja cruzada'],['mv','Mitad vertical'],['mh','Mitad horizontal']],S3=[['tv','Tricolor vertical'],['th','Tricolor horizontal']];
+ const S2=[['v1','Franja vertical'],['h1','Franja horizontal'],['vs','Franjas verticales'],['hs','Franjas horizontales'],['vv','Franja en V'],['dg','Franja cruzada'],['mv','Mitad vertical'],['mh','Mitad horizontal']],S3=[['bv','Bastones con líneas (Vertical)'],['bh','Franjas con líneas (Horizontal)'],['cb','Franja central bicolor (Horizontal)'],['tv','Tricolor en tercios (Vertical)']];
  [['red','Local'],['blue','Visitante']].forEach(([tm,lb])=>{const u=G.uni[tm],d=document.createElement('div');
-  if(!u.c3)u.c3='#22c55e';if(u.n===3&&!S3.some(a=>a[0]===u.st))u.st='tv';if(u.n===2&&!S2.some(a=>a[0]===u.st))u.st='v1'; /* el diseño siempre es válido para la cantidad de colores */
+  if(!u.c3)u.c3='#22c55e';if(u.n===3&&!S3.some(a=>a[0]===u.st))u.st='bv';if(u.n===2&&!S2.some(a=>a[0]===u.st))u.st='v1'; /* el diseño siempre es válido para la cantidad de colores */
   const half=u.n===2&&(u.st==='mv'||u.st==='mh'),l1=u.n===1?'Color':(u.n===3||half)?'Color 1':'Fondo',l2=(u.n===3||half)?'Color 2':'Franja';
   d.style.cssText='display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--in);border:1px solid #243056;border-radius:10px;padding:6px 8px';
   d.innerHTML=`<b style="font-size:.8rem;width:100%">Uniforme ${lb}</b><select data-k="n" style="width:auto;padding:5px"><option value="1">1 color</option><option value="2">2 colores</option><option value="3">3 colores</option></select>
