@@ -74,7 +74,7 @@
   const okB=B.length===st.zones.B.length&&B.every(id=>st.zones.B.indexOf(id)>=0);
   if(!okB)B=st.zones.B.slice();
   const str={};D.teams.forEach(t=>{str[t.id]=+(0.82+Math.random()*0.42+(BIG.indexOf(t.id)>=0?0.1:0)).toFixed(3)});
-  return{v:2,teamId:st.teamId,player:{name:st.player.name,num:st.player.num},minutes:st.matchMinutes||3,
+  return{v:2,teamId:st.teamId,player:{name:st.player.name,num:st.player.num},minutes:st.matchMinutes||5,
    zones:{A,B},zonaDe:st.zonaDe,myZone:st.zonaDe[st.teamId],str,fixture:buildFixture(A,B),fecha:1,phase:'regular',
    po:null,squad:newSquad(st.teamId,st.player.num),champShown:false,createdAt:Date.now()};
  }
@@ -227,6 +227,8 @@
 .cmVs .tm .cmBd{width:84px;height:84px}.cmVs .tm .cmKit{width:46px;height:46px}.cmVs .tm small{font-size:.72rem;color:#9fc0ee;font-weight:800}
 .cmVs .tm.me{filter:drop-shadow(0 0 8px rgba(56,189,248,.9))}
 .cmVs .mid{font-size:1.5rem;font-weight:900;font-style:italic;color:#9fd5ff}
+.cmKits{display:flex;flex-direction:column;gap:6px}.cmKits h3{margin:0}.cmKcols{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cmKcols small{display:block;font-size:.72rem;font-weight:800;color:#9fc0ee;margin-bottom:4px;text-align:center}
+.cmKp{display:flex;gap:6px;justify-content:center}.cmKb{display:flex;flex-direction:column;align-items:center;gap:3px;background:rgba(4,18,48,.9);color:#cfe3ff;border:1.5px solid #1e3a8a;border-radius:12px;padding:6px 10px;font-size:.74rem;font-weight:800;cursor:pointer}.cmKb .cmKit{width:34px;height:34px}.cmKb.on{border-color:#e0f7ff;background:rgba(2,132,199,.55);box-shadow:0 0 10px rgba(56,189,248,.8)}
 .cmTag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.78rem;font-weight:900;background:#0c4a6e;color:#e0f7ff;border:1px solid #38bdf8}
 .cmWarn{padding:9px 12px;border-radius:12px;font-weight:800;font-size:.88rem;background:rgba(245,158,11,.18);border:1.5px solid #f59e0b;color:#fde68a}
 .cmFire{background:rgba(239,68,68,.2);border-color:#ef4444;color:#fecaca}
@@ -332,6 +334,7 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
   const sa=$('cmSimAll');if(sa)sa.onclick=()=>{simRest();renderHub();if(S.phase==='done'&&S.po.champ===S.teamId)showChamp()};
   const ns=$('cmNewSeason');if(ns)ns.onclick=newSeasonFlow;
   hub.querySelectorAll('.cmPr[data-k]').forEach(b=>b.onclick=()=>squadClick(b.dataset.k,+b.dataset.i));
+  hub.querySelectorAll('.cmKb[data-kt]').forEach(b=>b.onclick=()=>{KIT[b.dataset.kt]=b.dataset.kk;renderHub()});
  }
  function newSeasonFlow(){
   if(!confirm('¿Empezar una nueva temporada? Se borra el progreso guardado de la campaña actual.'))return;
@@ -340,13 +343,30 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
   show('career-screen');
  }
 
+ /* ---- Camisetas del Próximo Partido (Titular / Suplente) para Local y Visitante ---- */
+ let KIT={key:'',h:null,a:null};
+ function kitsFor(m){
+  const key=m.h+'|'+m.a+'|'+S.phase+'|'+S.fecha+'|'+(S.po&&S.po.stage||'');
+  if(KIT.key!==key)KIT={key,h:null,a:null};
+  const hT=T(m.h),aT=T(m.a);
+  const sH=KIT.h||'home',kH=sH==='away'?hT.kitAway:hT.kitHome;
+  let sA=KIT.a;if(!sA)sA=clash(kH,aT.kitHome)?'away':'home';
+  const kA=sA==='away'?aT.kitAway:aT.kitHome;
+  return{kH,kA,sH,sA,autoA:!KIT.a&&sA==='away',clash:clash(kH,kA)};
+ }
+ function kitPick(side,t,cur){
+  const b=(k,lbl,kit)=>'<button type="button" class="cmKb'+(cur===k?' on':'')+'" data-kt="'+side+'" data-kk="'+k+'" aria-pressed="'+(cur===k)+'">'+kitSvg(kit,'')+'<span>'+lbl+'</span></button>';
+  return '<div class="cmKp">'+b('home','Titular',t.kitHome)+b('away','Suplente',t.kitAway)+'</div>';
+ }
+
  function tabNext(){
   if(S.phase==='done')return doneHtml();
   const m=userMatch();
   if(!m)return outHtml();
-  const myHome=m.h===S.teamId,h=T(m.h),a=T(m.a),kH=h.kitHome;let kA=a.kitHome;const swapped=clash(kH,kA);if(swapped)kA=a.kitAway;
+  const myHome=m.h===S.teamId,h=T(m.h),a=T(m.a),ks=kitsFor(m),kH=ks.kH,kA=ks.kA;
   const me=myHome?h:a,rv=myHome?a:h,myKit=myHome?kH:kA,rvKit=myHome?kA:kH;
-  const mySwapped=!myHome&&swapped,rvSwapped=myHome&&swapped;
+  const mySide=myHome?ks.sH:ks.sA,rvSide=myHome?ks.sA:ks.sH;
+  const mySwapped=mySide==='away',rvSwapped=rvSide==='away'&&(myHome?ks.autoA:false);
   let warn='';
   if(S.phase==='playoffs')warn+='<div class="cmWarn">🏆 <b>'+STAGE_LBL[S.po.stage].toUpperCase()+'</b> · Partido único. Si hay empate al final: tiempo extra de 1 minuto y, si persiste, tanda de penales.'+(m.neutral?' · Cancha neutral.':'')+'</div>';
   if(m.kind==='C')warn+='<div class="cmWarn cmFire">🔥 <b>¡FECHA DE CLÁSICO!</b> Hoy enfrentás a tu clásico rival.</div>';
@@ -358,9 +378,10 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
    '<div class="mid">VS</div>'+
    '<div class="tm'+(!myHome?' me':'')+'"><span class="cmBd">'+badge(a)+'</span>'+E(a.name)+'<small>VISITANTE'+(!myHome?' · TU CLUB':'')+'</small>'+kitSvg(!myHome?myKit:kA,!myHome?S.player.num:'')+'</div></div>'+
    '<div class="cmRow"><span class="cmTag">'+(myHome?'🏟️ Jugás de LOCAL en el estadio de '+E(me.name):'✈️ Jugás de VISITANTE en el estadio de '+E(rv.name))+'</span>'+
-   '<span class="cmTag">👕 Camiseta '+((mySwapped)?'suplente (por choque de colores)':'titular')+'</span>'+
+   '<span class="cmTag">👕 Camiseta '+(mySwapped?'suplente':'titular')+((myHome?false:ks.autoA)?' (por choque de colores)':'')+'</span>'+
    '<span class="cmTag">⏱ '+S.minutes+' min · Realista 6v6</span></div>'+
    (rvSwapped?'<div class="cmNote">'+E(rv.name)+' usa su camiseta suplente para evitar el choque de colores.</div>':'')+
+   '<div class="cmKits"><h3>👕 Camisetas del partido</h3><div class="cmKcols"><div><small>LOCAL · '+E(h.shortName)+'</small>'+kitPick('h',h,ks.sH)+'</div><div><small>VISITANTE · '+E(a.shortName)+'</small>'+kitPick('a',a,ks.sA)+'</div></div>'+(ks.clash?'<div class="cmNote">⚠️ Los colores de ambas camisetas son muy parecidos.</div>':'')+'</div>'+
    stand+
    '<button id="cmPlay" class="cmBig" type="button">▶ JUGAR PARTIDO</button></div>';
  }
@@ -413,7 +434,7 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
 
  /* ---- Mi Plantel ---- */
  function prHtml(p,k,i,sel){return '<button type="button" class="cmPr'+(sel?' sel':'')+'" data-k="'+k+'" data-i="'+i+'"><span class="n">#'+E(p.number)+'</span><span class="ps">'+(POSL[p.pos]||p.pos)+'</span><span class="nm">'+E(p.name)+'</span><span class="bar"><i style="width:'+p.stam+'%;background:'+stamCol(p.stam)+'"></i></span><b>'+p.stam+'%</b></button>'}
- function userRow(){return '<div class="cmPr me"><span class="n">#'+E(S.player.num)+'</span><span class="ps">CAP</span><span class="nm">'+E(S.player.name)+'</span><span class="bar"><i style="width:100%;background:#22c55e"></i></span><b>100%</b><em>Capitán · Inamovible · nunca pierde stamina</em></div>'}
+ function userRow(){return '<div class="cmPr me"><span class="n">#'+E(S.player.num)+'</span><span class="ps">CAP</span><span class="nm">'+E(S.player.name)+'</span><span class="bar"><i style="width:100%;background:#22c55e"></i></span><b>100%</b></div>'}
  function tabSquad(){
   const q=S.squad;
   return '<div class="cmCard"><h2>Mi Plantel</h2>'+userRow()+
@@ -438,6 +459,13 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
 
  /* a) dorsales reales: no renumerar bots durante Carrera */
  hook('uniqueBotNums',o=>function(){if(CM.live)return;return o.apply(this,arguments)});
+
+ /* a2) marcador superior: en Carrera usa las siglas (shortName) de cada equipo; en Online sigue LOCAL / VISITANTE */
+ hook('paintTeams',o=>function(){
+  if(typeof teamLabel!=='function')return o.apply(this,arguments);
+  const live=!!(CM.live&&LIVE&&LIVE.m),lt=live?(T(LIVE.m.h).shortName||'LOCAL'):'LOCAL',vt=live?(T(LIVE.m.a).shortName||'VISITANTE'):'VISITANTE';
+  [['tL','red',lt],['pL','red',lt],['tV','blue',vt],['pV','blue',vt]].forEach(x=>{const el=$(x[0]);if(!el)return;if(el.dataset.cmTxt!==x[2]){el.dataset.cmTxt=x[2];el._k=null}teamLabel(el,x[1],x[2])});
+ });
  /* b) stamina → velocidad máxima (usa el mismo canal que las lesiones) */
  hook('injM',o=>function(p){
   const m=o.apply(this,arguments);
@@ -467,7 +495,7 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
  function playMatch(){
   const m=userMatch();if(!m||CM.live)return;
   const hT=T(m.h),aT=T(m.a),myHome=m.h===S.teamId,rvT=myHome?aT:hT;
-  const kH=hT.kitHome;let kA=aT.kitHome;if(clash(kH,kA))kA=aT.kitAway;
+  const ks=kitsFor(m),kH=ks.kH,kA=ks.kA;
   user.nick=S.player.name;user.num=String(S.player.num);
   enter({id:9001,name:'Modo Carrera',size:'realista',mode:'realistic',max:12,priv:true,pass:'',n:0,owner:'Carrera'},false);
   isAdmin=false;
@@ -475,7 +503,8 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
   me.name=S.player.name;me.num=String(S.player.num);me.team=team;
   const mine=S.squad.starters.map(id=>{const i=S.squad.info[id],b=mk(i.name,String(i.number),team,true);b.pos=i.pos;b.cSlot=true;b.cId=id;b.stam=i.stam;b.cInj=false;return b});
   const rv=[];for(let i=0;i<6;i++)rv.push(mk('','',rteam,true));
-  D.aplicarPlantelABots(rv,rvT.id,S.player.num);
+  /* 4) el rival conserva siempre su dorsal oficial: NO se le pasa el dorsal del usuario (la reasignación por duplicado solo rige en tu equipo, vía resolverPlantelCancha) */
+  try{D.aplicarPlantelABots(rv,rvT.id,null)}catch(e){D.aplicarPlantelABots(rv,rvT.id,-1)}
   rv.forEach(b=>{b.name=b.nick||b.name;b.num=String(b.num)});
   G.players=[me].concat(mine,rv);
   G.uni={red:Object.assign({},kH),blue:Object.assign({},kA)};

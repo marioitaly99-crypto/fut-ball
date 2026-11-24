@@ -1825,7 +1825,7 @@ let last=performance.now(),acc=0;
    <div class="cRow"><div style="flex:1"><label class="cLbl" for="cName">Nombre / Apodo</label><input id="cName" maxlength="16" placeholder="Tu nombre o apodo" autocomplete="off"></div>
     <div class="num"><label class="cLbl" for="cNum">Dorsal</label><input id="cNum" maxlength="2" inputmode="numeric" value="10" placeholder="10" autocomplete="off"></div></div>
    <label class="cLbl" for="cDur">Duración de partido</label>
-   <select id="cDur"><option value="2">2 min</option><option value="3" selected>3 min (Recomendado)</option><option value="5">5 min</option><option value="7">7 min</option></select>
+   <select id="cDur"><option value="2">2 min</option><option value="3">3 min</option><option value="5" selected>5 min (Recomendado)</option><option value="7">7 min</option></select>
    <div class="cErr" id="cErr" role="alert"></div>
    <button id="cStart" type="button">⚽ INICIAR TEMPORADA</button>
   </section>
@@ -1857,7 +1857,7 @@ let last=performance.now(),acc=0;
   if(!name)return err.textContent='Escribí tu nombre o apodo.';
   const n=parseInt(num,10);if(!(n>=1&&n<=99))return err.textContent='El dorsal debe estar entre 1 y 99.';
   const z=D.generarZonasAleatorias();
-  state={v:1,country:COUNTRIES[0].id,league:D.league.id,teamId:sel,player:{name,num:n},matchMinutes:parseInt($('cDur').value,10)||3,
+  state={v:1,country:COUNTRIES[0].id,league:D.league.id,teamId:sel,player:{name,num:n},matchMinutes:parseInt($('cDur').value,10)||5,
    zones:{A:z.A,B:z.B},zonaDe:z.zonaDe,myZone:z.zonaDe[sel],fecha:1,createdAt:Date.now()};
   try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
   window.CAREER_STATE=state;
