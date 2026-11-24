@@ -271,6 +271,52 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
  #screen-home,#career-screen{background-position:4% center}
  #screen-home .hmenu{width:min(82vw,560px)}
 }
+
+
+/* ===== 🏆 Modo Carrera · configuración (solo UI; no toca juego/red/editores) ===== */
+#career-screen{justify-content:flex-start;overflow-y:auto;overflow-x:hidden;gap:10px;-webkit-overflow-scrolling:touch;
+ padding:calc(env(safe-area-inset-top,0px) + 54px) 12px calc(env(safe-area-inset-bottom,0px) + 22px)}
+#career-screen #backCareer{position:fixed;z-index:6}
+#career-screen .careerCard{flex:none;width:min(1100px,96vw);padding:clamp(8px,1.6vh,14px) 16px;border-radius:14px}
+#career-screen .careerCard h1{font-size:clamp(.9rem,3vh,1.4rem)}
+#career-root{flex:none;width:min(1100px,96vw);color:#fff}
+#career-root .cGrid{display:grid;grid-template-columns:1.05fr 1fr;gap:12px;align-items:start}
+#career-root .cPanel{display:flex;flex-direction:column;gap:8px;padding:14px 16px;background:rgba(7,25,56,.9);border:2px solid #38bdf8;border-radius:16px;box-shadow:0 0 22px rgba(56,189,248,.28)}
+#career-root h2{font-size:1rem;font-weight:900;font-style:italic;color:#9fd5ff;letter-spacing:.3px;text-transform:uppercase}
+#career-root .cLbl{font-size:.78rem;font-weight:800;color:#bcd3f5;margin-top:2px}
+#career-root select,#career-root input{background:rgba(4,18,48,.9);border:1.5px solid #1d4ed8;color:#fff;border-radius:10px;padding:9px 12px;font-size:.98rem;width:100%}
+#career-root select:focus,#career-root input:focus{border-color:#38bdf8;box-shadow:0 0 0 2px rgba(56,189,248,.25);outline:none}
+#career-root select option{background:#04122f;color:#fff}
+#career-root .cNote{font-size:.78rem;color:#8fb2e6}
+#career-root .cRow{display:flex;gap:8px}#career-root .cRow>*{min-width:0}
+#career-root .cRow .num{flex:0 0 96px}
+#career-root #cRand{padding:11px 14px;font-size:1rem;font-weight:900;border-radius:12px;color:#fff;border:2px solid #e0f7ff;
+ background:linear-gradient(90deg,#0284c7,#38bdf8,#7dd3fc);text-shadow:0 1px 0 rgba(0,20,60,.7);box-shadow:0 0 16px rgba(56,189,248,.65)}
+#career-root .cTeams{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:6px;max-height:min(250px,36vh);overflow-y:auto;padding:4px;border-radius:12px;background:rgba(2,10,30,.5)}
+#career-root .tm{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px 4px;border-radius:10px;background:rgba(4,18,48,.9);color:#dbeafe;border:1.5px solid #1e3a8a;font-size:.72rem;font-weight:900}
+#career-root .tm:hover{filter:none;border-color:#7dd3fc}
+#career-root .tm.on{border-color:#e0f7ff;background:rgba(2,132,199,.55);box-shadow:0 0 12px rgba(56,189,248,.8)}
+#career-root .tm .bd{width:38px;height:38px;display:block}#career-root .bd svg{width:100%;height:100%;display:block}
+#career-root .cErr{min-height:1em;color:#fca5a5;font-size:.85rem;font-weight:700}
+#career-root #cStart{padding:13px 18px;font-size:1.1rem;font-weight:900;font-style:italic;border-radius:12px;color:#04210f;border:2px solid #052e16;
+ background:linear-gradient(180deg,#4ade80,#22c55e);box-shadow:0 3px 0 #052e16,0 0 14px rgba(74,222,128,.45)}
+#career-root #cStart:disabled{opacity:.45}
+#career-root .pHead{display:flex;align-items:center;gap:12px}
+#career-root .pHead .bd{width:64px;height:64px;flex:none}
+#career-root .pHead b{font-size:1.2rem;line-height:1.15}#career-root .pHead span{font-size:.8rem;color:#9fc0ee}
+#career-root .pKits{display:flex;gap:14px;flex-wrap:wrap}
+#career-root .pKit{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.78rem;font-weight:800;color:#cfe3ff}
+#career-root .pBox{padding:8px 10px;border-radius:12px;background:rgba(2,10,30,.5);border:1px solid #1e3a8a;display:flex;flex-direction:column;gap:6px}
+#career-root .pStad svg{width:100%;max-width:300px;display:block;border-radius:8px}
+#career-root .pRiv{display:flex;align-items:center;gap:10px;font-weight:800}#career-root .pRiv .bd{width:34px;height:34px}
+#career-root .pEmpty{padding:30px 10px;text-align:center;color:#9fc0ee;font-weight:700}
+#career-root .cZones{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#career-root .cZ{display:flex;flex-direction:column;gap:4px}
+#career-root .cZ .z{display:flex;align-items:center;gap:7px;padding:3px 8px;border-radius:8px;background:rgba(2,10,30,.5);font-size:.85rem;font-weight:700}
+#career-root .cZ .z .bd{width:22px;height:22px;flex:none}
+#career-root .cZ .z.me{background:rgba(2,132,199,.6);border:1.5px solid #e0f7ff}
+#career-root .cDone{padding:11px 14px;font-size:1rem;font-weight:800;border-radius:12px;background:rgba(4,18,48,.9);color:#fff;border:1.5px solid #38bdf8}
+@media(max-width:820px){#career-root .cGrid,#career-root .cZones{grid-template-columns:1fr}}
 </style>
 </head><body>
 
@@ -279,7 +325,7 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
   <button id="homeHelp" type="button">❓ Cómo jugar</button>
   <nav class="hmenu" aria-label="Menú principal">
     <button id="homeOnline" class="hbar main" type="button" data-info="Juega salas públicas o privadas con amigos y bots en tiempo real."><span>⚽ ONLINE</span></button>
-    <button id="homeCareer" class="hbar sec" type="button" data-info="Elige tu club favorito, disputa la temporada y alcanza la gloria máxima."><span>🏆 MODO CARRERA</span></button>
+    <button id="homeCareer" class="hbar sec" type="button" data-info="Elige tu club de Primera División, disputa las 16 fechas y pelea por el título en los Playoffs."><span>🏆 MODO CARRERA</span></button>
   </nav>
   <div class="hinfo" role="status" aria-live="polite"><span class="ic" aria-hidden="true">i</span><span id="homeInfo">Selecciona una opción para continuar.</span></div>
 </div>
@@ -1729,6 +1775,115 @@ let last=performance.now(),acc=0;
  $('backLogin').onclick=toMenu;$('backLobby').onclick=toMenu;$('backCareer').onclick=toMenu;
  /* Links de invitación (?sala=...) saltan directo al acceso online, como antes */
  if(new URLSearchParams(location.search).get('sala'))go('screen-login');
+})();
+</script>
+<script src="LigaData.js"></script>
+<script>
+/* ===== 🏆 Modo Carrera · pantalla de configuración (País → Liga → Club + Jugador) ===== */
+(()=>{
+ const root=$('career-root'),D=window.LIGA_ARGENTINA_DATA,KEY='futball_career_v1';
+ if(!D){root.innerHTML='<div class="cPanel"><h2>Datos no disponibles</h2><div class="cErr">No se pudo cargar LigaData.js. Verificá que esté junto a index.html.</div></div>';return}
+ const COUNTRIES=[{id:D.country.id,name:D.country.name,flag:D.country.flag,leagues:[{id:D.league.id,name:D.league.name,data:D}]}];
+ const E=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ let sel='',state=null,uid=0;
+ const badge=t=>{const sfx='-'+(++uid);return t.badgeSvg.split('b-'+t.id).join('b-'+t.id+sfx)};
+ /* Camiseta (misma lógica de dibujo que jersey() del juego, solo para la vista previa) */
+ function drawKit(cv,u,num){const S=72,dpr=2;cv.width=cv.height=S*dpr;cv.style.width=cv.style.height=S+'px';
+  const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,S,S);
+  const cx=S/2,cy=S/2,r=S/2-3,x=cx-r,y=cy-r,d=r*2,k=d/5;
+  g.save();g.beginPath();g.arc(cx,cy,r,0,7);g.clip();g.fillStyle=u.c1;g.fillRect(x,y,d,d);
+  if(u.n===2){g.fillStyle=u.c2;
+   if(u.st==='v1')g.fillRect(x+d*.34,y,d*.32,d);else if(u.st==='h1')g.fillRect(x,y+d*.34,d,d*.32);
+   else if(u.st==='vs'){for(let i=1;i<5;i+=2)g.fillRect(x+i*k,y,k,d)}else if(u.st==='hs'){for(let i=1;i<5;i+=2)g.fillRect(x,y+i*k,d,k)}
+   else if(u.st==='mv')g.fillRect(x+d*.5,y,d*.5+1,d);else if(u.st==='mh')g.fillRect(x,y+d*.5,d,d*.5+1);
+   else if(u.st==='vv'){g.strokeStyle=u.c2;g.lineWidth=r*.45;g.lineCap='butt';g.lineJoin='miter';g.beginPath();g.moveTo(cx-r*.85,cy-r*.45);g.lineTo(cx,cy+r*.35);g.lineTo(cx+r*.85,cy-r*.45);g.stroke()}
+   else{g.strokeStyle=u.c2;g.lineWidth=r*.52;g.lineCap='butt';g.beginPath();g.moveTo(cx-r*1.1,cy-r*1.1);g.lineTo(cx+r*1.1,cy+r*1.1);g.stroke()}}
+  else if(u.n===3){const t=d/3,c3=u.c3||'#ffffff',lw=Math.min(2,Math.max(1.5,d*.05)),st=u.st;
+   if(st==='bv'||st==='bh'){const v=st==='bv';g.fillStyle=u.c2;for(let i=1;i<5;i+=2){if(v)g.fillRect(x+i*k,y,k,d);else g.fillRect(x,y+i*k,d,k)}
+    g.fillStyle=c3;for(let i=1;i<5;i++){if(v)g.fillRect(x+i*k-lw/2,y,lw,d);else g.fillRect(x,y+i*k-lw/2,d,lw)}}
+   else if(st==='cb'){const bh=d*.15,y0=y+d*.5-(2*bh+lw)/2;g.fillStyle=u.c2;g.fillRect(x,y0,d,bh);g.fillStyle=c3;g.fillRect(x,y0+bh+lw,d,bh)}
+   else{g.fillStyle=u.c2;g.fillRect(x+t,y,t,d);g.fillStyle=c3;g.fillRect(x+2*t,y,t+1,d)}}
+  g.restore();g.beginPath();g.arc(cx,cy,r,0,7);g.lineWidth=3;g.strokeStyle='#0b1220';g.stroke();
+  if(num){g.font='900 24px "Segoe UI",system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.lineJoin='round';g.lineWidth=4.5;g.strokeStyle='rgba(0,0,0,.78)';g.strokeText(num,cx,cy+1);g.fillStyle='#fff';g.fillText(num,cx,cy+1)}}
+ /* Vista previa de estadio: butacas por filas + banderas (misma regla de colores que el editor de estadio) */
+ function stadSvg(S){const rows=7,rh=9,top=36,W=220,H=top+rows*rh+6;
+  const sc=i=>S.seats.n===3?[S.seats.c1,S.seats.c2,S.seats.c3][i%3]:S.seats.n===2?((i<2||i>=rows-2)?S.seats.c1:S.seats.c2):S.seats.c1;
+  const fc=j=>S.flags.n===3?[S.flags.c1,S.flags.c2,S.flags.c3][j%3]:S.flags.n===2?(j%2?S.flags.c2:S.flags.c1):S.flags.c1;
+  let h=`<rect width="${W}" height="${H}" fill="#14301c"/><rect y="${top-8}" width="${W}" height="8" fill="#2b3447"/>`;
+  for(let i=0;i<rows;i++)h+=`<rect y="${top+i*rh}" width="${W}" height="${rh-1}" fill="${sc(i)}"/><line x1="0" x2="${W}" y1="${top+i*rh+(rh-1)/2}" y2="${top+i*rh+(rh-1)/2}" stroke="rgba(0,0,0,.28)" stroke-width="2.4" stroke-dasharray="3 3"/>`;
+  for(let j=0;j<10;j++){const fx=12+j*21.8;h+=`<path d="M${fx-8} ${top-8}h16v22l-8 5-8-5z" fill="${fc(j)}" stroke="rgba(0,0,0,.35)" stroke-width="1"/>`}
+  return`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Estadio">${h}</svg>`}
+ const kitName={v1:'Franja vertical',h1:'Franja horizontal',vs:'Franjas verticales',hs:'Franjas horizontales',vv:'Franja en V',dg:'Franja cruzada',mv:'Mitad vertical',mh:'Mitad horizontal'};
+
+ function form(){
+  const c=COUNTRIES[0],l=c.leagues[0];
+  root.innerHTML=`<div class="cGrid">
+  <section class="cPanel"><h2>Selección de club</h2>
+   <label class="cLbl" for="cPais">País</label>
+   <select id="cPais">${COUNTRIES.map(x=>`<option value="${x.id}">${x.flag} ${E(x.name)}</option>`).join('')}</select>
+   <label class="cLbl" for="cLiga">Liga</label>
+   <select id="cLiga">${c.leagues.map(x=>`<option value="${x.id}">${E(x.name)}</option>`).join('')}</select>
+   <div class="cNote">${D.league.teams} equipos · ${D.league.zones} Zonas · ${D.league.fechas} Fechas + Playoffs</div>
+   <span class="cLbl">Club</span>
+   <button id="cRand" type="button">🎲 Equipo Aleatorio</button>
+   <div class="cTeams" id="cTeams" role="listbox" aria-label="Equipos"></div>
+   <h2 style="margin-top:6px">Tu jugador</h2>
+   <div class="cRow"><div style="flex:1"><label class="cLbl" for="cName">Nombre / Apodo</label><input id="cName" maxlength="16" placeholder="Tu nombre o apodo" autocomplete="off"></div>
+    <div class="num"><label class="cLbl" for="cNum">Dorsal</label><input id="cNum" maxlength="2" inputmode="numeric" value="10" placeholder="10" autocomplete="off"></div></div>
+   <label class="cLbl" for="cDur">Duración de partido</label>
+   <select id="cDur"><option value="2">2 min</option><option value="3" selected>3 min (Recomendado)</option><option value="5">5 min</option><option value="7">7 min</option></select>
+   <div class="cErr" id="cErr" role="alert"></div>
+   <button id="cStart" type="button">⚽ INICIAR TEMPORADA</button>
+  </section>
+  <section class="cPanel" id="cPrev"></section></div>`;
+  const grid=$('cTeams');
+  D.teams.forEach(t=>{const b=document.createElement('button');b.type='button';b.className='tm';b.dataset.id=t.id;b.title=t.name;b.setAttribute('role','option');
+   b.innerHTML=`<span class="bd">${badge(t)}</span><b>${E(t.shortName)}</b>`;b.onclick=()=>pick(t.id);grid.appendChild(b)});
+  $('cRand').onclick=()=>{const t=D.teams[Math.floor(Math.random()*D.teams.length)];pick(t.id,true)};
+  $('cStart').onclick=start;
+  $('cNum').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,2);if(sel)preview()};
+  $('cName').oninput=()=>{$('cErr').textContent=''};
+  $('cPais').onchange=()=>{};$('cLiga').onchange=()=>{};
+  pick(sel,false);
+ }
+ function pick(id,scroll){sel=id||'';
+  document.querySelectorAll('#cTeams .tm').forEach(b=>{const on=b.dataset.id===sel;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);if(on&&scroll)b.scrollIntoView({block:'nearest'})});
+  $('cErr').textContent='';preview()}
+ function preview(){const box=$('cPrev'),t=sel&&D.getTeam(sel);
+  if(!t){box.innerHTML='<h2>Vista previa</h2><div class="pEmpty">Elegí un club o tocá 🎲 Equipo Aleatorio.</div>';return}
+  const rv=D.getTeam(t.classicRivalId),num=$('cNum')?($('cNum').value||''):'';
+  box.innerHTML=`<h2>Vista previa</h2>
+   <div class="pHead"><span class="bd">${badge(t)}</span><div><b>${E(t.name)}</b><br><span>${E(t.shortName)} · Primera División</span></div></div>
+   <div class="pBox"><span class="cLbl">Camisetas</span><div class="pKits">
+    <div class="pKit"><canvas id="kH"></canvas>Titular</div><div class="pKit"><canvas id="kA"></canvas>Suplente</div></div></div>
+   <div class="pBox pStad"><span class="cLbl">Estadio · butacas y banderas</span>${stadSvg(t.stadium)}</div>
+   <div class="pBox"><span class="cLbl">Clásico rival</span><div class="pRiv"><span class="bd">${badge(rv)}</span>${E(rv.name)}</div></div>`;
+  drawKit($('kH'),t.kitHome,num);drawKit($('kA'),t.kitAway,num)}
+ function start(){const err=$('cErr'),name=$('cName').value.trim(),num=$('cNum').value.trim();
+  if(!sel)return err.textContent='Elegí un club (o tocá Equipo Aleatorio) para continuar.';
+  if(!name)return err.textContent='Escribí tu nombre o apodo.';
+  const n=parseInt(num,10);if(!(n>=1&&n<=99))return err.textContent='El dorsal debe estar entre 1 y 99.';
+  const z=D.generarZonasAleatorias();
+  state={v:1,country:COUNTRIES[0].id,league:D.league.id,teamId:sel,player:{name,num:n},matchMinutes:parseInt($('cDur').value,10)||3,
+   zones:{A:z.A,B:z.B},zonaDe:z.zonaDe,myZone:z.zonaDe[sel],fecha:1,createdAt:Date.now()};
+  try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
+  window.CAREER_STATE=state;
+  try{window.dispatchEvent(new CustomEvent('career:start',{detail:state}))}catch(e){}
+  summary()}
+ function summary(){const t=D.getTeam(state.teamId),rv=D.getTeam(t.classicRivalId);
+  const zl=k=>`<div class="cZ"><h2>Zona ${k}</h2>${state.zones[k].map(id=>{const q=D.getTeam(id);return`<div class="z${id===state.teamId?' me':''}"><span class="bd">${badge(q)}</span>${E(q.name)}${id===state.teamId?' ⭐':''}</div>`}).join('')}</div>`;
+  root.innerHTML=`<section class="cPanel"><h2>✅ Temporada lista</h2>
+   <div class="pHead"><span class="bd">${badge(t)}</span><div><b>${E(t.name)} · Zona ${state.myZone}</b><br><span>Jugás como ${E(state.player.name)} (#${state.player.num}) · partidos de ${state.matchMinutes} min</span></div></div>
+   <div class="cNote">Tu clásico, ${E(rv.name)}, quedó en la Zona ${state.zonaDe[rv.id]}. El motor del torneo se conecta en el próximo paso.</div>
+   <div class="cZones">${zl('A')}${zl('B')}</div>
+   <button id="cBack" class="cDone" type="button">↺ Cambiar configuración</button></section>`;
+  $('cBack').onclick=()=>{const nm=state.player.name,nu=state.player.num,du=state.matchMinutes;form();$('cName').value=nm;$('cNum').value=nu;$('cDur').value=du;preview()}}
+ /* Al abrir el Modo Carrera, precarga apodo/dorsal del login si el campo está vacío */
+ $('homeCareer').addEventListener('click',()=>{if(!$('cName'))return;
+  if(!$('cName').value&&$('nick').value.trim())$('cName').value=$('nick').value.trim().slice(0,16);
+  const dn=($('num').value||'').trim();if(/^\d{1,2}$/.test(dn)&&(+dn>=1)&&$('cNum').value==='10')$('cNum').value=dn;if(sel)preview()});
+ window.CAREER_API={getState:()=>state,rosterFor:teamId=>D.resolverPlantelCancha(teamId,state&&state.player.num),aplicarPlantelABots:(bots,teamId)=>D.aplicarPlantelABots(bots,teamId,state&&state.player.num)};
+ form();
 })();
 </script>
 </body>
