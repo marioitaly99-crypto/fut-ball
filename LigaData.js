@@ -26,11 +26,11 @@
    "st": "h1"
   },
   "kitAway": {
-   "n": 2,
-   "c1": "#f3b229",
-   "c2": "#00338d",
-   "c3": "#22c55e",
-   "st": "h1"
+   "n": 3,
+   "c1": "#ffffff",
+   "c2": "#ffffff",
+   "c3": "#00338d",
+   "st": "bv"
   },
   "stadium": {
    "enabled": true,
@@ -141,7 +141,7 @@
    "c1": "#e30613",
    "c2": "#111111",
    "c3": "#22c55e",
-   "st": "dg"
+   "st": "vs"
   },
   "stadium": {
    "enabled": true,
@@ -248,11 +248,11 @@
    "st": "v1"
   },
   "kitAway": {
-   "n": 2,
+   "n": 1,
    "c1": "#ffffff",
-   "c2": "#e30613",
+   "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "h1"
+   "st": "v1"
   },
   "stadium": {
    "enabled": true,
@@ -359,11 +359,11 @@
    "st": "vs"
   },
   "kitAway": {
-   "n": 2,
+   "n": 1,
    "c1": "#0b1f3a",
-   "c2": "#6cabdd",
+   "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "h1"
+   "st": "v1"
   },
   "stadium": {
    "enabled": true,
@@ -578,14 +578,14 @@
    "c1": "#ffffff",
    "c2": "#e30613",
    "c3": "#22c55e",
-   "st": "h1"
+   "st": "v1"
   },
   "kitAway": {
-   "n": 2,
+   "n": 1,
    "c1": "#e30613",
    "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "h1"
+   "st": "v1"
   },
   "stadium": {
    "enabled": true,
@@ -692,11 +692,11 @@
    "st": "vs"
   },
   "kitAway": {
-   "n": 2,
-   "c1": "#111111",
-   "c2": "#d91e2a",
+   "n": 1,
+   "c1": "#ffffff",
+   "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "dg"
+   "st": "v1"
   },
   "stadium": {
    "enabled": true,
@@ -803,11 +803,11 @@
    "st": "h1"
   },
   "kitAway": {
-   "n": 2,
+   "n": 3,
    "c1": "#0b1f3a",
-   "c2": "#ffffff",
-   "c3": "#22c55e",
-   "st": "h1"
+   "c2": "#0b1f3a",
+   "c3": "#ffffff",
+   "st": "bh"
   },
   "stadium": {
    "enabled": true,
@@ -1025,11 +1025,11 @@
    "st": "vs"
   },
   "kitAway": {
-   "n": 2,
-   "c1": "#f7b500",
-   "c2": "#002d72",
+   "n": 1,
+   "c1": "#ffffff",
+   "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "dg"
+   "st": "v1"
   },
   "stadium": {
    "enabled": true,
@@ -1136,11 +1136,11 @@
    "st": "vs"
   },
   "kitAway": {
-   "n": 2,
-   "c1": "#071324",
-   "c2": "#5bc2e7",
+   "n": 1,
+   "c1": "#0055a4",
+   "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "h1"
+   "st": "v1"
   },
   "stadium": {
    "enabled": true,
@@ -1247,11 +1247,11 @@
    "st": "v1"
   },
   "kitAway": {
-   "n": 2,
+   "n": 1,
    "c1": "#111111",
-   "c2": "#5bc2e7",
+   "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "h1"
+   "st": "v1"
   },
   "stadium": {
    "enabled": true,
@@ -1470,8 +1470,8 @@
   },
   "kitAway": {
    "n": 2,
-   "c1": "#004d20",
-   "c2": "#ffffff",
+   "c1": "#111111",
+   "c2": "#004d20",
    "c3": "#22c55e",
    "st": "dg"
   },
@@ -1581,8 +1581,8 @@
   },
   "kitAway": {
    "n": 2,
-   "c1": "#004b9b",
-   "c2": "#ffffff",
+   "c1": "#0b1f3a",
+   "c2": "#0055a4",
    "c3": "#22c55e",
    "st": "vv"
   },
@@ -1691,11 +1691,11 @@
    "st": "h1"
   },
   "kitAway": {
-   "n": 3,
+   "n": 1,
    "c1": "#ffffff",
-   "c2": "#004b9b",
-   "c3": "#e30613",
-   "st": "cb"
+   "c2": "#ffffff",
+   "c3": "#22c55e",
+   "st": "v1"
   },
   "stadium": {
    "enabled": true,
@@ -1802,11 +1802,11 @@
    "st": "dg"
   },
   "kitAway": {
-   "n": 2,
+   "n": 1,
    "c1": "#ffffff",
-   "c2": "#e30613",
+   "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "dg"
+   "st": "v1"
   },
   "stadium": {
    "enabled": true,
@@ -2247,10 +2247,10 @@
   },
   "kitAway": {
    "n": 2,
-   "c1": "#0b1f3a",
-   "c2": "#5bc2e7",
+   "c1": "#004b9b",
+   "c2": "#111111",
    "c3": "#22c55e",
-   "st": "h1"
+   "st": "vs"
   },
   "stadium": {
    "enabled": true,
@@ -2357,11 +2357,11 @@
    "st": "vs"
   },
   "kitAway": {
-   "n": 2,
-   "c1": "#ffffff",
-   "c2": "#111111",
+   "n": 1,
+   "c1": "#7a1c32",
+   "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "h1"
+   "st": "v1"
   },
   "stadium": {
    "enabled": true,
@@ -2459,7 +2459,7 @@
   "name": "Gimnasia (Mendoza)",
   "shortName": "GME",
   "classicRivalId": "independiente_riv",
-  "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-gimnasia_mza\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><g clip-path=\"url(#b-gimnasia_mza)\"><rect width=\"64\" height=\"64\" fill=\"#ffffff\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#0b3d91\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#0b3d91\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"28.6\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+  "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-gimnasia_mza\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><g clip-path=\"url(#b-gimnasia_mza)\"><rect width=\"64\" height=\"64\" fill=\"#ffffff\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#111111\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#111111\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"28.6\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
    "n": 2,
    "c1": "#ffffff",
@@ -3127,11 +3127,11 @@
   "classicRivalId": "estudiantes_rc",
   "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-riestra\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><g clip-path=\"url(#b-riestra)\"><rect width=\"64\" height=\"64\" fill=\"#ffffff\"/><rect x=\"12.8\" width=\"12.8\" height=\"64\" fill=\"#111111\"/><rect x=\"38.4\" width=\"12.8\" height=\"64\" fill=\"#111111\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"28.6\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
   "kitHome": {
-   "n": 2,
+   "n": 1,
    "c1": "#111111",
    "c2": "#ffffff",
    "c3": "#22c55e",
-   "st": "h1"
+   "st": "v1"
   },
   "kitAway": {
    "n": 2,
