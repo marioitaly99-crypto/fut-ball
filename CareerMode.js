@@ -76,8 +76,8 @@
   const r=D.resolverPlantelCancha(teamId,num),info={};
   const st=r.starters.slice(0,5),bn=r.subs.slice(0,6); /* el 6.º titular del club es el lugar de tu jugador */
   const starters=[],bench=[];
-  st.forEach((p,i)=>{const id='s'+i;info[id]={id,name:p.name,number:p.number,pos:p.pos,stam:100};starters.push(id)});
-  bn.forEach((p,i)=>{const id='b'+i;info[id]={id,name:p.name,number:p.number,pos:p.pos,stam:100};bench.push(id)});
+  st.forEach((p,i)=>{const id='s'+i;info[id]={id,name:p.name,number:p.number,pos:p.pos,stam:100,ycTotal:0,susp:0};starters.push(id)});
+  bn.forEach((p,i)=>{const id='b'+i;info[id]={id,name:p.name,number:p.number,pos:p.pos,stam:100,ycTotal:0,susp:0};bench.push(id)});
   return{info,starters,bench};
  }
 
@@ -87,7 +87,7 @@
   const okB=B.length===st.zones.B.length&&B.every(id=>st.zones.B.indexOf(id)>=0);
   if(!okB)B=st.zones.B.slice();
   const str={};D.teams.forEach(t=>{str[t.id]=+(0.82+Math.random()*0.42+(BIG.indexOf(t.id)>=0?0.1:0)).toFixed(3)});
-  return{v:2,teamId:st.teamId,player:{name:st.player.name,num:st.player.num},minutes:st.matchMinutes||5,
+  return{v:2,teamId:st.teamId,player:{name:st.player.name,num:st.player.num,ycTotal:0,susp:0},minutes:st.matchMinutes||5,
    zones:{A,B},zonaDe:st.zonaDe,myZone:st.zonaDe[st.teamId],str,fixture:buildFixture(A,B),fecha:1,phase:'regular',
    po:null,squad:newSquad(st.teamId,st.player.num),champShown:false,createdAt:Date.now()};
  }
@@ -275,7 +275,7 @@
 .cmBr .bm.me{border-color:#e0f7ff;box-shadow:0 0 8px rgba(56,189,248,.7)}
 .cmBr .bm .l{display:flex;align-items:center;gap:6px;justify-content:space-between;opacity:.8}.cmBr .bm .l.w{opacity:1;color:#86efac}
 .cmBr .bm .l span{display:flex;align-items:center;gap:5px}.cmBr .bm .cmBd{width:18px;height:18px}
-.cmPr{display:grid;grid-template-columns:34px 38px 1fr 90px 42px;gap:8px;align-items:center;width:100%;text-align:left;padding:7px 10px;border-radius:10px;
+.cmPr{display:grid;grid-template-columns:34px 38px 1fr auto 90px 42px;gap:8px;align-items:center;width:100%;text-align:left;padding:7px 10px;border-radius:10px;
  background:rgba(2,10,30,.6);color:#fff;border:1.5px solid #1e3a8a;font-size:.84rem;font-weight:800}
 .cmPr .n{color:#fde68a;font-weight:900}.cmPr .ps{color:#9fc0ee;font-size:.72rem}.cmPr .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cmPr .bar{height:9px;border-radius:6px;background:#0b1530;overflow:hidden;border:1px solid #1e3a8a}.cmPr .bar i{display:block;height:100%}
@@ -283,6 +283,10 @@
 .cmPr.sel{border-color:#e0f7ff;background:rgba(2,132,199,.55);box-shadow:0 0 10px rgba(56,189,248,.8)}
 .cmPr.me{border-color:#facc15;cursor:default}.cmPr.me em{grid-column:1/-1;font-style:normal;color:#fde68a;font-size:.72rem}
 .cmPr:hover{filter:none;border-color:#7dd3fc}.cmPr.me:hover{border-color:#facc15}
+.cmPr .cd{font-size:.72rem;font-weight:900;white-space:nowrap;color:#fde68a}
+.cmPr em.wn{grid-column:1/-1;font-style:normal;color:#fbbf24;font-size:.72rem;font-weight:900}
+.cmPr.exp{filter:grayscale(100%);opacity:.45;cursor:not-allowed;border-color:#ef4444}
+.cmPr.exp:hover{filter:grayscale(100%);border-color:#ef4444}
 .cmNote{font-size:.78rem;color:#8fb2e6}
 .cmCols{display:grid;grid-template-columns:1fr 1fr;gap:14px}.cmCols>div{display:flex;flex-direction:column;gap:6px}
 #cmSub,#cmEnd,#cmChamp{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(3,8,20,.82);overflow-y:auto}
@@ -300,7 +304,7 @@ html.is-touch body.careerOn.cmInGame #cmSubBtn{right:auto;left:50%;transform:tra
 body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCopy,body.careerOn #mCode{display:none!important}
 #cmCont{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;padding:12px 16px;background:rgba(7,25,56,.92);border:2px solid #4ade80;border-radius:16px;box-shadow:0 0 22px rgba(74,222,128,.3)}
 #cmCont b{font-size:1.05rem}
-@media(max-width:780px){.cmZ,.cmCols{grid-template-columns:1fr}.cmVs .tm .cmBd{width:62px;height:62px}.cmBr{grid-template-columns:repeat(4,200px)}.cmPr{grid-template-columns:30px 34px 1fr 64px 38px;gap:6px;padding:6px 8px}}
+@media(max-width:780px){.cmZ,.cmCols{grid-template-columns:1fr}.cmVs .tm .cmBd{width:62px;height:62px}.cmBr{grid-template-columns:repeat(4,200px)}.cmPr{grid-template-columns:30px 34px 1fr auto 64px 38px;gap:6px;padding:6px 8px}}
 `;
   document.head.appendChild(s);
  }
@@ -386,6 +390,7 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
   if(S.phase==='playoffs')warn+='<div class="cmWarn">🏆 <b>'+STAGE_LBL[S.po.stage].toUpperCase()+'</b> · Partido único. Si hay empate al final: tiempo extra de 1 minuto y, si persiste, tanda de penales.'+(m.neutral?' · Cancha neutral.':'')+'</div>';
   if(m.kind==='C')warn+='<div class="cmWarn cmFire">🔥 <b>¡FECHA DE CLÁSICO!</b> Hoy enfrentás a tu clásico rival.</div>';
   if(m.kind==='I')warn+='<div class="cmWarn">🌐 Fecha interzonal: rival de la otra zona.</div>';
+  if((S.player.susp||0)>0)warn+='<div class="cmWarn cmFire">🟥 <b>Estás suspendido (1 fecha)</b>: no jugás este partido. Lo mirás desde afuera y tu equipo juega 6v6 con un suplente.</div>';
   const r=rankOf(S.teamId);
   const stand=S.phase==='regular'?'<div class="cmNote">Posición actual: <b>'+r.pos+'º</b> en Zona '+r.z+' · '+r.row.pts+' pts ('+r.row.pj+' PJ) · clasifican los 8 primeros.</div>':'';
   return '<div class="cmCard"><h2>'+(S.phase==='regular'?'Fecha '+S.fecha+' de 16':STAGE_LBL[S.po.stage])+'</h2>'+warn+
@@ -449,8 +454,32 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
 
  /* ---- Mi Plantel ---- */
  function injTag(p){return p.inj==='s'?' <span title="Lesión grave · Requiere cambio" style="color:#f87171;font-weight:900;font-size:.72rem">🚑 Cambio req.</span>':p.inj==='l'?' <span title="Jugador resentido" style="color:#fbbf24">🩹</span>':''}
- function prHtml(p,k,i,sel){return '<button type="button" class="cmPr'+(sel?' sel':'')+'" data-k="'+k+'" data-i="'+i+'"><span class="n">#'+E(p.number)+'</span><span class="ps">'+(POSL[p.pos]||p.pos)+'</span><span class="nm">'+E(p.name)+injTag(p)+'</span><span class="bar"><i style="width:'+p.stam+'%;background:'+stamCol(p.stam)+'"></i></span><b>'+p.stam+'%</b></button>'}
- function userRow(){return '<div class="cmPr me"><span class="n">#'+E(S.player.num)+'</span><span class="ps" style="color:#facc15;font-weight:900">TÚ</span><span class="nm">'+E(S.player.name)+'</span><span class="bar"><i style="width:100%;background:#22c55e"></i></span><b>100%</b></div>'}
+ /* Disciplina en "Mi Plantel": contador 🟨 n/4, aviso en 3/4 y suspendido (🟥 + .exp) */
+ function discHub(p){
+  const yc=p.ycTotal||0,sp=p.susp||0;
+  if(sp>0)return{cls:' exp',cd:'<span class="cd" style="color:#f87171;font-weight:900">🟥 Suspendido ('+sp+' fecha'+(sp>1?'s':'')+')</span>',wn:''};
+  return{cls:'',cd:'<span class="cd"'+(yc===3?' style="color:#facc15"':'')+'>🟨 '+yc+'/4</span>',wn:yc===3?'<em class="wn">⚠️ SERÁ SUSPENDIDO EN CASO DE SER AMONESTADO CON AMARILLA</em>':''};
+ }
+ /* card = {yc,exp,susp} → render dentro del modal de cambios (#cmSub); sin card → Mi Plantel */
+ function prHtml(p,k,i,sel,card){
+  let cls='cmPr'+(sel?' sel':''),cd='',wn='';
+  if(card){
+   if(card.exp){cls+=' exp';cd='<span class="cd" style="color:#f87171;font-weight:900">🟥 Expulsado</span>'}
+   else if(card.susp){cls+=' exp';cd='<span class="cd" style="color:#f87171;font-weight:900">🟥 Suspendido</span>'}
+   else if(card.yc>0)cd='<span class="cd" title="Amonestado">🟨</span>';
+  }else{const d=discHub(p);cls+=d.cls;cd=d.cd;wn=d.wn}
+  return '<button type="button" class="'+cls+'" data-k="'+k+'" data-i="'+i+'"><span class="n">#'+E(p.number)+'</span><span class="ps">'+(POSL[p.pos]||p.pos)+'</span><span class="nm">'+E(p.name)+injTag(p)+'</span>'+(cd||'<span class="cd"></span>')+'<span class="bar"><i style="width:'+p.stam+'%;background:'+stamCol(p.stam)+'"></i></span><b>'+p.stam+'%</b>'+wn+'</button>';
+ }
+ function userRow(modal){
+  const P=S.player;let cls='cmPr me',cd='',wn='';
+  if(modal){
+   const yc=(typeof me!=='undefined'&&me&&me.yc)||0;
+   if(typeof me!=='undefined'&&me&&me.rt){cls+=' exp';cd='<span class="cd" style="color:#f87171;font-weight:900">🟥 Expulsado</span>'}
+   else if((P.susp||0)>0){cls+=' exp';cd='<span class="cd" style="color:#f87171;font-weight:900">🟥 Suspendido</span>'}
+   else if(yc>0)cd='<span class="cd" title="Amonestado">🟨</span>';
+  }else{const d=discHub(P);cls+=d.cls;cd=d.cd;wn=d.wn}
+  return '<div class="'+cls+'"><span class="n">#'+E(P.num)+'</span><span class="ps" style="color:#facc15;font-weight:900">TÚ</span><span class="nm">'+E(P.name)+'</span>'+(cd||'<span class="cd"></span>')+'<span class="bar"><i style="width:100%;background:#22c55e"></i></span><b>100%</b>'+wn+'</div>';
+ }
  function tabSquad(){
   const q=S.squad;
   return '<div class="cmCard"><h2>Mi Plantel</h2>'+userRow()+
@@ -461,6 +490,7 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
  function swapOk(a,b){return (a.pos==='GK')===(b.pos==='GK')}
  function squadClick(k,i){
   const q=S.squad;
+  if(k==='b'&&(q.info[q.bench[i]].susp||0)>0){SEL=null;renderHub();const m=$('cmSqMsg');if(m)m.textContent='⚠️ Este jugador está suspendido y no puede jugar el próximo partido.';return}
   if(!SEL||SEL.k===k){SEL={k,i};return renderHub()}
   const si=k==='s'?i:SEL.i,bi=k==='b'?i:SEL.i,sid=q.starters[si],bid=q.bench[bi];
   if(!swapOk(q.info[sid],q.info[bid])){SEL=null;renderHub();const m=$('cmSqMsg');if(m)m.textContent='⚠️ El arquero solo puede cambiarse por otro arquero.';return}
@@ -519,10 +549,55 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
  });
  /* e) fin del partido: congela el reinicio automático y muestra el resultado */
  hook('end',o=>function(){
-  const was=!!(G&&G.over),r=o.apply(this,arguments);
+  const was=!!(G&&G.over);
+  if(CM.live&&LIVE&&!was)snapCards(); /* ANTES de o.apply: end() limpia p.yc / p.rc */
+  const r=o.apply(this,arguments);
   if(CM.live&&LIVE&&!was)onEnd();
   return r;
  });
+
+ /* Tarjetas del partido: se guardan en me y en cada bot de LIVE.slots (_lastYc / _wasExp) y por jugador en LIVE.cards */
+ function snapCards(){
+  const L=LIVE;if(!L||L.snapped)return;L.snapped=true;L.cards=L.cards||{};
+  const bots=L.slots.map(s=>s.bot);
+  [me].concat(bots).forEach(p=>{if(!p)return;p._lastYc=p.yc||0;p._wasExp=(p.team==='spec'&&!!p.rt)});
+  L.slots.forEach(s=>{L.cards[s.id]={yc:s.bot._lastYc,exp:s.bot._wasExp}});
+  L.meCards={yc:me._lastYc,exp:me._wasExp};
+ }
+ /* Suspensiones: cumplen fecha los ya suspendidos, después se procesan las tarjetas de este partido */
+ function applyDiscipline(){
+  const L=LIVE,info=S.squad.info,P=S.player;
+  [P].concat(Object.keys(info).map(id=>info[id])).forEach(p=>{if((p.susp||0)>0)p.susp=Math.max(0,p.susp-1)});
+  const proc=(p,yc,exp)=>{
+   if(exp){p.susp=1;return}
+   if(yc>0){p.ycTotal=(p.ycTotal||0)+1;if(p.ycTotal>=4){p.susp=1;p.ycTotal=0}}
+  };
+  Object.keys(L.cards||{}).forEach(id=>{const p=info[id];if(p)proc(p,L.cards[id].yc||0,!!L.cards[id].exp)});
+  if(L.meCards)proc(P,L.meCards.yc||0,!!L.meCards.exp);
+ }
+ /* Auto-reemplazo de titulares suspendidos: primer suplente no suspendido del mismo puesto (GK por GK, campo por campo) */
+ function fixSuspended(){
+  const q=S.squad,info=q.info;
+  q.starters.forEach((id,i)=>{
+   if(!((info[id].susp||0)>0))return;
+   const gk=info[id].pos==='GK',j=q.bench.findIndex(b=>!((info[b].susp||0)>0)&&((info[b].pos==='GK')===gk));
+   if(j>=0){const bid=q.bench[j];q.bench[j]=id;q.starters[i]=bid}
+  });
+ }
+ /* 6.º jugador de cancha cuando S.player está suspendido: primer suplente disponible (prefiere GK solo si no hay arquero titular) */
+ function pickExtra(){
+  const q=S.squad,info=q.info,ok=id=>!((info[id].susp||0)>0),hasGK=q.starters.some(id=>info[id].pos==='GK');
+  let j=q.bench.findIndex(id=>ok(id)&&((info[id].pos==='GK')===!hasGK));
+  if(j<0)j=q.bench.findIndex(ok);
+  return j<0?null:{id:q.bench[j],idx:j};
+ }
+ /* Tarjetas en vivo de un jugador (modal de cambios): en cancha → su bot; en el banco → lo que quedó registrado */
+ function liveCard(id){
+  const L=LIVE,s=L&&L.slots.find(x=>x.id===id);
+  if(s){const b=s.bot;return{yc:b.yc||0,exp:b.team==='spec'||!!b.rt,susp:false}}
+  const c=L&&L.cards&&L.cards[id];
+  return{yc:c?c.yc:0,exp:false,susp:((S.squad.info[id]||{}).susp||0)>0};
+ }
 
  function playMatch(){
   const m=userMatch();if(!m||CM.live)return;
@@ -532,8 +607,11 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
   enter({id:9001,name:'Modo Carrera',size:'realista',mode:'realistic',max:12,priv:true,pass:'',n:0,owner:'Carrera'},false);
   isAdmin=false;
   const team=myHome?'red':'blue',rteam=myHome?'blue':'red';
-  me.name=S.player.name;me.num=String(S.player.num);me.team=team;
-  const mine=S.squad.starters.map(id=>{const i=S.squad.info[id],b=mk(i.name,String(i.number),team,true);b.pos=i.pos;b.cSlot=true;b.cId=id;b.stam=i.stam;b.cInj=false;return b});
+  fixSuspended(); /* titulares suspendidos → suplente del mismo puesto */
+  const sus=(S.player.susp||0)>0,ex=sus?pickExtra():null;
+  me.name=S.player.name;me.num=String(S.player.num);me.team=sus?'spec':team; /* suspendido: mirás desde afuera */
+  const ids=S.squad.starters.concat(ex?[ex.id]:[]); /* suspendido: 5 titulares + 1 suplente = 6v6 */
+  const mine=ids.map(id=>{const i=S.squad.info[id],b=mk(i.name,String(i.number),team,true);b.pos=i.pos;b.cSlot=true;b.cId=id;b.stam=i.stam;b.cInj=false;return b});
   const rv=[];for(let i=0;i<6;i++)rv.push(mk('','',rteam,true));
   /* 4) el rival conserva siempre su dorsal oficial: NO se le pasa el dorsal del usuario (la reasignación por duplicado solo rige en tu equipo, vía resolverPlantelCancha) */
   try{D.aplicarPlantelABots(rv,rvT.id,null)}catch(e){D.aplicarPlantelABots(rv,rvT.id,-1)}
@@ -544,7 +622,7 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
   G.teamTactics={red:calcBias(m.h,true),blue:calcBias(m.a,false)};
   STAD=stadClean(m.neutral?null:hT.stadium);if(typeof STAD_CF!=='undefined')STAD_CF.length=0;
   CM.live=true;
-  LIVE={m,slots:mine.map((b,i)=>({bot:b,id:S.squad.starters[i],t0:0})),bench:S.squad.bench.slice(),subs:0,played:{},inj:{},sel:null,res:null,done:false,timer:0};
+  LIVE={m,slots:mine.map((b,i)=>({bot:b,id:ids[i],t0:0})),bench:S.squad.bench.filter(id=>!ex||id!==ex.id),extraId:ex?ex.id:null,extraIdx:ex?ex.idx:-1,cards:{},subs:0,played:{},inj:{},sel:null,res:null,done:false,timer:0};
   document.body.classList.add('careerOn','cmInGame');
   const lv=$('mLeave');if(lv)lv.textContent='Abandonar partido';
   const hn=$('hint');if(hn){if(!hn.dataset.o)hn.dataset.o=hn.textContent;hn.textContent='ESC: menú · P: pausa y cambios · Flechas / WASD: mover · Espacio / X: patear'}
@@ -569,9 +647,9 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
  }
  function renderSub(msg){
   const q=S.squad,L=LIVE;
-  $('cmSub').innerHTML='<div class="cmCard"><h2>🔄 Realizar Cambio ('+L.subs+'/3)</h2><div class="cmCols"><div><h3>En cancha</h3>'+userRow()+
-   L.slots.map((s,i)=>prHtml(q.info[s.id],'s',i,L.sel&&L.sel.k==='s'&&L.sel.i===i)).join('')+'</div>'+
-   '<div><h3>Banco de suplentes</h3>'+L.bench.map((id,i)=>prHtml(q.info[id],'b',i,L.sel&&L.sel.k==='b'&&L.sel.i===i)).join('')+'</div></div>'+
+  $('cmSub').innerHTML='<div class="cmCard"><h2>🔄 Realizar Cambio ('+L.subs+'/3)</h2><div class="cmCols"><div><h3>En cancha</h3>'+userRow(true)+
+   L.slots.map((s,i)=>prHtml(q.info[s.id],'s',i,L.sel&&L.sel.k==='s'&&L.sel.i===i,liveCard(s.id))).join('')+'</div>'+
+   '<div><h3>Banco de suplentes</h3>'+L.bench.map((id,i)=>prHtml(q.info[id],'b',i,L.sel&&L.sel.k==='b'&&L.sel.i===i,liveCard(id))).join('')+'</div></div>'+
    '<div class="cmNote" id="cmSubMsg">'+(msg?E(msg):'Tocá un jugador en cancha y después un suplente. Máximo 3 cambios por partido; el arquero solo por otro arquero.')+'</div>'+
    '<div class="cmRow"><button id="cmSubClose" class="cmBig" type="button">▶ Reanudar partido</button></div></div>';
   $('cmSubClose').onclick=closeSub;
@@ -579,19 +657,25 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
  }
  function subClick(k,i){
   const L=LIVE;
+  if(k==='s'){const s=L.slots[i];if(s&&(s.bot.team==='spec'||!!s.bot.rt))return renderSub('⚠️ No podés sustituir a un jugador expulsado.')}
+  if(k==='b'&&((S.squad.info[L.bench[i]].susp||0)>0))return renderSub('⚠️ Ese jugador está suspendido y no puede ingresar.');
   if(!L.sel||L.sel.k===k){L.sel={k,i};return renderSub()}
   const si=k==='s'?i:L.sel.i,bi=k==='b'?i:L.sel.i;L.sel=null;
   doSub(si,bi);
  }
  function doSub(si,bi){
   const L=LIVE,q=S.squad,sl=L.slots[si],outId=sl.id,inId=L.bench[bi],out=q.info[outId],inn=q.info[inId];
+  if(sl.bot.team==='spec'||!!sl.bot.rt)return renderSub('⚠️ No podés sustituir a un jugador expulsado.');
+  if((inn.susp||0)>0)return renderSub('⚠️ Ese jugador está suspendido y no puede ingresar.');
   if(L.subs>=3)return renderSub('⚠️ Ya usaste los 3 cambios.');
   if((out.pos==='GK')!==(inn.pos==='GK'))return renderSub('⚠️ El arquero solo puede cambiarse por otro arquero.');
   const now=G.clock||0;
   L.played[outId]=(L.played[outId]||0)+Math.max(0,now-sl.t0);
   L.inj[outId]=L.inj[outId]||!!sl.bot.cInj;
+  L.cards=L.cards||{};const prev=L.cards[inId];
+  L.cards[outId]={yc:sl.bot.yc||0,exp:false}; /* el bot de la ranura se reutiliza: las tarjetas viajan con el jugador */
   out.inj=null;L.bench[bi]=outId;sl.id=inId;sl.t0=now;
-  const b=sl.bot;b.name=inn.name;b.num=String(inn.number);b.pos=inn.pos;b.stam=inn.stam;b.cId=inId;b.cInj=false;
+  const b=sl.bot;b.name=inn.name;b.num=String(inn.number);b.pos=inn.pos;b.stam=inn.stam;b.cId=inId;b.cInj=false;b.yc=prev?prev.yc:0;b.fc=0;b.rc=0;
   try{injClear(b)}catch(e){}b.sl=null;
   L.subs++;
   renderSub('✅ Entra '+inn.name+' (#'+inn.number+', '+inn.stam+'%) por '+out.name+'.');
@@ -624,7 +708,7 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
  }
  function forfeit(){
   if(!LIVE||LIVE.done)return;
-  clearTimeout(LIVE.timer);
+  clearTimeout(LIVE.timer);snapCards(); /* abandonar no pasa por end(): se guardan las tarjetas acá */
   const myHome=LIVE.m.h===S.teamId;
   LIVE.res={hg:myHome?0:3,ag:myHome?3:0,ph:null,pa:null,total:1,forfeit:true};
   finishMatch(true);
@@ -637,7 +721,11 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
   if(r.forfeit){L.slots.forEach(s=>{L.played[s.id]=total;L.inj[s.id]=false})}
   else L.slots.forEach(s=>{L.played[s.id]=(L.played[s.id]||0)+Math.max(0,total-s.t0);L.inj[s.id]=L.inj[s.id]||!!s.bot.cInj});
   applyStamina(L.played,L.inj,total);
-  S.squad.starters=L.slots.map(s=>s.id);S.squad.bench=L.bench.slice();
+  applyDiscipline();
+  if(L.extraId!=null){ /* S.player suspendido: el 6.º de cancha vuelve al banco */
+   const sid=L.slots.map(s=>s.id),ex=sid.pop(),bn=L.bench.slice();bn.splice(Math.min(L.extraIdx,bn.length),0,ex);
+   S.squad.starters=sid;S.squad.bench=bn;
+  }else{S.squad.starters=L.slots.map(s=>s.id);S.squad.bench=L.bench.slice()}
   recordUser(m,r);
   save();
   leaveGame();
