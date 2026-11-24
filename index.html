@@ -1017,7 +1017,7 @@ function fkBotAim(S){const gx=S.team==='red'?G.w:0,ins=G.gh*.14,ys=[G.gT+ins,G.h
 /* Humano que controla la mira: el del equipo que saca más cercano a la pelota; con la pelota a mano, ↑/↓ (W/S/joystick) apuntan en vez de moverlo */
 function fkCtl(p){const S=G.sp,b=G.ball;if(!RL()||G.pen||!S||S.type!=='libre'||p.team!==S.team)return false;
  let n=null,nd=1e9;G.players.forEach(q=>{if(q.bot||q.team!==S.team)return;const d=Math.hypot(q.x-b.x,q.y-b.y);if(d<nd){nd=d;n=q}});
- return n===p&&nd<p.r+b.r+70}
+ return n===p&&nd<p.r+b.r+10} /* ↑/↓ apuntan solo con la pelota al alcance de patada (tryKick = r+b.r+4); más lejos el humano se mueve libre en todas direcciones y puede rodear la pelota */
 /* Mira curva `)`: arco convexo hacia el arco rival con 3 puntos (Arriba / Medio / Abajo); el punto elegido va en amarillo con su línea real de tiro */
 function fkSight(){const S=G.sp;if(!S||S.type!=='libre'||!RL()||G.pen)return;const k=G.k,R=88*k,c=fkAngles(S),tm=c[1],rel=a=>Math.atan2(Math.sin(a-tm),Math.cos(a-tm)),
  sp=Math.max(.3,Math.abs(rel(c[0])),Math.abs(rel(c[2]))),A=sp+.16,disp=[tm+Math.sign(rel(c[0])||-1)*sp,tm,tm+Math.sign(rel(c[2])||1)*sp],sel=(S.aim|0)+1,mine=!!me&&me.team===S.team;
@@ -1406,7 +1406,7 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
  /* tras los choques entre jugadores se reaplican postes, red, paredes y barreras: nadie queda del otro lado */
  if(!sweepBall(L)){b.x+=b.vx;b.y+=b.vy}b.vx*=bdf;b.vy*=bdf;if(Math.hypot(b.vx,b.vy)<.01)b.vx=b.vy=0;
  for(let pass=0;pass<3;pass++){let hit=false; /* máx. 3 pasadas jugador↔balón por frame */
-  L.forEach(p=>{if(G.sp&&p.bot&&p.team===G.sp.team)return; /* un bot sacador no empuja la pelota: la libera con su pase */
+  L.forEach(p=>{if(G.sp&&p.team===G.sp.team)return; /* el equipo que saca (humano o bot) atraviesa la pelota parada: se acomoda libre y la libera solo al patear */
    const dx=b.x-p.x,dy=b.y-p.y,m=p.r+b.r;let dist=Math.hypot(dx,dy);
    if(dist<m-.001){hit=true;G.lastT=p.team;G.lastP=p;let nx,ny;if(dist<.001){const g=(p.x*13.7+p.y*7.3)%6.283;nx=Math.cos(g);ny=Math.sin(g)}else{nx=dx/dist;ny=dy/dist}
     dist=Math.max(dist,.001);if(G.activePowerEvent==='stain')stainTouch(p);if(G.activePowerEvent==='giant'){giantBump(p,b,nx,ny,m);return} /* Pelota Gigante: masa brutal, el jugador sale volando */
@@ -1414,7 +1414,7 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
     if(vn<0){const j=-(1+PREST)*vn/1.5;b.vx+=j*nx;b.vy+=j*ny;const pr=G.fkS?Math.min(1,6/Math.max(.001,j*.5)):1;p.vx-=j*.5*nx*pr;p.vy-=j*.5*ny*pr}}});
   if(!hit)break}
  if(G.sp&&G.sp.g>0)G.sp.g-=DT; /* tiro libre: 0.9 s de gracia para que el contacto de la víctima no lo "ejecute" solo */
- if(G.sp&&(!L.some(p=>p.team===G.sp.team)||(!(G.sp.g>0)&&L.some(p=>!p.bot&&p.team===G.sp.team&&Math.hypot(p.x-b.x,p.y-b.y)<p.r+b.r+1))||Math.hypot(b.vx,b.vy)>.3)){G.sp=null;G.outImm=.15} /* se ejecutó la reanudación; 150 ms de inmunidad contra re-detección */
+ if(G.sp&&(!L.some(p=>p.team===G.sp.team)||Math.hypot(b.vx,b.vy)>.3)){G.sp=null;G.outImm=.15} /* se ejecutó la reanudación SOLO al patear (tryKick → velocidad > .3) o si no queda nadie del equipo; rozar la pelota ya no la pone en juego. 150 ms de inmunidad contra re-detección */
  if(G.sp){b.vx=b.vy=0;b.x=G.sp.x;b.y=G.sp.y} /* balón parado: quieto y en su sitio */
  if(G.ko&&(!L.some(p=>p.team===G.ko)||L.some(p=>p.team===G.ko&&Math.hypot(p.x-b.x,p.y-b.y)<p.r+b.r+1)||Math.hypot(b.vx,b.vy)>.3))G.ko=null; /* el saque se ejecutó: se quita la barrera */
  powerStep();
