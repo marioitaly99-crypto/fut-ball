@@ -218,7 +218,7 @@
       if (!type) return null;
       const b = gs.ball;
       if (hyp(b.vx || 0, b.vy || 0) > gs.stadium.width * 0.004) return null; // ya se ejecutó
-      return { type, team: obj ? sp.team : undefined, executorId: obj ? sp.executorId : undefined };
+      return { type, team: obj ? sp.team : undefined, executorId: obj ? sp.executorId : undefined, botTake: obj ? !!sp.botTake : false };
     }
 
     _roleInfo(me, ctx) {
@@ -809,10 +809,12 @@
         if (!exec) {                                                        // el bot más cercano a la pelota
           let bd = 1e9;
           for (const b of ctx.teamBots) { const d = hyp(b.x - ball.x, b.y - ball.y); if (d < bd) { bd = d; exec = b; } }
-          for (const m of ctx.mates) {                                      // un humano claramente encima de la pelota la saca él
-            if (m.isBot || m.frozen) continue;
-            const d = hyp(m.x - ball.x, m.y - ball.y);
-            if (d < bd * 0.6 && d < ctx.W * 0.08) exec = m;
+          if (!sp.botTake) {                                                // "Que lo ejecute otro pateador" (Carrera): sin override humano
+            for (const m of ctx.mates) {                                    // un humano claramente encima de la pelota la saca él
+              if (m.isBot || m.frozen) continue;
+              const d = hyp(m.x - ball.x, m.y - ball.y);
+              if (d < bd * 0.6 && d < ctx.W * 0.08) exec = m;
+            }
           }
         }
         if (exec === me) return this._spExecute(me, ctx, cfg, mem, sp);
