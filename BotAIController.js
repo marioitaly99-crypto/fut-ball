@@ -37,7 +37,7 @@
     normal: { react: [7, 9],   aim: 8,  predict: 12, through: false, wallBounce: false, smartPass: false, passChance: 0.9, shootMul: 1,
               kickTol: 0.32, alignTol: 0.85, precise: false,
               slide: true, slideChance: 0.6,  slideFront: -0.15, slideBallFirst: true, slideStrict: false, slideReach: 1.2,  slideErr: 0.5 },
-    hard:   { react: [3, 4],   aim: 2,  predict: 24, through: true,  wallBounce: true,  smartPass: true,  passChance: 1,   shootMul: 1.15,
+    hard:   { react: [2, 3],   aim: 1.5, predict: 24, through: true,  wallBounce: true,  smartPass: true,  passChance: 1,   shootMul: 1.2,
               kickTol: 0.16, alignTol: 0.6, precise: true,
               slide: true, slideChance: 1,    slideFront: 0.0,  slideBallFirst: true,  slideStrict: true,  slideReach: 1.0,  slideErr: 0.15 }
   };
@@ -667,7 +667,7 @@
       const inArea = (p) => ctx.depth(p.x) < box.depth && Math.abs(p.y - g.cy) < box.halfH;
 
       // 1) Atajar: en CADA frame, mientras la pelota avance hacia el arco, proyecta la intersección con la línea de gol
-      if (toward > W * 0.0012 && bd > 0) {
+      if (toward > W * 0.0008 && bd > 0) {
         const t = bd / toward;
         const yLine = reflect(ball.y + ball.vy * t, ctx.T + ball.r, ctx.B - ball.r);
         if (yLine > g.top - ball.r * 2 && yLine < g.bottom + ball.r * 2) {
@@ -737,7 +737,7 @@
       // Avance paso a paso (retroceder es inmediato)
       const myKd = clamp(hyp(me.x - gx, me.y - gy), lineD, box.depth * 2);
       if (mem.gkAdv == null) mem.gkAdv = myKd;
-      const step = Math.max(ctx.vmax * 1.2, W * 0.004);
+      const step = Math.max(ctx.vmax * 1.4, W * 0.0052);
       mem.gkAdv += clamp(want - mem.gkAdv, -step * 4, step);
       mem.gkAdv = Math.min(mem.gkAdv, maxKd);
 

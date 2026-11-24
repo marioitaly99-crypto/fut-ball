@@ -301,6 +301,10 @@
 body.careerOn #cmMenuSub{display:block}
 body.careerOn.cmInGame #cmSubBtn{display:block;position:fixed;z-index:130;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);padding:8px 14px;font-size:.85rem;border-radius:12px;background:rgba(11,15,26,.85);color:#fff;border:1.5px solid #38bdf8}
 html.is-touch body.careerOn.cmInGame #cmSubBtn{right:auto;left:50%;transform:translateX(-50%);bottom:auto;top:calc(env(safe-area-inset-top,0px) + 52px);padding:5px 12px;font-size:.74rem}
+#cmSimRestBtn,#cmMenuSim{display:none}
+body.careerOn.cmRed #cmMenuSim{display:block}
+body.careerOn.cmInGame.cmRed #cmSimRestBtn{display:block;position:fixed;z-index:130;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 54px);padding:8px 14px;font-size:.85rem;border-radius:12px;background:rgba(127,29,29,.92);color:#fff;border:1.5px solid #f87171}
+html.is-touch body.careerOn.cmInGame.cmRed #cmSimRestBtn{right:auto;left:50%;transform:translateX(-50%);bottom:auto;top:calc(env(safe-area-inset-top,0px) + 86px);padding:5px 12px;font-size:.74rem}
 body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCopy,body.careerOn #mCode{display:none!important}
 #cmCont{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;padding:12px 16px;background:rgba(7,25,56,.92);border:2px solid #4ade80;border-radius:16px;box-shadow:0 0 22px rgba(74,222,128,.3)}
 #cmCont b{font-size:1.05rem}
@@ -318,6 +322,9 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
    const b=document.createElement('button');b.id='cmSubBtn';b.type='button';b.textContent='🔄 Cambios (P)';document.body.appendChild(b);
    const m=document.createElement('button');m.id='cmMenuSub';m.type='button';m.className='ghost';m.textContent='🔄 Realizar Cambio';
    const mr=$('mResume');if(mr&&mr.parentNode)mr.parentNode.insertBefore(m,mr);
+   const sr=document.createElement('button');sr.id='cmSimRestBtn';sr.type='button';sr.textContent='⏩ Reemplazar y simular resto';document.body.appendChild(sr);
+   const ms=document.createElement('button');ms.id='cmMenuSim';ms.type='button';ms.className='ghost';ms.textContent='⏩ Reemplazar y simular resto';
+   if(mr&&mr.parentNode)mr.parentNode.insertBefore(ms,mr);
   }
  }
 
@@ -398,8 +405,7 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
    '<div class="mid">VS</div>'+
    '<div class="tm'+(!myHome?' me':'')+'"><span class="cmBd">'+badge(a)+'</span>'+E(a.name)+'<small>VISITANTE'+(!myHome?' · TU CLUB':'')+'</small>'+kitSvg(!myHome?myKit:kA,!myHome?S.player.num:'')+'</div></div>'+
    '<div class="cmRow"><span class="cmTag">'+(myHome?'🏟️ Jugás de LOCAL en el estadio de '+E(me.name):'✈️ Jugás de VISITANTE en el estadio de '+E(rv.name))+'</span>'+
-   '<span class="cmTag">⏱ '+S.minutes+' min · Realista 6v6</span>'+
-   '<span class="cmTag">'+({offensive:'⚔️ Rival ofensivo',defensive:'🛡️ Rival defensivo',balanced:'⚖️ Rival equilibrado'})[styleOf(rv.id)]+'</span></div>'+
+   '<span class="cmTag">⏱ '+S.minutes+' min · Realista 6v6</span></div>'+
    (rvSwapped?'<div class="cmNote">'+E(rv.name)+' usa su camiseta suplente para evitar el choque de colores.</div>':'')+
    '<div class="cmKits"><h3>👕 Camisetas del partido</h3><div class="cmKcols"><div><small>LOCAL · '+E(h.shortName)+'</small>'+kitPick('h',h,ks.sH)+'</div><div><small>VISITANTE · '+E(a.shortName)+'</small>'+kitPick('a',a,ks.sA)+'</div></div>'+(ks.clash?'<div class="cmNote">⚠️ Los colores de ambas camisetas son muy parecidos.</div>':'')+'</div>'+
    stand+
@@ -599,6 +605,21 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
   return{yc:c?c.yc:0,exp:false,susp:((S.squad.info[id]||{}).susp||0)>0};
  }
 
+ /* Dificultad dinámica del rival: Playoffs = 100% hard; fase regular según su posición en la tabla (fecha 1: por fuerza del club) */
+ function pickMatchDiff(rivalId){
+  if(S.phase==='playoffs')return 'hard';
+  if(S.phase!=='regular')return 'normal';
+  const z=S.zonaDe[rivalId],rows=stats(S.zones[z]);
+  let pos;
+  if(rows.every(r=>r.pts===0)){
+   const ids=S.zones[z].slice().sort((a,b)=>(S.str[b]||1)-(S.str[a]||1));
+   pos=ids.indexOf(rivalId)+1;
+  }else pos=rankOf(rivalId).pos;
+  const r=Math.random();
+  if(pos<=5)return r<.85?'hard':'normal';
+  if(pos<=10)return r<.25?'hard':r<.85?'normal':'easy';
+  return r<.10?'hard':r<.80?'normal':'easy';
+ }
  function playMatch(){
   const m=userMatch();if(!m||CM.live)return;
   const hT=T(m.h),aT=T(m.a),myHome=m.h===S.teamId,rvT=myHome?aT:hT;
@@ -626,6 +647,7 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
   document.body.classList.add('careerOn','cmInGame');
   const lv=$('mLeave');if(lv)lv.textContent='Abandonar partido';
   const hn=$('hint');if(hn){if(!hn.dataset.o)hn.dataset.o=hn.textContent;hn.textContent='ESC: menú · P: pausa y cambios · Flechas / WASD: mover · Espacio / X: patear'}
+  try{if(typeof setBotDiff==='function')setBotDiff(pickMatchDiff(rvT.id))}catch(e){} /* dificultad oculta al usuario */
   restart();G.cd=3;
   Object.keys(keys).forEach(k=>keys[k]=0);
   try{$('c').focus()}catch(e){}
@@ -651,8 +673,9 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
    L.slots.map((s,i)=>prHtml(q.info[s.id],'s',i,L.sel&&L.sel.k==='s'&&L.sel.i===i,liveCard(s.id))).join('')+'</div>'+
    '<div><h3>Banco de suplentes</h3>'+L.bench.map((id,i)=>prHtml(q.info[id],'b',i,L.sel&&L.sel.k==='b'&&L.sel.i===i,liveCard(id))).join('')+'</div></div>'+
    '<div class="cmNote" id="cmSubMsg">'+(msg?E(msg):'Tocá un jugador en cancha y después un suplente. Máximo 3 cambios por partido; el arquero solo por otro arquero.')+'</div>'+
-   '<div class="cmRow"><button id="cmSubClose" class="cmBig" type="button">▶ Reanudar partido</button></div></div>';
+   '<div class="cmRow"><button id="cmSubClose" class="cmBig" type="button">▶ Reanudar partido</button>'+(meRed()?'<button id="cmSubSim" class="cmBig" type="button">⏩ Reemplazar y simular resto</button>':'')+'</div></div>';
   $('cmSubClose').onclick=closeSub;
+  const bsim=$('cmSubSim');if(bsim)bsim.onclick=simRestMatch;
   $('cmSub').querySelectorAll('.cmPr[data-k]').forEach(b=>b.onclick=()=>subClick(b.dataset.k,+b.dataset.i));
  }
  function subClick(k,i){
@@ -680,6 +703,60 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
   L.subs++;
   renderSub('✅ Entra '+inn.name+' (#'+inn.number+', '+inn.stam+'%) por '+out.name+'.');
   try{showEv('🔄 Cambio: entra '+inn.name+' (#'+inn.number+')',2200)}catch(e){}
+ }
+
+ /* ---- expulsión del usuario: reemplazar y simular el resto ---- */
+ const meRed=()=>!!(CM.live&&LIVE&&!LIVE.res&&typeof G!=='undefined'&&G&&!G.over&&!G.pen&&typeof me!=='undefined'&&me&&me.team==='spec'&&!!me.rt);
+ function syncRed(){const on=meRed();document.body.classList.toggle('cmRed',on);return on}
+ /* entra el primer suplente disponible (no suspendido ni expulsado) por el bot en cancha de menor stamina (mismo rol GK/campo): la roja deja 5 bots */
+ function autoSubIn(){
+  const L=LIVE,info=S.squad.info,now=G.clock||0;
+  for(let bi=0;bi<L.bench.length;bi++){
+   const inId=L.bench[bi],inn=info[inId],pc=L.cards&&L.cards[inId];
+   if((inn.susp||0)>0||(pc&&pc.exp))continue;
+   let si=-1;
+   L.slots.forEach((s,i)=>{
+    if(s.bot.team==='spec'||!!s.bot.rt)return;
+    if((info[s.id].pos==='GK')!==(inn.pos==='GK'))return;
+    if(si<0||info[s.id].stam<info[L.slots[si].id].stam)si=i;
+   });
+   if(si<0)continue;
+   const sl=L.slots[si],outId=sl.id,out=info[outId];
+   L.played[outId]=(L.played[outId]||0)+Math.max(0,now-sl.t0);
+   L.inj[outId]=L.inj[outId]||!!sl.bot.cInj;
+   L.cards=L.cards||{};
+   L.cards[outId]={yc:sl.bot.yc||0,exp:false};
+   out.inj=null;L.bench[bi]=outId;sl.id=inId;sl.t0=now;
+   const b=sl.bot;b.name=inn.name;b.num=String(inn.number);b.pos=inn.pos;b.stam=inn.stam;b.cId=inId;b.cInj=false;b.yc=pc?pc.yc:0;b.fc=0;b.rc=0;
+   try{injClear(b)}catch(e){}b.sl=null;
+   return inn;
+  }
+  return null;
+ }
+ function simRestMatch(){
+  if(!meRed())return;
+  if(!confirm('Quedaste expulsado. ¿Reemplazar y simular el resto del partido? Entra un suplente y el resultado se calcula con los minutos que faltan.'))return;
+  const L=LIVE,m=L.m,myHome=m.h===S.teamId,base=S.minutes*60;
+  const rem=Math.max(0,G.duration-G.clock);
+  autoSubIn();
+  snapCards(); /* registra amarillas y tu expulsión (suspensión) */
+  /* goles probables de los minutos que faltan: proporcionales al tiempo y a la fuerza; el rival juega con 1 más */
+  const f=Math.min(1,rem/base),sh=st(m.h),sa=st(m.a);
+  let lh=1.3*Math.pow(sh/sa,.9)*1.08*f,la=1.05*Math.pow(sa/sh,.9)*f;
+  if(myHome){lh*=.8;la*=1.25}else{la*=.8;lh*=1.25}
+  let hg=G.score.red+Math.min(4,pois(lh)),ag=G.score.blue+Math.min(4,pois(la)),ph=null,pa=null;
+  if(S.phase==='playoffs'&&hg===ag){ /* empate en eliminatoria: gol en el minuto extra o penales */
+   G.cET=true;const r=Math.random();
+   if(r<.22)hg++;else if(r<.44)ag++;
+   else{
+    const hw=Math.random()<Math.max(.3,Math.min(.7,.5+(sh-sa)*.25)),w=rnd(3,5),l=Math.max(0,w-rnd(1,2));
+    ph=hw?w:l;pa=hw?l:w;
+   }
+  }
+  G.score.red=hg;G.score.blue=ag;
+  L.res={hg,ag,ph,pa,total:Math.max(base,G.clock||0)}; /* total = partido completo → desgaste de stamina completo */
+  clearTimeout(L.timer);
+  finishMatch();
  }
 
  /* ---- fin de partido ---- */
@@ -736,7 +813,8 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
  }
  function leaveGame(){
   CM.live=false;LIVE=null;
-  document.body.classList.remove('careerOn','cmInGame');
+  document.body.classList.remove('careerOn','cmInGame','cmRed');
+  try{if(typeof setBotDiff==='function')setBotDiff('normal')}catch(e){}
   ['cmSub','cmEnd'].forEach(i=>{const e=$(i);if(e)e.classList.remove('on')});
   try{menuOpen=false;$('menu').classList.add('hidden');$('vote').classList.add('hidden')}catch(e){}
   if(G)G.paused=false;
@@ -762,6 +840,9 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
   },true);
   const sb=$('cmSubBtn');if(sb)sb.onclick=()=>{subOpen()?closeSub():openSub()};
   const ms=$('cmMenuSub');if(ms)ms.onclick=()=>{try{toggleMenu(false)}catch(e){}openSub()};
+  const sr=$('cmSimRestBtn');if(sr)sr.onclick=simRestMatch;
+  const msr=$('cmMenuSim');if(msr)msr.onclick=simRestMatch;
+  setInterval(syncRed,400);
   const menu=$('menu');
   if(menu)menu.addEventListener('click',e=>{
    if(!CM.live||!e.target.closest||!e.target.closest('#mLeave'))return;
