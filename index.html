@@ -219,10 +219,79 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
 #helpModal .chips span{font-size:.7rem;font-weight:700;background:rgba(0,0,0,.35);border-radius:999px;padding:2px 7px;white-space:nowrap}
 #helpModal #helpOk{width:100%;padding:12px 18px;font-size:1.1rem}
 @media(max-width:640px){#helpModal .modes,#helpModal .adm,#helpModal .pad{grid-template-columns:1fr}#helpModal .hLbl{min-width:0;width:100%}}
+
+
+/* ===== 🏠 Pantalla Principal estilo PES (solo UI de portada; no toca juego/red/editores) ===== */
+#screen-home,#career-screen{position:fixed;inset:0;z-index:1;width:100vw;height:100vh;height:100dvh;overflow:hidden;
+ background:url('menu_bg.png') center center / cover no-repeat,#0a7a24}
+#career-screen{flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:16px;
+ background:linear-gradient(rgba(3,12,32,.66),rgba(3,12,32,.66)),url('menu_bg.png') center center / cover no-repeat,#06240f}
+#screen-home .sr-only,#career-screen .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#screen-home .hmenu{position:absolute;top:36%;left:calc(3% + env(safe-area-inset-left,0px));width:min(36vw,560px);
+ display:flex;flex-direction:column;gap:clamp(8px,1.8vh,20px)}
+#screen-home .hbar{--h:clamp(40px,9.5vh,88px);position:relative;display:flex;align-items:center;justify-content:flex-start;
+ width:100%;height:var(--h);padding:0 6%;border-radius:8px;transform:skewX(-18deg);transform-origin:left center;cursor:pointer;
+ color:#fff;text-align:left;white-space:nowrap;overflow:hidden;
+ transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease,filter .16s ease;
+ -webkit-tap-highlight-color:transparent;outline:none}
+#screen-home .hbar>span{display:block;transform:skewX(18deg);font-size:clamp(.82rem,min(4.2vh,2.8vw),2rem);font-weight:900;font-style:italic;
+ letter-spacing:.04em;text-transform:uppercase;color:#fff;text-shadow:0 2px 0 rgba(0,20,60,.85),0 3px 8px rgba(0,0,0,.65)}
+#screen-home .hbar::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+ background:linear-gradient(180deg,rgba(255,255,255,.34) 0%,rgba(255,255,255,0) 52%)}
+#screen-home .hbar.main{background:linear-gradient(90deg,#0284c7,#38bdf8,#7dd3fc);border:3px solid #e0f7ff;
+ box-shadow:0 0 0 2px rgba(56,189,248,.55),0 0 22px rgba(56,189,248,.75),0 6px 14px rgba(0,0,0,.45)}
+#screen-home .hbar.sec{width:92%;background:rgba(7,25,56,.92);border:2px solid rgba(125,211,252,.4);
+ box-shadow:0 5px 12px rgba(0,0,0,.5)}
+#screen-home .hbar:hover,#screen-home .hbar:focus-visible{filter:none;transform:skewX(-18deg) translateX(10px)}
+#screen-home .hbar.main:hover,#screen-home .hbar.main:focus-visible{box-shadow:0 0 0 2px rgba(125,211,252,.9),0 0 32px rgba(56,189,248,.95),0 6px 14px rgba(0,0,0,.45)}
+#screen-home .hbar.sec:hover,#screen-home .hbar.sec:focus-visible{background:linear-gradient(90deg,rgba(2,132,199,.95),rgba(56,189,248,.92),rgba(125,211,252,.9));
+ border-color:#e0f7ff;box-shadow:0 0 0 2px rgba(56,189,248,.55),0 0 22px rgba(56,189,248,.75),0 6px 14px rgba(0,0,0,.45)}
+#screen-home .hbar:active{transform:skewX(-18deg) translateX(10px) scale(.985)}
+#screen-home #homeHelp{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:calc(env(safe-area-inset-right,0px) + 16px);
+ padding:7px 16px;font-size:clamp(.74rem,2.2vh,.95rem);border-radius:999px;background:rgba(7,25,56,.82);color:#fff;
+ border:1.5px solid rgba(125,211,252,.7);box-shadow:0 2px 10px rgba(0,0,0,.4);font-weight:800;white-space:nowrap;
+ -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+#screen-home #homeHelp:hover,#screen-home #homeHelp:focus-visible{filter:none;background:rgba(2,132,199,.9);border-color:#e0f7ff;outline:none}
+#screen-home .hinfo{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:12px;
+ min-height:clamp(32px,7vh,58px);padding:4px calc(env(safe-area-inset-right,0px) + 18px) calc(4px + env(safe-area-inset-bottom,0px)) calc(env(safe-area-inset-left,0px) + 18px);
+ background:rgba(3,12,32,.78);border-top:2px solid rgba(56,189,248,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+ color:#fff;font-weight:700;font-size:clamp(.78rem,2.5vh,1.1rem);text-shadow:0 1px 2px #000}
+#screen-home .hinfo .ic{flex:none;width:1.5em;height:1.5em;border-radius:50%;background:#fff;color:#0b1f4a;display:flex;align-items:center;justify-content:center;
+ font-family:Georgia,serif;font-style:italic;font-weight:900;font-size:1em;line-height:1;text-shadow:none}
+#screen-home .hinfo #homeInfo{min-width:0}
+.backBtn{padding:6px 14px;font-size:.82rem;border-radius:999px;background:rgba(4,18,48,.88);color:#fff;border:1.5px solid #38bdf8;box-shadow:none;white-space:nowrap}
+#screen-login #backLogin{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(env(safe-area-inset-left,0px) + 12px);z-index:5}
+#screen-lobby #backLobby{position:absolute;top:42px;left:12px;z-index:5;padding:5px 12px;font-size:.78rem;background:rgba(4,18,48,.88);color:#fff;border:1.5px solid #38bdf8;border-radius:999px;box-shadow:none;font-weight:800}
+#career-screen #backCareer{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:calc(env(safe-area-inset-left,0px) + 16px)}
+#career-screen .careerCard{width:min(760px,92vw);padding:clamp(18px,4vh,34px) clamp(16px,3vw,32px);text-align:center;background:rgba(7,25,56,.9);
+ border:2px solid #38bdf8;border-radius:18px;box-shadow:0 0 28px rgba(56,189,248,.35)}
+#career-screen .careerCard h1{font-size:clamp(1.05rem,4.2vh,1.9rem);line-height:1.35;color:#fff;font-weight:900;font-style:italic;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+@media (max-aspect-ratio:4/3){#screen-home .hmenu{width:min(32vw,560px)}}
+@media (max-aspect-ratio:1/1){
+ #screen-home,#career-screen{background-position:4% center}
+ #screen-home .hmenu{width:min(82vw,560px)}
+}
 </style>
 </head><body>
 
-<div id="screen-login" class="screen active"><div class="card">
+<div id="screen-home" class="screen active">
+  <h1 class="sr-only">Fut-ball</h1>
+  <button id="homeHelp" type="button">❓ Cómo jugar</button>
+  <nav class="hmenu" aria-label="Menú principal">
+    <button id="homeOnline" class="hbar main" type="button" data-info="Juega salas públicas o privadas con amigos y bots en tiempo real."><span>⚽ ONLINE</span></button>
+    <button id="homeCareer" class="hbar sec" type="button" data-info="Elige tu club de Primera División, disputa las 16 fechas y pelea por el título en los Playoffs."><span>🏆 MODO CARRERA</span></button>
+  </nav>
+  <div class="hinfo" role="status" aria-live="polite"><span class="ic" aria-hidden="true">i</span><span id="homeInfo">Selecciona una opción para continuar.</span></div>
+</div>
+
+<div id="career-screen" class="screen">
+  <button id="backCareer" class="backBtn" type="button">← Menú</button>
+  <div class="careerCard"><h1>🏆 MODO CARRERA — Próximamente (Argentina · Primera División)</h1></div>
+  <div id="career-root"></div>
+</div>
+
+
+<div id="screen-login" class="screen"><button id="backLogin" class="backBtn" type="button">← Menú</button><div class="card">
   <h1 class="sr-only">Fut-ball</h1>
   <label class="lbl" for="nick"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.5" r="4.5"/><path d="M3 22c0-5 4-8 9-8s9 3 9 8z"/></svg>Apodo</label>
   <input id="nick" maxlength="16" placeholder="Nombre de usuario / Apodo" autocomplete="off">
@@ -246,6 +315,7 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
 </script>
 
 <div id="screen-lobby" class="screen">
+  <button id="backLobby" type="button">← Menú</button>
   <h1 class="sr-only">Fut-ball Online</h1><div id="who" class="label"></div><button id="pwaLobby" type="button" class="pwaBtn">📲 Crear Acceso Directo</button><button id="helpLobby" type="button">❓ ¿Cómo jugar?</button>
   <div class="grid">
     <section class="panel"><h2><span>Salas activas</span><button id="refreshRooms" type="button" class="ghost">🔄 Actualizar</button></h2><div id="roomList" style="display:flex;flex-direction:column;gap:9px"></div></section>
@@ -1639,6 +1709,26 @@ let last=performance.now(),acc=0;
  $('helpLobby').onclick=open;$('helpOk').onclick=close;
  M.addEventListener('click',e=>{if(e.target===M)close()});
  addEventListener('keydown',e=>{if(e.key==='Escape'&&!M.classList.contains('hidden')){e.preventDefault();close()}});
+})();
+</script>
+<script>
+/* ===== 🏠 Pantalla Principal · solo navegación entre pantallas (no toca lógica de juego/red) ===== */
+(()=>{
+ const DEF='Selecciona una opción para continuar.',info=$('homeInfo');
+ const go=id=>{if(typeof show==='function')show(id);else document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id))};
+ const setInfo=t=>{info.textContent=t||DEF};
+ document.querySelectorAll('#screen-home .hbar').forEach(b=>{
+  const t=b.dataset.info;
+  b.addEventListener('pointerenter',()=>setInfo(t));b.addEventListener('focus',()=>setInfo(t));
+  b.addEventListener('pointerleave',()=>setInfo());b.addEventListener('blur',()=>setInfo());
+ });
+ $('homeOnline').onclick=()=>{setInfo();go('screen-login');setTimeout(()=>{try{$('nick').focus({preventScroll:true})}catch(e){}},0)};
+ $('homeCareer').onclick=()=>{setInfo();go('career-screen')};
+ $('homeHelp').onclick=()=>$('helpLobby').click();
+ const toMenu=()=>go('screen-home');
+ $('backLogin').onclick=toMenu;$('backLobby').onclick=toMenu;$('backCareer').onclick=toMenu;
+ /* Links de invitación (?sala=...) saltan directo al acceso online, como antes */
+ if(new URLSearchParams(location.search).get('sala'))go('screen-login');
 })();
 </script>
 </body>
