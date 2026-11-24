@@ -360,13 +360,15 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
           <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="stOn" style="width:auto"> Activar estadio personalizado</label>
           <div id="stBox" class="hidden" style="display:flex;flex-direction:column;gap:6px">
             <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><b style="font-size:.8rem;width:100%">Butacas</b>
-              <select id="stSn" style="width:auto;padding:5px"><option value="1">1 color</option><option value="2">2 colores</option></select>
+              <select id="stSn" style="width:auto;padding:5px"><option value="1">1 color</option><option value="2">2 colores</option><option value="3">3 colores</option></select>
               <span class="label">Color 1</span><input id="stSc1" type="color" style="width:38px;height:30px;padding:0">
-              <span class="label stSt2">Color 2</span><input id="stSc2" type="color" class="stSt2" style="width:38px;height:30px;padding:0"></div>
+              <span class="label stSt2">Color 2</span><input id="stSc2" type="color" class="stSt2" style="width:38px;height:30px;padding:0">
+              <span class="label stSt3">Color 3</span><input id="stSc3" type="color" class="stSt3" style="width:38px;height:30px;padding:0"></div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><b style="font-size:.8rem;width:100%">Banderas</b>
-              <select id="stFn" style="width:auto;padding:5px"><option value="1">1 color</option><option value="2">2 colores</option></select>
+              <select id="stFn" style="width:auto;padding:5px"><option value="1">1 color</option><option value="2">2 colores</option><option value="3">3 colores</option></select>
               <span class="label">Color 1</span><input id="stFc1" type="color" style="width:38px;height:30px;padding:0">
-              <span class="label stFt2">Color 2</span><input id="stFc2" type="color" class="stFt2" style="width:38px;height:30px;padding:0"></div>
+              <span class="label stFt2">Color 2</span><input id="stFc2" type="color" class="stFt2" style="width:38px;height:30px;padding:0">
+              <span class="label stFt3">Color 3</span><input id="stFc3" type="color" class="stFt3" style="width:38px;height:30px;padding:0"></div>
           </div>
         </div>
         <select id="aMode"><option value="clasico">Modo Clásico</option><option value="realista">🏟️ Modo Realista (11v11 · 2100×1250)</option><option value="super">⚡ Modo Superpoderes (eventos aleatorios)</option></select>
@@ -520,8 +522,9 @@ function kickoff(){G.sp=null;G.outImm=0;G.lastT=null;G.lastP=null;G.players.forE
  ['red','blue'].forEach(t=>{const l=G.players.filter(p=>p.team===t);l.forEach((p,i)=>{p.x=t==='red'?G.w*.3:G.w*.7;p.y=G.h*(i+1)/(l.length+1);p.vx=p.vy=0;p.cd=p.flash=0})})}
 function restart(){G.pw=null;G.players.forEach(p=>{injClear(p);p.slCd=0;p.sl=null;p.kh=0;p.khK=false;p.yc=0;p.fc=0;p.rc=0;if(p.rt){if(p.team==='spec')p.team=p.rt;p.rt=null}});$('pbR').style.display=$('pbB').style.display='';clearTimeout(evT);$('ev').classList.remove('show');assignRoles();G.koTeam='red';G.pen=null;$('penbar').classList.add('hidden');$('sb').classList.remove('hidden');$('sb').appendChild($('mute'));G.vote=null;G.golden=false;powerReset();$('vote').classList.add('hidden');G.paused=false;G.cd=0;G.score={red:0,blue:0};G.clock=0;G.gp=0;G.over=false;kickoff();hud()}
 /* Etiquetas LOCAL/VISITANTE con los colores del uniforme: 1 color → palabra completa; 2 colores → mitad y mitad */
-function teamLabel(el,team,txt){const u=(G&&G.uni&&G.uni[team])||{n:1,c1:team==='red'?'#ff5d5d':'#3b9cff'},key=u.n+'|'+u.c1+'|'+u.c2;if(el._k===key)return;el._k=key;el.textContent=txt;
- el.style.cssText=u.n===2?`background:linear-gradient(90deg,${u.c1} 50%,${u.c2} 50%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;-webkit-text-stroke:.5px rgba(255,255,255,.35)`
+function teamLabel(el,team,txt){const u=(G&&G.uni&&G.uni[team])||{n:1,c1:team==='red'?'#ff5d5d':'#3b9cff'},key=u.n+'|'+u.c1+'|'+u.c2+'|'+(u.c3||'');if(el._k===key)return;el._k=key;el.textContent=txt;
+ el.style.cssText=u.n===3?`background:linear-gradient(90deg,${u.c1} 33.34%,${u.c2} 33.34% 66.67%,${u.c3||'#ffffff'} 66.67%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;-webkit-text-stroke:.5px rgba(255,255,255,.35)`
+  :u.n===2?`background:linear-gradient(90deg,${u.c1} 50%,${u.c2} 50%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;-webkit-text-stroke:.5px rgba(255,255,255,.35)`
   :`color:${u.c1};-webkit-text-fill-color:${u.c1};-webkit-text-stroke:.5px rgba(255,255,255,.35)`}
 function paintTeams(){teamLabel($('tL'),'red','LOCAL');teamLabel($('tV'),'blue','VISITANTE');teamLabel($('pL'),'red','LOCAL');teamLabel($('pV'),'blue','VISITANTE')}
 function hud(){paintTeams();powerUI();$('score').textContent=`${G.score.red}:${G.score.blue}`;
@@ -694,27 +697,28 @@ function pauseFx(){ctx.filter='none';
  const t=cd?'3... 2... 1...':'Vuelve a presionar la letra P para reanudar el partido',y=cd?cy+80:cy+42;ctx.lineWidth=5;ctx.font='600 22px "Segoe UI",sans-serif';ctx.strokeText(t,cx,y);ctx.fillText(t,cx,y)}
 /* ===== 🏟️ Estadio personalizado (solo visual): estado, persistencia, panel del admin, tribunas, banderas y confeti ===== */
 const STAD_KEY='futball_stadium',hexOk=v=>/^#[0-9a-f]{6}$/i.test(String(v||'')),
- stadDef=()=>({enabled:false,seats:{n:1,c1:'#64748b',c2:'#64748b'},flags:{n:1,c1:'#64748b',c2:'#64748b'}});
+ stadDef=()=>({enabled:false,seats:{n:1,c1:'#64748b',c2:'#64748b',c3:'#64748b'},flags:{n:1,c1:'#64748b',c2:'#64748b',c3:'#64748b'}});
 function stadClean(o){const d=stadDef();if(!o||typeof o!=='object')return d;
- const g=k=>{const q=o[k]&&typeof o[k]==='object'?o[k]:{};return{n:+q.n===2?2:1,c1:hexOk(q.c1)?q.c1:d[k].c1,c2:hexOk(q.c2)?q.c2:d[k].c2}};
+ const g=k=>{const q=o[k]&&typeof o[k]==='object'?o[k]:{};return{n:+q.n===3?3:+q.n===2?2:1,c1:hexOk(q.c1)?q.c1:d[k].c1,c2:hexOk(q.c2)?q.c2:d[k].c2,c3:hexOk(q.c3)?q.c3:d[k].c3}};
  return{enabled:o.enabled===true,seats:g('seats'),flags:g('flags')}}
 function stadLoad(){try{const v=localStorage.getItem(STAD_KEY);if(v)return stadClean(JSON.parse(v))}catch(e){}return stadDef()}
 let STAD=stadDef();
 function stadSave(){try{localStorage.setItem(STAD_KEY,JSON.stringify(STAD))}catch(e){}}
 function stadUI(){if(!$('stOn'))return;const S=STAD;$('stOn').checked=S.enabled;$('stBox').classList.toggle('hidden',!S.enabled);
- $('stSn').value=S.seats.n;$('stSc1').value=S.seats.c1;$('stSc2').value=S.seats.c2;$('stFn').value=S.flags.n;$('stFc1').value=S.flags.c1;$('stFc2').value=S.flags.c2;
- document.querySelectorAll('.stSt2').forEach(e=>e.classList.toggle('hidden',S.seats.n!==2));document.querySelectorAll('.stFt2').forEach(e=>e.classList.toggle('hidden',S.flags.n!==2))}
+ $('stSn').value=S.seats.n;$('stSc1').value=S.seats.c1;$('stSc2').value=S.seats.c2;$('stSc3').value=S.seats.c3;$('stFn').value=S.flags.n;$('stFc1').value=S.flags.c1;$('stFc2').value=S.flags.c2;$('stFc3').value=S.flags.c3;
+ document.querySelectorAll('.stSt2').forEach(e=>e.classList.toggle('hidden',S.seats.n<2));document.querySelectorAll('.stSt3').forEach(e=>e.classList.toggle('hidden',S.seats.n!==3));
+ document.querySelectorAll('.stFt2').forEach(e=>e.classList.toggle('hidden',S.flags.n<2));document.querySelectorAll('.stFt3').forEach(e=>e.classList.toggle('hidden',S.flags.n!==3))}
 function stadChanged(){if(!isAdmin)return;STAD=stadClean(STAD);stadSave();stadUI();if(NET.role==='host')bc(cfgMsg())} /* el Host reenvía el tema al instante; los invitados lo reciben también en cada cfg periódico */
 (()=>{if(!$('stOn'))return;
  $('stOn').onchange=e=>{if(!isAdmin)return;STAD.enabled=e.target.checked;stadChanged();if(!STAD.enabled)STAD_CF.length=0};
- [['stSn','seats','n'],['stSc1','seats','c1'],['stSc2','seats','c2'],['stFn','flags','n'],['stFc1','flags','c1'],['stFc2','flags','c2']].forEach(([id,g,k])=>{
+ [['stSn','seats','n'],['stSc1','seats','c1'],['stSc2','seats','c2'],['stSc3','seats','c3'],['stFn','flags','n'],['stFc1','flags','c1'],['stFc2','flags','c2'],['stFc3','flags','c3']].forEach(([id,g,k])=>{
   const el=$(id),f=()=>{if(!isAdmin)return;STAD[g][k]=k==='n'?+el.value:el.value;stadChanged()};el.oninput=f;el.onchange=f})})();
 /* ===== Tribunas v2: estructura estática pre-renderizada en canvas auxiliares (se regenera solo al cambiar colores / tamaño / escala) + público animado liviano ===== */
 const ST_ROWS=7,ST_RH=18,ST_FW=26,ST_D=ST_FW+ST_ROWS*ST_RH,ST_PAD=ST_D+38,ST_AW=16,ST_TW=150; /* ST_FW: muro/alambrado frontal · ST_PAD: espacio extra que ve la cámara con el estadio activo */
 let STAD_CEL=-1e9;const STAD_C={key:'',t:0,sc:1,strips:[],fans:[],spr:null};
 function stShade(hex,p){const n=parseInt(String(hex).slice(1),16),t=Math.abs(p)/100,f=p<0?0:255,m=v=>Math.round(v+(f-v)*t);return`rgb(${m(n>>16)},${m(n>>8&255)},${m(n&255)})`}
-function stRowCol(S,i){return S.n===2?((i<2||i>=ST_ROWS-2)?S.c1:S.c2):S.c1} /* 2 colores: Color 1 arriba y abajo, Color 2 en el medio */
-function stPalette(T){T=T||STAD;const p=[T.seats.c1,T.flags.c1];if(T.seats.n===2)p.push(T.seats.c2);if(T.flags.n===2)p.push(T.flags.c2);return[...new Set(p)]}
+function stRowCol(S,i){return S.n===3?[S.c1,S.c2,S.c3][i%3]:S.n===2?((i<2||i>=ST_ROWS-2)?S.c1:S.c2):S.c1} /* 3 colores: filas alternadas Color 1 → 2 → 3 */ /* 2 colores: Color 1 arriba y abajo, Color 2 en el medio */
+function stPalette(T){T=T||STAD;const p=[T.seats.c1,T.flags.c1];if(T.seats.n>=2)p.push(T.seats.c2);if(T.seats.n===3)p.push(T.seats.c3);if(T.flags.n>=2)p.push(T.flags.c2);if(T.flags.n===3)p.push(T.flags.c3);return[...new Set(p)]}
 /* Pasillos / escaleras que dividen las tribunas en sectores (plateas y cabeceras) */
 function stAisles(a,b,c,d){const L=c-a,Hd=d-b,D=ST_D,F=ST_FW,A=ST_AW,r=[];
  [0,.2,.36,.64,.8,1].forEach(f=>r.push({x:a+L*f-A/2,y:b-D,w:A,h:D-F,v:1})); /* tribuna superior (centro libre: túnel) */
@@ -725,7 +729,7 @@ function stFlagPath(g,w,h,sg){g.beginPath();g.moveTo(-w/2,0);g.lineTo(w/2,0);g.l
 /* Trapo colgante: se ancla arriba (borde del muro hacia las gradas) y cuelga sobre la cara del muro que mira a la cancha */
 function stFlag(g,S,x,y,rot,k){g.save();g.translate(x,y);g.rotate(rot+((k%3)-1)*.025);const w=32,h=ST_FW-4,sg=k%2?1:-1;
  stFlagPath(g,w,h,sg);g.save();g.clip();
- if(S.n===2){const t=h/3;g.fillStyle=S.c1;g.fillRect(-w/2,-2,w,t+2);g.fillStyle=S.c2;g.fillRect(-w/2,t,w,t);g.fillStyle=S.c1;g.fillRect(-w/2,2*t,w,t+8)}
+ if(S.n>=2){const t=h/3;g.fillStyle=S.c1;g.fillRect(-w/2,-2,w,t+2);g.fillStyle=S.c2;g.fillRect(-w/2,t,w,t);g.fillStyle=S.n===3?S.c3:S.c1;g.fillRect(-w/2,2*t,w,t+8)} /* 3 colores: tricolor horizontal */
  else{g.fillStyle=S.c1;g.fillRect(-w/2,-2,w,h+8)}
  g.fillStyle='rgba(0,0,0,.16)';g.fillRect(-w*.18,0,3,h+6);g.fillRect(w*.2,0,3,h+6);g.fillStyle='rgba(255,255,255,.14)';g.fillRect(-w*.18+3,0,2,h+6);g.fillRect(w*.2+3,0,2,h+6); /* pliegues */
  g.restore();stFlagPath(g,w,h,sg);g.lineWidth=1.6;g.lineJoin='round';g.strokeStyle='#0b1220';g.stroke();
@@ -784,7 +788,7 @@ function stBuildFans(a,b,c,d,n){let sd=20261121;const rnd=()=>{sd|=0;sd=sd+0x6D2
     fans.push({x:x+(rnd()-.5)*2,y:y+(rnd()-.5)*2,v:Math.floor(rnd()*n)*4+Math.floor(rnd()*4),g:(k+i)&1})}})}
  return fans}
 /* Regenera el pre-render SOLO si cambió algo (colores, cantidad de colores, tamaño de cancha, escala); throttle de 150 ms al arrastrar un color */
-function stEnsure(a,b,c,d){const sc=clamp(Math.round(.78*DPR*10)/10,.7,1.6),T=STAD,key=[G.w,G.h,sc,T.seats.n,T.seats.c1,T.seats.c2,T.flags.n,T.flags.c1,T.flags.c2].join('|'),now=performance.now();
+function stEnsure(a,b,c,d){const sc=clamp(Math.round(.78*DPR*10)/10,.7,1.6),T=STAD,key=[G.w,G.h,sc,T.seats.n,T.seats.c1,T.seats.c2,T.seats.c3,T.flags.n,T.flags.c1,T.flags.c2,T.flags.c3].join('|'),now=performance.now();
  if(STAD_C.key===key)return;if(STAD_C.strips.length&&now-STAD_C.t<150)return;
  STAD_C.t=now;STAD_C.key=key;STAD_C.sc=sc;
  const D2=ST_D+16,L=c-a,Hd=d-b;
@@ -804,7 +808,7 @@ function drawCrowd(vx0,vy0,vx1,vy1){const C=STAD_C;if(!C.fl)return;const t=perfo
   C.fl[g].forEach(s=>{if(s.x+s.w+6<vx0||s.x-6>vx1||s.y+s.h+6<vy0||s.y-6>vy1)return;ctx.drawImage(s.cv,s.x+ox,s.y+oy,s.w,s.h)})}}
 /* Confeti / papelitos al hacer un gol (colores de butacas + banderas) */
 const STAD_CF=[];let STAD_CFT=0;
-function spawnConfetti(scorer){if(!STAD.enabled||!G||!G.w)return;const U=G.uni&&G.uni.blue,pal=scorer==='red'?stPalette():(U?(U.n===2?[U.c1,U.c2]:[U.c1]):['#3b9cff']),W=G.w,H=G.h,gx=scorer==='red'?W:0,din=scorer==='red'?-1:1,R=Math.random;
+function spawnConfetti(scorer){if(!STAD.enabled||!G||!G.w)return;const U=G.uni&&G.uni.blue,pal=scorer==='red'?stPalette():(U?(U.n===3?[U.c1,U.c2,U.c3||'#ffffff']:U.n===2?[U.c1,U.c2]:[U.c1]):['#3b9cff']),W=G.w,H=G.h,gx=scorer==='red'?W:0,din=scorer==='red'?-1:1,R=Math.random;
  if(scorer==='red')STAD_CEL=performance.now(); /* solo festeja (salta) la hinchada cuando anota el Local */
  for(let i=0;i<150;i++){const an=(R()-.5)*2.4,sp=3+R()*11,vx=Math.cos(an)*sp*din,vy=Math.sin(an)*sp;
   STAD_CF.push({x:gx+din*R()*30,y:H/2+(R()-.5)*G.gh,vx,vy,s:6+R()*6,a:R()*6.283,va:(R()-.5)*.4,f:R()*6.283,l:2.6+R()*1.8,c:pal[Math.floor(R()*pal.length)]})} /* ráfaga desde el arco */
@@ -815,28 +819,36 @@ function drawConfetti(){if(!STAD.enabled){STAD_CF.length=0;STAD_CFT=0;return}con
  for(let i=STAD_CF.length-1;i>=0;i--){const q=STAD_CF[i];if(adv){q.l-=dt;if(q.l<=0){STAD_CF.splice(i,1);continue}q.x+=q.vx*k;q.y+=q.vy*k;q.vx*=Math.pow(.965,k);q.vy*=Math.pow(.985,k);q.vy+=.02*k;q.a+=q.va*k;q.f+=.2*k}
   ctx.save();ctx.globalAlpha=Math.min(1,q.l);ctx.translate(q.x,q.y);ctx.rotate(q.a);ctx.scale(1,Math.max(.15,Math.abs(Math.cos(q.f))));ctx.fillStyle=q.c;ctx.fillRect(-q.s/2,-q.s/3,q.s,q.s*.66);ctx.restore()}}
 /* Uniformes */
-const defUni=()=>({red:{n:1,c1:'#ff5d5d',c2:'#ffffff',st:'v1'},blue:{n:1,c1:'#3b9cff',c2:'#ffffff',st:'v1'}});
+const defUni=()=>({red:{n:1,c1:'#ff5d5d',c2:'#ffffff',c3:'#22c55e',st:'v1'},blue:{n:1,c1:'#3b9cff',c2:'#ffffff',c3:'#facc15',st:'v1'}});
 function jersey(p){const u=G.uni[p.team]||G.uni.red,x=p.x-p.r,y=p.y-p.r,d=p.r*2,k=d/5;
  ctx.save();ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.clip();ctx.fillStyle=u.c1;ctx.fillRect(x,y,d,d);
  if(u.n===2){ctx.fillStyle=u.c2;
   if(u.st==='v1')ctx.fillRect(x+d*.34,y,d*.32,d);else if(u.st==='h1')ctx.fillRect(x,y+d*.34,d,d*.32);
   else if(u.st==='vs'){for(let i=1;i<5;i+=2)ctx.fillRect(x+i*k,y,k,d)}else if(u.st==='hs'){for(let i=1;i<5;i+=2)ctx.fillRect(x,y+i*k,d,k)}
+  else if(u.st==='mv')ctx.fillRect(x+d*.5,y,d*.5+1,d); /* Mitad vertical: izq. Color 1 / der. Color 2 */
+  else if(u.st==='mh')ctx.fillRect(x,y+d*.5,d,d*.5+1); /* Mitad horizontal: arriba Color 1 / abajo Color 2 */
   else if(u.st==='vv'){ /* Franja en V (estilo Vélez) */
    ctx.strokeStyle=u.c2;ctx.lineWidth=p.r*.45;ctx.lineCap='butt';ctx.lineJoin='miter';ctx.beginPath();
    ctx.moveTo(p.x-p.r*.85,p.y-p.r*.45);ctx.lineTo(p.x,p.y+p.r*.35);ctx.lineTo(p.x+p.r*.85,p.y-p.r*.45);ctx.stroke()}
   else{ /* Franja cruzada: banda diagonal de esquina a esquina (estilo River / Perú) */
    ctx.strokeStyle=u.c2;ctx.lineWidth=p.r*.52;ctx.lineCap='butt';ctx.beginPath();
    ctx.moveTo(p.x-p.r*1.1,p.y-p.r*1.1);ctx.lineTo(p.x+p.r*1.1,p.y+p.r*1.1);ctx.stroke()}}
+ else if(u.n===3){const t=d/3,c3=u.c3||'#ffffff';ctx.fillStyle=u.c2; /* Tricolor: 3 franjas iguales (33,3 %) */
+  if(u.st==='th'){ctx.fillRect(x,y+t,d,t);ctx.fillStyle=c3;ctx.fillRect(x,y+2*t,d,t+1)}else{ctx.fillRect(x+t,y,t,d);ctx.fillStyle=c3;ctx.fillRect(x+2*t,y,t+1,d)}}
  ctx.restore()}
 function uniUI(){const el=$('uni');el.innerHTML='';
+ const S2=[['v1','Franja vertical'],['h1','Franja horizontal'],['vs','Franjas verticales'],['hs','Franjas horizontales'],['vv','Franja en V'],['dg','Franja cruzada'],['mv','Mitad vertical'],['mh','Mitad horizontal']],S3=[['tv','Tricolor vertical'],['th','Tricolor horizontal']];
  [['red','Local'],['blue','Visitante']].forEach(([tm,lb])=>{const u=G.uni[tm],d=document.createElement('div');
+  if(!u.c3)u.c3='#22c55e';if(u.n===3&&!S3.some(a=>a[0]===u.st))u.st='tv';if(u.n===2&&!S2.some(a=>a[0]===u.st))u.st='v1'; /* el diseño siempre es válido para la cantidad de colores */
+  const half=u.n===2&&(u.st==='mv'||u.st==='mh'),l1=u.n===1?'Color':(u.n===3||half)?'Color 1':'Fondo',l2=(u.n===3||half)?'Color 2':'Franja';
   d.style.cssText='display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--in);border:1px solid #243056;border-radius:10px;padding:6px 8px';
-  d.innerHTML=`<b style="font-size:.8rem;width:100%">Uniforme ${lb}</b><select data-k="n" style="width:auto;padding:5px"><option value="1">1 color</option><option value="2">2 colores</option></select>
-  <span class="label">${u.n===1?'Color':'Fondo'}</span><input data-k="c1" type="color" style="width:38px;height:30px;padding:0">
-  <span class="label two">Franja</span><input data-k="c2" type="color" class="two" style="width:38px;height:30px;padding:0">
-  <select data-k="st" class="two" style="width:auto;padding:5px"><option value="v1">Franja vertical</option><option value="h1">Franja horizontal</option><option value="vs">Franjas verticales</option><option value="hs">Franjas horizontales</option><option value="vv">Franja en V</option><option value="dg">Franja cruzada</option></select>`;
-  d.querySelectorAll('.two').forEach(e=>e.classList.toggle('hidden',u.n===1));
-  d.querySelectorAll('[data-k]').forEach(i=>{i.value=u[i.dataset.k];i.oninput=()=>{const k=i.dataset.k;u[k]=k==='n'?+i.value:i.value;if(k==='n')uniUI();paintTeams()}});
+  d.innerHTML=`<b style="font-size:.8rem;width:100%">Uniforme ${lb}</b><select data-k="n" style="width:auto;padding:5px"><option value="1">1 color</option><option value="2">2 colores</option><option value="3">3 colores</option></select>
+  <span class="label">${l1}</span><input data-k="c1" type="color" style="width:38px;height:30px;padding:0">
+  <span class="label two">${l2}</span><input data-k="c2" type="color" class="two" style="width:38px;height:30px;padding:0">
+  <span class="label three">Color 3</span><input data-k="c3" type="color" class="three" style="width:38px;height:30px;padding:0">
+  <select data-k="st" class="two" style="width:auto;padding:5px">${(u.n===3?S3:S2).map(([v,t])=>`<option value="${v}">${t}</option>`).join('')}</select>`;
+  d.querySelectorAll('.two').forEach(e=>e.classList.toggle('hidden',u.n===1));d.querySelectorAll('.three').forEach(e=>e.classList.toggle('hidden',u.n!==3));
+  d.querySelectorAll('[data-k]').forEach(i=>{i.value=u[i.dataset.k];i.oninput=()=>{const k=i.dataset.k;u[k]=k==='n'?+i.value:i.value;if(k==='n'||k==='st')uniUI();paintTeams()}});
   el.appendChild(d)})}
 /* ===== 🚑 Lesiones por falta (SOLO Modo Realista) =====
    p.inj = segundos restantes (se descuenta con DT: respeta pausa/cuenta regresiva) · p.injT = 'l' leve (18 s) | 's' grave (60 s) · p.injG = arquero dentro del área chica (efecto mínimo 85 %). Se sincroniza Host → invitados en netState. */
