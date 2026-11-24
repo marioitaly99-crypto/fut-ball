@@ -36,10 +36,10 @@
               slide: true, slideChance: 0.06, slideFront: -0.4, slideBallFirst: false, slideStrict: false, slideReach: 1.15, slideErr: 1.6 },
     normal: { react: [7, 9],   aim: 8,  predict: 12, through: false, wallBounce: false, smartPass: false, passChance: 0.9, shootMul: 1,
               kickTol: 0.32, alignTol: 0.85, precise: false,
-              slide: true, slideChance: 0.4,  slideFront: 0.0,  slideBallFirst: true,  slideStrict: false, slideReach: 1,    slideErr: 0.5 },
+              slide: true, slideChance: 0.6,  slideFront: -0.15, slideBallFirst: true, slideStrict: false, slideReach: 1.2,  slideErr: 0.5 },
     hard:   { react: [3, 4],   aim: 2,  predict: 24, through: true,  wallBounce: true,  smartPass: true,  passChance: 1,   shootMul: 1.15,
               kickTol: 0.16, alignTol: 0.6, precise: true,
-              slide: true, slideChance: 1,    slideFront: 0.2,  slideBallFirst: true,  slideStrict: true,  slideReach: 0.85, slideErr: 0 }
+              slide: true, slideChance: 1,    slideFront: 0.0,  slideBallFirst: true,  slideStrict: true,  slideReach: 1.0,  slideErr: 0.15 }
   };
 
   // ---------------------------------------------------------------------------
@@ -403,8 +403,8 @@
     _slideCheck(me, ctx, cfg, mem, carrier) {
       if (!carrier || carrier.team === me.team || !this._slideAllowed(me, cfg, ctx)) return null;
       const ball = ctx.ball, W = ctx.W, dir = ctx.dir;
-      if (ctx.depth(ball.x) > W * 0.5 || ctx.depth(me.x) > W * 0.5) return null;   // solo su mitad
-      if (carrier.vx * dir > -W * 0.0012) return null;                            // no avanza hacia nuestro arco
+      if (ctx.depth(ball.x) > W * 0.58 || ctx.depth(me.x) > W * 0.58) return null;  // solo su mitad (y un poco más allá)
+      if (carrier.vx * dir > -W * 0.0008) return null;                            // no avanza hacia nuestro arco
       if (!cfg.slideStrict && !mem.slideRoll) return null;
       const contact = me.r + ball.r;
       const dBall = hyp(me.x - ball.x, me.y - ball.y);
@@ -417,7 +417,7 @@
 
       if (cfg.slideBallFirst) {                                                    // llega a la pelota antes que al cuerpo
         const dBody = hyp(me.x - carrier.x, me.y - carrier.y);
-        const margin = cfg.slideStrict ? me.r * 0.3 : 0;
+        const margin = cfg.slideStrict ? me.r * 0.1 : 0;
         if (!(dBall - ball.r < dBody - carrier.r - margin)) return null;
       }
       const tb = this._predBall(ctx, cfg.slideStrict ? 2 : 0);

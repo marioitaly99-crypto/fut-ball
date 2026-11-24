@@ -279,7 +279,7 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
     <div class="hRow"><span class="hLbl">⚽ Patear</span>
       <span class="kc">X</span><span class="hOr">o</span><span class="kc sp">BARRA ESPACIADORA</span></div>
     <div class="hRow"><span class="hLbl">🟨 Barrida</span>
-      <span class="hTxt"><b>Solo en Modo Realista:</b> mantené apretado <span class="kc" style="min-width:28px;height:26px;font-size:.8rem">X</span> o <span class="kc" style="min-width:60px;height:26px;font-size:.8rem">ESPACIO</span> un instante (~½ s) para deslizarte hacia donde corrés. Recarga de 30 s.</span></div>
+      <span class="hTxt"><b>Solo en Modo Realista:</b> mantené apretado <span class="kc" style="min-width:28px;height:26px;font-size:.8rem">X</span> o <span class="kc" style="min-width:60px;height:26px;font-size:.8rem">ESPACIO</span> un instante (~½ s) para deslizarte hacia donde corrés. Recarga de 15 s.</span></div>
   </div>
 
   <div id="hpM" class="hBox">
@@ -290,7 +290,7 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
       <span class="tg" style="right:5%;bottom:40%">PATEAR / BARRIDA</span></div>
     <div class="hRow"><span class="hLbl">🏃 Moverse</span><span class="hTxt">Joystick virtual <b>izquierdo</b>: arrastralo hacia donde querés ir.</span></div>
     <div class="hRow"><span class="hLbl">⚽ Patear</span><span class="hTxt">Botón de pelota <b>derecho</b>: un toque rápido.</span></div>
-    <div class="hRow"><span class="hLbl">🟨 Deslizar</span><span class="hTxt"><b>Solo en Modo Realista:</b> mantené apretado el botón de pelota un momento (~½ s) y tu jugador se desliza. Recarga de 30 s.</span></div>
+    <div class="hRow"><span class="hLbl">🟨 Deslizar</span><span class="hTxt"><b>Solo en Modo Realista:</b> mantené apretado el botón de pelota un momento (~½ s) y tu jugador se desliza. Recarga de 15 s.</span></div>
   </div>
 
   <div class="hBox">
@@ -876,7 +876,7 @@ function powerStep(){if(NET.role==='client')return;
   else if(dq(o)<48){pw.t+=DT;if(!pw.on&&pw.t>=3){pw.on=true;notifyPower(o)}}}
  if(!pw){let o=null,od=48;L.forEach(q=>{const d=dq(q);if(d<od){od=d;o=q}});
   if(o&&!L.some(q=>q.team!==o.team&&dq(q)<48))G.pw={id:o.id,t:0,on:false}}}
-/* MODO REALISTA · Barrida: mantener patear 0.35 s sin haber pateado → desliza 0.34 s (1.85x) + 3.0 s de recuperación lenta (0.45x); recarga de 30 s desde que termina el deslizamiento; avisos en el chat; sin efectos visuales */
+/* MODO REALISTA · Barrida: mantener patear 0.35 s sin haber pateado → desliza 0.34 s (1.85x) + 3.0 s de recuperación lenta (0.45x); recarga de 15 s desde que termina el deslizamiento; avisos en el chat; sin efectos visuales */
 const SLV=3.5,SL1=.34,SL2=3;
 function slideTick(p){const b=G.ball;p.slCd=Math.max(0,(p.slCd||0)-DT);
  if(!RL()&&!p.sl){p.kh=0;return}
@@ -889,7 +889,7 @@ function slideTick(p){const b=G.ball;p.slCd=Math.max(0,(p.slCd||0)-DT);
  if(s.t<SL1){p.vx=s.dx*SLV*1.85*injSpd(p);p.vy=s.dy*SLV*1.85*injSpd(p);p.ax=p.ay=0;
   if(!s.hit&&!s.bad){if(Math.hypot(b.x-p.x,b.y-p.y)<p.r+b.r+10){s.hit=true;b.vx=b.vx*.2+s.dx*KS*1.2;b.vy=b.vy*.2+s.dy*KS*1.2;G.lastT=p.team;G.lastP=p;p.cd=KCD;G.pw=null;thump()} /* toca el balón primero: roba / despeja limpio hacia adelante */
    else{const q=act().find(q=>q!==p&&q.team!==p.team&&Math.hypot(q.x-p.x,q.y-p.y)<p.r+q.r+3);if(q){s.bad=true;refFoul(p,q,s)}}}} /* chocó primero con un rival, sin tocar el balón: el árbitro interviene */
- else if(s.t<SL1+SL2){if(!s.rec){s.rec=true;p.slCd=30;notifySl(p,30,false)} /* terminó de deslizarse: arranca la recarga de 30 s */
+ else if(s.t<SL1+SL2){if(!s.rec){s.rec=true;p.slCd=15;notifySl(p,15,false)} /* terminó de deslizarse: arranca la recarga de 15 s */
   const v=Math.hypot(p.vx,p.vy),mx=SLV*.45;if(v>mx){p.vx*=mx/v;p.vy*=mx/v}}
  else p.sl=null}
 /* MODO REALISTA · Árbitro: falta por barrida sin tocar el balón → silbato, evaluación (ángulo / zona), tarjetas, Penal (dentro del área grande) o Tiro Libre (fuera) con anillos de 95 / 150 px */
@@ -931,7 +931,7 @@ function refFoul(p,q,s){const W=G.w,H=G.h,b=G.ball,O=p.team,T=q.team,ownX=O==='r
  else if(perdon)setTimeout(()=>showEv('⚠️ ¡Última vida! El árbitro le perdona la expulsión',2400),2300);
  G.pw=null;if(lvl===2)expel(p);
  injure(q,card||extremo); /* lesión del que recibió la falta */
- if(pen&&startFoulPen(q,O)){if(lvl<2){p.sl=null;p.vx=p.vy=0;p.slCd=30;notifySl(p,30,false)}return}
+ if(pen&&startFoulPen(q,O)){if(lvl<2){p.sl=null;p.vx=p.vy=0;p.slCd=15;notifySl(p,15,false)}return}
  G.ko=null;G.sp={type:'libre',team:T,x:fx,y:fy,rad:SPR,g:.9};b.x=fx;b.y=fy;b.vx=b.vy=0;
  if(Math.hypot(ownX-fx,H/2-fy)<420){ /* barrera: 2 o 3 bots de campo rivales más cercanos, hombro con hombro (34 px) a 150 px del balón, perpendicular a la línea balón-arco */
   const gx=ownX-fx,gy=H/2-fy,gl=Math.hypot(gx,gy)||1,ux=gx/gl,uy=gy/gl,cand=G.players.filter(d=>d.team===O&&d.bot&&d.role!=='arquero').sort((a,c)=>Math.hypot(a.x-fx,a.y-fy)-Math.hypot(c.x-fx,c.y-fy)),
@@ -1521,7 +1521,7 @@ let last=performance.now(),acc=0;
  joy.addEventListener('pointermove',e=>{if(e.pointerId===jp){e.preventDefault();jMove(e)}});
  ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>joy.addEventListener(ev,e=>{if(e.pointerId===jp)jRelease()}));
 
- /* Botón ⚽: igual que X / Espacio. Toque rápido = patear; mantener ≥0,35 s = barrida (la lógica del juego respeta el modo y el cooldown de 30 s) */
+ /* Botón ⚽: igual que X / Espacio. Toque rápido = patear; mantener ≥0,35 s = barrida (la lógica del juego respeta el modo y el cooldown de 15 s) */
  let kp=null,kTm=null;
  const kPress=()=>{if(menuOpen||!G||G.vote)return;keys.kick=1;sendKeys();kb.classList.add('on');
   clearTimeout(kTm);kTm=setTimeout(()=>{if(RL())kb.classList.add('slide')},350)};
