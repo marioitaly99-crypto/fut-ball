@@ -710,6 +710,7 @@ function botState(){const b=G.ball;return{
  goalTop:G.gT,goalBottom:G.gB,isRealistic:RL(),
  setPiece:G.sp?{type:G.sp.type,team:G.sp.team,botTake:!!G.sp.botTake,executorId:spExecId()}:(G.ko?{type:'kickoff',team:G.ko}:null),
  activePowerEvent:G.activePowerEvent||null,
+ powerHolderId:(G.pw&&(G.pw.on||G.pw.t>=1.4))?G.pw.id:null,
  tactics:{red:teamTacticBias('red'),blue:teamTacticBias('blue')}}}
 /* respaldo suave si el módulo no cargó o falló: el bot más cercano va por la pelota, el resto mantiene su zona */
 function botFallback(p){const b=G.ball,W=G.w,H=G.h,dir=p.team==='red'?1:-1,ownX=dir>0?0:W,dB=q=>Math.hypot(q.x-b.x,q.y-b.y),

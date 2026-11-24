@@ -169,6 +169,7 @@
       return {
         W, H, L, T, R, B, cx, cy, dir, ownX, oppX, ball, me, mates, rivals, teamBots,
         ownGoal: own, oppGoal: opp, power: pt || null,
+        powerHolderId: gs.powerHolderId != null && gs.powerHolderId !== '' ? gs.powerHolderId : null,   // atacante que domina/carga Power Shot
         tacticBias: clamp((gs.tactics && gs.tactics[bot.team]) || 0, -0.22, 0.25),
         isRealistic: !!(gs.isRealistic || gs.mode === 'realistic'),
         depth: (x) => (x - ownX) * dir,          // distancia a la línea de fondo propia (+ hacia el rival)
@@ -409,7 +410,9 @@
       if (!cfg.slideStrict && !mem.slideRoll) return null;
       const contact = me.r + ball.r;
       const dBall = hyp(me.x - ball.x, me.y - ball.y);
-      if (dBall > ctx.cutDist * cfg.slideReach || dBall < contact * 1.05) return null;
+      // Power Shot en carga en nuestra mitad: rango de decisión algo mayor (normal/hard) para cortar antes del remate
+      const pwCharge = cfg !== DIFFICULTY.easy && ctx.powerHolderId != null && ctx.powerHolderId === carrier.id;
+      if (dBall > ctx.cutDist * cfg.slideReach * (pwCharge ? 1.15 : 1) || dBall < contact * 1.05) return null;
 
       const cs = hyp(carrier.vx, carrier.vy) || 1e-9;
       const f = { x: carrier.vx / cs, y: carrier.vy / cs };                        // hacia dónde mira/avanza el rival
@@ -525,6 +528,26 @@
         let pr = null, bd = 1e9;
         for (const b of pool) { const d = hyp(b.x - poss.x, b.y - poss.y); if (d < bd) { bd = d; pr = b; } }
         if (pr === me && !meHeld) return this._press(me, ctx, cfg, mem, poss);
+
+        // Escalonamiento: 2.º hombre de cobertura (DEF/MID más cercano al punto medio poss ↔ nuestro arco)
+        const pwCharge = ctx.powerHolderId != null && ctx.powerHolderId === poss.id;
+        if (cfg !== DIFFICULTY.easy && (ctx.depth(poss.x) < ctx.W * 0.62 || pwCharge)) {
+          const mx = (poss.x + ctx.ownX) / 2, my = (poss.y + ctx.ownGoal.cy) / 2;
+          let cover = null, cd = 1e9;
+          fb.forEach((b, i) => {
+            if (b === pr || (roleAt(i) !== 'DEF' && roleAt(i) !== 'MID')) return;
+            const d = hyp(b.x - mx, b.y - my);
+            if (d < cd) { cd = d; cover = b; }
+          });
+          if (cover === me) {
+            const p = this._clampField(ctx, poss.x + (ctx.ownX - poss.x) * 0.32, poss.y + (ctx.ownGoal.cy - poss.y) * 0.28);
+            if (ctx.depth(poss.x) < ctx.W * 0.36 || pwCharge) {       // zona de tiro: lo encima a máxima velocidad
+              const s = this._steer(me, p.x, p.y, ctx, { arrive: false });
+              return mk(s.ix, s.iy, false, false, { target: p, positional: true, tag: 'cover' });
+            }
+            return this._goTo(me, p.x, p.y, ctx, { tag: 'cover', role: info.role });
+          }
+        }
       } else {
         const tb = this._predBall(ctx, 6);
         let ch = null, bd = 1e9;
@@ -575,8 +598,22 @@
       const sl = this._slideCheck(me, ctx, cfg, mem, carrier);
       if (sl) return sl;
       const og = norm(ctx.ownX - ball.x, ctx.ownGoal.cy - ball.y);
-      return this._strike(me, { x: ctx.oppX, y: ctx.oppGoal.cy }, ctx, cfg, mem,
+      const strike = () => this._strike(me, { x: ctx.oppX, y: ctx.oppGoal.cy }, ctx, cfg, mem,
         { direct: true, kick: true, kickOk: (b) => b.x * og.x + b.y * og.y < 0.35 }, 'tackle');
+
+      // Anticipación: punto de intercepción adelantado hacia donde avanza el portador, corrido hacia nuestro arco (tapa su línea de avance/remate)
+      const lead = cfg.precise ? 7 : 4;
+      const toGoal = norm(ctx.ownX - (carrier.x + carrier.vx * lead), ctx.ownGoal.cy - (carrier.y + carrier.vy * lead));
+      const shift = ctx.W * 0.018;
+      const ip = this._clampField(ctx, carrier.x + carrier.vx * lead + toGoal.x * shift, carrier.y + carrier.vy * lead + toGoal.y * shift);
+
+      // normal/hard: portador en nuestra mitad o cargando Power Shot → cierre directo y a máxima velocidad
+      const aggr = cfg !== DIFFICULTY.easy &&
+        (ctx.depth(ball.x) < ctx.W * 0.52 || (ctx.powerHolderId != null && ctx.powerHolderId === carrier.id));
+      const dBall = hyp(me.x - ball.x, me.y - ball.y);
+      if (dBall <= ctx.cutDist * 1.4) return strike();                  // ya está encima: embiste la pelota
+      const s = this._steer(me, ip.x, ip.y, ctx, { arrive: !aggr });
+      return mk(s.ix, s.iy, false, false, { target: ip, tag: 'tackle', direct: aggr });
     }
 
     /** Con la pelota: remate, centro, pase/pared, despeje o conducción (decisión con histéresis por dificultad). */
