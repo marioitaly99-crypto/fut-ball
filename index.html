@@ -641,7 +641,7 @@ function enter(r,admin){netReset();updateInvite();cur=r;isAdmin=admin;STAD=admin
 function sizeUp(){[G.w,G.h]=SIZES[G.size];G.gh=GHT[G.size];G.gT=(G.h-G.gh)/2;G.gB=G.gT+G.gh;G.k=G.size==='gigante'?1.2:G.size==='grande'?1.1:1;G.cam=null}
 function kickoff(){G.sp=null;G.outImm=0;G.lastT=null;G.lastP=null;G.players.forEach(p=>{p.fz=p.im=0});G.ko=G.koTeam||'red';G.ball={x:G.w/2,y:G.h/2,vx:0,vy:0,r:BRAD*G.k};G.players.forEach(p=>p.r=PRAD*G.k);if(G.super)powerRadii(true);
  ['red','blue'].forEach(t=>{const l=G.players.filter(p=>p.team===t);l.forEach((p,i)=>{p.x=t==='red'?G.w*.3:G.w*.7;p.y=G.h*(i+1)/(l.length+1);p.vx=p.vy=0;p.cd=p.flash=0})})}
-function restart(){if(G.addedDone&&G.baseDur&&G.duration===G.baseDur+G.addedMins*60)G.duration=G.baseDur;G.addedDone=false;G.addedMins=0;G.baseDur=0;G.pw=null;G.players.forEach(p=>{injClear(p);p.slCd=0;p.sl=null;p.kh=0;p.khK=false;p.yc=0;p.fc=0;p.rc=0;if(p.rt){if(p.team==='spec')p.team=p.rt;p.rt=null}});$('pbR').style.display=$('pbB').style.display='';clearTimeout(evT);$('ev').classList.remove('show');assignRoles();G.koTeam='red';G.pen=null;$('penbar').classList.add('hidden');$('sb').classList.remove('hidden');$('sb').appendChild($('mute'));G.vote=null;G.golden=false;powerReset();$('vote').classList.add('hidden');G.paused=false;G.cd=0;G.score={red:0,blue:0};G.clock=0;G.gp=0;G.fp=0;G.fpA=null;G.over=false;kickoff();hud()}
+function restart(){if(G.addedDone&&G.baseDur&&G.duration===G.baseDur+G.addedMins*60)G.duration=G.baseDur;G.addedDone=false;G.addedMins=0;G.baseDur=0;G.dangerT=0;G.dangerWarned=false;G.pw=null;G.players.forEach(p=>{injClear(p);p.slCd=0;p.sl=null;p.kh=0;p.khK=false;p.yc=0;p.fc=0;p.rc=0;if(p.rt){if(p.team==='spec')p.team=p.rt;p.rt=null}});$('pbR').style.display=$('pbB').style.display='';clearTimeout(evT);$('ev').classList.remove('show');assignRoles();G.koTeam='red';G.pen=null;$('penbar').classList.add('hidden');$('sb').classList.remove('hidden');$('sb').appendChild($('mute'));G.vote=null;G.golden=false;powerReset();$('vote').classList.add('hidden');G.paused=false;G.cd=0;G.score={red:0,blue:0};G.clock=0;G.gp=0;G.fp=0;G.fpA=null;G.over=false;kickoff();hud()}
 /* Etiquetas LOCAL/VISITANTE con los colores del uniforme: 1 color → palabra completa; 2 colores → mitad y mitad */
 function teamLabel(el,team,txt){const u=(G&&G.uni&&G.uni[team])||{n:1,c1:team==='red'?'#ff5d5d':'#3b9cff'},key=u.n+'|'+u.c1+'|'+u.c2+'|'+(u.c3||'');if(el._k===key)return;el._k=key;el.textContent=txt;
  el.style.cssText=u.n===3?`background:linear-gradient(90deg,${u.c1} 33.34%,${u.c2} 33.34% 66.67%,${u.c3||'#ffffff'} 66.67%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;-webkit-text-stroke:.5px rgba(255,255,255,.35)`
@@ -1425,6 +1425,14 @@ function goal(t){if(G.pen){const P=G.pen;if((P.ph==='ball'||P.ph==='aim')&&(t===
  G.koTeam=other(t);goalFx(t);G.score[t]++;G.ball.vx=G.ball.vy=0;showEv('¡GOOOOL!',1800);chime();hud();if(G.golden){end(`🏆 ¡GOL DE ORO! GANÓ ${t==='red'?'LOCAL':'VISITANTE'} (${G.score.red} - ${G.score.blue})`);return}
  if(G.goalLimit&&G.score[t]>=G.goalLimit)return end();G.gp=2}
 const DT=1/60;
+/* Última jugada de peligro: el árbitro no pita el final mientras haya un ataque claro en curso */
+function isDangerPlay(){const b=G.ball,W=G.w,H=G.h,L=act(),S=G.sp;
+ if(G.pen)return true; /* a) penal en curso */
+ if(S&&(S.type==='corner'||S.type==='libre')){const d=Math.min(Math.hypot(S.x,S.y-H/2),Math.hypot(S.x-W,S.y-H/2));if(d<areaD()*1.6)return true} /* a) balón detenido peligroso pendiente */
+ if(b.x<W*.23||b.x>W*.77){const att=b.x<W*.23?'blue':'red'; /* b) último cuarto junto a un arco con un atacante de ese lado cerca (Local ataca x=W; Visitante x=0) */
+  if(L.some(p=>p.team===att&&Math.hypot(p.x-b.x,p.y-b.y)<220))return true}
+ if((b.x<W*.35&&b.vx<-3.5)||(b.x>W*.65&&b.vx>3.5))return true; /* c) disparo fuerte viajando hacia un arco */
+ return false}
 function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO!',1200)}return} /* reinicio automático tras 3 s */
  if(G.vote){voteStep();return}
  if(G.paused)return;if(G.cd>0){G.cd-=DT;return}
@@ -1437,7 +1445,10 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
    G.addedDone=true;const addMin=Math.random()<0.5?1:2;G.baseDur=G.duration;G.addedMins=addMin;G.duration+=addMin*60;
    showEv(`⏱️ +${addMin}' TIEMPO AÑADIDO`,2600);refSay(`🧑‍⚖️ Árbitro: ⏱️ Se adicionan ${addMin} minuto${addMin>1?'s':''} de tiempo añadido`);hud();
   }
-  if(G.clock>=G.duration){G.clock=G.duration;return G.score.red===G.score.blue?(G.super?startGolden():startVote()):end()}
+  if(G.clock>=G.duration){G.clock=G.duration;
+   if((G.dangerT||0)<15&&!(G.gp>0)&&!G.ko&&isDangerPlay()){ /* última jugada de peligro (tope 15 s); tras un gol (G.gp) o saque del medio pendiente se termina normalmente */
+    G.dangerT=(G.dangerT||0)+DT;if(!G.dangerWarned){G.dangerWarned=true;refSay('🧑‍⚖️ Árbitro: Deja seguir la última jugada de peligro...')}}
+   else return G.score.red===G.score.blue?(G.super?startGolden():startVote()):end()}
  }
  if(G.gp>0){if((G.gp-=DT)<=0)kickoff();return hud()}
  if(G.outImm>0)G.outImm-=DT;
