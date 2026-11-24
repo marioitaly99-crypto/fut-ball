@@ -306,6 +306,8 @@ body.careerOn.cmRed #cmMenuSim{display:block}
 body.careerOn.cmInGame.cmRed #cmSimRestBtn{display:block;position:fixed;z-index:130;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 54px);padding:8px 14px;font-size:.85rem;border-radius:12px;background:rgba(127,29,29,.92);color:#fff;border:1.5px solid #f87171}
 html.is-touch body.careerOn.cmInGame.cmRed #cmSimRestBtn{right:auto;left:50%;transform:translateX(-50%);bottom:auto;top:calc(env(safe-area-inset-top,0px) + 86px);padding:5px 12px;font-size:.74rem}
 body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCopy,body.careerOn #mCode{display:none!important}
+body.careerOn #chatIn,body.careerOn #chatTog{display:none!important}
+body.careerOn #chat{background:transparent!important;border:none!important;pointer-events:none!important}
 #cmCont{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;padding:12px 16px;background:rgba(7,25,56,.92);border:2px solid #4ade80;border-radius:16px;box-shadow:0 0 22px rgba(74,222,128,.3)}
 #cmCont b{font-size:1.05rem}
 @media(max-width:780px){.cmZ,.cmCols{grid-template-columns:1fr}.cmVs .tm .cmBd{width:62px;height:62px}.cmBr{grid-template-columns:repeat(4,200px)}.cmPr{grid-template-columns:30px 34px 1fr auto 64px 38px;gap:6px;padding:6px 8px}}
