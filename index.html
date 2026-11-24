@@ -332,9 +332,11 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
 
 <div id="career-screen" class="screen">
   <button id="backCareer" class="backBtn" type="button">← Menú</button>
-  <div class="careerCard"><h1>🏆 MODO CARRERA — Próximamente (Argentina · Primera División)</h1></div>
+  <div class="careerCard"><h1>🏆 MODO CARRERA — Argentina · Primera División</h1></div>
   <div id="career-root"></div>
 </div>
+
+<div id="career-hub-screen" class="screen"></div>
 
 
 <div id="screen-login" class="screen"><button id="backLogin" class="backBtn" type="button">← Menú</button><div class="card">
@@ -1859,8 +1861,8 @@ let last=performance.now(),acc=0;
    zones:{A:z.A,B:z.B},zonaDe:z.zonaDe,myZone:z.zonaDe[sel],fecha:1,createdAt:Date.now()};
   try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
   window.CAREER_STATE=state;
-  try{window.dispatchEvent(new CustomEvent('career:start',{detail:state}))}catch(e){}
-  summary()}
+  try{window.dispatchEvent(new CustomEvent('career:start',{detail:state}))}catch(e){} /* CareerMode.js abre el Hub de la temporada */
+ }
  function summary(){const t=D.getTeam(state.teamId),rv=D.getTeam(t.classicRivalId);
   const zl=k=>`<div class="cZ"><h2>Zona ${k}</h2>${state.zones[k].map(id=>{const q=D.getTeam(id);return`<div class="z${id===state.teamId?' me':''}"><span class="bd">${badge(q)}</span>${E(q.name)}${id===state.teamId?' ⭐':''}</div>`}).join('')}</div>`;
   root.innerHTML=`<section class="cPanel"><h2>✅ Temporada lista</h2>
@@ -1877,5 +1879,6 @@ let last=performance.now(),acc=0;
  form();
 })();
 </script>
+<script src="CareerMode.js"></script>
 </body>
 </html>
