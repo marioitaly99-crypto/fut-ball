@@ -701,7 +701,7 @@ function botState(){const b=G.ball;return{
  ball:{x:b.x,y:b.y,vx:b.vx,vy:b.vy,r:b.r},
  players:act().map(q=>({id:q.id,team:q.team,x:q.x,y:q.y,vx:q.vx,vy:q.vy,r:q.r,isBot:!!q.bot,frozen:q.fz>0,slideCooldown:q.slCd||0})),
  goalTop:G.gT,goalBottom:G.gB,isRealistic:RL(),
- setPiece:G.sp?{type:G.sp.type,team:G.sp.team,botTake:!!G.sp.botTake}:(G.ko?{type:'kickoff',team:G.ko}:null),
+ setPiece:G.sp?{type:G.sp.type,team:G.sp.team,botTake:!!G.sp.botTake,executorId:spExecId()}:(G.ko?{type:'kickoff',team:G.ko}:null),
  activePowerEvent:G.activePowerEvent||null}}
 /* respaldo suave si el módulo no cargó o falló: el bot más cercano va por la pelota, el resto mantiene su zona */
 function botFallback(p){const b=G.ball,W=G.w,H=G.h,dir=p.team==='red'?1:-1,ownX=dir>0?0:W,dB=q=>Math.hypot(q.x-b.x,q.y-b.y),
@@ -737,7 +737,9 @@ function movePlayer(p,to){if(p.team===to)return;if(G.pen)return showEv('Espera: 
  else{p.x=G.w-p.x;p.vx=-p.vx} /* Local↔Visitante: misma posición relativa a su arco, sin tocar la pelota ni al resto */
  if(from!=='spec')assignRoles(from);if(to!=='spec')assignRoles(to);botUI()}
 /* Modo Realista: saque lateral, córner y saque de arco */
-function setPiece(sp,txt){const b=G.ball;G.sp=sp;b.x=sp.x;b.y=sp.y;b.vx=b.vy=0;showEv(`${txt} · ${sp.team==='red'?'LOCAL':'VISITANTE'}`,1700)}
+function setPiece(sp,txt){const b=G.ball;G.sp=sp;
+ if(sp.type==='lateral'){let n=null,nd=1e9;act().forEach(q=>{if(q.team!==sp.team||q.fz>0)return;const d=Math.hypot(q.x-sp.x,q.y-sp.y);if(d<nd){nd=d;n=q}});sp.exId=n?n.id:null} /* lateral: ejecutante fijo = el más cercano (humano o bot) cuando sale la pelota; sin alternancia */
+ b.x=sp.x;b.y=sp.y;b.vx=b.vy=0;showEv(`${txt} · ${sp.team==='red'?'LOCAL':'VISITANTE'}`,1700)}
 function ballOut(){const b=G.ball,r=b.r,W=G.w,H=G.h;
  if(b.y+r<0||b.y-r>H)setPiece({type:'lateral',team:other(G.lastT||'red'),x:clamp(b.x,40,W-40),y:b.y<0?5:H-5,rad:SPR},'↔️ SAQUE LATERAL'); /* en el punto exacto, para el rival del último que la tocó */
  else if(b.x+r<0||b.x-r>W){const left=b.x<0,def=left?'red':'blue',att=other(def);
@@ -1019,6 +1021,7 @@ function fkBotAim(S){const gx=S.team==='red'?G.w:0,ins=G.gh*.14,ys=[G.gT+ins,G.h
  return best}
 /* Humano que controla la mira: el del equipo que saca más cercano a la pelota; con la pelota a mano, ↑/↓ (W/S/joystick) apuntan en vez de moverlo */
 function fkCtl(p){const S=G.sp,b=G.ball;if(!RL()||G.pen||!S||S.type!=='libre'||p.team!==S.team)return false;
+ if(carOn()&&G.players.some(q=>q.bot&&q.team===S.team))return !S.botTake&&spExecutor()===p&&Math.hypot(p.x-b.x,p.y-b.y)<p.r+b.r+45; /* Carrera con bots: controla la mira solo el ejecutante asignado (si es bot, nadie) */
  const R=p.r+b.r+45,vic=S.victimId!=null?act().find(q=>q.id===S.victimId&&!q.bot&&q.team===S.team):null;
  if(vic)return vic===p&&Math.hypot(p.x-b.x,p.y-b.y)<R; /* la víctima de la falta (si es humana y sigue activa en el equipo) es la única que controla la mira `)` */
  let n=null,nd=1e9;G.players.forEach(q=>{if(q.bot||q.team!==S.team)return;const d=Math.hypot(q.x-b.x,q.y-b.y);if(d<nd){nd=d;n=q}});
@@ -1026,6 +1029,8 @@ function fkCtl(p){const S=G.sp,b=G.ball;if(!RL()||G.pen||!S||S.type!=='libre'||p
 /* Mira direccional (lateral / córner / saque de arco): el humano del equipo que saca más cercano al balón, a menos de r+b.r+28 px, gira G.sp.aimAng con ↑↓←→ sin moverse */
 const SP_AIM_T=['lateral','corner','arco'],SP_REACH=28;
 function spAimCtl(p){const S=G.sp;if(!S||G.pen||p.bot||p.team!==S.team||S.botTake||!SP_AIM_T.includes(S.type))return false;
+ if(S.type==='lateral'&&S.exId!=null&&act().some(q=>q.id===S.exId))return S.exId===p.id&&Math.hypot(p.x-S.x,p.y-S.y)<p.r+G.ball.r+SP_REACH; /* lateral: solo el más cercano al salir la pelota */
+ if(S.type==='corner'&&carOn()&&G.players.some(q=>q.bot&&q.team===S.team))return spExecutor()===p&&Math.hypot(p.x-S.x,p.y-S.y)<p.r+G.ball.r+SP_REACH; /* córner (Carrera con bots): solo el ejecutante asignado */
  let n=null,nd=1e9;act().forEach(q=>{if(q.bot||q.team!==S.team)return;const d=Math.hypot(q.x-S.x,q.y-S.y);if(d<nd){nd=d;n=q}});
  return n===p&&nd<p.r+G.ball.r+SP_REACH}
 function spAimInit(S){const W=G.w,H=G.h;let tx=W/2,ty=H/2; /* hacia el interior de la cancha */
@@ -1089,15 +1094,44 @@ function spAimArrow(){const S=G.sp;if(!S||G.pen||S.aimAng==null||S.botTake||!me|
  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash([10,8]);ctx.lineWidth=3*k;ctx.strokeStyle='rgba(250,204,21,.9)';
  ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();ctx.setLineDash([]);
  ctx.beginPath();ctx.moveTo(x1-Math.cos(a-.45)*h,y1-Math.sin(a-.45)*h);ctx.lineTo(x1,y1);ctx.lineTo(x1-Math.cos(a+.45)*h,y1-Math.sin(a+.45)*h);ctx.stroke();ctx.restore()}
-/* Modo Carrera (estilo PES): "Que lo ejecute otro pateador" → un bot del equipo hace el saque (BotAIController lo toma vía setPiece.botTake) */
-const spHudCan=()=>{const S=G&&G.sp;return !!(S&&me&&me.team!=='spec'&&S.team===me.team&&!G.pen&&document.body.classList.contains('careerOn')&&G.players.some(q=>q.bot&&q.team===S.team))};
-function spBotTake(p){const S=G.sp;if(!S||S.botTake||G.pen||p.bot||p.team!==S.team||!document.body.classList.contains('careerOn')||!G.players.some(q=>q.bot&&q.team===S.team))return;S.botTake=true}
-function reqBotTake(){if(!spHudCan()||G.sp.botTake)return;if(NET.role==='client'){keys.bt=1;sendKeys();keys.bt=0}else spBotTake(me)}
-let spHudBT=false,spHudT=0;
-function spHudUpdate(){const el=$('spHud');if(!el)return;const S=G&&G.sp,bt=!!(S&&S.botTake),now=performance.now();
- if(bt&&!spHudBT)spHudT=now+1500;spHudBT=bt; /* confirmación 1.5 s (sin showEv en el centro) */
- const show=spHudCan()&&(!bt||now<spHudT),txt=bt?'✅ Ejecuta otro pateador':IS_TOUCH?'🔄 Que lo ejecute otro pateador':'🔄 [E] Que lo ejecute otro pateador';
- if(el.textContent!==txt)el.textContent=txt;el.classList.toggle('hidden',!show)}
+/* Balón detenido · ejecutantes. LATERAL y SAQUE DE ARCO: sin opción de cambio (el lateral lo saca siempre el más cercano al balón al salir; nunca #spHud ni tecla E).
+   TIRO LIBRE y CÓRNER (SOLO Modo Carrera, con bots en el equipo): alternancia bidireccional humano ↔ bot con #spHud / tecla E. */
+const spSwapT=['libre','corner'],carOn=()=>document.body.classList.contains('careerOn');
+/* Ejecutante actual: botTake → bot más cercano · víctima de la falta (si sigue en el equipo) · si no, el más cercano al balón (humano o bot). Se fija hasta que cambie el modo/víctima */
+function spExecutor(){const S=G&&G.sp;if(!S||!spSwapT.includes(S.type))return null;
+ const team=act().filter(q=>q.team===S.team&&!(q.fz>0));if(!team.length)return null;
+ const key=(S.botTake?1:0)+'|'+(S.victimId==null?'':S.victimId);
+ if(S.exK===key&&S.exc!=null){const c=team.find(q=>q.id===S.exc);if(c)return c}
+ const dq=q=>Math.hypot(q.x-S.x,q.y-S.y),near=l=>l.reduce((a,q)=>!a||dq(q)<dq(a)?q:a,null);let ex=null;
+ if(S.botTake)ex=near(team.filter(q=>q.bot));
+ else{if(S.victimId!=null)ex=team.find(q=>q.id===S.victimId)||null;if(!ex)ex=near(team)}
+ S.exK=key;S.exc=ex?ex.id:null;return ex}
+/* ¿p no debe patear esta jugada? (lateral: solo el más cercano; libre/córner en Carrera con bots: solo el ejecutante asignado) */
+function spBlock(p){const S=G.sp;if(!S||G.pen)return false;
+ if(S.type==='lateral')return S.exId!=null&&S.exId!==p.id&&act().some(q=>q.id===S.exId);
+ if(carOn()&&spSwapT.includes(S.type)&&S.team===p.team&&G.players.some(q=>q.bot&&q.team===S.team)){const ex=spExecutor();return !!ex&&ex!==p}
+ return false}
+/* ¿p (humano) puede alternar? Solo libre/córner, su equipo saca, hay bots y el ejecutante es él (Caso A) o un bot (Caso B) */
+function spCan(p){const S=G&&G.sp;if(!S||!p||p.bot||p.team==='spec'||!spSwapT.includes(S.type)||S.team!==p.team||G.pen||!carOn()||!G.players.some(q=>q.bot&&q.team===S.team))return false;
+ const ex=spExecutor();return !!ex&&(ex===p||!!ex.bot)}
+const spHudCan=()=>!!me&&spCan(me);
+function spToggle(p){if(!spCan(p))return;const S=G.sp,b=G.ball,ex=spExecutor();
+ if(ex===p){ /* Caso A: yo ejecutaba → lo ejecuta el bot más cercano; se libera mi movimiento */
+  S.botTake=true;S.victimId=null;S.exK='';p.ax=p.ay=0;if(S.type==='libre'){S.ba=fkBotAim(S);S.aim=S.ba}return}
+ /* Caso B: ejecutaba un bot → lo ejecuto yo: me ubico detrás del balón mirando a la mira y el bot se desmarca hacia el área */
+ S.botTake=false;S.victimId=p.id;S.exK='';
+ let a;if(S.type==='libre')a=fkAngles(S)[(S.aim|0)+1];else{if(S.aimAng==null)S.aimAng=spAimInit(S);a=S.aimAng}
+ const gap=p.r+b.r+6;p.x=b.x-Math.cos(a)*gap;p.y=b.y-Math.sin(a)*gap;p.vx=p.vy=0;p.ax=p.ay=0;p.sl=null;
+ if(ex&&ex.bot&&Math.hypot(ex.x-b.x,ex.y-b.y)<110*G.k){const gx=S.team==='red'?G.w:0,sg=S.team==='red'?-1:1;ex.x=gx+sg*areaD()*.65;ex.y=clamp(G.h/2+(Math.random()<.5?-1:1)*G.h*.08,ex.r,G.h-ex.r);ex.vx=ex.vy=0}}
+function reqBotTake(){if(!spHudCan())return;if(NET.role==='client'){keys.bt=1;sendKeys();keys.bt=0}else spToggle(me)}
+function spHudUpdate(){const el=$('spHud');if(!el)return;const can=spHudCan();
+ if(can){const mine=spExecutor()===me,txt=mine?(IS_TOUCH?'🔄 Que lo ejecute otro pateador':'🔄 [E] Que lo ejecute otro pateador'):(IS_TOUCH?'⚽ Patearlo con mi jugador':'⚽ [E] Patearlo con mi jugador');if(el.textContent!==txt)el.textContent=txt}
+ el.classList.toggle('hidden',!can)}
+/* ejecutante que se le informa a BotAIController (lateral: fijo; libre/córner en Carrera: según la alternancia) */
+function spExecId(){const S=G.sp;if(!S)return undefined;
+ if(S.type==='lateral')return S.exId!=null&&act().some(q=>q.id===S.exId)?S.exId:undefined;
+ if(carOn()&&spSwapT.includes(S.type)){const ex=spExecutor();return ex?ex.id:undefined}
+ return undefined}
 function refFoul(p,q,s){const W=G.w,H=G.h,b=G.ball,O=p.team,T=q.team,ownX=O==='red'?0:W,dirG=O==='red'?-1:1;
  const fx=clamp((p.x+q.x)/2,14,W-14),fy=clamp((p.y+q.y)/2,14,H-14),pen=Math.abs(fx-ownX)<areaD()&&Math.abs(fy-H/2)<areaH()/2; /* ¿dentro del área grande de quien cometió la falta? */
  let ux=q.vx,uy=q.vy,ul=Math.hypot(ux,uy);if(ul<.8){ux=q.ax||0;uy=q.ay||0;ul=Math.hypot(ux,uy)}if(ul<.05){ux=dirG;uy=0;ul=1}ux/=ul;uy/=ul; /* hacia dónde mira / avanza la víctima */
@@ -1153,7 +1187,7 @@ function foulPenEnd(){const P=G.pen,t=P.team,gl=P.g===true;G.pen=null;
  P.save.forEach(([p,x,y])=>{if(G.players.includes(p)&&p.team!=='spec'){p.x=x;p.y=y;p.vx=p.vy=0}});
  if(gl)goal(t);else{const sd=smallD()*.55;setPiece({type:'arco',team:other(t),x:P.gx===0?sd:G.w-sd,y:G.h/2,rad:SPR,gx:P.gx},'🥅 SAQUE DE ARCO')} /* gol: saque del medio; atajado/errado: saque de arco */
  hud()}
-function tryKick(p){const b=G.ball,S=G.sp,hs=!!S&&!p.bot&&p.team===S.team&&(S.type==='libre'||SP_AIM_T.includes(S.type));if(hs&&S.botTake)return; /* pidió que lo ejecute otro: el humano no patea */
+function tryKick(p){const b=G.ball,S=G.sp,hs=!!S&&!p.bot&&p.team===S.team&&(S.type==='libre'||SP_AIM_T.includes(S.type));if(spBlock(p)||(hs&&S.botTake))return; /* pidió que lo ejecute otro: el humano no patea */
  const d=Math.hypot(b.x-p.x,b.y-p.y);if(d>p.r+b.r+(hs?SP_REACH:4)||!d)return;const pwOn=RL()&&G.pw&&G.pw.on&&G.pw.id===p.id,m=kMult(p)*injShot(p)*(pwOn?PS_MULT:G.activePowerEvent==='fire'?1.6:1)*spMult(p);p.khK=true; /* Power Shot 1.60x · Córner 2x · Tiro Libre 4x con mira `)` (el lateral conserva la fuerza normal) */
  const fk=fkDir(p),aa=!fk&&hs&&S.aimAng!=null?S.aimAng:null,dx=fk?fk.x:aa!=null?Math.cos(aa):(b.x-p.x)/d,dy=fk?fk.y:aa!=null?Math.sin(aa):(b.y-p.y)/d;if(spMult(p)>1||pwOn)G.fkS=true;
  b.vx+=dx*KS*m;b.vy+=dy*KS*m;const s=Math.hypot(b.vx,b.vy);if(s>BMAX*m){b.vx*=BMAX*m/s;b.vy*=BMAX*m/s}G.lastT=p.team;G.lastP=p;p.cd=KCD;p.flash=FL;if(G.pw)G.pw=null;if(pwOn||G.activePowerEvent==='fire')powerThump();else thump()}
@@ -1417,7 +1451,7 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
  G.players.forEach(p=>{if(p.bot)return;const k=p===me?keys:(p.keys||{}),ix=(k.right|0)-(k.left|0)+clamp(+k.jx||0,-1,1),iy=(k.down|0)-(k.up|0)+clamp(+k.jy||0,-1,1),l=Math.max(1,Math.hypot(ix,iy));p.ax=ix/l;p.ay=iy/l;p.kick=!!k.kick;if(G.activePowerEvent==='reverse'&&!G.pen){p.ax=-p.ax;p.ay=-p.ay} /* Reversa: ix=-ix, iy=-iy (teclado y joystick) */
  if(fkCtl(p)){const S=G.sp;S.ac=(S.ac||0)-DT;if(Math.abs(iy)<.5)S.ac=0;else if(S.ac<=0){S.aim=clamp((S.aim|0)+(iy>0?1:-1),-1,1);S.ac=.2}p.ay=0} /* ↑/↓: mueve el selector sobre la curva `)` */
  if(spAimCtl(p)){const S=G.sp;if(S.aimAng==null)S.aimAng=spAimInit(S);if(Math.hypot(ix,iy)>.3){let da=Math.atan2(iy,ix)-S.aimAng;da=Math.atan2(Math.sin(da),Math.cos(da));S.aimAng+=clamp(da,-4*DT,4*DT)}p.ax=p.ay=0} /* las direcciones giran la mira (4 rad/s) sin mover al jugador */
- if(p!==me&&k.bt){k.bt=0;spBotTake(p)} /* invitado online que pidió "que lo ejecute otro pateador" */
+ if(p!==me&&k.bt){k.bt=0;spToggle(p)} /* invitado online que pidió "que lo ejecute otro pateador" */
  if(p.fz>0){p.ax=p.ay=0;p.kick=false;p.sl=null}
  if(G.pen&&G.pen.k===p)p.ax=0}); /* teclas de cada humano; arquero: solo vertical */
  G.fr=(G.fr||0)+1;

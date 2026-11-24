@@ -792,7 +792,7 @@
     // -------------------------------------------------------------------------
     _setPieceLogic(me, ctx, cfg, mem, info, sp) {
       const ball = ctx.ball;
-      const sig = sp.type + '|' + sp.team + '|' + Math.round(ball.x) + '|' + Math.round(ball.y);
+      const sig = sp.type + '|' + sp.team + '|' + Math.round(ball.x) + '|' + Math.round(ball.y) + '|' + (sp.botTake ? 1 : 0);
       if (mem.spSig !== sig) {
         mem.spSig = sig; mem.spStart = mem.age;
         mem.spReady = null; mem.spMate = null; mem.spSpot = null;
@@ -800,12 +800,23 @@
         mem.spAim = (this.rng() * 2 - 1) * cfg.aim * DEG * 0.5;              // error de puntería fijo durante el saque
       }
       const weTake = sp.team === me.team;
+      // botTake solo rige en tiro libre / córner (alternancia del Modo Carrera). El lateral lo saca SIEMPRE el más cercano (humano o bot).
+      const bt = (sp.type === 'free_kick' || sp.type === 'corner') ? !!sp.botTake : false;
 
       if (weTake) {
         const team = [me].concat(ctx.mates);
+        const nearest = (list) => {
+          let best = null, nd = 1e9;
+          for (const q of list) { if (q.frozen) continue; const d = hyp(q.x - ball.x, q.y - ball.y); if (d < nd) { nd = d; best = q; } }
+          return best;
+        };
         let exec = null;
-        if (sp.executorId != null) exec = team.find((p) => p.id === sp.executorId) || null;
+        if (sp.executorId != null) {                                        // ejecutante designado por el juego (humano o bot)
+          const c = team.find((p) => p.id === sp.executorId) || null;
+          if (c && !(bt && !c.isBot)) exec = c;                             // botTake=true: solo vale si es un bot
+        }
         if (!exec && sp.type === 'goal_kick') exec = ctx.teamBots[0];
+        if (!exec && sp.type === 'throw_in') exec = nearest(team);          // lateral: el más cercano; si es humano, los bots NO sacan
         if (!exec) {                                                        // el bot más cercano a la pelota
           let bd = 1e9;
           for (const b of ctx.teamBots) { const d = hyp(b.x - ball.x, b.y - ball.y); if (d < bd) { bd = d; exec = b; } }
