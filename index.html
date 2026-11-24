@@ -304,10 +304,10 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
 #career-root .pHead{display:flex;align-items:center;gap:12px}
 #career-root .pHead .bd{width:64px;height:64px;flex:none}
 #career-root .pHead b{font-size:1.2rem;line-height:1.15}#career-root .pHead span{font-size:.8rem;color:#9fc0ee}
-#career-root .pKits{display:flex;gap:14px;flex-wrap:wrap}
-#career-root .pKit{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.78rem;font-weight:800;color:#cfe3ff}
+#career-root .pKits{display:flex;gap:22px;flex-wrap:wrap}
+#career-root .pKit{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.8rem;font-weight:800;color:#cfe3ff}
+#career-root .pKit canvas{position:static;inset:auto;top:auto;left:auto;width:58px;height:58px;max-width:none;aspect-ratio:auto;border:0;border-radius:0;display:block;flex:none}
 #career-root .pBox{padding:8px 10px;border-radius:12px;background:rgba(2,10,30,.5);border:1px solid #1e3a8a;display:flex;flex-direction:column;gap:6px}
-#career-root .pStad svg{width:100%;max-width:300px;display:block;border-radius:8px}
 #career-root .pRiv{display:flex;align-items:center;gap:10px;font-weight:800}#career-root .pRiv .bd{width:34px;height:34px}
 #career-root .pEmpty{padding:30px 10px;text-align:center;color:#9fc0ee;font-weight:700}
 #career-root .cZones{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -1788,7 +1788,7 @@ let last=performance.now(),acc=0;
  let sel='',state=null,uid=0;
  const badge=t=>{const sfx='-'+(++uid);return t.badgeSvg.split('b-'+t.id).join('b-'+t.id+sfx)};
  /* Camiseta (misma lógica de dibujo que jersey() del juego, solo para la vista previa) */
- function drawKit(cv,u,num){const S=72,dpr=2;cv.width=cv.height=S*dpr;cv.style.width=cv.style.height=S+'px';
+ function drawKit(cv,u,num){const S=58,dpr=3;cv.width=cv.height=S*dpr;cv.style.width=cv.style.height=S+'px';
   const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,S,S);
   const cx=S/2,cy=S/2,r=S/2-3,x=cx-r,y=cy-r,d=r*2,k=d/5;
   g.save();g.beginPath();g.arc(cx,cy,r,0,7);g.clip();g.fillStyle=u.c1;g.fillRect(x,y,d,d);
@@ -1803,16 +1803,8 @@ let last=performance.now(),acc=0;
     g.fillStyle=c3;for(let i=1;i<5;i++){if(v)g.fillRect(x+i*k-lw/2,y,lw,d);else g.fillRect(x,y+i*k-lw/2,d,lw)}}
    else if(st==='cb'){const bh=d*.15,y0=y+d*.5-(2*bh+lw)/2;g.fillStyle=u.c2;g.fillRect(x,y0,d,bh);g.fillStyle=c3;g.fillRect(x,y0+bh+lw,d,bh)}
    else{g.fillStyle=u.c2;g.fillRect(x+t,y,t,d);g.fillStyle=c3;g.fillRect(x+2*t,y,t+1,d)}}
-  g.restore();g.beginPath();g.arc(cx,cy,r,0,7);g.lineWidth=3;g.strokeStyle='#0b1220';g.stroke();
-  if(num){g.font='900 24px "Segoe UI",system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.lineJoin='round';g.lineWidth=4.5;g.strokeStyle='rgba(0,0,0,.78)';g.strokeText(num,cx,cy+1);g.fillStyle='#fff';g.fillText(num,cx,cy+1)}}
- /* Vista previa de estadio: butacas por filas + banderas (misma regla de colores que el editor de estadio) */
- function stadSvg(S){const rows=7,rh=9,top=36,W=220,H=top+rows*rh+6;
-  const sc=i=>S.seats.n===3?[S.seats.c1,S.seats.c2,S.seats.c3][i%3]:S.seats.n===2?((i<2||i>=rows-2)?S.seats.c1:S.seats.c2):S.seats.c1;
-  const fc=j=>S.flags.n===3?[S.flags.c1,S.flags.c2,S.flags.c3][j%3]:S.flags.n===2?(j%2?S.flags.c2:S.flags.c1):S.flags.c1;
-  let h=`<rect width="${W}" height="${H}" fill="#14301c"/><rect y="${top-8}" width="${W}" height="8" fill="#2b3447"/>`;
-  for(let i=0;i<rows;i++)h+=`<rect y="${top+i*rh}" width="${W}" height="${rh-1}" fill="${sc(i)}"/><line x1="0" x2="${W}" y1="${top+i*rh+(rh-1)/2}" y2="${top+i*rh+(rh-1)/2}" stroke="rgba(0,0,0,.28)" stroke-width="2.4" stroke-dasharray="3 3"/>`;
-  for(let j=0;j<10;j++){const fx=12+j*21.8;h+=`<path d="M${fx-8} ${top-8}h16v22l-8 5-8-5z" fill="${fc(j)}" stroke="rgba(0,0,0,.35)" stroke-width="1"/>`}
-  return`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Estadio">${h}</svg>`}
+  g.restore();g.beginPath();g.arc(cx,cy,r,0,7);g.lineWidth=2.5;g.strokeStyle='#0b1220';g.stroke();
+  if(num){g.font='900 19px "Segoe UI",system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.lineJoin='round';g.lineWidth=3.5;g.strokeStyle='rgba(0,0,0,.78)';g.strokeText(num,cx,cy+1);g.fillStyle='#fff';g.fillText(num,cx,cy+1)}}
  const kitName={v1:'Franja vertical',h1:'Franja horizontal',vs:'Franjas verticales',hs:'Franjas horizontales',vv:'Franja en V',dg:'Franja cruzada',mv:'Mitad vertical',mh:'Mitad horizontal'};
 
  function form(){
@@ -1856,7 +1848,6 @@ let last=performance.now(),acc=0;
    <div class="pHead"><span class="bd">${badge(t)}</span><div><b>${E(t.name)}</b><br><span>${E(t.shortName)} · Primera División</span></div></div>
    <div class="pBox"><span class="cLbl">Camisetas</span><div class="pKits">
     <div class="pKit"><canvas id="kH"></canvas>Titular</div><div class="pKit"><canvas id="kA"></canvas>Suplente</div></div></div>
-   <div class="pBox pStad"><span class="cLbl">Estadio · butacas y banderas</span>${stadSvg(t.stadium)}</div>
    <div class="pBox"><span class="cLbl">Clásico rival</span><div class="pRiv"><span class="bd">${badge(rv)}</span>${E(rv.name)}</div></div>`;
   drawKit($('kH'),t.kitHome,num);drawKit($('kA'),t.kitAway,num)}
  function start(){const err=$('cErr'),name=$('cName').value.trim(),num=$('cNum').value.trim();
