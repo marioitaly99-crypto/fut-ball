@@ -378,7 +378,6 @@ body.careerOn #teams,body.careerOn #extBox,body.careerOn #adm,body.careerOn #mCo
    '<div class="mid">VS</div>'+
    '<div class="tm'+(!myHome?' me':'')+'"><span class="cmBd">'+badge(a)+'</span>'+E(a.name)+'<small>VISITANTE'+(!myHome?' · TU CLUB':'')+'</small>'+kitSvg(!myHome?myKit:kA,!myHome?S.player.num:'')+'</div></div>'+
    '<div class="cmRow"><span class="cmTag">'+(myHome?'🏟️ Jugás de LOCAL en el estadio de '+E(me.name):'✈️ Jugás de VISITANTE en el estadio de '+E(rv.name))+'</span>'+
-   '<span class="cmTag">👕 Camiseta '+(mySwapped?'suplente':'titular')+((myHome?false:ks.autoA)?' (por choque de colores)':'')+'</span>'+
    '<span class="cmTag">⏱ '+S.minutes+' min · Realista 6v6</span></div>'+
    (rvSwapped?'<div class="cmNote">'+E(rv.name)+' usa su camiseta suplente para evitar el choque de colores.</div>':'')+
    '<div class="cmKits"><h3>👕 Camisetas del partido</h3><div class="cmKcols"><div><small>LOCAL · '+E(h.shortName)+'</small>'+kitPick('h',h,ks.sH)+'</div><div><small>VISITANTE · '+E(a.shortName)+'</small>'+kitPick('a',a,ks.sA)+'</div></div>'+(ks.clash?'<div class="cmNote">⚠️ Los colores de ambas camisetas son muy parecidos.</div>':'')+'</div>'+
