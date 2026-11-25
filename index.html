@@ -1000,21 +1000,24 @@ function paintRing(g,a,b,c,d,T){const D=ST_D,F=ST_FW,RH=ST_RH,L=c-a,Hd=d-b,
  stTunnel(g,a,b,c,d,T);stValla(g,a,b,c,d,T);
  const txt=STAD_C.txt||'FUT-BALL';stSignBoxes(a,b,c,d).forEach(sg=>stSign(g,sg,txt,T.seats))}
 /* Hinchas grandes de medio cuerpo con contorno negro de 2.5 px (brazos abajo / brazos arriba en V o U con los colores de seats), pre-dibujados en sprites */
-function stSprites(T){const S=T.seats,sh=S.n===3?[S.c1,S.c2,S.c3]:S.n===2?[S.c1,S.c2]:[S.c1,stShade(S.c1,45)],skins=['#f1c9a5','#d9a066','#a86b3c','#6b4226'],hairs=['#1a1a1a','#3b2314','#7a4a1e','#d4a82b'],SC=3,N=ST_FS,out=[[],[]];
+function stSprites(T){const S=T.seats,sh=S.n===3?[{b:S.c1},{b:S.c2},{b:S.c3}]:S.n===2?[{b:S.c1},{b:S.c2},{b:S.c1,s:S.c2}]:[{b:S.c1}],skins=['#f1c9a5','#d9a066','#a86b3c','#6b4226'],hairs=['#1a1a1a','#3b2314','#7a4a1e','#d4a82b'],SC=3,N=ST_FS,out=[[],[]]; /* SOLO colores puros de seats (sin aclarar): n=3 → c1/c2/c3 · n=2 → c1, c2 y camiseta a franjas c1/c2 · n=1 → c1 */
  for(let m=0;m<2;m++)for(let si=0;si<sh.length;si++)for(let k=0;k<4;k++){const cv=document.createElement('canvas');cv.width=cv.height=N*SC;const g=cv.getContext('2d');g.scale(SC,SC);g.lineJoin='round';g.lineCap='round';
-  const sk=skins[k],hr=hairs[(k+si)%4],sc=sh[si],ac=sh[(si+1)%sh.length],pl=q=>{g.beginPath();g.moveTo(q[0][0],q[0][1]);for(let n=1;n<q.length;n++)g.lineTo(q[n][0],q[n][1])};
-  if(m){const A=k%2?[[[5,16],[1.8,12],[3,4.6]],[[17,16],[20.2,12],[19,4.6]]]:[[[5.2,16],[2.2,5.2]],[[16.8,16],[19.8,5.2]]]; /* U (codo) / V */
-   A.forEach(q=>{pl(q);g.strokeStyle='#000';g.lineWidth=5.4;g.stroke();pl(q);g.strokeStyle=sc;g.lineWidth=2.9;g.stroke()});
-   A.forEach(q=>{const h=q[q.length-1];g.beginPath();g.arc(h[0],h[1],1.9,0,7);g.fillStyle=sk;g.fill();g.lineWidth=2.5;g.strokeStyle='#000';g.stroke()})}
-  const tor=()=>{g.beginPath();g.moveTo(2.4,22.5);g.quadraticCurveTo(2.4,13.8,11,13.4);g.quadraticCurveTo(19.6,13.8,19.6,22.5);g.closePath()};
+  const sk=skins[k],hr=hairs[(k+si)%4],sc=sh[si].b,st=sh[si].s,pl=q=>{g.beginPath();g.moveTo(q[0][0],q[0][1]);for(let n=1;n<q.length;n++)g.lineTo(q[n][0],q[n][1])},ol=()=>{g.lineWidth=2.5;g.strokeStyle='#000';g.stroke()};
+  if(m){const A=k%2?[[[4.2,17.5],[2.8,13],[3.4,5.8]],[[17.8,17.5],[19.2,13],[18.6,5.8]]]:[[[4.4,17.5],[3.2,6]],[[17.6,17.5],[18.8,6]]]; /* brazos gruesos en U (codo) / V */
+   A.forEach(q=>{pl(q);g.strokeStyle='#000';g.lineWidth=6.4;g.stroke();pl(q);g.strokeStyle=sc;g.lineWidth=3.9;g.stroke()});
+   A.forEach(q=>{const h=q[q.length-1];g.beginPath();g.arc(h[0],h[1],2.3,0,7);g.fillStyle=sk;g.fill();ol()})}
+  const tor=()=>{g.beginPath();g.moveTo(1.2,22.5);g.quadraticCurveTo(1.2,13,11,12.6);g.quadraticCurveTo(20.8,13,20.8,22.5);g.closePath()};
   tor();g.fillStyle=sc;g.fill();
-  if(sh.length>1&&k%2===0){g.save();tor();g.clip();g.fillStyle=ac;g.fillRect(7.4,12,2.8,11);g.fillRect(11.8,12,2.8,11);g.restore()}
-  tor();g.lineWidth=2.5;g.strokeStyle='#000';g.stroke();
-  g.beginPath();g.arc(11,8.4,4.6,0,7);g.fillStyle=sk;g.fill();
-  g.beginPath();g.arc(11,8.4,4.6,Math.PI*1.04,Math.PI*1.96);g.closePath();g.fillStyle=hr;g.fill();
-  g.beginPath();g.arc(11,8.4,4.6,0,7);g.lineWidth=2.5;g.strokeStyle='#000';g.stroke();
-  g.fillStyle='#000';[[9.2,9.3],[12.8,9.3]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,.65,0,7);g.fill()});
-  if(m){g.beginPath();g.ellipse(11,11.3,1.2,.9,0,0,7);g.fillStyle='#7f1d1d';g.fill()}
+  if(st){g.save();tor();g.clip();g.fillStyle=st;for(let x=3.2;x<20;x+=5.6)g.fillRect(x,12,2.8,11);g.restore()}
+  tor();ol(); /* torso ancho, contorno negro 2.5 px */
+  if(k===2)[[5.4,6.4],[16.6,6.4]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,2.2,0,7);g.fillStyle=hr;g.fill();ol()}); /* pelo voluminoso */
+  g.beginPath();g.arc(11,8.3,5.6,0,7);g.fillStyle=sk;g.fill();
+  g.beginPath();g.arc(11,8.3,5.6,k===3?Math.PI*.9:Math.PI*1.02,k===3?Math.PI*2.1:Math.PI*1.98);g.closePath();g.fillStyle=k===1?sc:hr;g.fill(); /* pelo / gorra (color puro de la camiseta) */
+  g.beginPath();g.arc(11,8.3,5.6,0,7);ol();
+  if(k===1){g.beginPath();g.ellipse(11,7.4,6.6,1.5,0,0,7);g.fillStyle=sc;g.fill();ol()} /* visera */
+  g.fillStyle='#000';[[9,9.3],[13,9.3]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,.8,0,7);g.fill()});
+  if(m){g.beginPath();g.ellipse(11,11.9,1.6,1.2,0,0,7);g.fillStyle='#7f1d1d';g.fill()}
+  else{g.beginPath();g.arc(11,10.9,1.8,Math.PI*.15,Math.PI*.85);g.lineWidth=1.1;g.strokeStyle='#000';g.stroke()}
   out[m][si*4+k]=cv}
  return{out,n:sh.length}}
 /* Posiciones fijas (semilla) en los 4 lados; filas del fondo primero (las de adelante tapan); cada hincha mira al campo (r = giro por tribuna); ~30% con brazos siempre arriba */
@@ -1024,7 +1027,7 @@ function stBuildFans(a,b,c,d,n){let sd=20261121;const rnd=()=>{sd|=0;sd=sd+0x6D2
  for(let i=ST_ROWS-1;i>=0;i--){const o=F+i*ST_RH+ST_RH/2;
   [[a-o,b-o,c+o,b-o],[c+o,b-o,c+o,d+o],[c+o,d+o,a-o,d+o],[a-o,d+o,a-o,b-o]].forEach(([x1,y1,x2,y2],sd2)=>{const len=Math.hypot(x2-x1,y2-y1),m=Math.floor(len/16),ux=(x2-x1)/len,uy=(y2-y1)/len;
    for(let k=1;k<m;k++){const t=k*16+8+(rnd()-.5)*3,x=x1+ux*t,y=y1+uy*t;if(bad(x,y))continue;
-    fans.push({x:x+(rnd()-.5)*2,y:y+(rnd()-.5)*2,v:Math.floor(rnd()*n)*4+Math.floor(rnd()*4),g:(k+i)&1,r:RT[sd2],u:rnd()<.3?1:0})}})}
+    fans.push({x:x+(rnd()-.5)*2,y:y+(rnd()-.5)*2,v:(n===1?0:(q=>q<.7?0:q<.9?1:2)(rnd()))*4+Math.floor(rnd()*4),g:(k+i)&1,r:RT[sd2],u:rnd()<.3?1:0})}})}
  return fans}
 /* Regenera el pre-render SOLO si cambió algo (colores, cantidad de colores, tamaño de cancha, escala, nombre del cartel); throttle de 150 ms al arrastrar un color */
 function stEnsure(a,b,c,d){const sc=clamp(Math.round(.78*DPR*10)/10,.7,1.6),T=STAD,txt=stSignText(),key=[G.w,G.h,sc,txt,T.seats.n,T.seats.c1,T.seats.c2,T.seats.c3,T.flags.n,T.flags.c1,T.flags.c2,T.flags.c3].join('|'),now=performance.now();
@@ -1197,11 +1200,16 @@ function spAim(p,b,dx,dy){G.goldSpin=0;if(p.team==='red'?b.x<=G.w*.42:b.x>=G.w*.
  let ay=ty,ok=true;for(let it=0;it<8;it++){const e=sim(ay);if(e==null){ok=false;break}ay+=ty-e} /* compensa la comba: la pelota termina en ty */
  if(!ok||Math.abs(ay-G.h/2)>G.h*.48)ay=ty;else G.goldSpin=sg;
  const l=Math.hypot(gx-b.x,ay-b.y)||1;return[(gx-b.x)/l,(ay-b.y)/l]}
+/* Palo más libre del arco rival: el más alejado del arquero rival (el más cercano a su arco) */
+function chFarPost(p){const gx=p.team==='red'?G.w:0,gT=G.gT,gB=G.gB,gh=G.gh,rv=G.players.filter(q=>q.team!==p.team&&q.team!=='spec'),gk=rv.length?rv.reduce((a,q)=>Math.abs(q.x-gx)<Math.abs(a.x-gx)?q:a):null;return{gx,gT,gB,gh,up:gk?Math.abs(gk.y-gT)>Math.abs(gk.y-gB):Math.random()<.5}}
 function chargedShot(p,c){const b=G.ball,d=Math.hypot(b.x-p.x,b.y-p.y);if(!d)return;
  const pwOn=!!(RL()&&G.pw&&G.pw.on&&G.pw.id===p.id),fire=G.activePowerEvent==='fire';let dx=(b.x-p.x)/d,dy=(b.y-p.y)/d,pm,strong=true;
  if(pwOn){pm=PS_MULT;G.goldDef=Math.random()<.35;[dx,dy]=spAim(p,b,dx,dy)} /* Power Shot por dominio: misil inatajable x3.0, sin desvío por sobrecarga · puntería asistida cerca del arco rival */
  else{pm=c<.30?.75+c*.65:.95+Math.pow((c-.30)/.70,1.35)*1.60; /* toque rápido 0.75x · hasta 2.55x al 100% (+50%) */
-  if(c>CH_R){const a=((c-CH_R)/.22)*(Math.random()<.5?1:-1)*(.28+Math.random()*.25),ca=Math.cos(a),sa=Math.sin(a),nx=dx*ca-dy*sa;dy=dx*sa+dy*ca;dx=nx} /* zona roja: se pasó de fuerza → sale desviado */
+  let aimed=false;
+  if(!p.bot&&c>=.35&&(p.team==='red'?b.x>G.w*.52:b.x<G.w*.48)){const f=chFarPost(p),ty=f.up?f.gT+f.gh*.22:f.gB-f.gh*.22,l=Math.hypot(f.gx-b.x,ty-b.y)||1,n=Math.hypot(dx*.65+(f.gx-b.x)/l*.35,dy*.65+(ty-b.y)/l*.35)||1;[dx,dy]=[(dx*.65+(f.gx-b.x)/l*.35)/n,(dy*.65+(ty-b.y)/l*.35)/n]} /* humano cargado desde campo rival: 35 % de asistencia hacia el palo más alejado del arquero rival */
+  else if(p.bot&&c>=.50&&(p.team==='red'?b.x>G.w*.55:b.x<G.w*.45)){const f=chFarPost(p),ty=(f.up?f.gT+f.gh*.22:f.gB-f.gh*.22)+(Math.random()-.5)*f.gh*.08,l=Math.hypot(f.gx-b.x,ty-b.y)||1,a=(Math.random()-.5)*.06,ca=Math.cos(a),sa=Math.sin(a),ux=(f.gx-b.x)/l,uy=(ty-b.y)/l;dx=ux*ca-uy*sa;dy=ux*sa+uy*ca;aimed=true} /* bot cargado desde campo rival: apunta al palo más libre con leve variación (reemplaza el desvío por sobrecarga) */
+  if(c>CH_R&&!aimed){const a=((c-CH_R)/.22)*(Math.random()<.5?1:-1)*(.14+Math.random()*.125),ca=Math.cos(a),sa=Math.sin(a),nx=dx*ca-dy*sa;dy=dx*sa+dy*ca;dx=nx} /* zona roja: desvío aleatorio reducido a la mitad */
   else if(c<CH_Y)strong=false}
  const m=kMult(p)*injShot(p)*pm*(!pwOn&&fire?1.6:1);
  b.vx+=dx*KS*m;b.vy+=dy*KS*m;const s=Math.hypot(b.vx,b.vy);if(s>BMAX*m){b.vx*=BMAX*m/s;b.vy*=BMAX*m/s}
