@@ -1097,7 +1097,7 @@ function powerStep(){if(NET.role==='client')return;
 const SLV=3.5,SL1=.34,SL2=3;
 /* MODO REALISTA (Online y Carrera) · Disparo Cargado manual (barra PES); Clásico y Superpoderes no pasan por aquí */
 const hasBallClose=p=>RL()&&!G.pen&&!G.sp&&Math.hypot(G.ball.x-p.x,G.ball.y-p.y)<=p.r+G.ball.r+20,
- CH_T=.48,CH_AUTO=.25,CH_Y=.45,CH_R=.78;
+ CH_T=.58,CH_AUTO=.25,CH_Y=.45,CH_R=.78;
 /* Special Shot en campo rival: apunta a palo superior / centro / palo inferior (según p.ay o la dirección del tiro) con leve variación; mezcla 75 % arco + 25 % dirección original */
 function spAim(p,b,dx,dy){if(p.team==='red'?b.x<=G.w*.45:b.x>=G.w*.55)return[dx,dy];
  const gx=p.team==='red'?G.w:0,ay=Math.abs(p.ay||0)>.12?p.ay:dy,base=ay<-.33?G.gT+G.gh*.16:ay>.33?G.gB-G.gh*.16:G.h/2,ty=base+(Math.random()-.5)*G.gh*.22,gl=Math.hypot(gx-b.x,ty-b.y)||1,mx=.75*(gx-b.x)/gl+.25*dx,my=.75*(ty-b.y)/gl+.25*dy,ml=Math.hypot(mx,my);
@@ -1105,7 +1105,7 @@ function spAim(p,b,dx,dy){if(p.team==='red'?b.x<=G.w*.45:b.x>=G.w*.55)return[dx,
 function chargedShot(p,c){const b=G.ball,d=Math.hypot(b.x-p.x,b.y-p.y);if(!d)return;
  const pwOn=!!(RL()&&G.pw&&G.pw.on&&G.pw.id===p.id),fire=G.activePowerEvent==='fire';let dx=(b.x-p.x)/d,dy=(b.y-p.y)/d,pm,strong=true;
  if(pwOn){pm=PS_MULT;[dx,dy]=spAim(p,b,dx,dy)} /* Power Shot por dominio: misil inatajable x3.0, sin desvío por sobrecarga · puntería asistida cerca del arco rival */
- else{pm=1+c*1.45; /* 1.0x → 2.45x */
+ else{pm=c<.30?.80+c*.75:1.02+Math.pow((c-.30)/.70,1.35)*1.55; /* toque rápido 0.80x–1.02x · carga progresiva hasta 2.57x */
   if(c>CH_R){const a=((c-CH_R)/.22)*(Math.random()<.5?1:-1)*(.28+Math.random()*.25),ca=Math.cos(a),sa=Math.sin(a),nx=dx*ca-dy*sa;dy=dx*sa+dy*ca;dx=nx} /* zona roja: se pasó de fuerza → sale desviado */
   else if(c<CH_Y)strong=false}
  const m=kMult(p)*injShot(p)*pm*(!pwOn&&fire?1.6:1);
@@ -1268,9 +1268,9 @@ function foulPenEnd(){const P=G.pen,t=P.team,gl=P.g===true;G.pen=null;
  hud()}
 function tryKick(p){const b=G.ball,S=G.sp,hs=!!S&&!p.bot&&p.team===S.team&&(S.type==='libre'||SP_AIM_T.includes(S.type));if(spBlock(p)||(hs&&S.botTake))return; /* pidió que lo ejecute otro: el humano no patea */
  if(S&&S.type==='corner'&&hs&&RL()&&p.cornerC==null&&spAimCtl(p)){p.chg=Math.min(1,(p.chg||0)+DT/0.55);return} /* córner PES: patear solo carga la barra; no toca el balón hasta soltar */
- const d=Math.hypot(b.x-p.x,b.y-p.y);if(d>p.r+b.r+(hs?SP_REACH:4)||!d)return;const pwOn=RL()&&G.pw&&G.pw.on&&G.pw.id===p.id,m=kMult(p)*injShot(p)*(pwOn?PS_MULT:G.activePowerEvent==='fire'?1.6:1)*spMult(p)*(S&&S.type==='corner'&&hs&&p.cornerC!=null?.4+.6*p.cornerC:1);p.khK=true; /* Power Shot 1.60x · Córner 2x · Tiro Libre 4x con mira `)` (el lateral conserva la fuerza normal) */
+ const d=Math.hypot(b.x-p.x,b.y-p.y);if(d>p.r+b.r+(hs?SP_REACH:4)||!d)return;const pwOn=RL()&&G.pw&&G.pw.on&&G.pw.id===p.id,m=kMult(p)*injShot(p)*(pwOn?PS_MULT:G.activePowerEvent==='fire'?1.6:1)*spMult(p)*(S&&S.type==='corner'&&hs&&p.cornerC!=null?.75+1.15*p.cornerC:1);p.khK=true; /* Power Shot 1.60x · Córner 2x · Tiro Libre 4x con mira `)` (el lateral conserva la fuerza normal) */
  const fk=fkDir(p),aa=!fk&&hs&&S.aimAng!=null?S.aimAng:null;let dx=fk?fk.x:aa!=null?Math.cos(aa):(b.x-p.x)/d,dy=fk?fk.y:aa!=null?Math.sin(aa):(b.y-p.y)/d;if(pwOn&&!fk&&aa==null)[dx,dy]=spAim(p,b,dx,dy);if(spMult(p)>1||pwOn)G.fkS=true;
- b.vx+=dx*KS*m;b.vy+=dy*KS*m;const s=Math.hypot(b.vx,b.vy);if(s>BMAX*m){b.vx*=BMAX*m/s;b.vy*=BMAX*m/s}G.lastT=p.team;G.lastP=p;p.cd=KCD;p.flash=FL;if(G.pw)G.pw=null;if(pwOn===true)p.pwCd=15;if(pwOn||G.activePowerEvent==='fire')powerThump();else thump()}
+ b.vx+=dx*KS*m;b.vy+=dy*KS*m;const s=Math.hypot(b.vx,b.vy);if(s>BMAX*m){b.vx*=BMAX*m/s;b.vy*=BMAX*m/s}G.lastT=p.team;G.lastP=p;p.cd=KCD;p.flash=FL;if(G.pw)G.pw=null;if(pwOn===true)p.pwCd=15;const cr=!!(S&&S.type==='corner'&&hs&&p.cornerC!=null&&p.cornerC>=.45);if(cr)G.redShot=true;if(pwOn||cr||G.activePowerEvent==='fire')powerThump();else thump()}
 function end(msg){G.over=true;powerReset();G.players.forEach(p=>{p.yc=0;p.fc=0;p.rc=0;injClear(p)});G.endT=3;Object.keys(keys).forEach(k=>keys[k]=0);const{red:a,blue:b}=G.score;
  showEv(msg||(a>b?`🏆 ¡FINAL! GANÓ LOCAL (${a} - ${b})`:b>a?`🏆 ¡FINAL! GANÓ VISITANTE (${a} - ${b})`:`🤝 ¡FINAL! EMPATE (${a} - ${b})`),3000);hud()}
 /* Tanda de penales */
