@@ -762,6 +762,8 @@ function movePlayer(p,to){if(p.team===to)return;if(G.pen)return showEv('Espera: 
 /* Modo Realista: saque lateral, córner y saque de arco */
 function setPiece(sp,txt){const b=G.ball;G.sp=sp;
  if(sp.type==='lateral'){let n=null,nd=1e9;act().forEach(q=>{if(q.team!==sp.team||q.fz>0)return;const d=Math.hypot(q.x-sp.x,q.y-sp.y);if(d<nd){nd=d;n=q}});sp.exId=n?n.id:null} /* lateral: ejecutante fijo = el más cercano (humano o bot) cuando sale la pelota; sin alternancia */
+ if(sp.type==='corner'&&!sp.botTake){const hb=carOn()&&G.players.some(q=>q.bot&&q.team===sp.team),p=hb?spExecutor():act().filter(q=>!q.bot&&q.team===sp.team&&!(q.fz>0)).reduce((a,q)=>!a||Math.hypot(q.x-sp.x,q.y-sp.y)<Math.hypot(a.x-sp.x,a.y-sp.y)?q:a,null);
+  if(p&&!p.bot){p.x=sp.x+(sp.x<G.w/2?-18:18);p.y=sp.y+(sp.y<G.h/2?-18:18);p.vx=p.vy=0;p.ax=p.ay=0;sp.aimAng=spAimInit(sp)}} /* córner PES: el humano ejecutante queda detrás del balón con la flecha guía lista */
  b.x=sp.x;b.y=sp.y;b.vx=b.vy=0;showEv(`${txt} · ${sp.team==='red'?'LOCAL':'VISITANTE'}`,1700)}
 function ballOut(){const b=G.ball,r=b.r,W=G.w,H=G.h;
  if(b.y+r<0||b.y-r>H)setPiece({type:'lateral',team:other(G.lastT||'red'),x:clamp(b.x,40,W-40),y:b.y<0?5:H-5,rad:SPR},'↔️ SAQUE LATERAL'); /* en el punto exacto, para el rival del último que la tocó */
@@ -1029,7 +1031,7 @@ function injFx(p){if(!(p.inj>0)||!RL()||G.pen)return;const t=performance.now(),k
 /* ===== 🎯 Tiro Libre con mira `)` + Córner potenciado (SOLO Modo Realista) =====
    CORNER_MULT: fuerza del córner (2x, valor original). FK_MULT: tiro libre = el doble que un córner (4x, atajable). Ajustar solo estas dos constantes para afinar.
    G.sp.aim: -1 Arriba · 0 Medio · 1 Abajo (se sincroniza en netState dentro de sp.a). */
-const CORNER_MULT=2,FK_MULT=4,PS_MULT=3; /* PS_MULT: disparo cargado (Power Shot) con posesión sostenida, antes 1.6x */
+const CORNER_MULT=2,FK_MULT=4,PS_MULT=3.5; /* PS_MULT: Special Shot (posesión sostenida) · misil, antes 3x / 1.6x */
 const spMult=p=>RL()&&G.sp&&p.team===G.sp.team?(G.sp.type==='corner'?CORNER_MULT:G.sp.type==='libre'?FK_MULT:1):1;
 /* ángulos reales (pelota → palo alto / centro / palo bajo del arco rival) */
 function fkAngles(S){const gx=S.team==='red'?G.w:0,ins=G.gh*.14,ys=[G.gT+ins,G.h/2,G.gB-ins];return ys.map(y=>Math.atan2(y-S.y,gx-S.x))}
@@ -1085,27 +1087,33 @@ function powerStep(){if(NET.role==='client')return;
  const b=G.ball,L=act(),dq=q=>Math.hypot(q.x-b.x,q.y-b.y);let pw=G.pw;
  if(pw){const o=L.find(q=>q.id===pw.id);
   if(!o||dq(o)>65||L.some(q=>q.team!==o.team&&dq(q)<q.r+b.r+3)){G.pw=null;pw=null}
-  else if(dq(o)<48){pw.t+=DT;if(!pw.on&&pw.t>=3){pw.on=true;notifyPower(o)}}}
- if(!pw){let o=null,od=48;L.forEach(q=>{const d=dq(q);if(d<od){od=d;o=q}});
-  if(o&&!L.some(q=>q.team!==o.team&&dq(q)<48))G.pw={id:o.id,t:0,on:false}}}
+  else if(dq(o)<58){pw.t+=DT;if(!pw.on&&pw.t>=2.4&&!(o.pwCd>0)&&(o.team==='red'?o.x>G.w*0.45:o.x<G.w*0.55)){pw.on=true;notifyPower(o)}}}
+ if(!pw){let o=null,od=58;L.forEach(q=>{const d=dq(q);if(d<od){od=d;o=q}});
+  if(o&&!L.some(q=>q.team!==o.team&&dq(q)<52))G.pw={id:o.id,t:0,on:false}}}
 /* MODO REALISTA · Barrida: mantener patear 0.35 s sin haber pateado → desliza 0.34 s (1.85x) + 3.0 s de recuperación lenta (0.45x); recarga de 15 s desde que termina el deslizamiento; avisos en el chat; sin efectos visuales */
 const SLV=3.5,SL1=.34,SL2=3;
 /* MODO REALISTA (Online y Carrera) · Disparo Cargado manual (barra PES); Clásico y Superpoderes no pasan por aquí */
 const hasBallClose=p=>RL()&&!G.pen&&!G.sp&&Math.hypot(G.ball.x-p.x,G.ball.y-p.y)<=p.r+G.ball.r+20,
- CH_T=.85,CH_AUTO=.25,CH_Y=.45,CH_R=.78;
+ CH_T=.48,CH_AUTO=.25,CH_Y=.45,CH_R=.78;
 function chargedShot(p,c){const b=G.ball,d=Math.hypot(b.x-p.x,b.y-p.y);if(!d)return;
  const pwOn=!!(RL()&&G.pw&&G.pw.on&&G.pw.id===p.id),fire=G.activePowerEvent==='fire';let dx=(b.x-p.x)/d,dy=(b.y-p.y)/d,pm,strong=true;
  if(pwOn)pm=PS_MULT; /* Power Shot por dominio: misil inatajable x3.0, sin desvío por sobrecarga */
- else{pm=1+c*1.05; /* 1.0x → 2.05x */
+ else{pm=1+c*1.45; /* 1.0x → 2.45x */
   if(c>CH_R){const a=((c-CH_R)/.22)*(Math.random()<.5?1:-1)*(.28+Math.random()*.25),ca=Math.cos(a),sa=Math.sin(a),nx=dx*ca-dy*sa;dy=dx*sa+dy*ca;dx=nx} /* zona roja: se pasó de fuerza → sale desviado */
   else if(c<CH_Y)strong=false}
  const m=kMult(p)*injShot(p)*pm*(!pwOn&&fire?1.6:1);
  b.vx+=dx*KS*m;b.vy+=dy*KS*m;const s=Math.hypot(b.vx,b.vy);if(s>BMAX*m){b.vx*=BMAX*m/s;b.vy*=BMAX*m/s}
- G.lastT=p.team;G.lastP=p;p.cd=KCD;p.flash=FL;p.khK=true;G.pw=null;
+ G.lastT=p.team;G.lastP=p;p.cd=KCD;p.flash=FL;p.khK=true;G.pw=null;if(pwOn===true)p.pwCd=15;
  G.goldShot=pwOn;G.redShot=!pwOn&&strong; /* dorado: Special Shot (dominio 3 s) · rojo: carga manual c ≥ 0.45 */
  if(pwOn||strong)G.fkS=true;
  if(pwOn||strong||fire)powerThump();else thump()}
 function chargeTick(p){const b=G.ball; /* devuelve true si la carga consume el botón patear (bloquea tryKick) */
+ const S0=G.sp;
+ if(S0&&S0.type==='corner'&&RL()&&!p.bot&&!G.pen&&spAimCtl(p)){ /* córner PES: la flecha gira (step) y la barra carga sin mover ni tocar el balón hasta soltar Patear */
+  if(p.kick&&!p.sl&&!(p.fz>0)){p.chg=Math.min(1,(p.chg||0)+DT/0.55);p.chgF=0;return true}
+  const c=p.chg||0;p.chg=0;p.chgF=0;
+  if(c>0&&!p.sl&&!(p.fz>0)&&p.cd<=0){p.cornerC=c;tryKick(p);p.cornerC=null}
+  return false}
  if(!RL()||p.bot||G.pen||G.sp){p.chg=0;p.chgF=0;p.chgL=false;return false}
  if(!p.kick)p.chgL=false;
  const d=Math.hypot(b.x-p.x,b.y-p.y);
@@ -1172,8 +1180,9 @@ function spToggle(p){if(!spCan(p))return;const S=G.sp,b=G.ball,ex=spExecutor();
   S.botTake=true;S.victimId=null;S.exK='';p.ax=p.ay=0;if(S.type==='libre'){S.ba=fkBotAim(S);S.aim=S.ba}return}
  /* Caso B: ejecutaba un bot → lo ejecuto yo: me ubico detrás del balón mirando a la mira y el bot se desmarca hacia el área */
  S.botTake=false;S.victimId=p.id;S.exK='';
- let a;if(S.type==='libre')a=fkAngles(S)[(S.aim|0)+1];else{if(S.aimAng==null)S.aimAng=spAimInit(S);a=S.aimAng}
+ let a;if(S.type==='libre')a=fkAngles(S)[(S.aim|0)+1];else{if(S.aimAng==null||S.type==='corner')S.aimAng=spAimInit(S);a=S.aimAng}
  const gap=p.r+b.r+6;p.x=b.x-Math.cos(a)*gap;p.y=b.y-Math.sin(a)*gap;p.vx=p.vy=0;p.ax=p.ay=0;p.sl=null;
+ if(S.type==='corner'){p.x=S.x+(S.x<G.w/2?-18:18);p.y=S.y+(S.y<G.h/2?-18:18);p.vx=p.vy=0} /* córner PES: detrás del balón, en la esquina */
  if(ex&&ex.bot&&Math.hypot(ex.x-b.x,ex.y-b.y)<110*G.k){const gx=S.team==='red'?G.w:0,sg=S.team==='red'?-1:1;ex.x=gx+sg*areaD()*.65;ex.y=clamp(G.h/2+(Math.random()<.5?-1:1)*G.h*.08,ex.r,G.h-ex.r);ex.vx=ex.vy=0}}
 /* Penal por falta durante el partido (SOLO Carrera): el humano del equipo que patea puede tomar el penal en lugar del bot. Nunca en tanda (!single). */
 let PEN_OK_T=0;
@@ -1251,9 +1260,10 @@ function foulPenEnd(){const P=G.pen,t=P.team,gl=P.g===true;G.pen=null;
  if(gl)goal(t);else{const sd=smallD()*.55;setPiece({type:'arco',team:other(t),x:P.gx===0?sd:G.w-sd,y:G.h/2,rad:SPR,gx:P.gx},'🥅 SAQUE DE ARCO')} /* gol: saque del medio; atajado/errado: saque de arco */
  hud()}
 function tryKick(p){const b=G.ball,S=G.sp,hs=!!S&&!p.bot&&p.team===S.team&&(S.type==='libre'||SP_AIM_T.includes(S.type));if(spBlock(p)||(hs&&S.botTake))return; /* pidió que lo ejecute otro: el humano no patea */
- const d=Math.hypot(b.x-p.x,b.y-p.y);if(d>p.r+b.r+(hs?SP_REACH:4)||!d)return;const pwOn=RL()&&G.pw&&G.pw.on&&G.pw.id===p.id,m=kMult(p)*injShot(p)*(pwOn?PS_MULT:G.activePowerEvent==='fire'?1.6:1)*spMult(p);p.khK=true; /* Power Shot 1.60x · Córner 2x · Tiro Libre 4x con mira `)` (el lateral conserva la fuerza normal) */
+ if(S&&S.type==='corner'&&hs&&RL()&&p.cornerC==null&&spAimCtl(p)){p.chg=Math.min(1,(p.chg||0)+DT/0.55);return} /* córner PES: patear solo carga la barra; no toca el balón hasta soltar */
+ const d=Math.hypot(b.x-p.x,b.y-p.y);if(d>p.r+b.r+(hs?SP_REACH:4)||!d)return;const pwOn=RL()&&G.pw&&G.pw.on&&G.pw.id===p.id,m=kMult(p)*injShot(p)*(pwOn?PS_MULT:G.activePowerEvent==='fire'?1.6:1)*spMult(p)*(S&&S.type==='corner'&&hs&&p.cornerC!=null?.4+.6*p.cornerC:1);p.khK=true; /* Power Shot 1.60x · Córner 2x · Tiro Libre 4x con mira `)` (el lateral conserva la fuerza normal) */
  const fk=fkDir(p),aa=!fk&&hs&&S.aimAng!=null?S.aimAng:null,dx=fk?fk.x:aa!=null?Math.cos(aa):(b.x-p.x)/d,dy=fk?fk.y:aa!=null?Math.sin(aa):(b.y-p.y)/d;if(spMult(p)>1||pwOn)G.fkS=true;
- b.vx+=dx*KS*m;b.vy+=dy*KS*m;const s=Math.hypot(b.vx,b.vy);if(s>BMAX*m){b.vx*=BMAX*m/s;b.vy*=BMAX*m/s}G.lastT=p.team;G.lastP=p;p.cd=KCD;p.flash=FL;if(G.pw)G.pw=null;if(pwOn||G.activePowerEvent==='fire')powerThump();else thump()}
+ b.vx+=dx*KS*m;b.vy+=dy*KS*m;const s=Math.hypot(b.vx,b.vy);if(s>BMAX*m){b.vx*=BMAX*m/s;b.vy*=BMAX*m/s}G.lastT=p.team;G.lastP=p;p.cd=KCD;p.flash=FL;if(G.pw)G.pw=null;if(pwOn===true)p.pwCd=15;if(pwOn||G.activePowerEvent==='fire')powerThump();else thump()}
 function end(msg){G.over=true;powerReset();G.players.forEach(p=>{p.yc=0;p.fc=0;p.rc=0;injClear(p)});G.endT=3;Object.keys(keys).forEach(k=>keys[k]=0);const{red:a,blue:b}=G.score;
  showEv(msg||(a>b?`🏆 ¡FINAL! GANÓ LOCAL (${a} - ${b})`:b>a?`🏆 ¡FINAL! GANÓ VISITANTE (${a} - ${b})`:`🤝 ¡FINAL! EMPATE (${a} - ${b})`),3000);hud()}
 /* Tanda de penales */
@@ -1519,7 +1529,7 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
  G.players.forEach(p=>{if(p.inj>0){if((p.inj-=DT)<=0)injClear(p);else p.injG=gkSmall(p)}});
  if(NET.role!=='client'&&(G.nt=(G.nt||0)+DT)>1){G.nt=0;uniqueBotNums()}
  superStep();
- const{w,h}=G,b=G.ball,bdf=G.activePowerEvent==='ice'?.9965:BD; /* Cancha de Hielo: casi sin fricción para la pelota */
+ const{w,h}=G,b=G.ball,bdf=G.activePowerEvent==='ice'?.9965:G.goldShot?.991:G.redShot?.986:BD; /* Hielo: casi sin fricción · Special Shot / disparo cargado: conservan velocidad en el aire */
  const nf=v=>!Number.isFinite(v); /* anti-congelamiento: ningún valor NaN/Infinity queda en el estado */
  if(nf(b.x)||nf(b.y)||nf(b.vx)||nf(b.vy)){b.x=w/2;b.y=h/2;b.vx=b.vy=0}
  G.players.forEach(p=>{if(nf(p.x)||nf(p.y)||nf(p.vx)||nf(p.vy)){p.x=w/2;p.y=h/2;p.vx=p.vy=0}if(nf(p.ax))p.ax=0;if(nf(p.ay))p.ay=0});
@@ -1533,7 +1543,7 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
  act().forEach(p=>{if(p.bot){if(p.fz>0){p.ax=p.ay=0;p.kick=false}else{G.pen?penAI(p):botAI(p);if(G.activePowerEvent==='reverse'&&!G.pen)botDisorient(p)}}
   velStep(p,powerMove(p));if(!p.bot)slideTick(p);if(p.fz>0){p.vx=p.vy=0;p.sl=null} /* bloque de hielo: inmóvil pero con colisión sólida */
   /* el ejecutante se mueve libre en SPF px alrededor del balón (spFree/contain); el resto, dentro de la cancha */
-  {const nx=p.x+p.vx;p.x=spFree(p)?nx:clamp(nx,Math.min(-GD+p.r,p.x),Math.max(w+GD-p.r,p.x))}p.y=moveY(p,p.y+p.vy);fence(p);p.cd=Math.max(0,p.cd-DT);p.flash=Math.max(0,p.flash-DT);
+  {const nx=p.x+p.vx;p.x=spFree(p)?nx:clamp(nx,Math.min(-GD+p.r,p.x),Math.max(w+GD-p.r,p.x))}p.y=moveY(p,p.y+p.vy);fence(p);p.cd=Math.max(0,p.cd-DT);p.pwCd=Math.max(0,(p.pwCd||0)-DT);p.flash=Math.max(0,p.flash-DT);
   if(p.kick&&!p.kd)p.flash=FL; /* destello 150 ms al presionar patear, toque o no la pelota */
   p.kd=p.kick;const chg=!p.bot&&RL()&&chargeTick(p);if(!chg&&p.kick&&p.cd<=0&&!p.sl)tryKick(p)}); /* Realista: la carga retiene el disparo hasta soltar */
  const L=act();magnetPull(L);
