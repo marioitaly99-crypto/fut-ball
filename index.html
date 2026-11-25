@@ -1034,7 +1034,7 @@ function injFx(p){if(!(p.inj>0)||!RL()||G.pen)return;const t=performance.now(),k
 /* ===== 🎯 Tiro Libre con mira `)` + Córner potenciado (SOLO Modo Realista) =====
    CORNER_MULT: fuerza del córner (2x, valor original). FK_MULT: tiro libre = el doble que un córner (4x, atajable). Ajustar solo estas dos constantes para afinar.
    G.sp.aim: -1 Arriba · 0 Medio · 1 Abajo (se sincroniza en netState dentro de sp.a). */
-const CORNER_MULT=2,FK_MULT=4,PS_MULT=3.5; /* PS_MULT: Special Shot (posesión sostenida) · misil, antes 3x / 1.6x */
+const CORNER_MULT=2,FK_MULT=4,PS_MULT=2.4; /* PS_MULT: Special Shot (posesión sostenida) · misil controlable, antes 3.5x */
 const spMult=p=>RL()&&G.sp&&p.team===G.sp.team?(G.sp.type==='corner'?CORNER_MULT:G.sp.type==='libre'?FK_MULT:1):1;
 /* ángulos reales (pelota → palo alto / centro / palo bajo del arco rival) */
 function fkAngles(S){const gx=S.team==='red'?G.w:0,ins=G.gh*.14,ys=[G.gT+ins,G.h/2,G.gB-ins];return ys.map(y=>Math.atan2(y-S.y,gx-S.x))}
@@ -1105,7 +1105,7 @@ function spAim(p,b,dx,dy){if(p.team==='red'?b.x<=G.w*.45:b.x>=G.w*.55)return[dx,
 function chargedShot(p,c){const b=G.ball,d=Math.hypot(b.x-p.x,b.y-p.y);if(!d)return;
  const pwOn=!!(RL()&&G.pw&&G.pw.on&&G.pw.id===p.id),fire=G.activePowerEvent==='fire';let dx=(b.x-p.x)/d,dy=(b.y-p.y)/d,pm,strong=true;
  if(pwOn){pm=PS_MULT;[dx,dy]=spAim(p,b,dx,dy)} /* Power Shot por dominio: misil inatajable x3.0, sin desvío por sobrecarga · puntería asistida cerca del arco rival */
- else{pm=c<.30?.80+c*.75:1.02+Math.pow((c-.30)/.70,1.35)*1.55; /* toque rápido 0.80x–1.02x · carga progresiva hasta 2.57x */
+ else{pm=c<.30?.75+c*.65:.95+Math.pow((c-.30)/.70,1.3)*.80; /* toque rápido 0.75x · hasta 1.75x al 100% */
   if(c>CH_R){const a=((c-CH_R)/.22)*(Math.random()<.5?1:-1)*(.28+Math.random()*.25),ca=Math.cos(a),sa=Math.sin(a),nx=dx*ca-dy*sa;dy=dx*sa+dy*ca;dx=nx} /* zona roja: se pasó de fuerza → sale desviado */
   else if(c<CH_Y)strong=false}
  const m=kMult(p)*injShot(p)*pm*(!pwOn&&fire?1.6:1);
@@ -1268,7 +1268,7 @@ function foulPenEnd(){const P=G.pen,t=P.team,gl=P.g===true;G.pen=null;
  hud()}
 function tryKick(p){const b=G.ball,S=G.sp,hs=!!S&&!p.bot&&p.team===S.team&&(S.type==='libre'||SP_AIM_T.includes(S.type));if(spBlock(p)||(hs&&S.botTake))return; /* pidió que lo ejecute otro: el humano no patea */
  if(S&&S.type==='corner'&&hs&&RL()&&p.cornerC==null&&spAimCtl(p)){p.chg=Math.min(1,(p.chg||0)+DT/0.55);return} /* córner PES: patear solo carga la barra; no toca el balón hasta soltar */
- const d=Math.hypot(b.x-p.x,b.y-p.y);if(d>p.r+b.r+(hs?SP_REACH:4)||!d)return;const pwOn=RL()&&G.pw&&G.pw.on&&G.pw.id===p.id,m=kMult(p)*injShot(p)*(pwOn?PS_MULT:G.activePowerEvent==='fire'?1.6:1)*spMult(p)*(S&&S.type==='corner'&&hs&&p.cornerC!=null?.75+1.15*p.cornerC:1);p.khK=true; /* Power Shot 1.60x · Córner 2x · Tiro Libre 4x con mira `)` (el lateral conserva la fuerza normal) */
+ const d=Math.hypot(b.x-p.x,b.y-p.y);if(d>p.r+b.r+(hs?SP_REACH:4)||!d)return;const pwOn=RL()&&G.pw&&G.pw.on&&G.pw.id===p.id,m=kMult(p)*injShot(p)*(pwOn?PS_MULT:G.activePowerEvent==='fire'?1.6:1)*spMult(p)*(S&&S.type==='corner'&&hs&&p.cornerC!=null?.55+.60*p.cornerC:1);p.khK=true; /* Power Shot 1.60x · Córner 2x · Tiro Libre 4x con mira `)` (el lateral conserva la fuerza normal) */
  const fk=fkDir(p),aa=!fk&&hs&&S.aimAng!=null?S.aimAng:null;let dx=fk?fk.x:aa!=null?Math.cos(aa):(b.x-p.x)/d,dy=fk?fk.y:aa!=null?Math.sin(aa):(b.y-p.y)/d;if(pwOn&&!fk&&aa==null)[dx,dy]=spAim(p,b,dx,dy);if(spMult(p)>1||pwOn)G.fkS=true;
  b.vx+=dx*KS*m;b.vy+=dy*KS*m;const s=Math.hypot(b.vx,b.vy);if(s>BMAX*m){b.vx*=BMAX*m/s;b.vy*=BMAX*m/s}G.lastT=p.team;G.lastP=p;p.cd=KCD;p.flash=FL;if(G.pw)G.pw=null;if(pwOn===true)p.pwCd=15;const cr=!!(S&&S.type==='corner'&&hs&&p.cornerC!=null&&p.cornerC>=.45);if(cr)G.redShot=true;if(pwOn||cr||G.activePowerEvent==='fire')powerThump();else thump()}
 function end(msg){G.over=true;powerReset();G.players.forEach(p=>{p.yc=0;p.fc=0;p.rc=0;injClear(p)});G.endT=3;Object.keys(keys).forEach(k=>keys[k]=0);const{red:a,blue:b}=G.score;
@@ -1537,7 +1537,7 @@ function step(){if(G.over){if((G.endT-=DT)<=0){restart();showEv('¡NUEVO PARTIDO
  G.players.forEach(p=>{if(p.inj>0){if((p.inj-=DT)<=0)injClear(p);else p.injG=gkSmall(p)}});
  if(NET.role!=='client'&&(G.nt=(G.nt||0)+DT)>1){G.nt=0;uniqueBotNums()}
  superStep();
- const{w,h}=G,b=G.ball,bdf=G.activePowerEvent==='ice'?.9965:G.goldShot?.991:G.redShot?.986:BD; /* Hielo: casi sin fricción · Special Shot / disparo cargado: conservan velocidad en el aire */
+ const{w,h}=G,b=G.ball,bdf=G.activePowerEvent==='ice'?.9965:BD; /* Hielo: casi sin fricción · goldShot/redShot solo son efecto visual */
  const nf=v=>!Number.isFinite(v); /* anti-congelamiento: ningún valor NaN/Infinity queda en el estado */
  if(nf(b.x)||nf(b.y)||nf(b.vx)||nf(b.vy)){b.x=w/2;b.y=h/2;b.vx=b.vy=0}
  G.players.forEach(p=>{if(nf(p.x)||nf(p.y)||nf(p.vx)||nf(p.vy)){p.x=w/2;p.y=h/2;p.vx=p.vy=0}if(nf(p.ax))p.ax=0;if(nf(p.ay))p.ay=0});
