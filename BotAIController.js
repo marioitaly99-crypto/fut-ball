@@ -5,7 +5,7 @@
  *   const ai = new window.BotAIController({ difficulty: 'normal' });
  *   const inputs = ai.update(gameState);           // { [botId]: { ix, iy, kick, slide } }
  *   // o bien, bot por bot:
- *   const input = ai.decide(botPlayer, gameState); // { ix, iy, kick, slide }
+ *   const input = ai.decide(botPlayer, gameState); // { ix, iy, kick, slide, charge }
  *
  * Forma esperada de `gameState` (todos los campos opcionales tienen fallback):
  *   stadium : { width, height, left=0, top=0, goalTop?, goalBottom? }  // cancha = [left, left+width] x [top, top+height]
@@ -61,10 +61,10 @@
     if (t < 0) t += 2 * span;
     return lo + (t <= span ? t : 2 * span - t);
   }
-  function mk(ix, iy, kick, slide, meta) {
+  function mk(ix, iy, kick, slide, meta, charge) {
     const m = hyp(ix, iy);
     if (m > 1) { ix /= m; iy /= m; }
-    return { ix: ix || 0, iy: iy || 0, kick: !!kick, slide: !!slide, meta: meta || {} };
+    return { ix: ix || 0, iy: iy || 0, kick: !!kick, slide: !!slide, charge: charge || 0, meta: meta || {} };
   }
   const isPlaying = (t) => t != null && t !== -1 && t !== 'spectator' && t !== 'spectators' && t !== 'spec';
 
@@ -93,7 +93,7 @@
     // Punto de entrada por bot (con tiempo de reacción según dificultad)
     // -------------------------------------------------------------------------
     decide(bot, gs) {
-      if (bot.frozen) return { ix: 0, iy: 0, kick: false, slide: false };
+      if (bot.frozen) return { ix: 0, iy: 0, kick: false, slide: false, charge: 0 };
       const cfg = DIFFICULTY[bot.difficulty] || DIFFICULTY[this.difficulty];
       const key = bot.id != null ? bot.id : 'bot';
       let mem = this._mem.get(key);
@@ -126,7 +126,28 @@
       const ctx = this._buildCtx(bot, gs, mem);
       let dec = this._think(ctx.me, gs, ctx, cfg, mem, sp);
       dec = this.handleSuperpowers(bot, gs, dec);
-      return { ix: dec.ix, iy: dec.iy, kick: dec.kick, slide: dec.slide };
+      const charge = this._kickCharge(ctx, cfg, dec, sp);
+      return { ix: dec.ix, iy: dec.iy, kick: dec.kick, slide: dec.slide, charge };
+    }
+
+    /**
+     * Fuerza de carga (0..1) para el Disparo/Pase Cargado del Modo Realista (0 = patada normal).
+     *  - Special Shot activo (ctx.specialHolderId === me.id) con arco a tiro / ángulo → 0.7 de inmediato.
+     *  - Remates ('shot' / 'long-shot') con dGoal > W*0.13 → 0.68 (easy 0.85).
+     *  - Centros, despejes y pases largos (> W*0.24) → 0.55.
+     */
+    _kickCharge(ctx, cfg, dec, sp) {
+      if (!ctx.isRealistic || !dec || dec.kick !== true || sp) return 0;   // sin carga en jugadas a balón parado (el juego las ejecuta con tryKick)
+      const me = ctx.me, ball = ctx.ball, W = ctx.W;
+      const dGoal = hyp(ball.x - ctx.oppX, ball.y - ctx.oppGoal.cy);
+      if (ctx.specialHolderId != null && ctx.specialHolderId === me.id &&
+          (dGoal < ctx.shootRange * 1.4 || this._shotTarget(ball.x, ball.y, ctx))) return 0.7;
+      const tag = dec.tag;
+      if (tag === 'shot' || tag === 'long-shot') return dGoal > W * 0.13 ? (cfg === DIFFICULTY.easy ? 0.85 : 0.68) : 0;
+      if (tag === 'cross' || tag === 'clear') return 0.55;
+      if ((tag === 'pass' || tag === 'gk-long' || tag === 'gk-short') && dec.to &&
+          hyp(dec.to.x - ball.x, dec.to.y - ball.y) > W * 0.24) return 0.55;
+      return 0;
     }
 
     // -------------------------------------------------------------------------
@@ -172,6 +193,7 @@
         powerHolderId: gs.powerHolderId != null && gs.powerHolderId !== '' ? gs.powerHolderId : null,   // atacante que domina/carga Power Shot
         tacticBias: clamp((gs.tactics && gs.tactics[bot.team]) || 0, -0.22, 0.25),
         isRealistic: !!(gs.isRealistic || gs.mode === 'realistic'),
+        specialHolderId: gs.specialHolderId != null ? gs.specialHolderId : null,   // dueño del Special Shot activo (Realista)
         depth: (x) => (x - ownX) * dir,          // distancia a la línea de fondo propia (+ hacia el rival)
         unDepth: (d) => ownX + d * dir,
         vmax, slowR: clamp(vmax * 12, W * 0.015, W * 0.15), deadzone: W * 0.006, gap: W * 0.012, kickReach: W * 0.010, brakeTicks: 5,
@@ -470,9 +492,17 @@
       for (const m of ctx.mates) {
         if (m.frozen) continue;
         const free = this._nearestDist(ctx.rivals, m);
-        if (free < ctx.W * 0.07) continue;
+        const dist = hyp(m.x - fx, m.y - fy);
+        // Humano de SU equipo (Carrera: el usuario · Online: los humanos del mismo equipo): apto si no tiene rival pegado y a distancia jugable
+        const hOk = !m.isBot && free >= ctx.W * 0.045 && dist >= ctx.W * 0.06 && dist <= ctx.W * 0.45;
+        if (o.onlyHumans && !hOk) continue;
+        if (free < ctx.W * 0.07 && !hOk) continue;
+        if (o.minFree != null && free < o.minFree) continue;
         let tx = m.x, ty = m.y;
-        if (cfg.through && !o.noThrough) {                      // pase al hueco, adelantado
+        if (hOk && ctx.depth(m.x) > ctx.W * 0.62) {              // humano cerca del área rival: pase a su carrera
+          tx = m.x + m.vx * 8 + ctx.dir * ctx.W * 0.04;
+          ty = m.y + m.vy * 8;
+        } else if (cfg.through && !o.noThrough) {                      // pase al hueco, adelantado
           tx = m.x + m.vx * 10 + ctx.dir * ctx.W * 0.07;
           ty = m.y + m.vy * 10;
         } else if (cfg.precise || cfg.predict > 6) { tx = m.x + m.vx * 5; ty = m.y + m.vy * 5; }
@@ -483,9 +513,25 @@
           p.x = m.x; p.y = m.y;
         }
         const prog = ctx.depth(m.x) - fd;
-        if (o.minProgress != null && prog < o.minProgress) continue;
-        const score = prog + Math.min(free, ctx.W * 0.2) * 0.8 - hyp(m.x - fx, m.y - fy) * 0.2 + (o.prefer != null && m.id === o.prefer ? ctx.W * 0.15 : 0);
-        if (score > bs) { bs = score; best = { mate: m, target: p, score }; }
+        let minP = o.minProgress;
+        if (hOk && free >= ctx.W * 0.11 && minP != null) minP = Math.min(minP, -ctx.W * 0.18);   // con espacio: se lo busca aunque esté algo más atrás
+        if (minP != null && prog < minP) continue;
+        let score = prog + Math.min(free, ctx.W * 0.2) * 0.8 - dist * 0.2 + (o.prefer != null && m.id === o.prefer ? ctx.W * 0.15 : 0);
+        if (hOk && (free >= ctx.W * 0.11 || ctx.depth(m.x) > ctx.W * 0.62)) score += free >= ctx.W * 0.14 ? ctx.W * 0.45 : ctx.W * 0.35;   // prioridad fuerte al humano libre / bien ubicado
+        if (score > bs) { bs = score; best = { mate: m, target: p, score, free, prog, human: hOk }; }
+      }
+      return best;
+    }
+
+    /** Humano de su equipo entrando al área rival con espacio (para dirigir centros / córners a su desmarque). */
+    _humanRunner(ctx) {
+      const W = ctx.W, H = ctx.H;
+      let best = null, bf = -1;
+      for (const m of ctx.mates) {
+        if (m.isBot || m.frozen) continue;
+        if (!(ctx.depth(m.x) > W * 0.66 && Math.abs(m.y - ctx.cy) < H * 0.36)) continue;
+        const free = this._nearestDist(ctx.rivals, m);
+        if (free >= W * 0.045 && free > bf) { bf = free; best = m; }
       }
       return best;
     }
@@ -624,17 +670,27 @@
       const rivalD = this._nearestDist(ctx.rivals, ball);
       const pressured = rivalD < ctx.pressR;
       const side = ball.y >= cy ? 1 : -1;
+      const spHold = ctx.specialHolderId != null && ctx.specialHolderId === me.id;   // Special Shot activo: remata de inmediato
 
       const A = {
-        shot: () => (dGoal < ctx.shootRange * (1 + ctx.tacticBias * 0.9) * cfg.shootMul ? this._shotTarget(ball.x, ball.y, ctx, mem) : null),
-        cross: () => (Math.abs(ball.y - cy) > H * 0.30 && Math.abs(ball.x - ctx.oppX) < W * 0.22
-          ? { x: ctx.unDepth(W * 0.88), y: cy } : null),
+        shot: () => (dGoal < Math.max(ctx.shootRange * (1 + ctx.tacticBias * 0.9) * cfg.shootMul, spHold ? ctx.shootRange * 1.4 : 0) ? this._shotTarget(ball.x, ball.y, ctx, mem) : null),
+        cross: () => {
+          if (!(Math.abs(ball.y - cy) > H * 0.30 && Math.abs(ball.x - ctx.oppX) < W * 0.22)) return null;
+          const hr = this._humanRunner(ctx);                                // humano de su equipo entrando al área: centro a su desmarque
+          return hr ? this._leadPoint(hr, ctx, cfg) : { x: ctx.unDepth(W * 0.88), y: cy };
+        },
         clear: () => (bd < W * 0.18 && pressured ? { x: ctx.unDepth(W * 0.5), y: cy + side * H * 0.48 } : null),
         pass: () => {
-          if (!pressured && !(cfg.smartPass && rivalD < ctx.pressR * 1.8)) return null;
-          if (pressured && !mem.passRoll) return null;                       // easy a veces no ve el pase
+          // Humano de SU equipo libre o acompañando el ataque: pase automático sin esperar a que presionen
+          const hp = this._bestPass(me, ctx, cfg, ball.x, ball.y, { onlyHumans: true, minProgress: -W * 0.18, prefer: mem.passMate });
+          if (hp && (hp.free >= W * 0.10 || hp.prog >= -W * 0.04)) { mem.passMate = hp.mate.id; return hp.target; }
+          // Circulación: normal/hard dan pases progresivos con presión moderada si hay un compañero libre bien adelantado
+          const smart = cfg.smartPass && rivalD < ctx.pressR * 1.8;
+          const mod = !pressured && !smart && cfg !== DIFFICULTY.easy && rivalD < ctx.pressR * 2.2;
+          if (!pressured && !smart && !mod) return null;
+          if ((pressured || mod) && !mem.passRoll) return null;              // easy a veces no ve el pase
           const p = this._bestPass(me, ctx, cfg, ball.x, ball.y,
-            { minProgress: pressured ? -W * 0.05 : W * 0.12, prefer: mem.passMate });
+            { minProgress: pressured ? -W * 0.05 : (mod ? W * 0.08 : W * 0.12), minFree: mod ? W * 0.09 : null, prefer: mem.passMate });
           if (!p) return null;
           mem.passMate = p.mate.id;
           return p.target;
@@ -912,6 +968,8 @@
     _spCornerTarget(me, ctx, cfg, mem, sp) {
       const ball = ctx.ball, W = ctx.W, H = ctx.H;
       const center = { x: ctx.unDepth(W * 0.90), y: ctx.cy };
+      const hr = this._humanRunner(ctx);                                    // humano de su equipo entrando al área: centro a su desmarque
+      if (hr) { mem.spMate = hr.id; return this._leadPoint(hr, ctx, cfg); }
       const inBox = ctx.mates.filter((m) => !m.frozen && ctx.depth(m.x) > W * 0.78 && Math.abs(m.y - ctx.cy) < H * 0.32);
       if (inBox.length) {
         let best = null, bs = -1e9, bf = 0;
@@ -1195,8 +1253,9 @@
     handleSuperpowers(bot, gameState, decision) {
       const ZERO = { ix: 0, iy: 0, kick: false, slide: false };
       if (bot && bot.frozen) return ZERO;
-      const out = { ix: decision.ix || 0, iy: decision.iy || 0, kick: !!decision.kick, slide: !!decision.slide };
       const meta = decision.meta || {};
+      const out = { ix: decision.ix || 0, iy: decision.iy || 0, kick: !!decision.kick, slide: !!decision.slide,
+        tag: meta.tag, to: meta.strike && meta.strike.target };           // tag / destino: los usa _kickCharge
       const ctx = meta.ctx;
       let ev = gameState && gameState.activePowerEvent;
       const evObj = ev && typeof ev === 'object' ? ev : null;
@@ -1206,7 +1265,7 @@
       const me = ctx.me, ball = ctx.ball, W = ctx.W;
       const cfg = meta.cfg, mem = meta.mem;
       const sp = hyp(me.vx, me.vy);
-      const finish = (o) => { const m = hyp(o.ix, o.iy); if (m > 1) { o.ix /= m; o.iy /= m; } return o; };
+      const finish = (o) => { const m = hyp(o.ix, o.iy); if (m > 1) { o.ix /= m; o.iy /= m; } if (o.tag === undefined) { o.tag = out.tag; o.to = out.to; } return o; };
 
       switch (ev) {
         case 'ice': {                                             // frena con mucha anticipación e impulsos suaves
@@ -1237,7 +1296,7 @@
             const shot = this._shotTarget(ball.x, ball.y, ctx);
             if (shot) {
               const r = this._strike(me, shot, ctx, cfg, mem, { kick: true }, 'long-shot');
-              return finish({ ix: r.ix, iy: r.iy, kick: r.kick, slide: false });
+              return finish({ ix: r.ix, iy: r.iy, kick: r.kick, slide: false, tag: 'long-shot', to: shot });
             }
           }
           return finish(out);
@@ -1259,7 +1318,7 @@
               const away = norm(ball.x - mg.x, ball.y - mg.y);
               const t = this._clampField(ctx, ball.x + away.x * W * 0.4 + ctx.dir * W * 0.2, ball.y + away.y * W * 0.4);
               const r = this._strike(me, t, ctx, cfg, mem, { kick: true }, 'magnet-clear');
-              return finish({ ix: r.ix, iy: r.iy, kick: r.kick, slide: false });
+              return finish({ ix: r.ix, iy: r.iy, kick: r.kick, slide: false, tag: 'clear', to: t });
             }
             if (dm < W * 0.14) {
               const away = norm(me.x - mg.x, me.y - mg.y);
@@ -1280,7 +1339,7 @@
               if (dBall <= me.r + ball.r + ctx.kickReach * 2) {   // despeje a un toque
                 const side = ball.y >= ctx.cy ? 1 : -1;
                 const r = this._strike(me, { x: ctx.unDepth(W * 0.6), y: ctx.cy + side * ctx.H * 0.48 }, ctx, cfg, mem, { kick: true }, 'tag-clear');
-                return finish({ ix: r.ix, iy: r.iy, kick: true, slide: false });
+                return finish({ ix: r.ix, iy: r.iy, kick: true, slide: false, tag: 'clear' });
               }
               const vv = norm(ball.vx, ball.vy);                  // si no, se hace a un lado de la trayectoria
               const side = (me.x - ball.x) * -vv.y + (me.y - ball.y) * vv.x >= 0 ? 1 : -1;
