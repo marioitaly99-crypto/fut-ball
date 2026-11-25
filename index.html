@@ -354,6 +354,15 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
 #career-root .cZ .z.me{background:rgba(2,132,199,.6);border:1.5px solid #e0f7ff}
 #career-root .cDone{padding:11px 14px;font-size:1rem;font-weight:800;border-radius:12px;background:rgba(4,18,48,.9);color:#fff;border:1.5px solid #38bdf8}
 @media(max-width:820px){#career-root .cGrid,#career-root .cZones{grid-template-columns:1fr}}
+/* ===== Móvil (≤900px): botón de cambio abajo al centro · chat translúcido · etiqueta de patear discreta ===== */
+@media (max-width:900px){
+ #cmSubBtn{bottom:10px!important;left:50%!important;transform:translateX(-50%)!important;top:auto!important;right:auto!important} /* nunca tapa el marcador superior */
+ #log,#chatLog{background:transparent!important}
+ #log>div,#chatLog>div{background:transparent!important;text-shadow:0 1px 2px #000,0 0 3px #000,0 0 7px rgba(0,0,0,.9);padding:1px 4px;border-radius:0} /* historial sin fondo sólido, legible por la sombra */
+ html.is-touch #chatIn,#chatIn,#chatBar{background:rgba(30,35,41,.45)!important;padding:3px 12px;box-shadow:none} /* barra compacta y translúcida */
+ html.is-touch #chatIn:focus,#chatIn:focus,#chatBar:focus{background:var(--cap)!important} /* sólida al recibir foco */
+ html.is-touch #kickWrap .klbl,#kickWrap .klbl{font-size:9px;padding:2px 7px;opacity:.65;box-shadow:none;position:fixed;right:calc(env(safe-area-inset-right,0px) + 6px);bottom:calc(env(safe-area-inset-bottom,0px) + 4px)} /* PATEAR / MANTENER: BARRIDA, pegada al borde inferior derecho */
+}
 </style>
 </head><body>
 
@@ -899,7 +908,7 @@ function stadChanged(){if(!isAdmin)return;STAD=stadClean(STAD);stadSave();stadUI
  [['stSn','seats','n'],['stSc1','seats','c1'],['stSc2','seats','c2'],['stSc3','seats','c3'],['stFn','flags','n'],['stFc1','flags','c1'],['stFc2','flags','c2'],['stFc3','flags','c3']].forEach(([id,g,k])=>{
   const el=$(id),f=()=>{if(!isAdmin)return;STAD[g][k]=k==='n'?+el.value:el.value;stadChanged()};el.oninput=f;el.onchange=f})})();
 /* ===== Tribunas v2: estructura estática pre-renderizada en canvas auxiliares (se regenera solo al cambiar colores / tamaño / escala) + público animado liviano ===== */
-const ST_ROWS=7,ST_RH=18,ST_FW=26,ST_D=ST_FW+ST_ROWS*ST_RH,ST_PAD=ST_D+38,ST_AW=16,ST_TW=150; /* ST_FW: muro/alambrado frontal · ST_PAD: espacio extra que ve la cámara con el estadio activo */
+const ST_ROWS=7,ST_RH=18,ST_FW=26,ST_D=ST_FW+ST_ROWS*ST_RH,ST_PAD=ST_D+38,ST_AW=16,ST_TW=150,ST_FS=22; /* ST_TW: ancho del túnel · ST_FS: tamaño del hincha */ /* ST_FW: muro/alambrado frontal · ST_PAD: espacio extra que ve la cámara con el estadio activo */
 let STAD_CEL=-1e9;const STAD_C={key:'',t:0,sc:1,strips:[],fans:[],spr:null};
 function stShade(hex,p){const n=parseInt(String(hex).slice(1),16),t=Math.abs(p)/100,f=p<0?0:255,m=v=>Math.round(v+(f-v)*t);return`rgb(${m(n>>16)},${m(n>>8&255)},${m(n&255)})`}
 function stRowCol(S,i){return S.n===3?[S.c1,S.c2,S.c3][i%3]:S.n===2?((i<2||i>=ST_ROWS-2)?S.c1:S.c2):S.c1} /* 3 colores: filas alternadas Color 1 → 2 → 3 */ /* 2 colores: Color 1 arriba y abajo, Color 2 en el medio */
@@ -913,29 +922,38 @@ function stAisles(a,b,c,d){const L=c-a,Hd=d-b,D=ST_D,F=ST_FW,A=ST_AW,r=[];
 /* ===== Tribuna cartoon: escalones grises, escaleras, hinchas con contorno, banderas con asta y valla de bloques con cartel ===== */
 const ST_SIGN_W=190;
 function stRR(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
-function stSignText(){try{if(typeof NET!=='undefined'&&NET&&NET.role&&NET.role!=='local')return'FUT-BALL';
-  if(document.body.classList.contains('careerOn')){const A=window.CAREER_API,D=window.LIGA_ARGENTINA_DATA,st=A&&A.getState&&A.getState(),t=st&&D&&D.getTeam&&D.getTeam(st.teamId);if(t&&t.name)return String(t.name).toUpperCase().slice(0,22)}
+/* Equipo LOCAL del partido de Carrera (CAREER_MATCH; si no está, el texto del marcador teamLabel('red')) */
+function stCareerLocal(){const M=window.CAREER_MATCH,D=window.LIGA_ARGENTINA_DATA,bad=/^(MODO CARRERA|LOCAL|VISITANTE)$/i,
+  nm=v=>{if(v==null||v==='')return'';if(typeof v==='object')return String(v.name||v.nombre||'');const t=D&&D.getTeam&&D.getTeam(v);return String(t&&t.name?t.name:v)};
+ let n='';if(M&&typeof M==='object')n=[M.local,M.localName,M.localTeam,M.localId,M.home,M.homeName,M.homeTeam,M.homeId].map(nm).find(x=>x&&!bad.test(x))||'';
+ if(!n){const e=$('tL'),t=e&&e.textContent.trim();if(t&&!bad.test(t))n=t}
+ return n}
+function stSignText(){try{if(carOn()){const n=stCareerLocal();return n?String(n).toUpperCase().slice(0,22):'FUT-BALL'} /* Carrera: nombre del local en mayúsculas, nunca "MODO CARRERA" */
+  if(typeof NET!=='undefined'&&NET&&NET.role&&NET.role!=='local')return'FUT-BALL';
   if(cur&&cur.name)return String(cur.name).trim().toUpperCase().slice(0,22)||'FUT-BALL'}catch(e){}
  return'FUT-BALL'}
 /* Cartel central de cada lado (centro, tamaño y giro): sobresale de la valla hacia las gradas */
-function stSignBoxes(a,b,c,d){const F=ST_FW,h=F+16,w=ST_SIGN_W,cx=(a+c)/2,cy=(b+d)/2;
- return[{x:cx,y:b-F/2-8,w,h,r:0},{x:cx,y:d+F/2+8,w,h,r:0},{x:a-F/2-8,y:cy,w,h,r:-Math.PI/2},{x:c+F/2+8,y:cy,w,h,r:Math.PI/2}]}
+function stSignBoxes(a,b,c,d){const F=ST_FW,h=F+16,w=ST_SIGN_W,cx=(a+c)/2;
+ return[{x:cx,y:b-F/2-8,w,h,r:0}]} /* cartel SOLO en la tribuna superior; inferior, izquierda y derecha: valla continua */
 function stSignRect(s){return Math.abs(s.r)>1?{x:s.x-s.h/2,y:s.y-s.w/2,w:s.h,h:s.w}:{x:s.x-s.w/2,y:s.y-s.h/2,w:s.w,h:s.h}}
-function stSign(g,s,txt,col){g.save();g.translate(s.x,s.y);g.rotate(s.r);const w=s.w,h=s.h;
+/* Cartel: marco claro + contorno negro; fondo según seats.n (1 sólido c1 · 2 franjas c1/c2 · 3 franjas c1/c2/c3); texto blanco grueso con trazo negro */
+function stSign(g,s,txt,S){g.save();g.translate(s.x,s.y);g.rotate(s.r);const w=s.w,h=s.h,P=5,iw=w-2*P,ih=h-2*P,cols=S.n===3?[S.c1,S.c2,S.c3]:S.n===2?[S.c1,S.c2]:[S.c1];
  g.fillStyle='rgba(0,0,0,.3)';stRR(g,-w/2+2,-h/2+4,w,h,9);g.fill();
- stRR(g,-w/2,-h/2,w,h,9);g.fillStyle=col;g.fill();g.lineWidth=3.2;g.lineJoin='round';g.strokeStyle='#111';g.stroke();
- const n=parseInt(String(col).slice(1),16),lum=((n>>16)*.299+(n>>8&255)*.587+(n&255)*.114)/255,fg=lum>.62?'#111':'#fff',ol=lum>.62?'#fff':'#111';
- let fs=Math.round(h*.64);const fnt=q=>`900 ${q}px ${RF}`;g.font=fnt(fs);while(g.measureText(txt).width>w-26&&fs>9){fs--;g.font=fnt(fs)}
- g.textAlign='center';g.textBaseline='middle';g.lineWidth=Math.max(2.5,fs*.2);g.strokeStyle=ol;g.fillStyle=fg;g.strokeText(txt,0,1);g.fillText(txt,0,1);g.restore()}
+ stRR(g,-w/2,-h/2,w,h,9);g.fillStyle='#f1f5f9';g.fill();g.lineWidth=3.2;g.lineJoin='round';g.strokeStyle='#111';g.stroke();
+ g.save();stRR(g,-iw/2,-ih/2,iw,ih,5);g.clip();
+ if(cols.length===1){g.fillStyle=cols[0];g.fillRect(-iw/2,-ih/2,iw,ih)}else{const nb=S.n===3?9:8,bw=iw/nb;for(let i=0;i<nb;i++){g.fillStyle=cols[i%cols.length];g.fillRect(-iw/2+i*bw,-ih/2,bw+.6,ih)}}
+ g.restore();stRR(g,-iw/2,-ih/2,iw,ih,5);g.lineWidth=2.4;g.strokeStyle='#111';g.stroke();
+ let fs=Math.round(ih*.72);const fnt=q=>`900 ${q}px ${RF}`;g.font=fnt(fs);while(g.measureText(txt).width>iw-18&&fs>9){fs--;g.font=fnt(fs)}
+ g.textAlign='center';g.textBaseline='middle';g.lineJoin='round';g.lineWidth=Math.max(3,fs*.26);g.strokeStyle='#111';g.fillStyle='#fff';g.strokeText(txt,0,1);g.fillText(txt,0,1);g.restore()}
 /* Valla inferior: bloques de color (colores de las butacas) con borde negro */
 function stValla(g,a,b,c,d,T){const F=ST_FW,S=T.seats,cols=S.n===3?[S.c1,S.c2,S.c3]:S.n===2?[S.c1,S.c2]:[S.c1,'#f8fafc'],BW=44;
  const blk=(x,y,w,h,i)=>{g.fillStyle=cols[i%cols.length];g.fillRect(x,y,w,h);g.strokeStyle='#111';g.lineWidth=3;g.lineJoin='miter';g.strokeRect(x,y,w,h)};
  let i=0;for(let x=a-F;x<c+F-1;x+=BW,i++){const w=Math.min(BW,c+F-x);blk(x,b-F,w,F,i);blk(x,d,w,F,i)}
  i=0;for(let y=b;y<d-1;y+=BW,i++){const h=Math.min(BW,d-y);blk(a-F,y,F,h,i);blk(c,y,F,h,i)}}
 /* Bandera grande con asta (colores de la configuración de banderas) */
-function stBigFlag(g,S,x,y,k){const w=52,h=34,ph=h+22,sg=k%2?1:-1,tp=-ph;g.save();g.translate(x,y);g.lineJoin='round';g.lineCap='round';
+function stBigFlag(g,S,x,y,k){const w=62,h=40,ph=h+26,sg=k%2?1:-1,tp=-ph;g.save();g.translate(x,y);g.lineJoin='round';g.lineCap='round';
  g.strokeStyle='#111';g.lineWidth=4.6;g.beginPath();g.moveTo(0,0);g.lineTo(0,tp-2);g.stroke();g.strokeStyle='#e5e7eb';g.lineWidth=2;g.beginPath();g.moveTo(0,0);g.lineTo(0,tp-1);g.stroke();
- const path=()=>{g.beginPath();g.moveTo(1,tp);g.bezierCurveTo(w*.3,tp-4*sg,w*.65,tp+4*sg,w,tp);g.lineTo(w,tp+h);g.bezierCurveTo(w*.65,tp+h+4*sg,w*.3,tp+h-4*sg,1,tp+h);g.closePath()};
+ const path=()=>{g.beginPath();g.moveTo(1,tp);g.bezierCurveTo(w*.3,tp-6*sg,w*.65,tp+6*sg,w,tp);g.lineTo(w,tp+h);g.bezierCurveTo(w*.65,tp+h+6*sg,w*.3,tp+h-6*sg,1,tp+h);g.closePath()};
  path();g.save();g.clip();const t=h/3;
  if(S.n>=2){g.fillStyle=S.c1;g.fillRect(0,tp-6,w+2,t+6);g.fillStyle=S.c2;g.fillRect(0,tp+t,w+2,t);g.fillStyle=S.n===3?S.c3:S.c1;g.fillRect(0,tp+2*t,w+2,t+8)}
  else{g.fillStyle=S.c1;g.fillRect(0,tp-6,w+2,h+14)}
@@ -943,12 +961,25 @@ function stBigFlag(g,S,x,y,k){const w=52,h=34,ph=h+22,sg=k%2?1:-1,tp=-ph;g.save(
  g.restore();path();g.lineWidth=2.8;g.strokeStyle='#111';g.stroke();g.restore()}
 /* Posiciones de banderas (semilla fija): filas 3-5, repartidas por los 4 lados, esquivando escaleras y carteles */
 function stBuildFlags(a,b,c,d){let sd=20260707;const rnd=()=>{sd|=0;sd=sd+0x6D2B79F5|0;let t=Math.imul(sd^sd>>>15,1|sd);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
- const F=ST_FW,ai=stAisles(a,b,c,d),sg=stSignBoxes(a,b,c,d).map(stSignRect),out=[],hit=(x0,y0,x1,y1)=>ai.concat(sg).some(r=>x1>r.x-6&&x0<r.x+r.w+6&&y1>r.y-6&&y0<r.y+r.h+6);
- const put=(x,y,k)=>{if(!hit(x-4,y-60,x+56,y+4))out.push({x,y,k})};let k=0;
+ const F=ST_FW,ai=stAisles(a,b,c,d),sg=stSignBoxes(a,b,c,d).map(stSignRect),tn=stTunnelRect(a,b,c,d),out=[],hit=(x0,y0,x1,y1)=>ai.concat(sg,[tn]).some(r=>x1>r.x-6&&x0<r.x+r.w+6&&y1>r.y-6&&y0<r.y+r.h+6);
+ const bx=(x,y,r)=>{const cs=Math.round(Math.cos(r)),sn=Math.round(Math.sin(r)),P=[[-4,-76],[68,-76],[68,4],[-4,4]].map(([u,v])=>[x+u*cs-v*sn,y+u*sn+v*cs]);return[Math.min(...P.map(q=>q[0])),Math.min(...P.map(q=>q[1])),Math.max(...P.map(q=>q[0])),Math.max(...P.map(q=>q[1]))]};
+ const put=(x,y,k,r)=>{const[x0,y0,x1,y1]=bx(x,y,r);if(!hit(x0,y0,x1,y1))out.push({x,y,k,r})};let k=0; /* r: giro para que cada tribuna quede orientada hacia el campo */
  const sp=250,L=c-a,Hd=d-b;
- for(let t=sp*.55;t<L-30;t+=sp,k++){const o=F+(2+Math.floor(rnd()*3))*ST_RH+ST_RH/2,x=a+t+(rnd()-.5)*40;put(x,b-o,k);put(x+sp*.5,d+o,k+1)}
- for(let t=sp*.5;t<Hd-30;t+=sp,k++){const o=F+(2+Math.floor(rnd()*2))*ST_RH+ST_RH/2;put(a-o,b+t+(rnd()-.5)*30,k);put(c+o,b+t+sp*.35,k+1)}
+ for(let t=sp*.55;t<L-30;t+=sp,k++){const o=F+(2+Math.floor(rnd()*3))*ST_RH+ST_RH/2,x=a+t+(rnd()-.5)*40;put(x,b-o,k,0);put(x+sp*.5,d+o,k+1,Math.PI)}
+ for(let t=sp*.5;t<Hd-30;t+=sp,k++){const o=F+(2+Math.floor(rnd()*2))*ST_RH+ST_RH/2;put(a-o,b+t+(rnd()-.5)*30,k,-Math.PI/2);put(c+o,b+t+sp*.35,k+1,Math.PI/2)}
  return out}
+/* Boca del túnel de vestuarios: centro de la tribuna superior (marco de hormigón con contorno negro grueso, interior oscuro con profundidad) */
+function stTunnelRect(a,b,c,d){return{x:(a+c)/2-ST_TW/2,y:b-ST_D,w:ST_TW,h:ST_D-ST_FW-ST_RH}}
+function stTunnel(g,a,b,c,d,T){const r=stTunnelRect(a,b,c,d),x=r.x,y=r.y,w=r.w,h=r.h,ox=x+10,oy=y+12,ow=w-20,oh=h-12;g.save();g.lineJoin='round';
+ g.fillStyle='rgba(0,0,0,.28)';stRR(g,x-4,y+4,w+8,h+2,12);g.fill();
+ stRR(g,x-2,y,w+4,h,12);g.fillStyle='#b8c0cc';g.fill();g.lineWidth=4;g.strokeStyle='#111';g.stroke();
+ g.fillStyle=T.seats.c1;stRR(g,x+6,y+3,w-12,7,3);g.fill();g.lineWidth=2;g.stroke(); /* franja del color primario */
+ g.save();stRR(g,ox,oy,ow,oh,16);g.clip();
+ const gr=g.createLinearGradient(0,oy,0,oy+oh);gr.addColorStop(0,'#03050a');gr.addColorStop(1,'#222c3e');g.fillStyle=gr;g.fillRect(ox,oy,ow,oh);
+ [[.8,'#0a101a'],[.6,'#060a12'],[.42,'#02040a']].forEach(([q,col])=>{const iw=ow*q,ih=oh*q;stRR(g,ox+(ow-iw)/2,oy+(oh-ih)*.2,iw,ih,12);g.fillStyle=col;g.fill();g.lineWidth=1.4;g.strokeStyle='rgba(255,255,255,.09)';g.stroke()}); /* profundidad */
+ g.strokeStyle='rgba(255,255,255,.13)';g.lineWidth=1.4;g.beginPath();[-.36,-.18,0,.18,.36].forEach(q=>{g.moveTo(ox+ow/2+q*ow*.3,oy+oh*.58);g.lineTo(ox+ow/2+q*ow*1.15,oy+oh)});g.stroke(); /* piso en perspectiva */
+ g.fillStyle='#fde68a';[.28,.72].forEach(q=>{g.beginPath();g.arc(ox+ow*q,oy+7,3,0,7);g.fill()}); /* luces */
+ g.restore();stRR(g,ox,oy,ow,oh,16);g.lineWidth=5;g.strokeStyle='#111';g.stroke();g.restore()}
 /* Dibuja TODA la estructura estática (en coordenadas de mundo) sobre el contexto g */
 function paintRing(g,a,b,c,d,T){const D=ST_D,F=ST_FW,RH=ST_RH,L=c-a,Hd=d-b,
  ringFill=(oo,oi,col)=>{g.beginPath();g.rect(a-oo,b-oo,L+2*oo,Hd+2*oo);g.rect(a-oi,b-oi,L+2*oi,Hd+2*oi);g.fillStyle=col;g.fill('evenodd')},
@@ -958,30 +989,42 @@ function paintRing(g,a,b,c,d,T){const D=ST_D,F=ST_FW,RH=ST_RH,L=c-a,Hd=d-b,
  for(let i=0;i<ST_ROWS;i++){const o=F+i*RH+RH/2;
   ringStroke(o,RH+1,i%2?'#b3bac6':'#c5cbd5'); /* escalón gris */
   ringStroke(F+i*RH+1,2.4,'#7b8494'); /* canto del escalón */
-  ringStroke(F+i*RH+3.4,1.4,'rgba(255,255,255,.35)')} /* brillo */
+  ringStroke(F+i*RH+3.4,1.4,'rgba(255,255,255,.35)');ringStroke(F+(i+1)*RH-2.5,4,'rgba(0,0,0,.2)')} /* brillo + sombra bajo el escalón */
  ringFill(F+9,F,'rgba(0,0,0,.2)'); /* sombra de la valla sobre la primera fila */
  stAisles(a,b,c,d).forEach(r=>{g.fillStyle='#eceff4';g.fillRect(r.x,r.y,r.w,r.h);g.strokeStyle='#a2abba';g.lineWidth=1.6;g.beginPath();
   if(r.v){for(let y=r.y+3;y<r.y+r.h;y+=6){g.moveTo(r.x,y);g.lineTo(r.x+r.w,y)}}else{for(let x=r.x+3;x<r.x+r.w;x+=6){g.moveTo(x,r.y);g.lineTo(x,r.y+r.h)}}g.stroke();
-  g.lineWidth=2;g.strokeStyle='#6f7889';g.strokeRect(r.x,r.y,r.w,r.h)}); /* escaleras */
+  g.lineWidth=2;g.strokeStyle='#6f7889';g.strokeRect(r.x,r.y,r.w,r.h);
+   const rl=(x1,y1,x2,y2)=>{g.lineCap='round';g.strokeStyle='#111';g.lineWidth=5.4;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.strokeStyle=T.seats.c1;g.lineWidth=2.6;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.lineCap='butt'};
+   if(r.v){rl(r.x+1.5,r.y,r.x+1.5,r.y+r.h);rl(r.x+r.w-1.5,r.y,r.x+r.w-1.5,r.y+r.h)}else{rl(r.x,r.y+1.5,r.x+r.w,r.y+1.5);rl(r.x,r.y+r.h-1.5,r.x+r.w,r.y+r.h-1.5)}}); /* escaleras con barandas del color primario */
  ringStroke(D+5,10,'#1f2630');ringStroke(D+.5,1.5,'#475569'); /* muro trasero */
- stValla(g,a,b,c,d,T);
- const txt=STAD_C.txt||'FUT-BALL';stSignBoxes(a,b,c,d).forEach(sg=>stSign(g,sg,txt,T.seats.c1))}
-/* Hinchas: posiciones orgánicas fijas (semilla) y sprites pre-dibujados con contorno negro (brazos abajo / arriba) */
-function stSprites(T){const S=T.seats,sh=S.n===3?[S.c1,S.c2,S.c3]:S.n===2?[S.c1,S.c2]:[S.c1,stShade(S.c1,45)],skins=['#f1c9a5','#d9a066','#a86b3c','#6b4226'],hairs=['#1a1a1a','#3b2314','#7a4a1e','#d4a82b'],SC=3,N=16,out=[[],[]];
+ stTunnel(g,a,b,c,d,T);stValla(g,a,b,c,d,T);
+ const txt=STAD_C.txt||'FUT-BALL';stSignBoxes(a,b,c,d).forEach(sg=>stSign(g,sg,txt,T.seats))}
+/* Hinchas grandes de medio cuerpo con contorno negro de 2.5 px (brazos abajo / brazos arriba en V o U con los colores de seats), pre-dibujados en sprites */
+function stSprites(T){const S=T.seats,sh=S.n===3?[S.c1,S.c2,S.c3]:S.n===2?[S.c1,S.c2]:[S.c1,stShade(S.c1,45)],skins=['#f1c9a5','#d9a066','#a86b3c','#6b4226'],hairs=['#1a1a1a','#3b2314','#7a4a1e','#d4a82b'],SC=3,N=ST_FS,out=[[],[]];
  for(let m=0;m<2;m++)for(let si=0;si<sh.length;si++)for(let k=0;k<4;k++){const cv=document.createElement('canvas');cv.width=cv.height=N*SC;const g=cv.getContext('2d');g.scale(SC,SC);g.lineJoin='round';g.lineCap='round';
-  if(m){[[4.2,10,2.6,3.4],[11.8,10,13.4,3.4]].forEach(([x1,y1,x2,y2])=>{g.strokeStyle='#000';g.lineWidth=3.6;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.strokeStyle=sh[si];g.lineWidth=2;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke()});
-   g.fillStyle=skins[k];g.lineWidth=1.1;g.strokeStyle='#000';[[2.6,3.2],[13.4,3.2]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,1.7,0,7);g.fill();g.stroke()})}
-  g.beginPath();g.ellipse(8,11.2,5.6,4.2,0,0,7);g.fillStyle=sh[si];g.fill();g.lineWidth=1.3;g.strokeStyle='#000';g.stroke();
-  g.beginPath();g.arc(8,7,3.5,0,7);g.fillStyle=skins[k];g.fill();g.beginPath();g.arc(8,7,3.5,Math.PI*1.02,Math.PI*1.98);g.closePath();g.fillStyle=hairs[k];g.fill();
-  g.beginPath();g.arc(8,7,3.5,0,7);g.stroke();g.fillStyle='#000';[[6.7,7.7],[9.3,7.7]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,.5,0,7);g.fill()});
+  const sk=skins[k],hr=hairs[(k+si)%4],sc=sh[si],ac=sh[(si+1)%sh.length],pl=q=>{g.beginPath();g.moveTo(q[0][0],q[0][1]);for(let n=1;n<q.length;n++)g.lineTo(q[n][0],q[n][1])};
+  if(m){const A=k%2?[[[5,16],[1.8,12],[3,4.6]],[[17,16],[20.2,12],[19,4.6]]]:[[[5.2,16],[2.2,5.2]],[[16.8,16],[19.8,5.2]]]; /* U (codo) / V */
+   A.forEach(q=>{pl(q);g.strokeStyle='#000';g.lineWidth=5.4;g.stroke();pl(q);g.strokeStyle=sc;g.lineWidth=2.9;g.stroke()});
+   A.forEach(q=>{const h=q[q.length-1];g.beginPath();g.arc(h[0],h[1],1.9,0,7);g.fillStyle=sk;g.fill();g.lineWidth=2.5;g.strokeStyle='#000';g.stroke()})}
+  const tor=()=>{g.beginPath();g.moveTo(2.4,22.5);g.quadraticCurveTo(2.4,13.8,11,13.4);g.quadraticCurveTo(19.6,13.8,19.6,22.5);g.closePath()};
+  tor();g.fillStyle=sc;g.fill();
+  if(sh.length>1&&k%2===0){g.save();tor();g.clip();g.fillStyle=ac;g.fillRect(7.4,12,2.8,11);g.fillRect(11.8,12,2.8,11);g.restore()}
+  tor();g.lineWidth=2.5;g.strokeStyle='#000';g.stroke();
+  g.beginPath();g.arc(11,8.4,4.6,0,7);g.fillStyle=sk;g.fill();
+  g.beginPath();g.arc(11,8.4,4.6,Math.PI*1.04,Math.PI*1.96);g.closePath();g.fillStyle=hr;g.fill();
+  g.beginPath();g.arc(11,8.4,4.6,0,7);g.lineWidth=2.5;g.strokeStyle='#000';g.stroke();
+  g.fillStyle='#000';[[9.2,9.3],[12.8,9.3]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,.65,0,7);g.fill()});
+  if(m){g.beginPath();g.ellipse(11,11.3,1.2,.9,0,0,7);g.fillStyle='#7f1d1d';g.fill()}
   out[m][si*4+k]=cv}
  return{out,n:sh.length}}
+/* Posiciones fijas (semilla) en los 4 lados; filas del fondo primero (las de adelante tapan); cada hincha mira al campo (r = giro por tribuna); ~30% con brazos siempre arriba */
 function stBuildFans(a,b,c,d,n){let sd=20261121;const rnd=()=>{sd|=0;sd=sd+0x6D2B79F5|0;let t=Math.imul(sd^sd>>>15,1|sd);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
- const F=ST_FW,ai=stAisles(a,b,c,d),sg=stSignBoxes(a,b,c,d).map(stSignRect),fans=[],bad=(x,y)=>ai.some(r=>x>r.x-8&&x<r.x+r.w+8&&y>r.y-8&&y<r.y+r.h+8)||sg.some(r=>x>r.x-6&&x<r.x+r.w+6&&y>r.y-6&&y<r.y+r.h+6);
- for(let i=0;i<ST_ROWS;i++){const o=F+i*ST_RH+ST_RH/2;
-  [[a-o,b-o,c+o,b-o],[c+o,b-o,c+o,d+o],[c+o,d+o,a-o,d+o],[a-o,d+o,a-o,b-o]].forEach(([x1,y1,x2,y2],sd2)=>{const len=Math.hypot(x2-x1,y2-y1),m=Math.floor(len/14),ux=(x2-x1)/len,uy=(y2-y1)/len;
-   for(let k=1;k<m;k++){const t=k*14+7+(rnd()-.5)*3,x=x1+ux*t,y=y1+uy*t;if(bad(x,y))continue;
-    fans.push({x:x+(rnd()-.5)*2,y:y+(rnd()-.5)*2,v:Math.floor(rnd()*n)*4+Math.floor(rnd()*4),g:(k+i)&1})}})}
+ const F=ST_FW,ai=stAisles(a,b,c,d),sg=stSignBoxes(a,b,c,d).map(stSignRect),tn=stTunnelRect(a,b,c,d),fans=[],RT=[0,Math.PI/2,Math.PI,-Math.PI/2],
+  bad=(x,y)=>ai.some(r=>x>r.x-12&&x<r.x+r.w+12&&y>r.y-12&&y<r.y+r.h+12)||sg.some(r=>x>r.x-10&&x<r.x+r.w+10&&y>r.y-10&&y<r.y+r.h+10)||(x>tn.x-12&&x<tn.x+tn.w+12&&y>tn.y-4&&y<tn.y+tn.h+8);
+ for(let i=ST_ROWS-1;i>=0;i--){const o=F+i*ST_RH+ST_RH/2;
+  [[a-o,b-o,c+o,b-o],[c+o,b-o,c+o,d+o],[c+o,d+o,a-o,d+o],[a-o,d+o,a-o,b-o]].forEach(([x1,y1,x2,y2],sd2)=>{const len=Math.hypot(x2-x1,y2-y1),m=Math.floor(len/16),ux=(x2-x1)/len,uy=(y2-y1)/len;
+   for(let k=1;k<m;k++){const t=k*16+8+(rnd()-.5)*3,x=x1+ux*t,y=y1+uy*t;if(bad(x,y))continue;
+    fans.push({x:x+(rnd()-.5)*2,y:y+(rnd()-.5)*2,v:Math.floor(rnd()*n)*4+Math.floor(rnd()*4),g:(k+i)&1,r:RT[sd2],u:rnd()<.3?1:0})}})}
  return fans}
 /* Regenera el pre-render SOLO si cambió algo (colores, cantidad de colores, tamaño de cancha, escala, nombre del cartel); throttle de 150 ms al arrastrar un color */
 function stEnsure(a,b,c,d){const sc=clamp(Math.round(.78*DPR*10)/10,.7,1.6),T=STAD,txt=stSignText(),key=[G.w,G.h,sc,txt,T.seats.n,T.seats.c1,T.seats.c2,T.seats.c3,T.flags.n,T.flags.c1,T.flags.c2,T.flags.c3].join('|'),now=performance.now();
@@ -995,8 +1038,8 @@ function stEnsure(a,b,c,d){const sc=clamp(Math.round(.78*DPR*10)/10,.7,1.6),T=ST
  /* Público PRE-DIBUJADO: 2 poses (brazos abajo / brazos arriba en gol) × 2 grupos alternados; las banderas con asta van en el grupo 1 (encima de los hinchas) */
  const scF=Math.min(sc,1.2),spr=stSprites(T),fans=stBuildFans(a,b,c,d,spr.n),flags=stBuildFlags(a,b,c,d);
  const mk=pose=>[0,1].map(gp=>RC.map(([x,y,w,h])=>{const cv=document.createElement('canvas');cv.width=Math.ceil(w*scF);cv.height=Math.ceil(h*scF);const g=cv.getContext('2d');g.setTransform(scF,0,0,scF,-x*scF,-y*scF);
-  for(let i=0;i<fans.length;i++){const f=fans[i];if(f.g!==gp||f.x+8<x||f.x-8>x+w||f.y+8<y||f.y-8>y+h)continue;g.drawImage(spr.out[pose][f.v],f.x-7.5,f.y-7.5,15,15)}
-  if(gp===1)flags.forEach(q=>{if(q.x+60<x||q.x-6>x+w||q.y+6<y||q.y-64>y+h)return;stBigFlag(g,T.flags,q.x,q.y,q.k)});
+  for(let i=0;i<fans.length;i++){const f=fans[i];if(f.g!==gp||f.x+16<x||f.x-16>x+w||f.y+16<y||f.y-16>y+h)continue;g.save();g.translate(f.x,f.y);g.rotate(f.r);g.drawImage(spr.out[pose||f.u?1:0][f.v],-ST_FS/2,-ST_FS/2,ST_FS,ST_FS);g.restore()}
+  if(gp===1)flags.forEach(q=>{if(q.x+80<x||q.x-80>x+w||q.y+80<y||q.y-80>y+h)return;g.save();g.translate(q.x,q.y);g.rotate(q.r);stBigFlag(g,T.flags,0,0,q.k);g.restore()});
   return{cv,x,y,w:cv.width/scF,h:cv.height/scF}}));
  STAD_C.fl=mk(0);STAD_C.fu=mk(1)}
 function drawStands(a,b,c,d,vx0,vy0,vx1,vy1){stEnsure(a,b,c,d);STAD_C.strips.forEach(s=>{if(s.x+s.w<vx0||s.x>vx1||s.y+s.h<vy0||s.y>vy1)return;ctx.drawImage(s.cv,s.x,s.y,s.w,s.h)})}
@@ -1132,13 +1175,13 @@ function notifyTo(p,t,ms){if(p.bot)return;if(p===me)addSys(t,ms);else{const c=NE
 function notifyPower(p){notifyTo(p,'⭐ Special Shot cargado',5000)} /* el aviso dorado desaparece a los 5 s */
 function notifySl(p,n,live){if(p.bot)return;if(p===me)slideNotice(n,live);else{const c=NET.conns.find(c=>c.pl===p);if(c&&c.open)try{c.send({t:'sw',n,l:live?1:0})}catch(e){}}}
 function powerStep(){if(NET.role==='client')return;
- if(!RL()||G.pen||G.sp||G.ko||G.over){G.pw=null;return}
+ if(!RL()||!carOn()||G.pen||G.sp||G.ko||G.over){G.pw=null;return} /* Special Shot: SOLO Modo Carrera (apagado en Online) */
  const b=G.ball,L=act(),dq=q=>Math.hypot(q.x-b.x,q.y-b.y);let pw=G.pw;
  if(pw){const o=L.find(q=>q.id===pw.id);
   if(!o||dq(o)>65||L.some(q=>q.team!==o.team&&dq(q)<q.r+b.r+3)){G.pw=null;pw=null}
   else if(dq(o)<58){pw.t+=DT;if(!pw.on&&pw.t>=2.4&&!(o.pwCd>0)&&(o.team==='red'?o.x>G.w*0.45:o.x<G.w*0.55)){pw.on=true;notifyPower(o)}}}
- if(!pw){let o=null,od=58;L.forEach(q=>{const d=dq(q);if(d<od){od=d;o=q}});
-  if(o&&!L.some(q=>q.team!==o.team&&dq(q)<52))G.pw={id:o.id,t:0,on:false}}}
+ if(!pw){let o=null,od=58;L.forEach(q=>{const d=dq(q);if(!q.bot&&d<od){od=d;o=q}});
+  if(o&&!o.bot&&carOn()&&!L.some(q=>q.team!==o.team&&dq(q)<52))G.pw={id:o.id,t:0,on:false}}} /* solo el jugador humano en Carrera (nunca bots) */
 /* MODO REALISTA · Barrida: mantener patear 0.35 s sin haber pateado → desliza 0.34 s (1.85x) + 3.0 s de recuperación lenta (0.45x); recarga de 15 s desde que termina el deslizamiento; avisos en el chat; sin efectos visuales */
 const SLV=3.5,SL1=.34,SL2=3;
 /* MODO REALISTA (Online y Carrera) · Disparo Cargado manual (barra PES); Clásico y Superpoderes no pasan por aquí */
