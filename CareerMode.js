@@ -234,7 +234,7 @@
 .cmTabs{display:flex;gap:6px;overflow-x:auto}
 .cmTabs button{flex:1;min-width:max-content;background:rgba(4,18,48,.9);color:#cfe3ff;border:1.5px solid #1e3a8a;border-radius:12px;padding:10px 12px;font-size:.92rem;font-weight:800}
 .cmTabs button.on{background:rgba(2,132,199,.65);color:#fff;border-color:#e0f7ff;box-shadow:0 0 12px rgba(56,189,248,.6)}
-.cmCard{display:flex;flex-direction:column;gap:10px;padding:14px 16px;background:rgba(7,25,56,.92);border:2px solid #38bdf8;border-radius:16px;box-shadow:0 0 22px rgba(56,189,248,.25)}
+.cmCard{min-width:0;max-width:100%;display:flex;flex-direction:column;gap:10px;padding:14px 16px;background:rgba(7,25,56,.92);border:2px solid #38bdf8;border-radius:16px;box-shadow:0 0 22px rgba(56,189,248,.25)}
 .cmCard h2{font-size:1rem;font-weight:900;font-style:italic;color:#9fd5ff;text-transform:uppercase;letter-spacing:.3px}
 .cmCard h3{font-size:.85rem;font-weight:900;color:#bcd3f5;text-transform:uppercase}
 .cmVs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;text-align:center}
@@ -261,7 +261,8 @@
 .cmT tr.me td{background:rgba(2,132,199,.55);outline:0}.cmT tr.q.me td{background:rgba(16,185,129,.5)}
 .cmT td.pt{font-weight:900;color:#fde68a}
 .cmZ{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.cmScroll{overflow-x:auto}
+.cmZ > div{min-width:0;max-width:100%}
+.cmScroll{min-width:0;max-width:100%;overflow-x:auto}
 .cmFx details{background:rgba(2,10,30,.5);border:1px solid #1e3a8a;border-radius:12px;padding:6px 10px;margin-bottom:6px}
 .cmFx summary{cursor:pointer;font-weight:900;font-size:.9rem;color:#cfe3ff}
 .cmFx .gm{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;padding:3px 6px;font-size:.8rem;font-weight:700;border-radius:8px}
@@ -311,6 +312,14 @@ body.careerOn #chat{background:transparent!important;border:none!important;point
 #cmCont{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;padding:12px 16px;background:rgba(7,25,56,.92);border:2px solid #4ade80;border-radius:16px;box-shadow:0 0 22px rgba(74,222,128,.3)}
 #cmCont b{font-size:1.05rem}
 @media(max-width:780px){.cmZ,.cmCols{grid-template-columns:1fr}.cmVs .tm .cmBd{width:62px;height:62px}.cmBr{grid-template-columns:repeat(4,200px)}.cmPr{grid-template-columns:30px 34px 1fr auto 64px 38px;gap:6px;padding:6px 8px}}
+@media (hover: none) and (pointer: coarse) and (orientation: landscape){
+.cmZ,.cmCols{grid-template-columns:1fr}
+.cmHead{padding:6px 10px}
+.cmTabs button{padding:6px 10px;font-size:.82rem}
+.cmT{font-size:.74rem}
+.cmT th,.cmT td{padding:3px 4px}
+#career-hub-screen,#cmSub{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 32px)}
+}
 `;
   document.head.appendChild(s);
  }

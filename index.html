@@ -112,6 +112,8 @@ html.is-touch body.careerOn #spHud{top:calc(env(safe-area-inset-top,0px) + 10px)
 /* ===== Interfaz táctil (solo con html.is-touch; en PC no cambia nada) ===== */
 .tc,#rot{display:none}
 html.is-touch .tc{display:block}
+.touchOnly{display:none}
+html.is-touch .touchOnly{display:flex}
 html.is-touch #hint{display:none}
 html.is-touch #screen-game{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 html.is-touch,html.is-touch body{width:100vw;height:100vh;height:100dvh;min-width:100vw;margin:0;padding-left:0;padding-right:0;background-color:var(--bg)}
@@ -473,6 +475,15 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
       <h2 style="text-align:center">Menú de sala</h2>
       <div id="teams" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px"></div>
       <button id="mResume">Continuar</button><button id="mCopy" class="ghost hidden">📋 Copiar Link / Contraseña de Invitación</button><div id="mCode" class="label" style="text-align:center"></div>
+      <div id="zoomBox" class="touchOnly" style="flex-direction:column;gap:4px;border-top:1px solid var(--line);padding-top:8px">
+        <div class="label">🔍 Zoom de cámara</div>
+        <select id="mZoom">
+          <option value="0.52">Panorámico (Vista amplia)</option>
+          <option value="0.65" selected>Normal (Recomendado)</option>
+          <option value="0.78">Medio</option>
+          <option value="0.90">Cerca</option>
+        </select>
+      </div>
       <div id="extBox" style="display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--line);padding-top:10px"><div class="label">📡 Extrapolación (ms): <b id="extV">60</b> <span style="opacity:.7">· suaviza el lag cuando juegas como invitado</span></div><input id="extR" type="range" min="0" max="200" step="5" value="60" style="width:100%"></div>
       <div id="adm" style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--line);padding-top:11px">
         <div class="label">⭐ Ajustes de administrador</div>
@@ -516,6 +527,8 @@ const $=id=>document.getElementById(id);
 const IS_TOUCH=('ontouchstart' in window)||navigator.maxTouchPoints>0,PLAT=IS_TOUCH?'m':'d',
  platIcon=t=>t==='m'?'📱 ':t==='d'?'🖥️ ':'';
 document.documentElement.classList.toggle('is-touch',IS_TOUCH);
+/* Zoom de cámara (solo celular): se guarda en localStorage */
+let MOBILE_ZOOM=.65;try{const v=parseFloat(localStorage.getItem('futball_mobile_zoom'));if([.52,.65,.78,.9].includes(v))MOBILE_ZOOM=v}catch(e){}
 const SIZES={chica:[800,420],mediana:[1150,600],grande:[1700,900],gigante:[2300,1300],realista:[2100,1250]},GHT={chica:110,mediana:140,grande:190,gigante:220,realista:210};
 /* Agarre estilo Haxball: damping .925 (antes .94) y aceleración compensada (.2845 = 3.509·.075/.925) → MISMA velocidad punta (≈3.51; pateando ≈2.98).
    BRAKE: freno extra al soltar controles · TURN: más empuje al invertir dirección (no se aplican en Cancha de Hielo, que conserva ACC_ICE original) */
@@ -1530,10 +1543,12 @@ function botUI(){const lock=hum()>=LOCK;['aBotTeam','bAdd','bDel'].forEach(i=>$(
  $('botInfo').textContent=`Bots · Local: ${nb('red').length} · Visitante: ${nb('blue').length}`;roster()}
 function toggleMenu(f){menuOpen=typeof f==='boolean'?f:!menuOpen;$('menu').classList.toggle('hidden',!menuOpen);
  if(menuOpen){
+  $('mZoom').value=MOBILE_ZOOM.toFixed(2);
   $('adm').classList.toggle('hidden',!isAdmin);$('aMode').value=RL()?'realista':G.super?'super':'clasico';$('aSize').value=RL()?(G.cs||'mediana'):G.size;$('aSize').classList.toggle('hidden',RL());$('aDiff').value=BOT_DIFF;syncNum();botUI();uniUI();stadUI();updateInvite();
   Object.keys(keys).forEach(k=>keys[k]=0);sendKeys()}else $('c').focus()}
 $('v1').onclick=()=>castVote(1);$('v2').onclick=()=>castVote(2);$('v3').onclick=()=>castVote(3);
 $('mResume').onclick=()=>toggleMenu(false);
+$('mZoom').onchange=()=>{const v=parseFloat($('mZoom').value);if(!isFinite(v))return;MOBILE_ZOOM=v;$('mZoom').value=v.toFixed(2);try{localStorage.setItem('futball_mobile_zoom',String(v))}catch(e){}};
 $('mute').onclick=()=>{audio();muted=!muted;$('mute').textContent=muted?'🔇':'🔊';$('c').focus()};
 $('aSize').onchange=e=>{G.size=e.target.value;G.cs=G.size;cur.size=G.size;sizeUp();kickoff()};
 $('aMode').onchange=e=>{if(!isAdmin)return;const v=e.target.value;G.super=v==='super';powerReset();if(v==='realista'){if(!RL())G.cs=G.size;G.size='realista'}else if(RL())G.size=G.cs&&G.cs!=='realista'?G.cs:'mediana';
@@ -1595,7 +1610,7 @@ let VW=1000,VH=600,DPR=1; /* tamaño interno del canvas = ventana (1 px de canva
 function resizeCanvas(){VW=Math.max(1,Math.floor(window.innerWidth));VH=Math.max(1,Math.floor(window.innerHeight));DPR=Math.min(window.devicePixelRatio||1,2.5);const w=Math.round(VW*DPR),h=Math.round(VH*DPR);if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}} /* VW/VH = px CSS (coordenadas lógicas); el búfer interno se multiplica por DPR para nitidez Retina/HD */
 resizeCanvas();addEventListener('resize',resizeCanvas);addEventListener('orientationchange',resizeCanvas);
 function draw(){if(VW!==Math.floor(window.innerWidth)||VH!==Math.floor(window.innerHeight)||DPR!==Math.min(window.devicePixelRatio||1,2.5))resizeCanvas();ctx.filter=(G.paused||G.cd>0)?'grayscale(100%)':'none';ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='#2a8f4f';ctx.fillRect(0,0,VW,VH);
- const{w:W,h:H,gT,gB,gh}=G,SO=STAD.enabled,SD=SO?ST_PAD:0,Z=IS_TOUCH?Math.min(.9,Math.max(.46,Math.min(VW/1280,VH/620)*.9)):.9,vw=VW/2/Z,vh=VH/2/Z,x0=-GD-80-SD,x1=W+GD+80+SD,y0=-100-SD,y1=H+100+SD,hyb=IS_TOUCH&&Z<.8&&!G.pen&&me&&me.team!=='spec',bx=hyb?clamp(me.x*.58+G.ball.x*.42,me.x-vw*.65,me.x+vw*.65):0,by=hyb?clamp(me.y*.58+G.ball.y*.42,me.y-vh*.65,me.y+vh*.65):0,bl=G.pen?{x:G.pen.gx+G.pen.din*G.w*.22,y:G.h/2}:(hyb?{x:bx,y:by}:(me&&me.team!=='spec'?me:G.ball)); /* sigue a tu personaje; si eres espectador, a la pelota */
+ const{w:W,h:H,gT,gB,gh}=G,SO=STAD.enabled,SD=SO?ST_PAD:0,Z=IS_TOUCH?MOBILE_ZOOM:.9,vw=VW/2/Z,vh=VH/2/Z,x0=-GD-80-SD,x1=W+GD+80+SD,y0=-100-SD,y1=H+100+SD,hyb=IS_TOUCH&&Z<.8&&!G.pen&&me&&me.team!=='spec',bx=hyb?clamp(me.x*.58+G.ball.x*.42,me.x-vw*.65,me.x+vw*.65):0,by=hyb?clamp(me.y*.58+G.ball.y*.42,me.y-vh*.65,me.y+vh*.65):0,bl=G.pen?{x:G.pen.gx+G.pen.din*G.w*.22,y:G.h/2}:(hyb?{x:bx,y:by}:(me&&me.team!=='spec'?me:G.ball)); /* sigue a tu personaje; si eres espectador, a la pelota */
  const fx=x1-x0<=2*vw?(x0+x1)/2:clamp(bl.x,x0+vw,x1-vw),fy=y1-y0<=2*vh?(y0+y1)/2:clamp(bl.y,y0+vh,y1-vh); /* cámara sigue la pelota sin salir del estadio */
  if(!G.cam)G.cam={x:fx,y:fy};G.cam.x+=(fx-G.cam.x)*.1;G.cam.y+=(fy-G.cam.y)*.1;
  ctx.setTransform(Z*DPR,0,0,Z*DPR,(VW/2-G.cam.x*Z)*DPR,(VH/2-G.cam.y*Z)*DPR);
