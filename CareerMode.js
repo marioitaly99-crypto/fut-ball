@@ -439,6 +439,20 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  #cmBody>.cmCard>.cmBig{position:sticky;bottom:0;z-index:2;margin-top:4px}
  #cmSub .cmCard,#cmEnd .cmCard,#cmChamp .cmCard{max-height:96dvh}
 }
+
+/* ---------- Modal Menú de sala (pausa) · cartoon vector ---------- */
+#menu .card{background:#1e2329;border:2.5px solid #0a1f3d;border-radius:20px;box-shadow:0 5px 0 rgba(0,0,0,.35);color:#fff}
+#menu .card>h2{color:#facc15;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:.02em;
+ text-shadow:-1.5px -1.5px 0 #0a1f3d,1.5px -1.5px 0 #0a1f3d,-1.5px 1.5px 0 #0a1f3d,1.5px 1.5px 0 #0a1f3d}
+#menu .card #mResume,#menu .card #mLeave,#menu .card #cmMenuSub{border:2.5px solid #0a1f3d;border-radius:16px;color:#fff;font-weight:900;
+ letter-spacing:.02em;box-shadow:0 4px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.25);
+ text-shadow:-1.5px -1.5px 0 #0a1f3d,1.5px -1.5px 0 #0a1f3d,-1.5px 1.5px 0 #0a1f3d,1.5px 1.5px 0 #0a1f3d,0 2px 2px rgba(0,0,0,.35);
+ transition:transform .08s ease,box-shadow .08s ease,filter .12s ease}
+#menu .card #mResume{background:linear-gradient(180deg,#62c74f 0%,#439e34 100%)}
+#menu .card #mLeave{background:linear-gradient(180deg,#f0615f 0%,#d23a3a 100%)}
+#menu .card #cmMenuSub{background:linear-gradient(180deg,#303843 0%,#262c34 100%)}
+#menu .card #mResume:hover,#menu .card #mLeave:hover,#menu .card #cmMenuSub:hover{filter:brightness(1.1)}
+#menu .card #mResume:active,#menu .card #mLeave:active,#menu .card #cmMenuSub:active{transform:translateY(3px);box-shadow:0 1px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.2)}
 `;
   document.head.appendChild(s);
  }

@@ -365,7 +365,7 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
 
 /* =====================================================================
    🎨 CARTOON VECTOR · menús y pantallas secundarias (solo CSS visual)
-   Pegar AL FINAL del último <style> de index.html (justo antes de </style>).
+   Bloque CSS integrado al final de la hoja de estilos principal.
    No cambia estructura HTML, fondos (career-bg.png / assets/) ni JS.
    ===================================================================== */
 #screen-login,#screen-lobby,#career-screen,#helpModal,#pwaModal,#menu,#vote{
@@ -572,6 +572,20 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
 @media (max-width:820px) and (orientation:portrait){
  #career-root .cGrid{grid-template-columns:1fr;grid-template-rows:minmax(0,2fr) minmax(0,1fr)}
 }
+
+/* ---------- Modal "Menú de sala" (pausa) · cartoon vector ---------- */
+#menu .card{background:#1e2329;border:2.5px solid #0a1f3d;border-radius:20px;box-shadow:0 5px 0 rgba(0,0,0,.35);color:#fff}
+#menu .card>h2{color:#facc15;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:.02em;
+ text-shadow:-1.5px -1.5px 0 #0a1f3d,1.5px -1.5px 0 #0a1f3d,-1.5px 1.5px 0 #0a1f3d,1.5px 1.5px 0 #0a1f3d}
+#menu .card #mResume,#menu .card #mLeave,#menu .card #cmMenuSub{border:2.5px solid #0a1f3d;border-radius:16px;color:#fff;font-weight:900;
+ letter-spacing:.02em;box-shadow:0 4px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.25);
+ text-shadow:-1.5px -1.5px 0 #0a1f3d,1.5px -1.5px 0 #0a1f3d,-1.5px 1.5px 0 #0a1f3d,1.5px 1.5px 0 #0a1f3d,0 2px 2px rgba(0,0,0,.35);
+ transition:transform .08s ease,box-shadow .08s ease,filter .12s ease}
+#menu .card #mResume{background:linear-gradient(180deg,#62c74f 0%,#439e34 100%)}
+#menu .card #mLeave{background:linear-gradient(180deg,#f0615f 0%,#d23a3a 100%)}
+#menu .card #cmMenuSub{background:linear-gradient(180deg,#303843 0%,#262c34 100%)}
+#menu .card #mResume:hover,#menu .card #mLeave:hover,#menu .card #cmMenuSub:hover{filter:brightness(1.1)}
+#menu .card #mResume:active,#menu .card #mLeave:active,#menu .card #cmMenuSub:active{transform:translateY(3px);box-shadow:0 1px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.2)}
 </style>
 </head><body>
 
