@@ -818,7 +818,13 @@ function applyFlag(){user.flag=FLAG;rooms.forEach(r=>{if(r.mine)r.flag=FLAG});if
 const act=()=>G.pen?(G.pen.parts||[]):G.players.filter(p=>p.team!=='spec');
 /* Audio sintetizado (Web Audio API) */
 let AC=null,muted=false;
-function audio(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(e){}}
+function audio(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state!=='running'){const p=AC.resume();if(p&&p.catch)p.catch(()=>{})}}catch(e){}}
+/* Sonido activo por defecto: se desbloquea con cualquier gesto previo (menú, JUGAR PARTIDO); #mute solo silencia / reactiva */
+function syncMuteIcon(){const b=$('mute');if(!b)return;b.textContent=muted?'🔇':'🔊';b.title=muted?'Activar sonido':'Silenciar sonido';b.setAttribute('aria-pressed',String(muted))}
+function audioMatchStart(){muted=false;syncMuteIcon();audio()} /* cada partido arranca con sonido */
+const unlockAudio=()=>{if(!AC||AC.state!=='running')audio()}; /* sin once: si el navegador rechaza un gesto, reintenta en el siguiente */
+['pointerdown','pointerup','touchend','click','keydown'].forEach(ev=>window.addEventListener(ev,unlockAudio,{capture:true,passive:true}));
+syncMuteIcon();
 function thump(v=1){if(NET.role==='host')bc({t:'snd',k:'t',v});if(!AC||muted)return;const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type='sine';
  o.frequency.setValueAtTime(180,t);o.frequency.exponentialRampToValueAtTime(45,t+.09);
  g.gain.setValueAtTime(.8*v,t);g.gain.exponentialRampToValueAtTime(.001,t+.11);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+.12)}
@@ -914,7 +920,7 @@ $('jPass').addEventListener('keydown',e=>e.key==='Enter'&&$('jOk').click());
 
 /* Partida local (misma física que el servidor) */
 const mk=(name,num,team,bot,id)=>({id:id||'b'+Math.random().toString(36).slice(2,7),name,num,team,bot,flag:'🌐',ping:0,x:0,y:0,vx:0,vy:0,r:PRAD,cd:0,flash:0,ax:0,ay:0,kick:false,wander:Math.random()*10});
-function enter(r,admin){netReset();updateInvite();cur=r;isAdmin=admin;STAD=admin?stadLoad():stadDef();STAD_CF.length=0;me=mk(user.nick,user.num,'red',false,'host');me.flag=FLAG;me.plat=PLAT;
+function enter(r,admin){audioMatchStart();netReset();updateInvite();cur=r;isAdmin=admin;STAD=admin?stadLoad():stadDef();STAD_CF.length=0;me=mk(user.nick,user.num,'red',false,'host');me.flag=FLAG;me.plat=PLAT;
  G={uni:defUni(),size:r.size||'mediana',super:r.mode==='super',duration:180,goalLimit:0,players:[me,...(r.test?[mk('Bot 1','7','red',true),mk('Bot 2','9','blue',true),mk('Bot 3','3','blue',true)]:[])]};botSeq=r.test?4:1;uniqueBotNums();
  sizeUp();restart();show('screen-game');$('log').textContent='';$('c').focus()}
 function sizeUp(){[G.w,G.h]=SIZES[G.size];G.gh=GHT[G.size];G.gT=(G.h-G.gh)/2;G.gB=G.gT+G.gh;G.k=G.size==='gigante'?1.2:G.size==='grande'?1.1:1;G.cam=null}
@@ -1026,12 +1032,14 @@ function movePlayer(p,to){if(p.team===to)return;if(G.pen)return showEv('Espera: 
  if(to==='spec'){}else if(from==='spec')placeFree(p); /* desde Espectadores: entra directo a su mitad */
  else{p.x=G.w-p.x;p.vx=-p.vx} /* Local↔Visitante: misma posición relativa a su arco, sin tocar la pelota ni al resto */
  if(from!=='spec')assignRoles(from);if(to!=='spec')assignRoles(to);botUI()}
+/* Punto de extensión: se llama en cada pelota parada (lateral, córner, saque de arco y tiro libre). CareerMode.js lo usa para los cambios de la CPU */
+function onSetPiece(sp){}
 /* Modo Realista: saque lateral, córner y saque de arco */
 function setPiece(sp,txt){const b=G.ball;G.sp=sp;
  if(sp.type==='lateral'){let n=null,nd=1e9;act().forEach(q=>{if(q.team!==sp.team||q.fz>0)return;const d=Math.hypot(q.x-sp.x,q.y-sp.y);if(d<nd){nd=d;n=q}});sp.exId=n?n.id:null} /* lateral: ejecutante fijo = el más cercano (humano o bot) cuando sale la pelota; sin alternancia */
  if(sp.type==='corner'&&!sp.botTake){const hb=carOn()&&G.players.some(q=>q.bot&&q.team===sp.team),p=hb?spExecutor():act().filter(q=>!q.bot&&q.team===sp.team&&!(q.fz>0)).reduce((a,q)=>!a||Math.hypot(q.x-sp.x,q.y-sp.y)<Math.hypot(a.x-sp.x,a.y-sp.y)?q:a,null);
   if(p&&!p.bot){p.x=sp.x+(sp.x<G.w/2?-18:18);p.y=sp.y+(sp.y<G.h/2?-18:18);p.vx=p.vy=0;p.ax=p.ay=0;sp.aimAng=spAimInit(sp)}} /* córner PES: el humano ejecutante queda detrás del balón con la flecha guía lista */
- b.x=sp.x;b.y=sp.y;b.vx=b.vy=0;showEv(`${txt} · ${sp.team==='red'?'LOCAL':'VISITANTE'}`,1700)}
+ b.x=sp.x;b.y=sp.y;b.vx=b.vy=0;showEv(`${txt} · ${sp.team==='red'?'LOCAL':'VISITANTE'}`,1700);onSetPiece(sp)}
 function ballOut(){const b=G.ball,r=b.r,W=G.w,H=G.h;
  if(b.y+r<0||b.y-r>H)setPiece({type:'lateral',team:other(G.lastT||'red'),x:clamp(b.x,40,W-40),y:b.y<0?5:H-5,rad:SPR},'↔️ SAQUE LATERAL'); /* en el punto exacto, para el rival del último que la tocó */
  else if(b.x+r<0||b.x-r>W){const left=b.x<0,def=left?'red':'blue',att=other(def);
@@ -1554,7 +1562,7 @@ function refFoul(p,q,s){const W=G.w,H=G.h,b=G.ball,O=p.team,T=q.team,ownX=O==='r
  if(Math.hypot(ownX-fx,H/2-fy)<420){ /* barrera: 2 o 3 bots de campo rivales más cercanos, hombro con hombro (34 px) a 150 px del balón, perpendicular a la línea balón-arco */
   const gx=ownX-fx,gy=H/2-fy,gl=Math.hypot(gx,gy)||1,ux=gx/gl,uy=gy/gl,cand=G.players.filter(d=>d.team===O&&d.bot&&d.role!=='arquero').sort((a,c)=>Math.hypot(a.x-fx,a.y-fy)-Math.hypot(c.x-fx,c.y-fy)),
    k=Math.min(cand.length,2); /* barrera automática: 2 bots defensores (sin arquero) */
-  G.sp.wall=cand.slice(0,k).map((d,i)=>{const o=(i-(k-1)/2)*34;return[d,clamp(fx+ux*120-uy*o,d.r,W-d.r),clamp(fy+uy*120+ux*o,d.r,H-d.r)]})}};} /* Tiro libre en el punto exacto de la infracción (balón detenido: 95 px libre / 150 px rivales) */
+  G.sp.wall=cand.slice(0,k).map((d,i)=>{const o=(i-(k-1)/2)*34;return[d,clamp(fx+ux*120-uy*o,d.r,W-d.r),clamp(fy+uy*120+ux*o,d.r,H-d.r)]})}onSetPiece(G.sp)};} /* Tiro libre en el punto exacto de la infracción (balón detenido: 95 px libre / 150 px rivales) */
 /* Penal por falta: reutiliza la mecánica de penales (pateador, arquero, 7 s); un solo tiro y se reanuda el juego */
 function startFoulPen(q,O){const T=q.team,defs=G.players.filter(d=>d.team===O),ownX=O==='red'?0:G.w,
   k=defs.find(d=>d.bot&&d.role==='arquero')||defs.reduce((a,c)=>!a||Math.abs(c.x-ownX)<Math.abs(a.x-ownX)?c:a,null);
@@ -1900,7 +1908,7 @@ function toggleMenu(f){menuOpen=typeof f==='boolean'?f:!menuOpen;$('menu').class
 $('v1').onclick=()=>castVote(1);$('v2').onclick=()=>castVote(2);$('v3').onclick=()=>castVote(3);
 $('mResume').onclick=()=>toggleMenu(false);
 $('mZoom').onchange=()=>{const v=parseFloat($('mZoom').value);if(!isFinite(v))return;MOBILE_ZOOM=v;$('mZoom').value=v.toFixed(2);try{localStorage.setItem('futball_mobile_zoom',String(v))}catch(e){}};
-$('mute').onclick=()=>{audio();muted=!muted;$('mute').textContent=muted?'🔇':'🔊';$('c').focus()};
+$('mute').onclick=()=>{audio();muted=!muted;syncMuteIcon();$('c').focus()};
 $('aSize').onchange=e=>{G.size=e.target.value;G.cs=G.size;cur.size=G.size;sizeUp();kickoff()};
 $('aMode').onchange=e=>{if(!isAdmin)return;const v=e.target.value;G.super=v==='super';powerReset();if(v==='realista'){if(!RL())G.cs=G.size;G.size='realista'}else if(RL())G.size=G.cs&&G.cs!=='realista'?G.cs:'mediana';
  cur.size=G.size;cur.mode=v;sizeUp();$('aSize').value=RL()?(G.cs||'mediana'):G.size;$('aSize').classList.toggle('hidden',RL());const mn=RL()?'🏟️ MODO REALISTA':G.super?'⚡ MODO SUPERPODERES':'Modo Clásico';adminRestart(mn,`🔄 El admin cambió el modo a ${mn.replace(/^\S+\s/,'')}: el partido se reinició (0 - 0).`)};
@@ -2081,7 +2089,7 @@ function joinCode(raw){const code=norm(raw),err=m=>{$('codeErr').textContent=m};
   c.on('close',()=>{if(NET.peer===pr)fail('El Host cerró la sala.')});c.on('error',()=>{})})}
 $('codeGo').onclick=()=>joinCode($('codeIn').value);
 $('codeIn').addEventListener('keydown',e=>e.key==='Enter'&&$('codeGo').click());
-function enterClient(m){NET.role='client';NET.myId=m.id;NET.pm=new Map();NET.code=NET.target;const c=m.cfg;isAdmin=false;menuOpen=false;STAD=stadClean(c.st);STAD_CF.length=0;cur={name:c.name,test:true,client:true};
+function enterClient(m){audioMatchStart();NET.role='client';NET.myId=m.id;NET.pm=new Map();NET.code=NET.target;const c=m.cfg;isAdmin=false;menuOpen=false;STAD=stadClean(c.st);STAD_CF.length=0;cur={name:c.name,test:true,client:true};
  me={id:m.id,name:user.nick,num:user.num,team:'red',x:0,y:0,vx:0,vy:0,r:PRAD,flash:0,vc:0,plat:PLAT};NET.lq=0;NET.kq=0;NET.hist=[];
  G={uni:c.uni,size:c.size,super:!!c.sm,duration:c.d,goalLimit:c.g,players:[me],ball:{x:500,y:300,r:BRAD},score:{red:0,blue:0},clock:0,golden:false,paused:false,cd:0,vote:null,pen:null,over:false};
  NET.pm.set(m.id,me);sizeUp();$('modal').classList.add('hidden');$('codeErr').textContent='';$('menu').classList.add('hidden');
@@ -2390,7 +2398,7 @@ let last=performance.now(),acc=0;
  const VOL=.5,FADE_MS=900,SHOW_MS=5000;
  const g=id=>document.getElementById(id);
  const au=new Audio();au.preload='auto';au.volume=0;
- let TRACKS=[],order=[],pos=-1,cur=null,last=null,unlocked=false,dead=false,fails=0,fadeT=null,shownFor=null,hideT=null,userPaused=false,musicMuted=false,hover=false,hist=[];
+ let TRACKS=[],order=[],pos=-1,cur=null,last=null,unlocked=false,dead=false,fails=0,fadeT=null,shownFor=null,hideT=null,userPaused=false,musicMuted=false,hover=false,hist=[],fromMatch=false;
 
  /* --- CSS de la cápsula --- */
  const st=document.createElement('style');
@@ -2486,8 +2494,15 @@ let last=performance.now(),acc=0;
   if(!cur||au.currentTime>3||!hist.length){if(cur){au.currentTime=0;shownFor=null;if(shouldPlay())au.play().catch(()=>{})}else nextTrack();return}
   playTrack(hist.pop());
  }
+ /* al volver de un partido: otra pista aleatoria (nunca la que quedó pausada) + pop-up */
+ function newTrackAfterMatch(){
+  const prev=cur;
+  if(TRACKS.length>1){do{if(!order.length||pos+1>=order.length)shuffle();if(TRACKS[order[pos+1]]!==prev)break;pos++}while(true)}
+  nextTrack();showCap(cur);
+ }
  function sync(){
-  if(inGame()){clearTimeout(hideT);setShown(false)}
+  if(inGame()){fromMatch=true;clearTimeout(hideT);setShown(false)}
+  else if(fromMatch){fromMatch=false;if(cur&&!dead&&TRACKS.length>0)newTrackAfterMatch()}
   if(shouldPlay()){
    if(!au.src||au.ended)nextTrack();
    else if(au.paused){const p=au.play();if(p&&p.catch)p.catch(()=>{})}

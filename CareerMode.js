@@ -299,6 +299,9 @@
 #cmChamp .cmCard{border-color:#facc15;box-shadow:0 0 40px rgba(250,204,21,.6)}
 #cmChamp h1{font-size:clamp(1.3rem,5vw,2.1rem);color:#fde68a;text-shadow:0 2px 10px rgba(250,204,21,.7);font-style:italic}
 #cmChamp .cmBd{width:110px;height:110px}
+#cmRivalSub{display:none;position:fixed;z-index:130;right:12px;top:calc(env(safe-area-inset-top,0px) + 96px);max-width:min(360px,calc(100vw - 24px));flex-direction:column;align-items:flex-end;gap:4px;pointer-events:none}
+#cmRivalSub div{padding:5px 10px;border-radius:10px;background:rgba(11,15,26,.82);border:1px solid rgba(56,189,248,.6);color:#fff;font-size:.76rem;font-weight:700;text-align:right}
+body.careerOn.cmInGame #cmRivalSub{display:flex}
 #cmSubBtn,#cmMenuSub{display:none}
 body.careerOn #cmMenuSub{display:block}
 body.careerOn.cmInGame #cmSubBtn{display:block;position:fixed;z-index:130;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);padding:8px 14px;font-size:.85rem;border-radius:12px;background:rgba(11,15,26,.85);color:#fff;border:1.5px solid #38bdf8}
@@ -463,6 +466,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    const d=document.createElement('div');d.id='cmSub';document.body.appendChild(d);
    const e=document.createElement('div');e.id='cmEnd';document.body.appendChild(e);
    const c=document.createElement('div');c.id='cmChamp';document.body.appendChild(c);
+   const rs=document.createElement('div');rs.id='cmRivalSub';rs.setAttribute('role','status');document.body.appendChild(rs);
    const b=document.createElement('button');b.id='cmSubBtn';b.type='button';b.textContent='🔄 Cambios (P)';document.body.appendChild(b);
    const m=document.createElement('button');m.id='cmMenuSub';m.type='button';m.className='ghost';m.textContent='🔄 Realizar Cambio';
    const mr=$('mResume');if(mr&&mr.parentNode)mr.parentNode.insertBefore(m,mr);
@@ -801,13 +805,14 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   /* 4) el rival conserva siempre su dorsal oficial: NO se le pasa el dorsal del usuario (la reasignación por duplicado solo rige en tu equipo, vía resolverPlantelCancha) */
   try{D.aplicarPlantelABots(rv,rvT.id,null)}catch(e){D.aplicarPlantelABots(rv,rvT.id,-1)}
   rv.forEach(b=>{b.name=b.nick||b.name;b.num=String(b.num)});
+  rv.forEach(b=>initRivalStam(b,rnd(62,100),0));
   G.players=[me].concat(mine,rv);
   G.uni={red:Object.assign({},kH),blue:Object.assign({},kA)};
   G.duration=S.minutes*60;G.goalLimit=0;G.super=false;G.cET=false;
   G.teamTactics={red:calcBias(m.h,true),blue:calcBias(m.a,false)};
   STAD=stadClean(m.neutral?null:hT.stadium);if(typeof STAD_CF!=='undefined')STAD_CF.length=0;
   CM.live=true;
-  LIVE={m,slots:mine.map((b,i)=>({bot:b,id:ids[i],t0:0})),bench:S.squad.bench.filter(id=>!ex||id!==ex.id),extraId:ex?ex.id:null,extraIdx:ex?ex.idx:-1,cards:{},subs:0,played:{},inj:{},sel:null,res:null,done:false,timer:0};
+  LIVE={m,slots:mine.map((b,i)=>({bot:b,id:ids[i],t0:0})),bench:S.squad.bench.filter(id=>!ex||id!==ex.id),extraId:ex?ex.id:null,extraIdx:ex?ex.idx:-1,cards:{},subs:0,rival:{bots:rv,bench:rivalBench(rvT.id,rv),subs:0},played:{},inj:{},sel:null,res:null,done:false,timer:0};
   document.body.classList.add('careerOn','cmInGame');
   const lv=$('mLeave');if(lv)lv.textContent='Abandonar partido';
   const hn=$('hint');if(hn){if(!hn.dataset.o)hn.dataset.o=hn.textContent;hn.textContent='ESC: menú · P: pausa y cambios · Flechas / WASD: mover · Espacio / X: patear'}
@@ -868,6 +873,50 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   renderSub('✅ Entra '+inn.name+' (#'+inn.number+', '+inn.stam+'%) por '+out.name+'.');
   try{showEv('🔄 Cambio: entra '+inn.name+' (#'+inn.number+')',2200)}catch(e){}
  }
+
+ /* ---- cambios automáticos de la CPU rival en pelota parada ---- */
+ const CPU_MAX_SUBS=3,CPU_STAM_MIN=35;
+ /* banco rival: plantel del club menos los 6 que están en cancha (hasta 9 suplentes) */
+ function rivalBench(teamId,onField){
+  let r;try{r=D.resolverPlantelCancha(teamId,null)}catch(e){try{r=D.resolverPlantelCancha(teamId,-1)}catch(er){return[]}}
+  const used=p=>onField.some(b=>String(b.num)===String(p.number)||b.name===p.name);
+  return r.starters.concat(r.subs).filter(p=>!used(p)).slice(0,9).map(p=>({name:p.name,number:p.number,pos:p.pos}));
+ }
+ /* stamina del rival: llega con desgaste previo y baja según los minutos jugados (solo decide los cambios; no altera su velocidad) */
+ function initRivalStam(b,start,now){
+  b.cRvS0=start;b.cRvT0=now;
+  b.cRvDrain=b.pos==='GK'?rnd(8,12):rnd(35,55); /* puntos que pierde en un partido completo */
+ }
+ const rivalStam=b=>Math.max(0,Math.round(b.cRvS0-b.cRvDrain*Math.max(0,(G.clock||0)-b.cRvT0)/(S.minutes*60)));
+ function cpuSubs(){
+  if(!CM.live||!LIVE||LIVE.res||!LIVE.rival||!G||G.over||G.pen)return;
+  const R=LIVE.rival;
+  if(R.subs>=CPU_MAX_SUBS||!R.bench.length)return;
+  /* candidatos en cancha (los expulsados no se reemplazan): primero lesionados, después el más cansado */
+  const cand=R.bots.filter(b=>b.team!=='spec'&&!b.rt&&(b.inj>0||rivalStam(b)<CPU_STAM_MIN))
+   .sort((a,b)=>(b.inj>0)-(a.inj>0)||rivalStam(a)-rivalStam(b));
+  cand.forEach(b=>{
+   if(R.subs>=CPU_MAX_SUBS)return;
+   const gk=b.pos==='GK',fits=p=>(p.pos==='GK')===gk; /* arquero solo por arquero */
+   let i=R.bench.findIndex(p=>p.pos===b.pos);
+   if(i<0)i=R.bench.findIndex(fits);
+   if(i<0)return;
+   const inn=R.bench.splice(i,1)[0],outName=b.name; /* el que sale no vuelve a entrar */
+   b.name=inn.name;if('nick' in b)b.nick=inn.name;b.num=String(inn.number);b.pos=inn.pos;
+   b.yc=0;b.fc=0;b.rc=0;b.sl=null;
+   try{injClear(b)}catch(e){}
+   initRivalStam(b,100,G.clock||0);
+   R.subs++;
+   rivalNotice('🔄 Cambio rival: SALE '+outName+' • ENTRA '+inn.name);
+  });
+ }
+ /* aviso discreto propio: no pisa el cartel central (lateral, córner, etc.) */
+ function rivalNotice(txt){
+  const box=$('cmRivalSub');if(!box)return;
+  const d=document.createElement('div');d.textContent=txt;box.appendChild(d);
+  setTimeout(()=>d.remove(),3800);
+ }
+ hook('onSetPiece',o=>function(){const r=o.apply(this,arguments);try{cpuSubs()}catch(e){console.warn('[CareerMode] cambio rival',e)}return r});
 
  /* ---- expulsión del usuario: reemplazar y simular el resto ---- */
  const meRed=()=>!!(CM.live&&LIVE&&!LIVE.res&&typeof G!=='undefined'&&G&&!G.over&&!G.pen&&typeof me!=='undefined'&&me&&me.team==='spec'&&!!me.rt);
@@ -979,6 +1028,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   CM.live=false;LIVE=null;
   document.body.classList.remove('careerOn','cmInGame','cmRed');
   try{if(typeof setBotDiff==='function')setBotDiff('normal')}catch(e){}
+  const rn=$('cmRivalSub');if(rn)rn.textContent='';
   ['cmSub','cmEnd'].forEach(i=>{const e=$(i);if(e)e.classList.remove('on')});
   try{menuOpen=false;$('menu').classList.add('hidden');$('vote').classList.add('hidden')}catch(e){}
   if(G)G.paused=false;
