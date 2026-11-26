@@ -362,6 +362,216 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
  html.is-touch #chatIn:focus,#chatIn:focus,#chatBar:focus{background:var(--cap)!important} /* sólida al recibir foco */
  html.is-touch #kickWrap .klbl,#kickWrap .klbl{font-size:9px;padding:2px 7px;opacity:.65;box-shadow:none;position:fixed;right:calc(env(safe-area-inset-right,0px) + 6px);bottom:calc(env(safe-area-inset-bottom,0px) + 4px)} /* PATEAR / MANTENER: BARRIDA, pegada al borde inferior derecho */
 }
+
+/* =====================================================================
+   🎨 CARTOON VECTOR · menús y pantallas secundarias (solo CSS visual)
+   Pegar AL FINAL del último <style> de index.html (justo antes de </style>).
+   No cambia estructura HTML, fondos (career-bg.png / assets/) ni JS.
+   ===================================================================== */
+#screen-login,#screen-lobby,#career-screen,#helpModal,#pwaModal,#menu,#vote{
+ --cap:#1e2329;--cap2:#262c34;--well:#161a1f;--ink:#0a1f3d;--gold:#facc15;--sky:#38bdf8;
+ --in:#161a1f;--line:#0a1f3d;--card:#1e2329;--mut:#7cc8f2}
+
+/* ---------- 1) Tarjetas y paneles: cápsulas oscuras sólidas ---------- */
+#screen-login .card,#screen-lobby .panel,#helpModal .card,#pwaModal .card,#menu .card,#vote .card,
+#career-screen .careerCard,#career-root .cPanel{
+ background:rgba(30,35,41,.96);border:2.5px solid #0a1f3d;border-radius:20px;
+ box-shadow:0 5px 0 rgba(0,0,0,.35);-webkit-backdrop-filter:none;backdrop-filter:none}
+#screen-lobby .panel>h2{background:#1e2329;border:2.5px solid #0a1f3d;border-bottom:none;border-radius:18px 18px 0 0;
+ color:#facc15;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:.02em;
+ text-shadow:-1.5px -1.5px 0 #0a1f3d,1.5px -1.5px 0 #0a1f3d,-1.5px 1.5px 0 #0a1f3d,1.5px 1.5px 0 #0a1f3d}
+#screen-lobby #who{background:#1e2329;border:2px solid #0a1f3d;box-shadow:0 3px 0 rgba(0,0,0,.35);color:#38bdf8;font-weight:800}
+#career-screen .careerCard h1{color:#fff;text-shadow:-1.5px -1.5px 0 #0a1f3d,1.5px -1.5px 0 #0a1f3d,-1.5px 1.5px 0 #0a1f3d,1.5px 1.5px 0 #0a1f3d,0 3px 3px rgba(0,0,0,.35)}
+#career-root h2,#menu h2,#pwaModal h2,#helpModal h2.hT{color:#facc15;font-weight:900;font-style:italic;letter-spacing:.02em}
+#menu .card,#vote .card{color:#fff}
+
+/* ---------- 2) Inputs, selects y etiquetas ---------- */
+#screen-login input,#screen-lobby input:not([type=radio]),#screen-lobby select,
+#career-root select,#career-root input,#menu select,
+#menu input:not([type=color]):not([type=range]):not([type=checkbox]),#pwaModal input{
+ background:#161a1f;color:#fff;border:2px solid #0a1f3d;border-radius:14px;
+ box-shadow:inset 0 3px 0 rgba(0,0,0,.35);font-weight:700}
+#screen-login input:focus,#screen-lobby input:not([type=radio]):focus,#screen-lobby select:focus,
+#career-root select:focus,#career-root input:focus,#menu select:focus,
+#menu input:not([type=color]):not([type=range]):not([type=checkbox]):focus{
+ border-color:#38bdf8;box-shadow:inset 0 3px 0 rgba(0,0,0,.35),0 0 0 2px rgba(56,189,248,.35);outline:none}
+#screen-login input::placeholder,#screen-lobby input::placeholder{color:#7c8794}
+#screen-lobby select option,#career-root select option,#menu select option{background:#161a1f;color:#fff}
+#screen-login .lbl,#career-root .cLbl{color:#facc15;font-weight:900}
+#screen-login .lbl svg{fill:#facc15}
+#career-root .cNote,#menu .label,#vote .label,#screen-lobby .label{color:#38bdf8}
+#screen-login .foot{border-top:2px solid #0a1f3d;color:#38bdf8}
+#screen-login .pick .chev svg{stroke:#facc15}
+#screen-login .pop{background:#1e2329;border:2.5px solid #0a1f3d;border-radius:16px;box-shadow:0 5px 0 rgba(0,0,0,.35)}
+#screen-login .pop button{background:#262c34;border:2px solid #0a1f3d;border-radius:12px;box-shadow:0 3px 0 rgba(0,0,0,.4)}
+#screen-login .pop button:hover{background:#334050}
+#menu #stad,#menu #uni>div{border:2px solid #0a1f3d!important;border-radius:14px!important;background:#161a1f!important}
+#menu #teams>div{border-left:2px solid #0a1f3d!important;border-right:2px solid #0a1f3d!important;border-bottom:2px solid #0a1f3d!important;border-radius:14px!important;background:#161a1f!important}
+#menu #teams>div>div:not(:first-child){background:#262c34!important;border:2px solid #0a1f3d!important;border-radius:10px!important}
+#menu #zoomBox,#menu #extBox,#menu #adm{border-top:2px solid #0a1f3d!important}
+
+/* ---------- 3) Botón principal: verde césped cartoon ---------- */
+#screen-lobby #create,#screen-lobby #codeGo,#screen-login #enter,#menu #mResume,#menu #bAdd,
+#pwaModal #pwaOk,#helpModal #helpOk,#vote #v1{
+ background:linear-gradient(180deg,#62c74f 0%,#439e34 100%);color:#fff;
+ border:3px solid #0a1f3d;border-radius:16px;font-weight:900;letter-spacing:.02em;
+ text-shadow:-1.5px -1.5px 0 #0a1f3d,1.5px -1.5px 0 #0a1f3d,-1.5px 1.5px 0 #0a1f3d,1.5px 1.5px 0 #0a1f3d,0 2px 2px rgba(0,0,0,.35);
+ box-shadow:0 5px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.28);
+ transition:transform .08s ease,box-shadow .08s ease,filter .12s ease}
+#screen-lobby #create:hover,#screen-lobby #codeGo:hover,#screen-login #enter:hover,#menu #mResume:hover,#menu #bAdd:hover,
+#pwaModal #pwaOk:hover,#helpModal #helpOk:hover,#vote #v1:hover{filter:brightness(1.08)}
+#screen-lobby #create:active,#screen-lobby #codeGo:active,#screen-login #enter:active,#menu #mResume:active,#menu #bAdd:active,
+#pwaModal #pwaOk:active,#helpModal #helpOk:active,#vote #v1:active{
+ transform:translateY(4px);box-shadow:0 1px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.2)}
+#screen-lobby #create:disabled,#screen-lobby #codeGo:disabled,#menu #mResume:disabled,#menu #bAdd:disabled{
+ filter:grayscale(.6);opacity:.55;transform:none;box-shadow:0 5px 0 #0a1f3d}
+#screen-login #enter svg{stroke:#fff}
+
+/* ---------- Botones secundarios: cápsulas oscuras con relieve ---------- */
+#screen-lobby button.ghost,#menu button.ghost,#vote button.ghost,.backBtn,.pwaBtn,
+#screen-lobby #backLobby,#screen-lobby #helpLobby,#screen-lobby #pwaLobby,#screen-lobby #refreshRooms,
+#screen-login #pwaLogin,#career-screen #backCareer,#screen-login #backLogin{
+ background:linear-gradient(180deg,#303843 0%,#262c34 100%);color:#fff;
+ border:2.5px solid #0a1f3d;border-radius:999px;font-weight:800;
+ box-shadow:0 4px 0 #0a1f3d;transition:transform .08s ease,box-shadow .08s ease,filter .12s ease}
+#menu button.ghost,#vote button.ghost{border-radius:14px}
+#screen-lobby button.ghost:hover,#menu button.ghost:hover,#vote button.ghost:hover,.backBtn:hover,.pwaBtn:hover,
+#screen-lobby #backLobby:hover,#screen-lobby #helpLobby:hover,#screen-lobby #pwaLobby:hover,#screen-lobby #refreshRooms:hover{filter:brightness(1.18)}
+#screen-lobby button.ghost:active,#menu button.ghost:active,#vote button.ghost:active,.backBtn:active,.pwaBtn:active,
+#screen-lobby #backLobby:active,#screen-lobby #helpLobby:active,#screen-lobby #pwaLobby:active,#screen-lobby #refreshRooms:active{
+ transform:translateY(3px);box-shadow:0 1px 0 #0a1f3d}
+#screen-lobby #refreshRooms{font-style:normal}
+
+/* ---------- Botones de peligro (rojo cartoon) ---------- */
+#menu button.danger,#menu #mLeave,#menu #bDel{
+ background:linear-gradient(180deg,#f0615f 0%,#d23a3a 100%);color:#fff;
+ border:3px solid #0a1f3d;border-radius:16px;font-weight:900;
+ text-shadow:-1.5px -1.5px 0 #0a1f3d,1.5px -1.5px 0 #0a1f3d,-1.5px 1.5px 0 #0a1f3d,1.5px 1.5px 0 #0a1f3d;
+ box-shadow:0 5px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.25)}
+#menu button.danger:active,#menu #mLeave:active,#menu #bDel:active{transform:translateY(4px);box-shadow:0 1px 0 #0a1f3d}
+
+/* ---------- Modo Online · lobby: salas y radios ---------- */
+#screen-lobby .room{background:#262c34;border:2px solid #0a1f3d;border-radius:16px;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+#screen-lobby .room b{color:#fff}
+#screen-lobby .room .label{color:#38bdf8}
+#screen-lobby .count{color:#62c74f}#screen-lobby .count.full{color:#f0615f}
+#screen-lobby .radios label{color:#fff}
+#screen-lobby .radios input[type=radio]{background:#262c34;border:2px solid #0a1f3d;box-shadow:inset 0 2px 0 rgba(0,0,0,.35)}
+#screen-lobby .radios input[type=radio]:checked{background:radial-gradient(circle,#fff 0 36%,#1f8be3 40% 100%);border-color:#0a1f3d;box-shadow:0 0 0 2px #38bdf8}
+#roomList{scrollbar-color:#38bdf8 #161a1f}
+#roomList::-webkit-scrollbar-track{background:#161a1f;border:2px solid #0a1f3d;border-radius:999px}
+#roomList::-webkit-scrollbar-thumb{background:#38bdf8;border:2px solid #0a1f3d;border-radius:999px;box-shadow:none}
+
+/* ---------- Modal ❓ Cómo jugar ---------- */
+#helpModal .hSel button{background:#262c34;color:#fff;border:2px solid #0a1f3d;border-radius:999px;box-shadow:0 3px 0 rgba(0,0,0,.4)}
+#helpModal .hSel button.on{background:linear-gradient(180deg,#4cb5f7 0%,#1f8be3 100%);color:#fff;border:2.5px solid #0a1f3d;
+ box-shadow:0 4px 0 #0a1f3d;text-shadow:-1px -1px 0 #0a1f3d,1px -1px 0 #0a1f3d,-1px 1px 0 #0a1f3d,1px 1px 0 #0a1f3d}
+#helpModal .hBox{background:#161a1f;border:2px solid #0a1f3d;border-radius:18px;box-shadow:inset 0 3px 0 rgba(0,0,0,.3)}
+#helpModal .hBox h3{color:#facc15}
+#helpModal .hLbl{color:#fff}#helpModal .hTxt{color:#cbd5e1}#helpModal .hOr{color:#38bdf8}
+#helpModal .kc{border:2px solid #0a1f3d;box-shadow:0 4px 0 #0a1f3d}
+#helpModal .phone{border:5px solid #0a1f3d;box-shadow:0 5px 0 rgba(0,0,0,.4)}
+#helpModal .phone .pz{background:#262c34;border:2px solid #0a1f3d}
+#helpModal .ai{background:#262c34;border:2px solid #0a1f3d;color:#fde68a}
+#helpModal .ai b{color:#facc15}
+#helpModal .mc{background:#161a1f;border-width:2.5px}
+#helpModal .mc.c{background:#161a1f;border-color:#62c74f}
+#helpModal .mc.r{background:#161a1f;border-color:#facc15}
+#helpModal .mc.s{background:#161a1f;border-color:#a855f7}
+#helpModal .chips span{background:#262c34;border:1.5px solid #0a1f3d;color:#fff}
+
+/* ---------- Pausa / votación ---------- */
+#vote #vTime{color:#facc15;text-shadow:-2px -2px 0 #0a1f3d,2px -2px 0 #0a1f3d,-2px 2px 0 #0a1f3d,2px 2px 0 #0a1f3d}
+#menu h2,#vote h2{text-transform:uppercase}
+
+/* ---------- Modo Carrera · selección de club ---------- */
+#career-root .cLbl{margin-top:2px}
+#career-root #cRand{background:linear-gradient(180deg,#4cb5f7 0%,#1f8be3 100%);color:#fff;border:2.5px solid #0a1f3d;border-radius:16px;
+ box-shadow:0 4px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.28);
+ text-shadow:-1.5px -1.5px 0 #0a1f3d,1.5px -1.5px 0 #0a1f3d,-1.5px 1.5px 0 #0a1f3d,1.5px 1.5px 0 #0a1f3d}
+#career-root #cRand:active{transform:translateY(3px);box-shadow:0 1px 0 #0a1f3d}
+#career-root #cStart{background:linear-gradient(180deg,#62c74f 0%,#439e34 100%);color:#fff;border:3px solid #0a1f3d;border-radius:16px;
+ font-weight:900;font-style:normal;letter-spacing:.02em;box-shadow:0 5px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.28);
+ text-shadow:-1.5px -1.5px 0 #0a1f3d,1.5px -1.5px 0 #0a1f3d,-1.5px 1.5px 0 #0a1f3d,1.5px 1.5px 0 #0a1f3d,0 2px 2px rgba(0,0,0,.35);
+ transition:transform .08s ease,box-shadow .08s ease}
+#career-root #cStart:hover{filter:brightness(1.08)}
+#career-root #cStart:active{transform:translateY(4px);box-shadow:0 1px 0 #0a1f3d}
+#career-root #cStart:disabled{opacity:.5;filter:grayscale(.6);transform:none;box-shadow:0 5px 0 #0a1f3d}
+#career-root .cTeams{background:#161a1f;border:2px solid #0a1f3d;border-radius:16px;box-shadow:inset 0 3px 0 rgba(0,0,0,.3);
+ scrollbar-width:thin;scrollbar-color:#38bdf8 #161a1f}
+#career-root .tm{background:#262c34;color:#fff;border:2px solid #0a1f3d;border-radius:14px;box-shadow:0 3px 0 rgba(0,0,0,.4)}
+#career-root .tm:hover{border-color:#38bdf8}
+#career-root .tm.on{background:linear-gradient(180deg,#4cb5f7 0%,#1f8be3 100%);border:2.5px solid #0a1f3d;box-shadow:0 4px 0 #0a1f3d}
+#career-root .pHead b{color:#fff}#career-root .pHead span{color:#38bdf8}
+#career-root .pKit{color:#facc15}
+#career-root .pBox{background:#161a1f;border:2px solid #0a1f3d;border-radius:14px}
+#career-root .pEmpty{color:#38bdf8}
+#career-root .cErr{color:#f0615f}
+#career-root .cZ .z{background:#262c34;border:2px solid #0a1f3d;border-radius:10px}
+#career-root .cZ .z.me{background:linear-gradient(180deg,#4cb5f7 0%,#1f8be3 100%);border:2px solid #0a1f3d}
+#career-root .cDone{background:linear-gradient(180deg,#303843 0%,#262c34 100%);border:2.5px solid #0a1f3d;border-radius:999px;box-shadow:0 4px 0 #0a1f3d}
+
+/* =====================================================================
+   4) Teléfono / pantallas bajas · todo entra en una pantalla sin scroll
+   ===================================================================== */
+@media (max-height:520px),(max-width:900px){
+ /* — Modo Carrera: selección de club — */
+ #career-screen.active{display:flex;flex-direction:column;height:100dvh;overflow:hidden;gap:6px;
+  padding:calc(env(safe-area-inset-top,0px) + 6px) 8px calc(env(safe-area-inset-bottom,0px) + 8px)}
+ #career-screen .careerCard{flex:none;width:min(1100px,100%);padding:5px 12px 5px 104px;border-radius:16px}
+ #career-screen .careerCard h1{font-size:clamp(.74rem,3.2vh,.98rem);line-height:1.2}
+ #career-root{flex:1 1 0;min-height:0;width:min(1100px,100%);display:flex;flex-direction:column}
+ #career-root .cGrid{flex:1 1 0;min-height:0;gap:8px;align-items:stretch;grid-template-rows:minmax(0,1fr)}
+ #career-root .cPanel{min-height:0;overflow-y:auto;overflow-x:hidden;padding:8px 10px;gap:5px;border-radius:18px}
+ #career-root .cPanel h2{font-size:.85rem}
+ #career-root .cLbl{font-size:.7rem;margin-top:0}
+ #career-root .cNote{font-size:.7rem}
+ #career-root select,#career-root input{padding:6px 10px;font-size:.85rem;border-radius:12px}
+ #career-root #cRand{padding:7px 12px;font-size:.85rem}
+ #career-root .cTeams{flex:1 1 140px;min-height:96px;max-height:none;overflow-y:auto;gap:5px;grid-template-columns:repeat(auto-fill,minmax(58px,1fr))}
+ #career-root .tm{padding:4px 2px 3px;font-size:.66rem}
+ #career-root .tm .bd{width:28px;height:28px}
+ #career-root #cStart{position:sticky;bottom:0;z-index:2;flex:none;padding:9px 14px;font-size:.95rem}
+ #career-root .pHead .bd{width:40px;height:40px}
+ #career-root .pHead b{font-size:1rem}
+ #career-root .pKit canvas{width:40px;height:40px}
+ #career-root .pKits{gap:12px}
+ #career-root .pBox{padding:6px 8px}
+ #career-root .pEmpty{padding:14px 8px}
+
+ /* — Modo Online: lobby (salas / crear / unirse) — */
+ #screen-lobby.active{display:flex;flex-direction:column;height:100dvh;overflow:hidden;gap:6px;padding-bottom:8px}
+ #screen-lobby .grid{flex:1 1 0;min-height:0;overflow-y:auto;overflow-x:hidden;align-content:start;row-gap:44px;padding:42px 4px 8px;-webkit-overflow-scrolling:touch}
+ #screen-lobby .panel{padding:14px 12px 12px;gap:7px;border-radius:18px}
+ #screen-lobby .panel>h2{height:34px;top:-33px;font-size:1rem;padding:0 16px}
+ #screen-lobby #roomList{height:auto;min-height:56px;max-height:min(30dvh,180px)}
+ #screen-lobby .room{padding:7px 10px;border-radius:14px}
+ #screen-lobby .room b{font-size:.95rem}
+ #screen-lobby input:not([type=radio]),#screen-lobby select{padding:7px 12px;font-size:.92rem;border-radius:12px}
+ #screen-lobby #create{padding:9px 14px;font-size:1rem}
+ #screen-lobby .radios{gap:14px}
+ #screen-lobby .radios label{font-size:.95rem}
+
+ /* — Login / personalizar — */
+ #screen-login .card{padding:12px 16px;gap:5px;border-radius:18px}
+ #screen-login input{padding:8px 12px;font-size:.95rem;border-radius:12px}
+ #screen-login .lbl{font-size:.9rem;margin-top:2px}
+ #screen-login .foot{margin-top:4px;padding-top:6px;font-size:.8rem}
+
+ /* — Menú de pausa, votación, ayuda y PWA (scroll solo dentro de la tarjeta) — */
+ #menu .card,#vote .card,#pwaModal .card,#helpModal .card{padding:10px 12px;gap:8px;border-radius:18px;max-height:96dvh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+ #menu select,#menu input:not([type=color]):not([type=range]):not([type=checkbox]){padding:6px 10px;font-size:.88rem}
+ #helpModal .hBox{padding:8px 10px;gap:7px}
+}
+/* Teléfono apaisado: la selección de club siempre en dos columnas */
+@media (orientation:landscape) and (max-height:520px){
+ #career-root .cGrid{grid-template-columns:1.1fr 1fr;grid-template-rows:minmax(0,1fr)}
+ #screen-lobby .grid{grid-template-columns:58% 40%}
+}
+/* Teléfono vertical: formulario arriba (2fr) y vista previa compacta abajo (1fr) */
+@media (max-width:820px) and (orientation:portrait){
+ #career-root .cGrid{grid-template-columns:1fr;grid-template-rows:minmax(0,2fr) minmax(0,1fr)}
+}
 </style>
 </head><body>
 

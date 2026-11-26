@@ -321,6 +321,124 @@ body.careerOn #chat{background:transparent!important;border:none!important;point
 .cmT th,.cmT td{padding:3px 4px}
 #career-hub-screen,#cmSub{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 32px)}
 }
+
+/* 🎨 CARTOON VECTOR · Hub del Modo Carrera */
+#career-hub-screen,#cmSub,#cmEnd,#cmChamp,#cmCont{--ink:#0a1f3d;--cap:#1e2329;--cap2:#262c34;--well:#161a1f}
+
+/* ---------- 1) Tarjetas y paneles ---------- */
+.cmHead,.cmCard,#cmCont{background:rgba(30,35,41,.96);border:2.5px solid #0a1f3d;border-radius:20px;box-shadow:0 5px 0 rgba(0,0,0,.35)}
+#cmCont{border-color:#0a1f3d}
+.cmHead b,#cmCont b{color:#fff}
+.cmHead small,.cmNote,#cmCont .cNote{color:#38bdf8}
+.cmCard h2{color:#facc15;font-weight:900;font-style:italic}
+.cmCard h3,.cmBr .col>h4,.cmKcols small{color:#38bdf8}
+.cmVs .mid{color:#facc15}
+.cmVs .tm small{color:#38bdf8}
+.cmVs .tm.me{filter:drop-shadow(0 0 0 transparent)}
+#cmChamp .cmCard{box-shadow:0 5px 0 rgba(0,0,0,.35),0 0 24px rgba(250,204,21,.45)}
+#cmChamp h1,#cmEnd .sc,#cmEnd .rs{color:#facc15;text-shadow:-2px -2px 0 #0a1f3d,2px -2px 0 #0a1f3d,-2px 2px 0 #0a1f3d,2px 2px 0 #0a1f3d}
+
+/* ---------- 2) Pestañas ---------- */
+.cmTabs{padding:0 2px 6px}
+.cmTabs button{background:#262c34;color:#fff;border:2px solid #0a1f3d;border-radius:14px;box-shadow:0 3px 0 rgba(0,0,0,.4);
+ transition:transform .08s ease,box-shadow .08s ease,filter .12s ease}
+.cmTabs button:hover{filter:brightness(1.15)}
+.cmTabs button.on{background:linear-gradient(180deg,#4cb5f7 0%,#1f8be3 100%);color:#fff;border:2.5px solid #0a1f3d;
+ box-shadow:0 4px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.28);
+ text-shadow:-1px -1px 0 #0a1f3d,1px -1px 0 #0a1f3d,-1px 1px 0 #0a1f3d,1px 1px 0 #0a1f3d}
+
+/* ---------- 3) Botones ---------- */
+.cmBig{background:linear-gradient(180deg,#62c74f 0%,#439e34 100%);color:#fff;border:3px solid #0a1f3d;border-radius:16px;
+ font-weight:900;font-style:normal;letter-spacing:.02em;
+ text-shadow:-1.5px -1.5px 0 #0a1f3d,1.5px -1.5px 0 #0a1f3d,-1.5px 1.5px 0 #0a1f3d,1.5px 1.5px 0 #0a1f3d,0 2px 2px rgba(0,0,0,.35);
+ box-shadow:0 5px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.28);
+ transition:transform .08s ease,box-shadow .08s ease,filter .12s ease}
+.cmBig:hover{filter:brightness(1.08)}
+.cmBig:active{transform:translateY(4px);box-shadow:0 1px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.2)}
+.cmBig:disabled{opacity:.5;filter:grayscale(.6);transform:none;box-shadow:0 5px 0 #0a1f3d}
+.cmGhost,.cmBtn{background:linear-gradient(180deg,#303843 0%,#262c34 100%);color:#fff;border:2.5px solid #0a1f3d;border-radius:999px;
+ font-weight:800;box-shadow:0 4px 0 #0a1f3d;transition:transform .08s ease,box-shadow .08s ease,filter .12s ease}
+.cmBtn{border-radius:16px;font-weight:900}
+.cmGhost:hover,.cmBtn:hover{filter:brightness(1.18)}
+.cmGhost:active,.cmBtn:active{transform:translateY(3px);box-shadow:0 1px 0 #0a1f3d}
+.cmBtn.red{background:linear-gradient(180deg,#f0615f 0%,#d23a3a 100%);border-color:#0a1f3d;
+ text-shadow:-1.5px -1.5px 0 #0a1f3d,1.5px -1.5px 0 #0a1f3d,-1.5px 1.5px 0 #0a1f3d,1.5px 1.5px 0 #0a1f3d}
+.cmKb{background:#262c34;color:#fff;border:2px solid #0a1f3d;border-radius:14px;box-shadow:0 3px 0 rgba(0,0,0,.4)}
+.cmKb.on{background:linear-gradient(180deg,#4cb5f7 0%,#1f8be3 100%);border:2.5px solid #0a1f3d;box-shadow:0 4px 0 #0a1f3d}
+body.careerOn.cmInGame #cmSubBtn{background:linear-gradient(180deg,#303843 0%,#262c34 100%);border:2.5px solid #0a1f3d;box-shadow:0 4px 0 #0a1f3d;font-weight:800}
+body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0615f 0%,#d23a3a 100%);border:2.5px solid #0a1f3d;box-shadow:0 4px 0 #0a1f3d;font-weight:800}
+
+/* ---------- 4) Píldoras, avisos, tablas y filas ---------- */
+.cmTag{background:#161a1f;color:#38bdf8;border:2px solid #0a1f3d;font-weight:900}
+.cmWarn{background:#262c34;border:2px solid #f59e0b;color:#fde68a}
+.cmFire{background:#2d2326;border-color:#ef4444;color:#fecaca}
+.cmT{border-collapse:separate;border-spacing:0 3px}
+.cmT th{color:#facc15;border-bottom:2px solid #0a1f3d}
+.cmT tbody tr:nth-child(odd) td{background:#161a1f}
+.cmT tbody tr:nth-child(even) td{background:#262c34}
+.cmT td:first-child{border-radius:10px 0 0 10px}
+.cmT td:last-child{border-radius:0 10px 10px 0}
+.cmT tbody tr.q td{background:#1d3b27}
+.cmT tbody tr.me td{background:#1f8be3;color:#fff}
+.cmT tbody tr.q.me td{background:#2f9d45;color:#fff}
+.cmT tr.cut td{border-bottom:2px dashed #62c74f}
+.cmT td.pt{color:#facc15}
+.cmT tbody tr.me td.pt,.cmT tbody tr.q.me td.pt{color:#fff}
+.cmFx details{background:#161a1f;border:2px solid #0a1f3d;border-radius:14px}
+.cmFx summary{color:#facc15}
+.cmFx .gm.me{background:#1f8be3}
+.cmFx .gm b{color:#facc15}
+.cmFx .gm.me b{color:#fff}
+.cmBr .bm{background:#161a1f;border:2px solid #0a1f3d;border-radius:12px}
+.cmBr .bm.me{border-color:#38bdf8;box-shadow:none}
+.cmBr .bm .l.w{color:#62c74f}
+.cmPr{background:#262c34;color:#fff;border:2px solid #0a1f3d;border-radius:14px;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.cmPr .n{color:#facc15}.cmPr .ps{color:#38bdf8}.cmPr .cd{color:#facc15}
+.cmPr .bar{background:#161a1f;border:2px solid #0a1f3d}
+.cmPr:hover{border-color:#38bdf8}
+.cmPr.sel{background:linear-gradient(180deg,#4cb5f7 0%,#1f8be3 100%);border:2.5px solid #0a1f3d;box-shadow:0 4px 0 #0a1f3d}
+.cmPr.sel .n,.cmPr.sel .ps,.cmPr.sel .cd{color:#fff}
+.cmPr.me{border-color:#facc15}.cmPr.me:hover{border-color:#facc15}
+.cmPr.exp,.cmPr.exp:hover{border-color:#ef4444}
+
+/* =====================================================================
+   5) Teléfono / pantallas bajas · hub sin scroll del body
+      (cabecera + pestañas + JUGAR PARTIDO siempre a la vista)
+   ===================================================================== */
+@media (max-height:520px),(max-width:900px){
+ #career-hub-screen.active{display:flex;flex-direction:column;height:100dvh;overflow:hidden;
+  padding:calc(env(safe-area-inset-top,0px) + 6px) 8px calc(env(safe-area-inset-bottom,0px) + 8px)}
+ #career-hub-screen .cmWrap{flex:1 1 0;min-height:0;height:100%;gap:6px}
+ .cmHead{flex:none;padding:5px 10px;gap:8px;border-radius:16px}
+ .cmHead .cmTitle{min-width:0;gap:8px}
+ .cmHead .bd,.cmBd{width:32px;height:32px}
+ .cmHead b{font-size:.92rem}
+ .cmHead small{font-size:.68rem}
+ .cmGhost{padding:4px 10px;font-size:.72rem}
+ .cmTabs{flex:none;gap:5px;padding:0 2px 5px}
+ .cmTabs button{padding:6px 10px;font-size:.78rem}
+ /* único contenedor que scrollea: el cuerpo de cada pestaña */
+ #cmBody{flex:1 1 0;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;gap:8px;padding:0 2px 6px;-webkit-overflow-scrolling:touch}
+ #cmBody>*{flex:none}
+ .cmCard{padding:8px 12px;gap:6px;border-radius:18px}
+ .cmCard h2{font-size:.88rem}
+ .cmVs{gap:6px}
+ .cmVs .tm{font-size:.88rem;gap:2px}
+ .cmVs .tm .cmBd{width:48px;height:48px}
+ .cmVs .tm .cmKit{width:32px;height:32px}
+ .cmVs .mid{font-size:1.1rem}
+ .cmKits{gap:4px}
+ .cmKb{padding:4px 8px;font-size:.68rem}
+ .cmKb .cmKit{width:26px;height:26px}
+ .cmT{font-size:.72rem}
+ .cmT th,.cmT td{padding:3px 4px}
+ .cmWarn{padding:6px 10px;font-size:.78rem}
+ .cmNote{font-size:.7rem}
+ .cmBig{padding:9px 14px;font-size:1rem}
+ /* JUGAR PARTIDO queda pegado abajo mientras el contenido scrollea */
+ #cmBody>.cmCard>.cmBig{position:sticky;bottom:0;z-index:2;margin-top:4px}
+ #cmSub .cmCard,#cmEnd .cmCard,#cmChamp .cmCard{max-height:96dvh}
+}
 `;
   document.head.appendChild(s);
  }
