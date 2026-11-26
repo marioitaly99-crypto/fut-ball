@@ -222,9 +222,9 @@
   if($('cmCSS'))return;
   const s=document.createElement('style');s.id='cmCSS';
   s.textContent=`
-#career-screen{background: #0d1b2a url('career-bg.png') center center / cover no-repeat;}
+#career-screen{background: #0d1b2a url('career-bg.png') center center / cover no-repeat !important;}
 #career-hub-screen{position:fixed;inset:0;z-index:1;width:100vw;height:100vh;height:100dvh;flex-direction:column;align-items:center;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;color:#fff;
- background:linear-gradient(rgba(3,12,32,.8),rgba(3,12,32,.8)),url('menu_bg.png') center center / cover no-repeat,#06240f;padding:calc(env(safe-area-inset-top,0px) + 10px) 10px calc(env(safe-area-inset-bottom,0px) + 22px)}
+ background: #0d1b2a url('career-bg.png') center center / cover no-repeat !important;padding:calc(env(safe-area-inset-top,0px) + 10px) 10px calc(env(safe-area-inset-bottom,0px) + 22px)}
 #career-hub-screen *{box-sizing:border-box}
 #career-hub-screen .cmWrap{width:min(1100px,100%);display:flex;flex-direction:column;gap:10px}
 .cmHead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;background:rgba(7,25,56,.92);border:2px solid #38bdf8;border-radius:14px}
