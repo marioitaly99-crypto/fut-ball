@@ -262,7 +262,7 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
 #screen-home,#career-screen{position:fixed;inset:0;z-index:1;width:100vw;height:100vh;height:100dvh;overflow:hidden;
  background:url('menu_bg.png') center center / cover no-repeat,#0a7a24}
 #career-screen{flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:16px;
- background:linear-gradient(rgba(3,12,32,.66),rgba(3,12,32,.66)),url('menu_bg.png') center center / cover no-repeat,#06240f}
+ background: #0d1b2a url('career-bg.png') center center / cover no-repeat;}
 #career-screen .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 #screen-home{background:#57b446 url('lobby-bg.png') center center / cover no-repeat}
 #screen-home .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -2188,14 +2188,12 @@ let last=performance.now(),acc=0;
 <script>
 /* ===== 🎵 Música de menús (estilo PES) · módulo autónomo: no toca juego, red ni mecánicas ===== */
 (()=>{
- /* ▼ Playlist configurable */
- const ALBUM='Fut-Ball Original OST';
- const PLAYLIST=[{file:'',title:'',artist:''},{file:'',title:'',artist:''}]; /* completá file/title/artist (p.ej. file:'music/track1.mp3') */
- const TRACKS=PLAYLIST.filter(t=>t&&typeof t.file==='string'&&t.file.trim()!==''); /* se ignoran los ítems con file vacío */
+ /* Lista de temas: music/playlist.json → array de rutas o nombres de archivo, p.ej. ["music/N.I.N.E - Tema 1.mp3"] */
+ const PLAYLIST_URL='music/playlist.json',ALBUM='Fut-Ball Original OST',ARTIST='N.I.N.E';
  const VOL=.5,FADE_MS=900,SHOW_MS=5000;
  const g=id=>document.getElementById(id);
  const au=new Audio();au.preload='auto';au.volume=0;
- let order=[],pos=-1,cur=null,last=null,unlocked=false,dead=false,fails=0,fadeT=null,shownFor=null,hideT=null;
+ let TRACKS=[],order=[],pos=-1,cur=null,last=null,unlocked=false,dead=false,fails=0,fadeT=null,shownFor=null,hideT=null;
 
  /* --- CSS de la cápsula --- */
  const st=document.createElement('style');
@@ -2222,6 +2220,21 @@ let last=performance.now(),acc=0;
  document.body.appendChild(cap);
  const q=s=>cap.querySelector(s);
 
+ /* --- lectura de la playlist: "Nombre del tema - Album.mp3" → tema y álbum (sin guion: álbum por defecto) --- */
+ function parse(item){
+  if(typeof item!=='string')return null;
+  let p=item.trim();if(!/\.mp3$/i.test(p))return null;
+  if(p.indexOf('/')<0)p='music/'+p;
+  let name=p.split('/').pop().replace(/\.mp3$/i,'');
+  try{name=decodeURIComponent(name)}catch(e){}
+  name=name.trim();
+  let title=name,album=ALBUM;
+  const m=name.match(/^\s*(.+?)\s+-\s+(.+?)\s*$/)||name.match(/^\s*(.+?)\s*-\s*(.+?)\s*$/);
+  if(m){title=m[1];album=m[2]}
+  return {file:p,title,album};
+ }
+ const enc=p=>p.split('/').map(s=>{try{return encodeURIComponent(decodeURIComponent(s))}catch(e){return encodeURIComponent(s)}}).join('/');
+
  /* --- estado --- */
  const inGame=()=>{const s=g('screen-game');return !!(s&&s.classList.contains('active'))};
  const isMuted=()=>{const m=g('mute');return !!(m&&m.textContent.indexOf('🔇')>-1)};
@@ -2241,14 +2254,14 @@ let last=performance.now(),acc=0;
  }
  function showCap(t){
   if(!t||shownFor===t||inGame())return;shownFor=t;
-  q('.npArtist').textContent=t.artist||'';q('.npTitle').textContent=t.title||'';q('.npAlbum').textContent=ALBUM;
+  q('.npArtist').textContent=ARTIST;q('.npTitle').textContent=t.title||'';q('.npAlbum').textContent=t.album||ALBUM;
   cap.classList.remove('show');void cap.offsetWidth;cap.classList.add('show');
   clearTimeout(hideT);hideT=setTimeout(()=>cap.classList.remove('show'),SHOW_MS);
  }
  function nextTrack(){
   if(!order.length||pos+1>=order.length)shuffle();
   pos++;cur=TRACKS[order[pos]];last=cur;
-  au.src=cur.file;au.volume=0;
+  au.src=enc(cur.file);au.volume=0;
   const p=au.play();if(p&&p.catch)p.catch(()=>{});
  }
  function sync(){
@@ -2277,6 +2290,11 @@ let last=performance.now(),acc=0;
  const mo=new MutationObserver(sync);
  document.querySelectorAll('.screen').forEach(s=>mo.observe(s,{attributes:true,attributeFilter:['class']}));
  const mb=g('mute');if(mb)mb.addEventListener('click',()=>setTimeout(sync,0));
+
+ /* --- carga de music/playlist.json (si falta o no se puede leer, el módulo queda inactivo) --- */
+ fetch(PLAYLIST_URL,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json()})
+  .then(a=>{TRACKS=(Array.isArray(a)?a:[]).map(parse).filter(Boolean);sync()})
+  .catch(()=>{dead=true});
 })();
 </script>
 </body>
