@@ -884,23 +884,20 @@ body.careerOn #chat{background:transparent!important;border:none!important;point
   if(!$('cmStartCSS')){
    const s=document.createElement('style');s.id='cmStartCSS';
    s.textContent=`
-#screen-home #homeCareer.hbar{width:100%;height:var(--h);padding:0 6%;gap:5%;border:2.5px solid #0a1f3d;border-radius:clamp(18px,3.6vh,32px);
- background:linear-gradient(180deg,#26804c 0%,#1b5e36 100%);
- box-shadow:inset 0 0 0 2px #d4af37,0 5px 0 rgba(0,0,0,.38),0 8px 10px rgba(0,0,0,.18)}
-#screen-home #homeCareer.hbar:hover,#screen-home #homeCareer.hbar:focus-visible{box-shadow:inset 0 0 0 2px #d4af37,0 7px 0 rgba(0,0,0,.38),0 10px 12px rgba(0,0,0,.2)}
-#screen-home #homeCareer.hbar:active{box-shadow:inset 0 0 0 2px #d4af37,0 2px 0 rgba(0,0,0,.38)}
-#screen-home #homeCareer .hico{height:72%;width:auto;aspect-ratio:1;flex:none;display:block;overflow:visible}
+#screen-home #homeCareer{background:linear-gradient(180deg,#1f6e3d 0%,#144928 100%)!important;box-shadow:inset 0 0 0 2.5px #d4af37,0 5px 0 rgba(0,0,0,.38),0 8px 10px rgba(0,0,0,.18)!important}
+#screen-home #homeCareer.hbar{width:100%;height:var(--h);padding:0 6%;gap:5%;border:3px solid #111827;border-radius:clamp(18px,3.6vh,32px);
+ background:#185a32;
+ box-shadow:inset 0 0 0 2px #d4af37,0 5px 0 rgba(0,0,0,.4),0 8px 10px rgba(0,0,0,.18)}
+#screen-home #homeCareer.hbar:hover,#screen-home #homeCareer.hbar:focus-visible{background:#185a32;box-shadow:inset 0 0 0 2px #d4af37,0 7px 0 rgba(0,0,0,.4),0 10px 12px rgba(0,0,0,.2)}
+#screen-home #homeCareer.hbar:active{box-shadow:inset 0 0 0 2px #d4af37,0 2px 0 rgba(0,0,0,.4)}
+#screen-home #homeCareer.hbar::after{display:none}
+#screen-home #homeCareer .hico{height:83%;width:auto;aspect-ratio:1;flex:none;display:block;overflow:visible}
 #screen-home #homeCareer .hsub{display:none!important}`;
    document.head.appendChild(s);
   }
   if(btn.dataset.cmStart)return;btn.dataset.cmStart='1';
   btn.removeAttribute('data-info');
-  btn.innerHTML='<svg class="hico" viewBox="0 0 64 64" aria-hidden="true">'
-   +'<path d="M18 14H8c0 10 4 16 11 17M46 14h10c0 10-4 16-11 17" fill="none" stroke="#d4af37" stroke-width="4" stroke-linecap="round"/>'
-   +'<path d="M17 6h30v18c0 10-6 17-15 17S17 34 17 24z" fill="#f2c230" stroke="#8a6a10" stroke-width="2.5" stroke-linejoin="round"/>'
-   +'<path d="M23 11v13c0 6 3 10 7 12" fill="none" stroke="#fff3b0" stroke-width="3" stroke-linecap="round" opacity=".8"/>'
-   +'<rect x="28" y="41" width="8" height="9" fill="#d4af37" stroke="#8a6a10" stroke-width="2"/>'
-   +'<rect x="19" y="50" width="26" height="9" rx="2.5" fill="#f2c230" stroke="#8a6a10" stroke-width="2.5"/></svg><span>MODO CARRERA</span>';
+  btn.innerHTML='<svg class="hico" viewBox="0 0 64 64"><path d="M18 10h28v16c0 9-6 15-14 15s-14-6-14-15V10z" fill="#facc15" stroke="#111827" stroke-width="4"/><path d="M18 14H10c0 9 4 13 8 13M46 14h8c0 9-4 13-8 13" fill="none" stroke="#facc15" stroke-width="5" stroke-linecap="round"/><path d="M18 14H10c0 9 4 13 8 13M46 14h8c0 9-4 13-8 13" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round"/><rect x="28" y="40" width="8" height="9" fill="#d4af37" stroke="#111827" stroke-width="3"/><rect x="20" y="49" width="24" height="6" rx="2" fill="#facc15" stroke="#111827" stroke-width="3"/></svg><span>MODO CARRERA</span>';
   const info=$('homeInfo');
   const on=()=>{if(info)info.textContent=START_INFO},off=()=>{if(info)info.textContent=START_DEF};
   btn.addEventListener('mouseenter',on);btn.addEventListener('focus',on);

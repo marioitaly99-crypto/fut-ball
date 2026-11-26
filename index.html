@@ -264,23 +264,21 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
 #career-screen{flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:16px;
  background:linear-gradient(rgba(3,12,32,.66),rgba(3,12,32,.66)),url('menu_bg.png') center center / cover no-repeat,#06240f}
 #career-screen .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-#screen-home{background:#57b446 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='400'%3E%3Cpath d='M40 60l-7 -12M40 60v-15M40 60l7 -12M300 35l-7 -12M300 35v-15M300 35l7 -12M520 110l-7 -12M520 110v-15M520 110l7 -12M170 150l-7 -12M170 150v-15M170 150l7 -12M420 230l-7 -12M420 230v-15M420 230l7 -12M80 300l-7 -12M80 300v-15M80 300l7 -12M300 330l-7 -12M300 330v-15M300 330l7 -12M500 360l-7 -12M500 360v-15M500 360l7 -12M210 40l-7 -12M210 40v-15M210 40l7 -12' fill='none' stroke='%233f8f32' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") 0 0/560px 400px repeat}
+#screen-home{background:#57b446 url('lobby-bg.png') center center / cover no-repeat}
 #screen-home .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-#screen-home .hscene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
-#screen-home .hlogo{position:absolute;z-index:1;left:4.5%;top:8%;width:min(46vw,640px);height:auto;overflow:visible;filter:drop-shadow(0 6px 4px rgba(0,0,0,.22))}
-#screen-home .hmenu{position:absolute;z-index:2;top:38%;left:calc(7.6% + env(safe-area-inset-left,0px));width:min(36vw,500px);
+#screen-home .hmenu{position:absolute;z-index:2;top:38%;left:calc(7.5% + env(safe-area-inset-left,0px));width:min(34.5vw,480px);
  display:flex;flex-direction:column;gap:clamp(10px,2.4vh,22px)}
-#screen-home .hbar{--h:clamp(54px,12.5vh,100px);position:relative;display:flex;align-items:center;justify-content:flex-start;gap:5%;
- width:100%;height:var(--h);padding:0 6%;box-sizing:border-box;border-radius:clamp(18px,3.6vh,32px);border:2.5px solid #0a1f3d;cursor:pointer;
+#screen-home .hbar{--h:clamp(54px,12.8vh,100px);position:relative;display:flex;align-items:center;justify-content:flex-start;gap:5%;
+ width:100%;height:var(--h);padding:0 6%;box-sizing:border-box;border-radius:clamp(18px,3.6vh,32px);border:3px solid #111827;cursor:pointer;
  color:#fff;text-align:left;white-space:nowrap;overflow:hidden;transform:none;
  box-shadow:0 5px 0 rgba(0,0,0,.38),0 8px 10px rgba(0,0,0,.18);
  transition:transform .12s ease,box-shadow .12s ease,filter .12s ease;-webkit-tap-highlight-color:transparent;outline:none}
-#screen-home .hbar .hico{flex:none;height:72%;width:auto;aspect-ratio:1;display:block;overflow:visible}
+#screen-home .hbar .hico{flex:none;height:83%;width:auto;aspect-ratio:1;display:block;overflow:visible}
 #screen-home .hbar>span{display:block;font-size:clamp(1rem,min(4.8vh,3.6vw),2.3rem);font-weight:900;font-style:italic;letter-spacing:.01em;text-transform:uppercase;color:#fff;
- text-shadow:-1.5px -1.5px 0 #0a1f3d,1.5px -1.5px 0 #0a1f3d,-1.5px 1.5px 0 #0a1f3d,1.5px 1.5px 0 #0a1f3d,0 3px 3px rgba(0,0,0,.35)}
+ text-shadow:-1.5px -1.5px 0 #111827,1.5px -1.5px 0 #111827,-1.5px 1.5px 0 #111827,1.5px 1.5px 0 #111827,0 3px 3px rgba(0,0,0,.35)}
 #screen-home .hbar::after{content:"";position:absolute;left:3%;right:3%;top:5%;height:42%;border-radius:inherit;pointer-events:none;
- background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,0))}
-#screen-home .hbar.main{background:linear-gradient(180deg,#4cb5f7 0%,#1f8be3 100%)}
+ background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0))}
+#screen-home .hbar.main{background:linear-gradient(180deg,#3baae8 0%,#1d86c9 100%)}
 #screen-home .hbar:hover,#screen-home .hbar:focus-visible{transform:translateY(-2px);filter:brightness(1.07);box-shadow:0 7px 0 rgba(0,0,0,.38),0 10px 12px rgba(0,0,0,.2)}
 #screen-home .hbar:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.38)}
 #screen-home #homeHelp{position:absolute;z-index:3;top:calc(env(safe-area-inset-top,0px) + 14px);right:calc(env(safe-area-inset-right,0px) + 16px);
@@ -302,12 +300,11 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
 #career-screen .careerCard{width:min(760px,92vw);padding:clamp(18px,4vh,34px) clamp(16px,3vw,32px);text-align:center;background:rgba(7,25,56,.9);
  border:2px solid #38bdf8;border-radius:18px;box-shadow:0 0 28px rgba(56,189,248,.35)}
 #career-screen .careerCard h1{font-size:clamp(1.05rem,4.2vh,1.9rem);line-height:1.35;color:#fff;font-weight:900;font-style:italic;text-shadow:0 2px 6px rgba(0,0,0,.6)}
-@media (max-aspect-ratio:4/3){#screen-home .hmenu{width:min(44vw,520px)}#screen-home .hlogo{width:min(52vw,640px)}}
+@media (max-aspect-ratio:4/3){#screen-home .hmenu{width:min(44vw,520px)}}
 @media (max-aspect-ratio:1/1){
  #career-screen{background-position:4% center}
- #screen-home .hscene{opacity:.45}
- #screen-home .hlogo{left:6%;top:7%;width:88vw}
- #screen-home .hmenu{top:36%;left:6%;width:88vw}
+ #screen-home{background-position:right center}
+ #screen-home .hmenu{top:36%;left:6%;width:min(88vw,480px)}
 }
 
 
@@ -369,13 +366,11 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
 
 <div id="screen-home" class="screen active">
   <h1 class="sr-only">Fut-ball</h1>
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="fbBall" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#fff" stroke="#0a1f3d" stroke-width="5"/><polygon points="50,33 66,45 60,64 40,64 34,45" fill="#0a1f3d"/><path d="M50 33V17M66 45L82 38M60 64L70 80M40 64L30 80M34 45L18 38" stroke="#0a1f3d" stroke-width="4" stroke-linecap="round"/><polygon points="40,8 60,8 50,18" fill="#0a1f3d"/><polygon points="90,36 94,54 82,48" fill="#0a1f3d"/><polygon points="10,36 6,54 18,48" fill="#0a1f3d"/><polygon points="72,88 56,92 62,80" fill="#0a1f3d"/><polygon points="28,88 44,92 38,80" fill="#0a1f3d"/></symbol></defs></svg>
-  <svg class="hscene" viewBox="0 0 1376 768" preserveAspectRatio="xMaxYMid slice" aria-hidden="true"><ellipse cx="1241" cy="224" rx="57" ry="55" fill="rgba(0,0,0,.2)"/><circle cx="1236" cy="208" r="56" fill="#e3141b" stroke="#0a1f3d" stroke-width="3" vector-effect="non-scaling-stroke"/><circle cx="1236" cy="208" r="50" fill="none" stroke="#8e0a10" stroke-width="5" opacity=".55"/><ellipse cx="1230" cy="182" rx="30" ry="16" fill="#fff" opacity=".32"/><ellipse cx="795" cy="328" rx="57" ry="55" fill="rgba(0,0,0,.2)"/><circle cx="790" cy="312" r="56" fill="#e3141b" stroke="#0a1f3d" stroke-width="3" vector-effect="non-scaling-stroke"/><circle cx="790" cy="312" r="50" fill="none" stroke="#8e0a10" stroke-width="5" opacity=".55"/><ellipse cx="784" cy="286" rx="30" ry="16" fill="#fff" opacity=".32"/><ellipse cx="1304" cy="626" rx="57" ry="55" fill="rgba(0,0,0,.2)"/><circle cx="1299" cy="610" r="56" fill="#1f6fd6" stroke="#0a1f3d" stroke-width="3" vector-effect="non-scaling-stroke"/><circle cx="1299" cy="610" r="50" fill="none" stroke="#0c3e86" stroke-width="5" opacity=".55"/><ellipse cx="1293" cy="584" rx="30" ry="16" fill="#fff" opacity=".32"/><ellipse cx="889" cy="708" rx="57" ry="55" fill="rgba(0,0,0,.2)"/><circle cx="884" cy="692" r="56" fill="#1f6fd6" stroke="#0a1f3d" stroke-width="3" vector-effect="non-scaling-stroke"/><circle cx="884" cy="692" r="50" fill="none" stroke="#0c3e86" stroke-width="5" opacity=".55"/><ellipse cx="878" cy="666" rx="30" ry="16" fill="#fff" opacity=".32"/><polygon points="1215,398 1190,402 1175,392 1160,404 1135,410 1110,422 1075,440 1110,452 1135,462 1160,474 1175,486 1190,478 1215,482" fill="#ffc400" stroke="#ff9d00" stroke-width="3" stroke-linejoin="round"/><polygon points="1205,414 1170,418 1135,426 1105,440 1135,450 1170,460 1205,466" fill="#fff3a0"/><ellipse cx="1031" cy="453" rx="57" ry="55" fill="rgba(0,0,0,.2)"/><circle cx="1026" cy="437" r="56" fill="#e3141b" stroke="#0a1f3d" stroke-width="3" vector-effect="non-scaling-stroke"/><circle cx="1026" cy="437" r="50" fill="none" stroke="#8e0a10" stroke-width="5" opacity=".55"/><ellipse cx="1020" cy="411" rx="30" ry="16" fill="#fff" opacity=".32"/><text x="1026" y="460" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-style="italic" font-size="64" fill="#fff" stroke="#0a1f3d" stroke-width="3" paint-order="stroke">10</text><ellipse cx="1254" cy="484" rx="40" ry="10" fill="rgba(0,0,0,.18)"/><use href="#fbBall" x="1206" y="393" width="90" height="90"/></svg>
-  <svg class="hlogo" viewBox="0 0 620 190" role="img" aria-label="Fut-ball"><g transform="translate(22 0) skewX(-8)"><rect x="20" y="112" width="560" height="44" rx="16" fill="#2f9bf0" stroke="#0a1f3d" stroke-width="5"/><rect x="30" y="118" width="540" height="12" rx="6" fill="#fff" opacity=".28"/></g><text x="52" y="136" font-family="Arial Black,Impact,Helvetica,sans-serif" font-weight="900" font-style="italic" font-size="128" fill="#fff" stroke="#0a1f3d" stroke-width="14" stroke-linejoin="round" paint-order="stroke" letter-spacing="-2">Fut-ball</text></svg>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="fbBall" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#fff" stroke="#111827" stroke-width="5"/><polygon points="50,33 66,45 60,64 40,64 34,45" fill="#111827"/><path d="M50 33V17M66 45L82 38M60 64L70 80M40 64L30 80M34 45L18 38" stroke="#111827" stroke-width="4" stroke-linecap="round"/><polygon points="40,8 60,8 50,18" fill="#111827"/><polygon points="90,36 94,54 82,48" fill="#111827"/><polygon points="10,36 6,54 18,48" fill="#111827"/><polygon points="72,88 56,92 62,80" fill="#111827"/><polygon points="28,88 44,92 38,80" fill="#111827"/></symbol></defs></svg>
   <button id="homeHelp" type="button"><span class="q" aria-hidden="true">?</span>Cómo jugar</button>
   <nav class="hmenu" aria-label="Menú principal">
     <button id="homeOnline" class="hbar main" type="button" data-info="Elegí tu equipo favorito y llevalo hasta la gloria máxima."><svg class="hico" viewBox="0 0 100 100" aria-hidden="true"><use href="#fbBall"/></svg><span>JUGAR ONLINE</span></button>
-    <button id="homeCareer" class="hbar sec" type="button"><span>MODO CARRERA</span></button>
+    <button id="homeCareer" class="hbar sec" type="button"><svg class="hico" viewBox="0 0 64 64"><path d="M18 10h28v16c0 9-6 15-14 15s-14-6-14-15V10z" fill="#facc15" stroke="#111827" stroke-width="4"/><path d="M18 14H10c0 9 4 13 8 13M46 14h8c0 9-4 13-8 13" fill="none" stroke="#facc15" stroke-width="5" stroke-linecap="round"/><path d="M18 14H10c0 9 4 13 8 13M46 14h8c0 9-4 13-8 13" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round"/><rect x="28" y="40" width="8" height="9" fill="#d4af37" stroke="#111827" stroke-width="3"/><rect x="20" y="49" width="24" height="6" rx="2" fill="#facc15" stroke="#111827" stroke-width="3"/></svg><span>MODO CARRERA</span></button>
   </nav>
   <div class="hinfo" role="status" aria-live="polite"><span class="ic" aria-hidden="true">i</span><span id="homeInfo">Selecciona una opción para continuar</span></div>
 </div>
@@ -2190,5 +2185,99 @@ let last=performance.now(),acc=0;
 })();
 </script>
 <script src="CareerMode.js"></script>
+<script>
+/* ===== 🎵 Música de menús (estilo PES) · módulo autónomo: no toca juego, red ni mecánicas ===== */
+(()=>{
+ /* ▼ Playlist configurable */
+ const ALBUM='Fut-Ball Original OST';
+ const PLAYLIST=[{file:'',title:'',artist:''},{file:'',title:'',artist:''}]; /* completá file/title/artist (p.ej. file:'music/track1.mp3') */
+ const TRACKS=PLAYLIST.filter(t=>t&&typeof t.file==='string'&&t.file.trim()!==''); /* se ignoran los ítems con file vacío */
+ const VOL=.5,FADE_MS=900,SHOW_MS=5000;
+ const g=id=>document.getElementById(id);
+ const au=new Audio();au.preload='auto';au.volume=0;
+ let order=[],pos=-1,cur=null,last=null,unlocked=false,dead=false,fails=0,fadeT=null,shownFor=null,hideT=null;
+
+ /* --- CSS de la cápsula --- */
+ const st=document.createElement('style');
+ st.textContent=`
+#npCap{position:fixed;right:calc(env(safe-area-inset-right,0px) + 14px);bottom:calc(env(safe-area-inset-bottom,0px) + 6px);z-index:250;display:flex;align-items:center;gap:12px;
+ max-width:calc(100vw - 28px);padding:6px 20px 6px 8px;border-radius:12px;background:#1e2329;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.45);
+ transform:translateX(130%);opacity:0;pointer-events:none;transition:transform .45s ease,opacity .45s ease}
+#npCap.show{transform:translateX(0);opacity:1}
+#npCap .npArt{position:relative;flex:none;width:76px;height:44px}
+#npCap .npCover{position:absolute;left:0;top:0;z-index:2;width:44px;height:44px;border-radius:5px;display:flex;align-items:center;justify-content:center;
+ background:linear-gradient(135deg,#1d86c9,#185a32);border:2px solid #facc15;box-sizing:border-box;font:900 italic .8rem/1 Arial,sans-serif;letter-spacing:.04em;color:#fff;text-shadow:0 1px 2px #000}
+#npCap .npDisc{position:absolute;left:30px;top:2px;z-index:1;width:40px;height:40px;border-radius:50%;
+ background:radial-gradient(circle,#facc15 0 12%,#111 13% 16%,#2b3038 17% 40%,#111 41% 44%,#2b3038 45% 70%,#111 71% 100%);
+ box-shadow:inset 0 0 0 1.5px #3a414b;animation:spin 3s linear infinite}
+#npCap .npDisc::after{content:"";position:absolute;left:46%;top:6%;width:8%;height:30%;border-radius:4px;background:rgba(255,255,255,.28)}
+@keyframes spin{to{transform:rotate(360deg)}}
+#npCap .npTxt{min-width:0;display:flex;flex-direction:column;gap:1px;line-height:1.2}
+#npCap .npArtist{font-size:.72rem;font-weight:700;color:#cbd5e1;letter-spacing:.05em}
+#npCap .npTitle{font-size:.95rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#npCap .npAlbum{font-size:.74rem;font-weight:700;color:#facc15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}`;
+ document.head.appendChild(st);
+ const cap=document.createElement('div');cap.id='npCap';cap.setAttribute('role','status');cap.setAttribute('aria-live','polite');
+ cap.innerHTML='<div class="npArt"><div class="npCover">OST</div><div class="npDisc"></div></div><div class="npTxt"><span class="npArtist"></span><span class="npTitle"></span><span class="npAlbum"></span></div>';
+ document.body.appendChild(cap);
+ const q=s=>cap.querySelector(s);
+
+ /* --- estado --- */
+ const inGame=()=>{const s=g('screen-game');return !!(s&&s.classList.contains('active'))};
+ const isMuted=()=>{const m=g('mute');return !!(m&&m.textContent.indexOf('🔇')>-1)};
+ const shouldPlay=()=>unlocked&&!dead&&TRACKS.length>0&&!inGame()&&!isMuted();
+
+ function shuffle(){
+  order=TRACKS.map((_,i)=>i);
+  for(let i=order.length-1;i>0;i--){const k=Math.floor(Math.random()*(i+1));[order[i],order[k]]=[order[k],order[i]]}
+  if(order.length>1&&TRACKS[order[0]]===last){order.push(order.shift())}
+  pos=-1;
+ }
+ function fadeTo(v,ms,done){
+  clearInterval(fadeT);
+  const from=au.volume,steps=Math.max(1,Math.round(ms/40));let n=0;
+  fadeT=setInterval(()=>{n++;au.volume=Math.min(1,Math.max(0,from+(v-from)*n/steps));
+   if(n>=steps){clearInterval(fadeT);fadeT=null;if(done)done()}},40);
+ }
+ function showCap(t){
+  if(!t||shownFor===t||inGame())return;shownFor=t;
+  q('.npArtist').textContent=t.artist||'';q('.npTitle').textContent=t.title||'';q('.npAlbum').textContent=ALBUM;
+  cap.classList.remove('show');void cap.offsetWidth;cap.classList.add('show');
+  clearTimeout(hideT);hideT=setTimeout(()=>cap.classList.remove('show'),SHOW_MS);
+ }
+ function nextTrack(){
+  if(!order.length||pos+1>=order.length)shuffle();
+  pos++;cur=TRACKS[order[pos]];last=cur;
+  au.src=cur.file;au.volume=0;
+  const p=au.play();if(p&&p.catch)p.catch(()=>{});
+ }
+ function sync(){
+  if(shouldPlay()){
+   if(!au.src||au.ended)nextTrack();
+   else if(au.paused){const p=au.play();if(p&&p.catch)p.catch(()=>{})}
+   fadeTo(VOL,FADE_MS);
+  }else if(!au.paused){
+   clearTimeout(hideT);cap.classList.remove('show');
+   fadeTo(0,FADE_MS,()=>{if(!shouldPlay())au.pause()});
+  }
+ }
+
+ /* --- eventos del audio --- */
+ au.addEventListener('playing',()=>{fails=0;if(shouldPlay())showCap(cur)});
+ au.addEventListener('ended',()=>{shownFor=null;if(shouldPlay()){nextTrack()}});
+ au.addEventListener('error',()=>{
+  if(++fails>=TRACKS.length){dead=true;console.warn('[Música] no se pudo cargar ninguna pista de la playlist');return}
+  if(shouldPlay())nextTrack();
+ });
+
+ /* --- disparadores: primer clic, cambio de pantalla, mute --- */
+ const unlock=()=>{if(unlocked)return;unlocked=true;sync()};
+ document.addEventListener('pointerdown',unlock,{capture:true,once:true});
+ document.addEventListener('keydown',unlock,{capture:true,once:true});
+ const mo=new MutationObserver(sync);
+ document.querySelectorAll('.screen').forEach(s=>mo.observe(s,{attributes:true,attributeFilter:['class']}));
+ const mb=g('mute');if(mb)mb.addEventListener('click',()=>setTimeout(sync,0));
+})();
+</script>
 </body>
 </html>
