@@ -51,17 +51,17 @@
    {
     "number": 1,
     "pos": "GK",
-    "name": "MARCHESÍN",
+    "name": "MONTERO",
     "starter": true
    },
    {
-    "number": 6,
+    "number": 3,
     "pos": "DEF",
-    "name": "ROJO",
+    "name": "BLANCO",
     "starter": true
    },
    {
-    "number": 20,
+    "number": 32,
     "pos": "DEF",
     "name": "COSTA",
     "starter": true
@@ -73,9 +73,9 @@
     "starter": true
    },
    {
-    "number": 21,
+    "number": 18,
     "pos": "MID",
-    "name": "HERRERA",
+    "name": "DELGADO",
     "starter": true
    },
    {
@@ -91,51 +91,51 @@
     "starter": false
    },
    {
-    "number": 3,
+    "number": 2,
     "pos": "DEF",
     "name": "DI LOLLO",
     "starter": false
    },
    {
-    "number": 15,
+    "number": 4,
     "pos": "DEF",
-    "name": "BLANCO",
+    "name": "FIGAL",
     "starter": false
    },
    {
-    "number": 18,
+    "number": 26,
+    "pos": "DEF",
+    "name": "PELLEGRINO",
+    "starter": false
+   },
+   {
+    "number": 6,
     "pos": "MID",
-    "name": "DELGADO",
+    "name": "BATTAGLIA",
+    "starter": false
+   },
+   {
+    "number": 25,
+    "pos": "MID",
+    "name": "ASCACIBAR",
+    "starter": false
+   },
+   {
+    "number": 8,
+    "pos": "MID",
+    "name": "BELMONTE",
     "starter": false
    },
    {
     "number": 22,
     "pos": "FWD",
-    "name": "ZENÓN",
+    "name": "VILLA",
     "starter": false
    },
    {
-    "number": 7,
+    "number": 9,
     "pos": "FWD",
-    "name": "ZEBALLOS",
-    "starter": false
-   },
-   {
-    "number": 17,
-    "pos": "DEF",
-    "name": "ADVÍNCULA",
-    "starter": false
-   },
-   {
-    "number": 14,
-    "pos": "DEF",
-    "name": "FABRA",
-    "starter": false
-   },
-   {
-    "number": 4,
-    "pos": "DEF",
-    "name": "ANSELMINO",
+    "name": "GIMÉNEZ",
     "starter": false
    }
   ]
@@ -178,27 +178,27 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 33,
     "pos": "GK",
-    "name": "ARMANI",
+    "name": "CENTURIÓN",
+    "starter": true
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "RIVERO",
     "starter": true
    },
    {
     "number": 28,
     "pos": "DEF",
-    "name": "QUARTA",
-    "starter": true
-   },
-   {
-    "number": 17,
-    "pos": "DEF",
-    "name": "DÍAZ",
+    "name": "M. QUARTA",
     "starter": true
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "GALOPPO",
+    "name": "ARAMBARRI",
     "starter": true
    },
    {
@@ -210,61 +210,61 @@
    {
     "number": 11,
     "pos": "FWD",
-    "name": "COLIDIO",
+    "name": "DRIUSSI",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 25,
     "pos": "GK",
-    "name": "BELTRÁN",
+    "name": "S. BELTRÁN",
     "starter": false
    },
    {
-    "number": 4,
+    "number": 29,
     "pos": "DEF",
     "name": "MONTIEL",
     "starter": false
    },
    {
-    "number": 24,
-    "pos": "MID",
-    "name": "PÉREZ",
-    "starter": false
-   },
-   {
-    "number": 26,
-    "pos": "MID",
-    "name": "FERNÁNDEZ",
-    "starter": false
-   },
-   {
-    "number": 9,
-    "pos": "FWD",
-    "name": "BORJA",
-    "starter": false
-   },
-   {
-    "number": 20,
-    "pos": "FWD",
-    "name": "SUBIABRE",
-    "starter": false
-   },
-   {
-    "number": 2,
+    "number": 21,
     "pos": "DEF",
-    "name": "MAMMANA",
+    "name": "ACUÑA",
     "starter": false
    },
    {
-    "number": 14,
-    "pos": "MID",
-    "name": "ACUÑA",
+    "number": 3,
+    "pos": "DEF",
+    "name": "ORTEGA",
+    "starter": false
+   },
+   {
+    "number": 30,
+    "pos": "DEF",
+    "name": "OTAMENDI",
     "starter": false
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "KRANEVITTER",
+    "name": "PORTILLO",
+    "starter": false
+   },
+   {
+    "number": 27,
+    "pos": "MID",
+    "name": "ESPÍNDOLA",
+    "starter": false
+   },
+   {
+    "number": 9,
+    "pos": "FWD",
+    "name": "L. BELTRÁN",
+    "starter": false
+   },
+   {
+    "number": 19,
+    "pos": "FWD",
+    "name": "BORRÉ",
     "starter": false
    }
   ]
@@ -307,25 +307,25 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 77,
     "pos": "GK",
     "name": "MELE",
     "starter": true
    },
    {
-    "number": 2,
-    "pos": "DEF",
-    "name": "VALDEZ",
-    "starter": true
-   },
-   {
     "number": 4,
     "pos": "DEF",
-    "name": "GODOY",
+    "name": "ARIAS",
     "starter": true
    },
    {
-    "number": 5,
+    "number": 36,
+    "pos": "DEF",
+    "name": "VALDÉZ",
+    "starter": true
+   },
+   {
+    "number": 23,
     "pos": "MID",
     "name": "MARCONE",
     "starter": true
@@ -337,63 +337,63 @@
     "starter": true
    },
    {
-    "number": 9,
+    "number": 6,
     "pos": "FWD",
-    "name": "ABALDO",
+    "name": "ÁVILA",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 33,
     "pos": "GK",
     "name": "REY",
     "starter": false
    },
    {
-    "number": 3,
+    "number": 2,
+    "pos": "DEF",
+    "name": "CALDERÓN",
+    "starter": false
+   },
+   {
+    "number": 22,
     "pos": "DEF",
     "name": "ZABALA",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 29,
     "pos": "DEF",
-    "name": "CABRAL",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "ARIAS",
-    "starter": false
-   },
-   {
-    "number": 15,
-    "pos": "DEF",
-    "name": "MILLÁN",
+    "name": "GODOY",
     "starter": false
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "ÁVILA",
+    "name": "CABRAL",
     "starter": false
    },
    {
     "number": 14,
     "pos": "MID",
-    "name": "CALDERÓN",
+    "name": "MILLÁN",
     "starter": false
    },
    {
-    "number": 16,
+    "number": 30,
     "pos": "MID",
     "name": "PARMO",
     "starter": false
    },
    {
-    "number": 11,
+    "number": 7,
     "pos": "FWD",
     "name": "MONTIEL",
+    "starter": false
+   },
+   {
+    "number": 19,
+    "pos": "FWD",
+    "name": "ABALDO",
     "starter": false
    }
   ]
@@ -436,93 +436,93 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 25,
     "pos": "GK",
-    "name": "ARIAS",
+    "name": "CAMBESES",
     "starter": true
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "ROJAS",
+    "name": "DI CÉSARE",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 6,
     "pos": "DEF",
-    "name": "DI CESARE",
+    "name": "ROJO",
     "starter": true
    },
    {
-    "number": 8,
+    "number": 11,
     "pos": "MID",
-    "name": "NARDONI",
+    "name": "ZARACHO",
     "starter": true
    },
    {
-    "number": 7,
+    "number": 10,
     "pos": "MID",
-    "name": "SOLARI",
+    "name": "MILJEVIC",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "MARAVILLA",
+    "name": "A. MARTÍNEZ",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 30,
     "pos": "GK",
-    "name": "GÓMEZ",
+    "name": "TAGLIAMONTE",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 4,
     "pos": "DEF",
-    "name": "QUINTANA",
+    "name": "CANNAVO",
     "starter": false
    },
    {
-    "number": 5,
+    "number": 23,
+    "pos": "DEF",
+    "name": "COLOMBO",
+    "starter": false
+   },
+   {
+    "number": 27,
+    "pos": "DEF",
+    "name": "ROJAS",
+    "starter": false
+   },
+   {
+    "number": 13,
     "pos": "MID",
-    "name": "ZUCULINI",
+    "name": "S. SOSA",
+    "starter": false
+   },
+   {
+    "number": 16,
+    "pos": "MID",
+    "name": "ORTEGOZA",
     "starter": false
    },
    {
     "number": 20,
     "pos": "MID",
-    "name": "FERNÁNDEZ",
+    "name": "B. RODRÍGUEZ",
     "starter": false
    },
    {
-    "number": 11,
+    "number": 7,
     "pos": "FWD",
-    "name": "SALAS",
+    "name": "VERGARA",
     "starter": false
    },
    {
     "number": 17,
     "pos": "FWD",
     "name": "CONECHNY",
-    "starter": false
-   },
-   {
-    "number": 2,
-    "pos": "DEF",
-    "name": "MURA",
-    "starter": false
-   },
-   {
-    "number": 22,
-    "pos": "DEF",
-    "name": "MARTIRENA",
-    "starter": false
-   },
-   {
-    "number": 14,
-    "pos": "MID",
-    "name": "SOSA",
     "starter": false
    }
   ]
@@ -565,93 +565,93 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 20,
     "pos": "GK",
-    "name": "GILL",
+    "name": "ALTAMIRANO",
     "starter": true
    },
    {
-    "number": 2,
+    "number": 24,
     "pos": "DEF",
     "name": "TRIPICHIO",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 23,
     "pos": "DEF",
-    "name": "ROMERO",
+    "name": "HERNÁNDEZ",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "BRAIDA",
+    "name": "PERRUZZI",
     "starter": true
    },
    {
-    "number": 7,
+    "number": 10,
     "pos": "MID",
-    "name": "MUNIAIN",
+    "name": "GULLI",
     "starter": true
    },
    {
-    "number": 19,
+    "number": 9,
     "pos": "FWD",
-    "name": "VOMBERGAR",
+    "name": "CUELLO",
     "starter": true
    },
    {
     "number": 25,
     "pos": "GK",
-    "name": "MARTÍNEZ",
+    "name": "DEVECCHI",
+    "starter": false
+   },
+   {
+    "number": 19,
+    "pos": "DEF",
+    "name": "AMOR",
+    "starter": false
+   },
+   {
+    "number": 2,
+    "pos": "DEF",
+    "name": "ARBOLEDA",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "HERRERA",
+    "name": "RODRÍGUEZ PAGANO",
     "starter": false
    },
    {
-    "number": 8,
+    "number": 38,
     "pos": "MID",
-    "name": "IRALA",
+    "name": "FARÍAS",
     "starter": false
    },
    {
-    "number": 10,
+    "number": 28,
     "pos": "MID",
-    "name": "CUELLO",
+    "name": "BARRIOS",
     "starter": false
    },
    {
-    "number": 9,
+    "number": 26,
+    "pos": "MID",
+    "name": "ABREGO",
+    "starter": false
+   },
+   {
+    "number": 7,
     "pos": "FWD",
-    "name": "REYNOSO",
+    "name": "CERUTTI",
     "starter": false
    },
    {
     "number": 11,
     "pos": "FWD",
-    "name": "GÓMEZ",
-    "starter": false
-   },
-   {
-    "number": 6,
-    "pos": "DEF",
-    "name": "GATTONI",
-    "starter": false
-   },
-   {
-    "number": 14,
-    "pos": "MID",
-    "name": "PEÑA BIAFORE",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "CERUTTI",
+    "name": "REALI",
     "starter": false
    }
   ]
@@ -700,87 +700,87 @@
     "starter": true
    },
    {
-    "number": 3,
+    "number": 2,
     "pos": "DEF",
-    "name": "GALVÁN",
+    "name": "BLONDEL",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 21,
     "pos": "DEF",
-    "name": "ZAMBRANO",
+    "name": "NERVO",
     "starter": true
    },
    {
-    "number": 5,
+    "number": 8,
     "pos": "MID",
-    "name": "CÁCERES",
+    "name": "GIL",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "GUTIÉRREZ",
+    "name": "Ó. ROMERO",
     "starter": true
    },
    {
-    "number": 9,
+    "number": 23,
     "pos": "FWD",
-    "name": "DAMIÁN",
+    "name": "PUSSETTO",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 32,
     "pos": "GK",
-    "name": "CARLÓN",
-    "starter": false
-   },
-   {
-    "number": 2,
-    "pos": "DEF",
-    "name": "TOLEDO",
-    "starter": false
-   },
-   {
-    "number": 8,
-    "pos": "MID",
-    "name": "ROMERO",
-    "starter": false
-   },
-   {
-    "number": 20,
-    "pos": "MID",
-    "name": "BOGADO",
-    "starter": false
-   },
-   {
-    "number": 11,
-    "pos": "FWD",
-    "name": "HELLER",
-    "starter": false
-   },
-   {
-    "number": 7,
-    "pos": "FWD",
-    "name": "ZALAZAR",
+    "name": "S. MEZA",
     "starter": false
    },
    {
     "number": 6,
     "pos": "DEF",
-    "name": "MEROLLA",
+    "name": "PEREYRA",
     "starter": false
    },
    {
-    "number": 14,
-    "pos": "MID",
-    "name": "CECCHINI",
+    "number": 25,
+    "pos": "DEF",
+    "name": "IBÁÑEZ",
+    "starter": false
+   },
+   {
+    "number": 22,
+    "pos": "DEF",
+    "name": "D. ZABALA",
     "starter": false
    },
    {
     "number": 15,
     "pos": "MID",
-    "name": "CARDOZO",
+    "name": "WALLER",
+    "starter": false
+   },
+   {
+    "number": 20,
+    "pos": "MID",
+    "name": "OJEDA",
+    "starter": false
+   },
+   {
+    "number": 5,
+    "pos": "MID",
+    "name": "FERNÁNDEZ CEDRÉS",
+    "starter": false
+   },
+   {
+    "number": 9,
+    "pos": "FWD",
+    "name": "CAICEDO",
+    "starter": false
+   },
+   {
+    "number": 33,
+    "pos": "FWD",
+    "name": "BARTICCIOTTO",
     "starter": false
    }
   ]
@@ -823,33 +823,33 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 16,
     "pos": "GK",
-    "name": "MUSSO",
-    "starter": true
-   },
-   {
-    "number": 2,
-    "pos": "DEF",
-    "name": "AMONDARAIN",
+    "name": "MUSLERA",
     "starter": true
    },
    {
     "number": 4,
     "pos": "DEF",
-    "name": "ÁLVAREZ",
+    "name": "S. NÚÑEZ",
+    "starter": true
+   },
+   {
+    "number": 5,
+    "pos": "DEF",
+    "name": "M. ROJO",
     "starter": true
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "PIATTI",
+    "name": "NEVES",
     "starter": true
    },
    {
-    "number": 5,
+    "number": 10,
     "pos": "MID",
-    "name": "CETRÉ",
+    "name": "T. PALACIOS",
     "starter": true
    },
    {
@@ -859,57 +859,57 @@
     "starter": true
    },
    {
-    "number": 12,
+    "number": 1,
     "pos": "GK",
-    "name": "MEZA",
-    "starter": false
-   },
-   {
-    "number": 3,
-    "pos": "DEF",
-    "name": "LEDESMA",
-    "starter": false
-   },
-   {
-    "number": 10,
-    "pos": "MID",
-    "name": "FERNÁNDEZ",
-    "starter": false
-   },
-   {
-    "number": 6,
-    "pos": "MID",
-    "name": "MEDINA",
-    "starter": false
-   },
-   {
-    "number": 7,
-    "pos": "FWD",
-    "name": "BARCIA",
-    "starter": false
-   },
-   {
-    "number": 11,
-    "pos": "FWD",
-    "name": "GUZMÁN",
+    "name": "IACOVICH",
     "starter": false
    },
    {
     "number": 13,
     "pos": "DEF",
-    "name": "MANCUSO",
+    "name": "BENEDETTI",
     "starter": false
    },
    {
-    "number": 14,
-    "pos": "MID",
-    "name": "ASCACÍBAR",
+    "number": 20,
+    "pos": "DEF",
+    "name": "E. MEZA",
     "starter": false
    },
    {
     "number": 15,
     "pos": "DEF",
-    "name": "NÚÑEZ",
+    "name": "ARZAMENDIA",
+    "starter": false
+   },
+   {
+    "number": 21,
+    "pos": "MID",
+    "name": "PIOVI",
+    "starter": false
+   },
+   {
+    "number": 7,
+    "pos": "MID",
+    "name": "J. SOSA",
+    "starter": false
+   },
+   {
+    "number": 11,
+    "pos": "MID",
+    "name": "FARÍAS",
+    "starter": false
+   },
+   {
+    "number": 18,
+    "pos": "FWD",
+    "name": "CETRÉ",
+    "starter": false
+   },
+   {
+    "number": 27,
+    "pos": "FWD",
+    "name": "ALARIO",
     "starter": false
    }
   ]
@@ -952,93 +952,93 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 23,
     "pos": "GK",
     "name": "INSFRÁN",
     "starter": true
    },
    {
-    "number": 2,
+    "number": 15,
     "pos": "DEF",
-    "name": "PÉREZ",
+    "name": "PINTADO",
     "starter": true
    },
    {
     "number": 4,
     "pos": "DEF",
-    "name": "DOMÍNGUEZ",
+    "name": "GIAMPAOLI",
     "starter": true
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "BERNARDI",
+    "name": "I. FERNÁNDEZ",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "MARIO",
+    "name": "MIRAMÓN",
     "starter": true
    },
    {
-    "number": 9,
+    "number": 32,
     "pos": "FWD",
-    "name": "CARRIZO",
+    "name": "TORRES",
     "starter": true
    },
    {
     "number": 12,
     "pos": "GK",
-    "name": "BALBUENA",
-    "starter": false
-   },
-   {
-    "number": 3,
-    "pos": "DEF",
-    "name": "ENRIQUE",
-    "starter": false
-   },
-   {
-    "number": 10,
-    "pos": "MID",
-    "name": "MORALES",
-    "starter": false
-   },
-   {
-    "number": 6,
-    "pos": "MID",
-    "name": "ROMERO",
-    "starter": false
-   },
-   {
-    "number": 11,
-    "pos": "FWD",
-    "name": "TORRES",
-    "starter": false
-   },
-   {
-    "number": 7,
-    "pos": "FWD",
-    "name": "SALVIO",
-    "starter": false
-   },
-   {
-    "number": 14,
-    "pos": "MID",
-    "name": "CONTÍN",
+    "name": "CASTILLO",
     "starter": false
    },
    {
     "number": 13,
     "pos": "DEF",
-    "name": "ROSALES",
+    "name": "CONTI",
     "starter": false
    },
    {
-    "number": 15,
+    "number": 22,
     "pos": "DEF",
-    "name": "ALVARADO",
+    "name": "MELLUSO",
+    "starter": false
+   },
+   {
+    "number": 24,
+    "pos": "DEF",
+    "name": "SILVA TORREJÓN",
+    "starter": false
+   },
+   {
+    "number": 10,
+    "pos": "MID",
+    "name": "A. SOSA",
+    "starter": false
+   },
+   {
+    "number": 16,
+    "pos": "MID",
+    "name": "MAX",
+    "starter": false
+   },
+   {
+    "number": 7,
+    "pos": "MID",
+    "name": "PANARO",
+    "starter": false
+   },
+   {
+    "number": 17,
+    "pos": "FWD",
+    "name": "JANSON",
+    "starter": false
+   },
+   {
+    "number": 29,
+    "pos": "FWD",
+    "name": "AUZMENDI",
     "starter": false
    }
   ]
@@ -1081,93 +1081,93 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 12,
     "pos": "GK",
-    "name": "ARIAS",
+    "name": "ESPÍNOLA",
     "starter": true
    },
    {
     "number": 2,
     "pos": "DEF",
-    "name": "VELÁZQUEZ",
+    "name": "GLAVINOVICH",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 17,
     "pos": "DEF",
-    "name": "RODRÍGUEZ",
+    "name": "GIANNETTI",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "GARCÍA",
+    "name": "REGIARDO",
     "starter": true
    },
    {
-    "number": 8,
+    "number": 10,
     "pos": "MID",
-    "name": "FERNÁNDEZ",
+    "name": "ACUÑA",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "TARRAGONA",
+    "name": "CÓCCARO",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 21,
     "pos": "GK",
-    "name": "MARTÍNEZ",
+    "name": "G. ARIAS",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "SOSA",
+    "name": "LUCIANO",
     "starter": false
    },
    {
-    "number": 10,
-    "pos": "MID",
-    "name": "CAMPAZ",
+    "number": 4,
+    "pos": "DEF",
+    "name": "MONTERO",
     "starter": false
    },
    {
     "number": 6,
-    "pos": "MID",
-    "name": "PÉREZ",
-    "starter": false
-   },
-   {
-    "number": 11,
-    "pos": "FWD",
-    "name": "SAN",
-    "starter": false
-   },
-   {
-    "number": 7,
-    "pos": "FWD",
-    "name": "HERRERA",
-    "starter": false
-   },
-   {
-    "number": 13,
     "pos": "DEF",
-    "name": "BERNABEI",
+    "name": "ORTEGA",
     "starter": false
    },
    {
-    "number": 14,
+    "number": 8,
     "pos": "MID",
-    "name": "CORDERO",
+    "name": "SOTELO",
     "starter": false
    },
    {
     "number": 15,
-    "pos": "DEF",
-    "name": "LOZANO",
+    "pos": "MID",
+    "name": "SOÑORA",
+    "starter": false
+   },
+   {
+    "number": 20,
+    "pos": "MID",
+    "name": "GUCH",
+    "starter": false
+   },
+   {
+    "number": 18,
+    "pos": "FWD",
+    "name": "MAZZANTTI",
+    "starter": false
+   },
+   {
+    "number": 99,
+    "pos": "FWD",
+    "name": "J. RAMÍREZ",
     "starter": false
    }
   ]
@@ -1212,91 +1212,91 @@
    {
     "number": 1,
     "pos": "GK",
-    "name": "BROUN",
+    "name": "WERNER",
     "starter": true
-   },
-   {
-    "number": 2,
-    "pos": "DEF",
-    "name": "ENRIQUE",
-    "starter": true
-   },
-   {
-    "number": 4,
-    "pos": "DEF",
-    "name": "QUIÑÓNEZ",
-    "starter": true
-   },
-   {
-    "number": 8,
-    "pos": "MID",
-    "name": "FERREIRA",
-    "starter": true
-   },
-   {
-    "number": 10,
-    "pos": "MID",
-    "name": "LOVERA",
-    "starter": true
-   },
-   {
-    "number": 9,
-    "pos": "FWD",
-    "name": "VECCHIO",
-    "starter": true
-   },
-   {
-    "number": 12,
-    "pos": "GK",
-    "name": "RAMÍREZ",
-    "starter": false
-   },
-   {
-    "number": 3,
-    "pos": "DEF",
-    "name": "MALCORRA",
-    "starter": false
-   },
-   {
-    "number": 5,
-    "pos": "MID",
-    "name": "ÁVILA",
-    "starter": false
-   },
-   {
-    "number": 6,
-    "pos": "MID",
-    "name": "CAMPAZ",
-    "starter": false
-   },
-   {
-    "number": 11,
-    "pos": "FWD",
-    "name": "COPETTI",
-    "starter": false
-   },
-   {
-    "number": 7,
-    "pos": "FWD",
-    "name": "OVIEDO",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "SANDEZ",
-    "starter": false
-   },
-   {
-    "number": 14,
-    "pos": "MID",
-    "name": "GAMBA",
-    "starter": false
    },
    {
     "number": 15,
     "pos": "DEF",
     "name": "MALLO",
+    "starter": true
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "G. ÁVILA",
+    "starter": true
+   },
+   {
+    "number": 5,
+    "pos": "MID",
+    "name": "IBARRA",
+    "starter": true
+   },
+   {
+    "number": 20,
+    "pos": "MID",
+    "name": "PIZARRO",
+    "starter": true
+   },
+   {
+    "number": 11,
+    "pos": "FWD",
+    "name": "DI MARÍA",
+    "starter": true
+   },
+   {
+    "number": 23,
+    "pos": "GK",
+    "name": "LEDESMA",
+    "starter": false
+   },
+   {
+    "number": 3,
+    "pos": "DEF",
+    "name": "SÁNDEZ",
+    "starter": false
+   },
+   {
+    "number": 6,
+    "pos": "DEF",
+    "name": "KOMAR",
+    "starter": false
+   },
+   {
+    "number": 32,
+    "pos": "DEF",
+    "name": "CORONEL",
+    "starter": false
+   },
+   {
+    "number": 28,
+    "pos": "MID",
+    "name": "G. FERNÁNDEZ",
+    "starter": false
+   },
+   {
+    "number": 19,
+    "pos": "MID",
+    "name": "SEGOVIA",
+    "starter": false
+   },
+   {
+    "number": 31,
+    "pos": "MID",
+    "name": "NAVARRO",
+    "starter": false
+   },
+   {
+    "number": 8,
+    "pos": "FWD",
+    "name": "CAMPAZ",
+    "starter": false
+   },
+   {
+    "number": 22,
+    "pos": "FWD",
+    "name": "COPETTI",
     "starter": false
    }
   ]
@@ -1341,67 +1341,79 @@
    {
     "number": 1,
     "pos": "GK",
-    "name": "HERRERA",
-    "starter": true
-   },
-   {
-    "number": 2,
-    "pos": "DEF",
-    "name": "CATALÁN",
+    "name": "BARBI",
     "starter": true
    },
    {
     "number": 4,
     "pos": "DEF",
-    "name": "KOCH",
+    "name": "CATALÁN",
+    "starter": true
+   },
+   {
+    "number": 14,
+    "pos": "DEF",
+    "name": "GUTH",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "PORTILLO",
+    "name": "GALARZA",
     "starter": true
    },
    {
-    "number": 8,
+    "number": 33,
     "pos": "MID",
-    "name": "BARTLETT",
+    "name": "REYNOSO",
     "starter": true
    },
    {
-    "number": 9,
+    "number": 77,
     "pos": "FWD",
-    "name": "RUBÉN",
+    "name": "R. MARTÍNEZ",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 32,
     "pos": "GK",
-    "name": "GUZMÁN",
+    "name": "UNSAIN",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "GARCÍA",
+    "name": "SUÁREZ",
+    "starter": false
+   },
+   {
+    "number": 19,
+    "pos": "DEF",
+    "name": "PALOMINO",
+    "starter": false
+   },
+   {
+    "number": 20,
+    "pos": "DEF",
+    "name": "SCHOTT",
+    "starter": false
+   },
+   {
+    "number": 15,
+    "pos": "MID",
+    "name": "SFORZA",
+    "starter": false
+   },
+   {
+    "number": 8,
+    "pos": "MID",
+    "name": "ORTEGOZA",
     "starter": false
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "LÓPEZ",
-    "starter": false
-   },
-   {
-    "number": 6,
-    "pos": "MID",
-    "name": "SOSA",
-    "starter": false
-   },
-   {
-    "number": 11,
-    "pos": "FWD",
-    "name": "BARCELÓ",
+    "name": "BARONI",
     "starter": false
    },
    {
@@ -1411,21 +1423,9 @@
     "starter": false
    },
    {
-    "number": 13,
-    "pos": "DEF",
-    "name": "MORENO",
-    "starter": false
-   },
-   {
-    "number": 14,
-    "pos": "MID",
+    "number": 11,
+    "pos": "FWD",
     "name": "DEPIETRI",
-    "starter": false
-   },
-   {
-    "number": 15,
-    "pos": "MID",
-    "name": "ORTEGOZA",
     "starter": false
    }
   ]
@@ -1468,27 +1468,27 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 25,
     "pos": "GK",
-    "name": "GÓMEZ",
+    "name": "CARDOZO",
     "starter": true
    },
    {
-    "number": 2,
+    "number": 14,
     "pos": "DEF",
-    "name": "MUÑOZ",
+    "name": "MORALES",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 17,
     "pos": "DEF",
-    "name": "GARCÍA",
+    "name": "L. LÓPEZ",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "LÓPEZ",
+    "name": "LONGO",
     "starter": true
    },
    {
@@ -1500,61 +1500,61 @@
    {
     "number": 9,
     "pos": "FWD",
-    "name": "LENCINA",
+    "name": "PASSERINI",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 23,
     "pos": "GK",
-    "name": "LOZANO",
+    "name": "VICENTINI",
+    "starter": false
+   },
+   {
+    "number": 2,
+    "pos": "DEF",
+    "name": "MALDONADO",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "RIVAROLA",
+    "name": "SPÖRLE",
     "starter": false
    },
    {
-    "number": 8,
-    "pos": "MID",
-    "name": "BARINAGA",
+    "number": 16,
+    "pos": "DEF",
+    "name": "RICCA",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 20,
     "pos": "MID",
-    "name": "SOSA",
+    "name": "F. VÁZQUEZ",
+    "starter": false
+   },
+   {
+    "number": 21,
+    "pos": "MID",
+    "name": "A. SÁNCHEZ",
     "starter": false
    },
    {
     "number": 11,
-    "pos": "FWD",
-    "name": "LOVERA",
-    "starter": false
-   },
-   {
-    "number": 7,
-    "pos": "FWD",
-    "name": "VALDÉS",
-    "starter": false
-   },
-   {
-    "number": 14,
     "pos": "MID",
-    "name": "VÁZQUEZ",
+    "name": "METILLI",
     "starter": false
    },
    {
-    "number": 13,
-    "pos": "MID",
-    "name": "NOVILLO",
+    "number": 24,
+    "pos": "FWD",
+    "name": "RIGONI",
     "starter": false
    },
    {
-    "number": 15,
-    "pos": "DEF",
-    "name": "SUÁREZ",
+    "number": 22,
+    "pos": "FWD",
+    "name": "N. FERNÁNDEZ",
     "starter": false
    }
   ]
@@ -1597,63 +1597,81 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 26,
     "pos": "GK",
     "name": "LOSADA",
     "starter": true
    },
    {
+    "number": 24,
+    "pos": "DEF",
+    "name": "IZQUIERDOZ",
+    "starter": true
+   },
+   {
     "number": 2,
     "pos": "DEF",
-    "name": "SOSA",
+    "name": "MUÑOZ",
     "starter": true
    },
    {
-    "number": 4,
-    "pos": "DEF",
-    "name": "BURDISSO",
-    "starter": true
-   },
-   {
-    "number": 5,
+    "number": 15,
     "pos": "MID",
-    "name": "CARDOZO",
+    "name": "LOAIZA",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "CASTILLO",
+    "name": "MORENO",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "MARÍN",
+    "name": "BOU",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 1,
     "pos": "GK",
-    "name": "ANDRADA",
+    "name": "AGUIRRE",
+    "starter": false
+   },
+   {
+    "number": 4,
+    "pos": "DEF",
+    "name": "CÁCERES",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "CABRAL",
+    "name": "SOLER",
+    "starter": false
+   },
+   {
+    "number": 6,
+    "pos": "DEF",
+    "name": "LUCIATTI",
+    "starter": false
+   },
+   {
+    "number": 5,
+    "pos": "MID",
+    "name": "PEÑA BIAFORE",
+    "starter": false
+   },
+   {
+    "number": 32,
+    "pos": "MID",
+    "name": "CARRERA",
     "starter": false
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "PIZZINI",
-    "starter": false
-   },
-   {
-    "number": 6,
-    "pos": "MID",
-    "name": "ORTIZ",
+    "name": "PÉREZ",
     "starter": false
    },
    {
@@ -1665,25 +1683,7 @@
    {
     "number": 7,
     "pos": "FWD",
-    "name": "BELMONTE",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "ESQUIVEL",
-    "starter": false
-   },
-   {
-    "number": 14,
-    "pos": "DEF",
-    "name": "LOAIZA",
-    "starter": false
-   },
-   {
-    "number": 15,
-    "pos": "MID",
-    "name": "MORENO",
+    "name": "TORRES",
     "starter": false
    }
   ]
@@ -1728,91 +1728,91 @@
    {
     "number": 1,
     "pos": "GK",
-    "name": "ARIAS",
+    "name": "SANGUINETTI",
     "starter": true
    },
    {
     "number": 2,
     "pos": "DEF",
-    "name": "PAZ",
+    "name": "MACIEL",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 6,
     "pos": "DEF",
-    "name": "LÓPEZ",
+    "name": "MALDONADO",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "CÁCERES",
+    "name": "NÚÑEZ",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "GALEANO",
+    "name": "ÁLVAREZ",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "DURÁN",
+    "name": "SEPÚLVEDA",
     "starter": true
    },
    {
     "number": 12,
     "pos": "GK",
-    "name": "MARTÍNEZ",
+    "name": "FACUNDO",
+    "starter": false
+   },
+   {
+    "number": 4,
+    "pos": "DEF",
+    "name": "BONIFACIO",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "ALVAREZ",
+    "name": "INSÚA",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "DEF",
+    "name": "ARANDA",
     "starter": false
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "SOSA",
+    "name": "RODRÍGUEZ",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 15,
     "pos": "MID",
-    "name": "RUIZ",
+    "name": "SORAIDE",
     "starter": false
    },
    {
-    "number": 11,
-    "pos": "FWD",
-    "name": "LEDESMA",
+    "number": 20,
+    "pos": "MID",
+    "name": "GALVÁN",
     "starter": false
    },
    {
     "number": 7,
     "pos": "FWD",
-    "name": "VALDEZ",
+    "name": "BISANZ",
     "starter": false
    },
    {
-    "number": 13,
-    "pos": "DEF",
-    "name": "CORONEL",
-    "starter": false
-   },
-   {
-    "number": 14,
-    "pos": "MID",
-    "name": "ESCALANTE",
-    "starter": false
-   },
-   {
-    "number": 15,
-    "pos": "DEF",
-    "name": "OLIVERA",
+    "number": 11,
+    "pos": "FWD",
+    "name": "GIMÉNEZ",
     "starter": false
    }
   ]
@@ -1857,91 +1857,91 @@
    {
     "number": 1,
     "pos": "GK",
-    "name": "HIGUITA",
+    "name": "MARCHIORI",
     "starter": true
    },
    {
     "number": 2,
     "pos": "DEF",
-    "name": "GARCÍA",
+    "name": "MAMMANA",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 16,
     "pos": "DEF",
-    "name": "GODOY",
+    "name": "MAGALLÁN",
     "starter": true
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "FERNÁNDEZ",
-    "starter": true
-   },
-   {
-    "number": 5,
-    "pos": "MID",
     "name": "ROBERTONE",
     "starter": true
    },
    {
-    "number": 9,
-    "pos": "FWD",
-    "name": "PIZZINI",
+    "number": 22,
+    "pos": "MID",
+    "name": "LANZINI",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 77,
+    "pos": "FWD",
+    "name": "R. MARTÍNEZ",
+    "starter": true
+   },
+   {
+    "number": 23,
     "pos": "GK",
-    "name": "LUCERO",
+    "name": "SANGUINETTI",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "LANZA",
+    "name": "E. GÓMEZ",
+    "starter": false
+   },
+   {
+    "number": 4,
+    "pos": "DEF",
+    "name": "J. GARCÍA",
+    "starter": false
+   },
+   {
+    "number": 21,
+    "pos": "DEF",
+    "name": "GORDON",
     "starter": false
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "BALZARETTI",
+    "name": "VALDÉS",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 29,
     "pos": "MID",
-    "name": "ORTIZ",
+    "name": "ALIENDRO",
+    "starter": false
+   },
+   {
+    "number": 5,
+    "pos": "MID",
+    "name": "BAEZA",
     "starter": false
    },
    {
     "number": 11,
     "pos": "FWD",
-    "name": "LEPAGE",
+    "name": "PELLEGRINI",
     "starter": false
    },
    {
     "number": 7,
     "pos": "FWD",
-    "name": "CASTRO",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "GÓMEZ",
-    "starter": false
-   },
-   {
-    "number": 14,
-    "pos": "DEF",
-    "name": "QUIRÓS",
-    "starter": false
-   },
-   {
-    "number": 15,
-    "pos": "MID",
-    "name": "AQUINO",
+    "name": "SANTOS",
     "starter": false
    }
   ]
@@ -1984,93 +1984,93 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 12,
     "pos": "GK",
-    "name": "MELGAREJO",
+    "name": "ZENOBIO",
     "starter": true
    },
    {
     "number": 2,
     "pos": "DEF",
-    "name": "PENNA",
+    "name": "PAZ",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 6,
     "pos": "DEF",
-    "name": "CARDOSO",
+    "name": "LASO",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "SOSA",
+    "name": "CARDONA",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "ÁVILA",
+    "name": "MARONI",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "RETEGUI",
+    "name": "CONTÍN",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 1,
     "pos": "GK",
-    "name": "DÍAZ",
+    "name": "SOSA",
+    "starter": false
+   },
+   {
+    "number": 4,
+    "pos": "DEF",
+    "name": "ORTEGA",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "GARCÍA",
+    "name": "MARCHEGIANI",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "DEF",
+    "name": "BANEGAS",
     "starter": false
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "ROMERO",
-    "starter": false
-   },
-   {
-    "number": 6,
-    "pos": "MID",
-    "name": "RUIZ",
-    "starter": false
-   },
-   {
-    "number": 11,
-    "pos": "FWD",
-    "name": "PINO",
-    "starter": false
-   },
-   {
-    "number": 7,
-    "pos": "FWD",
-    "name": "CAMPOS",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "PREDIGER",
-    "starter": false
-   },
-   {
-    "number": 14,
-    "pos": "MID",
-    "name": "BLANCO",
+    "name": "GARAY",
     "starter": false
    },
    {
     "number": 15,
     "pos": "MID",
-    "name": "MORALES",
+    "name": "GALVÁN",
+    "starter": false
+   },
+   {
+    "number": 20,
+    "pos": "MID",
+    "name": "SCIPIONI",
+    "starter": false
+   },
+   {
+    "number": 7,
+    "pos": "FWD",
+    "name": "ARMANDO",
+    "starter": false
+   },
+   {
+    "number": 11,
+    "pos": "FWD",
+    "name": "PROTTI",
     "starter": false
    }
   ]
@@ -2113,63 +2113,75 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 50,
     "pos": "GK",
-    "name": "LANZILLOTTA",
+    "name": "D. RODRÍGUEZ",
     "starter": true
    },
    {
-    "number": 2,
+    "number": 16,
     "pos": "DEF",
-    "name": "SÁNCHEZ",
+    "name": "F. ÁLVAREZ",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 20,
     "pos": "DEF",
-    "name": "MOLINA",
+    "name": "PRIETO",
     "starter": true
    },
    {
-    "number": 5,
+    "number": 24,
     "pos": "MID",
-    "name": "MAC ALLISTER",
+    "name": "E. PÉREZ",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "RIQUELME",
+    "name": "LESCANO",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "CAMPAZZO",
+    "name": "M. ROMERO",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 1,
     "pos": "GK",
-    "name": "VILLALBA",
+    "name": "SIRI",
     "starter": false
    },
    {
-    "number": 3,
+    "number": 17,
     "pos": "DEF",
-    "name": "AVILÉS",
+    "name": "PAREDES",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 26,
     "pos": "DEF",
-    "name": "LÓPEZ",
+    "name": "BRAVO",
     "starter": false
    },
    {
-    "number": 13,
+    "number": 23,
     "pos": "DEF",
-    "name": "VALENZUELA",
+    "name": "MENDOZA",
+    "starter": false
+   },
+   {
+    "number": 11,
+    "pos": "MID",
+    "name": "MANCUELLO",
+    "starter": false
+   },
+   {
+    "number": 5,
+    "pos": "MID",
+    "name": "FATTORI",
     "starter": false
    },
    {
@@ -2179,27 +2191,15 @@
     "starter": false
    },
    {
-    "number": 14,
-    "pos": "MID",
-    "name": "BARROS",
-    "starter": false
-   },
-   {
-    "number": 16,
-    "pos": "MID",
-    "name": "LUCERO",
-    "starter": false
-   },
-   {
-    "number": 11,
-    "pos": "FWD",
-    "name": "FERNÁNDEZ",
-    "starter": false
-   },
-   {
     "number": 7,
     "pos": "FWD",
-    "name": "ROMERO",
+    "name": "HERRERA",
+    "starter": false
+   },
+   {
+    "number": 19,
+    "pos": "FWD",
+    "name": "VERÓN",
     "starter": false
    }
   ]
@@ -2242,93 +2242,93 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 31,
     "pos": "GK",
-    "name": "ARCE",
+    "name": "COZZANI",
     "starter": true
    },
    {
-    "number": 2,
+    "number": 13,
+    "pos": "DEF",
+    "name": "VÁZQUEZ",
+    "starter": true
+   },
+   {
+    "number": 6,
     "pos": "DEF",
     "name": "SUSO",
     "starter": true
    },
    {
-    "number": 4,
-    "pos": "DEF",
-    "name": "DEJESÚS",
-    "starter": true
-   },
-   {
-    "number": 5,
+    "number": 14,
     "pos": "MID",
-    "name": "BALDASSARRA",
+    "name": "PICCO",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "FERRERO",
+    "name": "TABORDA",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "GONZÁLEZ",
+    "name": "PELLEGRINO",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 1,
     "pos": "GK",
-    "name": "MAGGI",
+    "name": "DESÁBATO",
+    "starter": false
+   },
+   {
+    "number": 25,
+    "pos": "DEF",
+    "name": "SABORIDO",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "LAGO",
+    "name": "MARCIANO",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 4,
     "pos": "DEF",
-    "name": "VALDEZ",
+    "name": "LOZANO",
     "starter": false
    },
    {
-    "number": 13,
-    "pos": "DEF",
-    "name": "ROJAS",
+    "number": 5,
+    "pos": "MID",
+    "name": "JUÁREZ",
     "starter": false
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "CÁCERES",
+    "name": "GÓMEZ",
     "starter": false
    },
    {
-    "number": 14,
+    "number": 7,
     "pos": "MID",
-    "name": "MARTÍNEZ",
+    "name": "SCHOR",
     "starter": false
    },
    {
-    "number": 16,
-    "pos": "MID",
-    "name": "PÉREZ",
+    "number": 21,
+    "pos": "FWD",
+    "name": "MAINERO",
     "starter": false
    },
    {
     "number": 11,
     "pos": "FWD",
-    "name": "ARIAS",
-    "starter": false
-   },
-   {
-    "number": 7,
-    "pos": "FWD",
-    "name": "GÓMEZ",
+    "name": "RONALDO",
     "starter": false
    }
   ]
@@ -2371,93 +2371,93 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 25,
     "pos": "GK",
-    "name": "MANSILLA",
+    "name": "CARDOZO",
     "starter": true
    },
    {
-    "number": 2,
+    "number": 34,
     "pos": "DEF",
-    "name": "BRUERA",
+    "name": "PARDO",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 3,
     "pos": "DEF",
-    "name": "BARBONA",
+    "name": "CORVALÁN",
     "starter": true
    },
    {
-    "number": 5,
+    "number": 28,
     "pos": "MID",
-    "name": "DOMÍNGUEZ",
+    "name": "PITTON",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "CARDOZO",
+    "name": "VECCHIO",
     "starter": true
    },
    {
-    "number": 9,
+    "number": 77,
     "pos": "FWD",
-    "name": "PINEDA",
+    "name": "BALBOA",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 1,
     "pos": "GK",
-    "name": "ROMERO",
+    "name": "MEULI",
     "starter": false
    },
    {
-    "number": 3,
+    "number": 2,
     "pos": "DEF",
-    "name": "PÉREZ",
+    "name": "PAZ",
+    "starter": false
+   },
+   {
+    "number": 26,
+    "pos": "DEF",
+    "name": "FASCENDINI",
+    "starter": false
+   },
+   {
+    "number": 16,
+    "pos": "DEF",
+    "name": "VARGAS",
+    "starter": false
+   },
+   {
+    "number": 5,
+    "pos": "MID",
+    "name": "MARTÍNEZ",
     "starter": false
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "SANABRIA",
+    "name": "MOSQUEIRA",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 20,
     "pos": "MID",
-    "name": "CHERRO",
+    "name": "ROLDÁN",
+    "starter": false
+   },
+   {
+    "number": 9,
+    "pos": "FWD",
+    "name": "DOMINA",
     "starter": false
    },
    {
     "number": 11,
     "pos": "FWD",
-    "name": "LUNA",
-    "starter": false
-   },
-   {
-    "number": 7,
-    "pos": "FWD",
-    "name": "ROSALES",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "CALDERÓN",
-    "starter": false
-   },
-   {
-    "number": 14,
-    "pos": "MID",
-    "name": "PITTÓN",
-    "starter": false
-   },
-   {
-    "number": 15,
-    "pos": "DEF",
-    "name": "ACOSTA",
+    "name": "ORTIZ",
     "starter": false
    }
   ]
@@ -2500,93 +2500,93 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 28,
     "pos": "GK",
-    "name": "CARRANZA",
+    "name": "ROFFO",
     "starter": true
    },
    {
-    "number": 2,
+    "number": 6,
     "pos": "DEF",
-    "name": "MARTÍNEZ",
+    "name": "ALARCÓN",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 31,
     "pos": "DEF",
-    "name": "ESCUDERO",
+    "name": "REQUENA",
     "starter": true
    },
    {
-    "number": 5,
+    "number": 19,
     "pos": "MID",
-    "name": "BARÓN",
+    "name": "LODICO",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "CARRERA",
+    "name": "PUEBLA",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "LAMENDOLA",
+    "name": "SUÁREZ",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 1,
     "pos": "GK",
-    "name": "CONTI",
+    "name": "PAPALEO",
     "starter": false
    },
    {
-    "number": 3,
+    "number": 2,
     "pos": "DEF",
-    "name": "SOSA",
+    "name": "FRANCO",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 18,
     "pos": "DEF",
-    "name": "PEREYRA",
+    "name": "L. RODRÍGUEZ",
     "starter": false
    },
    {
-    "number": 13,
+    "number": 4,
     "pos": "DEF",
-    "name": "FERREYRA",
+    "name": "CERATO",
     "starter": false
    },
    {
-    "number": 8,
+    "number": 5,
     "pos": "MID",
-    "name": "ROMERO",
+    "name": "MOREYRA",
     "starter": false
    },
    {
     "number": 14,
     "pos": "MID",
-    "name": "ORTIZ",
+    "name": "DUBERSARSKY",
     "starter": false
    },
    {
-    "number": 16,
+    "number": 8,
     "pos": "MID",
-    "name": "GUTIÉRREZ",
+    "name": "ACEVEDO",
+    "starter": false
+   },
+   {
+    "number": 22,
+    "pos": "FWD",
+    "name": "LUNA",
     "starter": false
    },
    {
     "number": 11,
     "pos": "FWD",
-    "name": "LÓPEZ",
-    "starter": false
-   },
-   {
-    "number": 7,
-    "pos": "FWD",
-    "name": "GIL",
+    "name": "ROMERO",
     "starter": false
    }
   ]
@@ -2631,91 +2631,91 @@
    {
     "number": 1,
     "pos": "GK",
-    "name": "LUCERO",
+    "name": "DURSO",
     "starter": true
    },
    {
     "number": 2,
     "pos": "DEF",
-    "name": "MARTÍNEZ",
+    "name": "FERRARI",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 6,
     "pos": "DEF",
-    "name": "BIANCHI",
+    "name": "ROMERO",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "LUGONES",
+    "name": "ACOSTA",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "MIRANDA",
+    "name": "PEREYRA",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "HEREDIA",
+    "name": "ESTIGARRIBIA",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 25,
     "pos": "GK",
-    "name": "VILLALBA",
+    "name": "GONZÁLEZ",
+    "starter": false
+   },
+   {
+    "number": 4,
+    "pos": "DEF",
+    "name": "BRANDÁN",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "RIVERO",
+    "name": "INFANTE",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "DEF",
-    "name": "SOSA",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "ORTIZ",
+    "name": "DE LOS SANTOS",
     "starter": false
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "ACOSTA",
+    "name": "SÁNCHEZ",
     "starter": false
    },
    {
-    "number": 14,
+    "number": 18,
     "pos": "MID",
-    "name": "PÉREZ",
+    "name": "TESURI",
     "starter": false
    },
    {
-    "number": 16,
+    "number": 20,
     "pos": "MID",
-    "name": "GUZMÁN",
-    "starter": false
-   },
-   {
-    "number": 11,
-    "pos": "FWD",
     "name": "CASTRO",
+    "starter": false
+   },
+   {
+    "number": 37,
+    "pos": "FWD",
+    "name": "CORONEL",
     "starter": false
    },
    {
     "number": 7,
     "pos": "FWD",
-    "name": "BENEDETTO",
+    "name": "RODRÍGUEZ",
     "starter": false
    }
   ]
@@ -2760,91 +2760,91 @@
    {
     "number": 1,
     "pos": "GK",
-    "name": "FERNÁNDEZ",
+    "name": "INGROSSO",
+    "starter": true
+   },
+   {
+    "number": 6,
+    "pos": "DEF",
+    "name": "ABASCIA",
     "starter": true
    },
    {
     "number": 2,
     "pos": "DEF",
-    "name": "SOSA",
+    "name": "VALDEZ",
     "starter": true
    },
    {
-    "number": 4,
-    "pos": "DEF",
-    "name": "ROMERO",
-    "starter": true
-   },
-   {
-    "number": 5,
+    "number": 8,
     "pos": "MID",
-    "name": "CORTÉS",
+    "name": "ATENCIO",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "TOLEDO",
+    "name": "FLORENTÍN",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "RIVAS",
+    "name": "VARALDO",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 25,
     "pos": "GK",
-    "name": "LUCERO",
+    "name": "BURSICH",
     "starter": false
    },
    {
-    "number": 3,
+    "number": 4,
     "pos": "DEF",
-    "name": "MORALES",
-    "starter": false
-   },
-   {
-    "number": 6,
-    "pos": "DEF",
-    "name": "GÓMEZ",
+    "name": "PILLUD",
     "starter": false
    },
    {
     "number": 13,
     "pos": "DEF",
-    "name": "BRAVO",
+    "name": "RAK",
     "starter": false
    },
    {
-    "number": 8,
+    "number": 3,
+    "pos": "DEF",
+    "name": "MANSILLA",
+    "starter": false
+   },
+   {
+    "number": 5,
     "pos": "MID",
-    "name": "PÉREZ",
+    "name": "VÁZQUEZ",
     "starter": false
    },
    {
-    "number": 14,
+    "number": 15,
     "pos": "MID",
-    "name": "GARCÍA",
+    "name": "VEGA",
     "starter": false
    },
    {
-    "number": 16,
+    "number": 20,
     "pos": "MID",
-    "name": "LÓPEZ",
-    "starter": false
-   },
-   {
-    "number": 11,
-    "pos": "FWD",
-    "name": "ORTIZ",
+    "name": "CABRERA",
     "starter": false
    },
    {
     "number": 7,
     "pos": "FWD",
-    "name": "ARIAS",
+    "name": "ANGULO",
+    "starter": false
+   },
+   {
+    "number": 11,
+    "pos": "FWD",
+    "name": "CABRAL",
     "starter": false
    }
   ]
@@ -2889,91 +2889,91 @@
    {
     "number": 1,
     "pos": "GK",
-    "name": "CHAVES",
+    "name": "OJEDA",
     "starter": true
    },
    {
     "number": 2,
     "pos": "DEF",
-    "name": "PÉREZ",
+    "name": "PADILLA",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 6,
     "pos": "DEF",
-    "name": "ROMERO",
+    "name": "MONDINO",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "GARCÍA",
+    "name": "ANTONIO",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "MORALES",
+    "name": "ROMANO",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "SILVA",
+    "name": "SILBA",
     "starter": true
    },
    {
     "number": 12,
     "pos": "GK",
-    "name": "SOSA",
+    "name": "PETRUCHI",
+    "starter": false
+   },
+   {
+    "number": 4,
+    "pos": "DEF",
+    "name": "NADALÍN",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "LÓPEZ",
+    "name": "RECALDE",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "DEF",
-    "name": "DÍAZ",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "FUNES",
+    "name": "MERITELO",
     "starter": false
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "ORTIZ",
+    "name": "CORTÉS",
     "starter": false
    },
    {
-    "number": 14,
+    "number": 15,
     "pos": "MID",
-    "name": "LUNA",
+    "name": "SOLÍS",
     "starter": false
    },
    {
-    "number": 16,
+    "number": 20,
     "pos": "MID",
-    "name": "MORÁN",
-    "starter": false
-   },
-   {
-    "number": 11,
-    "pos": "FWD",
-    "name": "CASTRO",
+    "name": "CICCOLINI",
     "starter": false
    },
    {
     "number": 7,
     "pos": "FWD",
-    "name": "ARIAS",
+    "name": "CASTRO",
+    "starter": false
+   },
+   {
+    "number": 11,
+    "pos": "FWD",
+    "name": "SPETALE",
     "starter": false
    }
   ]
@@ -3022,13 +3022,13 @@
     "starter": true
    },
    {
-    "number": 2,
+    "number": 6,
     "pos": "DEF",
-    "name": "BLANCO",
+    "name": "VILLALBA",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 2,
     "pos": "DEF",
     "name": "BIANCHI",
     "starter": true
@@ -3036,73 +3036,73 @@
    {
     "number": 5,
     "pos": "MID",
-    "name": "SOSA",
+    "name": "ROMERO",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "ORTIZ",
+    "name": "SEQUEIRA",
     "starter": true
    },
    {
-    "number": 9,
+    "number": 22,
     "pos": "FWD",
-    "name": "GONZÁLEZ",
+    "name": "VILLA",
     "starter": true
    },
    {
     "number": 12,
     "pos": "GK",
-    "name": "MARTÍNEZ",
+    "name": "MARINELLI",
+    "starter": false
+   },
+   {
+    "number": 4,
+    "pos": "DEF",
+    "name": "RUIZ DÍAZ",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "LÓPEZ",
+    "name": "OSTCHEGA",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "DEF",
-    "name": "ROMERO",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "AGUIRRE",
+    "name": "STUDER",
     "starter": false
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "LUNA",
+    "name": "TONETTO",
     "starter": false
    },
    {
-    "number": 14,
+    "number": 15,
     "pos": "MID",
-    "name": "PAZ",
+    "name": "HAM",
     "starter": false
    },
    {
-    "number": 16,
+    "number": 20,
     "pos": "MID",
-    "name": "VEGA",
+    "name": "RÍOS",
+    "starter": false
+   },
+   {
+    "number": 9,
+    "pos": "FWD",
+    "name": "RAMIS",
     "starter": false
    },
    {
     "number": 11,
     "pos": "FWD",
-    "name": "CASTRO",
-    "starter": false
-   },
-   {
-    "number": 7,
-    "pos": "FWD",
-    "name": "ARIAS",
+    "name": "SARTORI",
     "starter": false
    }
   ]
@@ -3145,93 +3145,93 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 25,
     "pos": "GK",
-    "name": "UNSAIN",
+    "name": "BOLOGNA",
     "starter": true
    },
    {
-    "number": 2,
+    "number": 21,
     "pos": "DEF",
-    "name": "GARCÍA",
+    "name": "RAMOS MINGO",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 6,
     "pos": "DEF",
-    "name": "ROMERO",
+    "name": "AGUILERA",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "SOSA",
+    "name": "GUTIÉRREZ",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "ORTIZ",
+    "name": "MOLINAS",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "FERNÁNDEZ",
+    "name": "OSORIO",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 1,
     "pos": "GK",
-    "name": "MARTÍNEZ",
+    "name": "FIERMARÍN",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "DEF",
+    "name": "CANNAVO",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "LÓPEZ",
+    "name": "SOTO",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 2,
     "pos": "DEF",
-    "name": "IBÁÑEZ",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "RUIZ",
+    "name": "FERREIRA",
     "starter": false
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "LUNA",
-    "starter": false
-   },
-   {
-    "number": 14,
-    "pos": "MID",
-    "name": "PÉREZ",
-    "starter": false
-   },
-   {
-    "number": 16,
-    "pos": "MID",
-    "name": "GÓMEZ",
+    "name": "LÓPEZ",
     "starter": false
    },
    {
     "number": 11,
-    "pos": "FWD",
-    "name": "CASTRO",
+    "pos": "MID",
+    "name": "PALAVECINO",
+    "starter": false
+   },
+   {
+    "number": 15,
+    "pos": "MID",
+    "name": "SCHAMINE",
     "starter": false
    },
    {
     "number": 7,
     "pos": "FWD",
-    "name": "ARIAS",
+    "name": "TOGNI",
+    "starter": false
+   },
+   {
+    "number": 19,
+    "pos": "FWD",
+    "name": "MIRITELLO",
     "starter": false
    }
   ]
@@ -3274,93 +3274,93 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 28,
     "pos": "GK",
-    "name": "RUIZ",
+    "name": "MIÑO",
     "starter": true
    },
    {
     "number": 2,
     "pos": "DEF",
-    "name": "GARCÍA",
+    "name": "CAPRARO",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 6,
     "pos": "DEF",
-    "name": "ROMERO",
+    "name": "GOÑI",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "SOSA",
+    "name": "HERRERA",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "ORTIZ",
+    "name": "TAPIA",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "FERNÁNDEZ",
+    "name": "BRUERA",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 1,
     "pos": "GK",
-    "name": "MARTÍNEZ",
+    "name": "MOYANO",
+    "starter": false
+   },
+   {
+    "number": 4,
+    "pos": "DEF",
+    "name": "MATER",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "LÓPEZ",
+    "name": "INSÚA",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "DEF",
-    "name": "IBÁÑEZ",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "VERA",
+    "name": "DEMARTINI",
     "starter": false
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "LUNA",
+    "name": "ROSANÉ",
     "starter": false
    },
    {
-    "number": 14,
+    "number": 15,
     "pos": "MID",
-    "name": "PÉREZ",
+    "name": "MILOC",
     "starter": false
    },
    {
-    "number": 16,
+    "number": 20,
     "pos": "MID",
-    "name": "GÓMEZ",
-    "starter": false
-   },
-   {
-    "number": 11,
-    "pos": "FWD",
-    "name": "CASTRO",
+    "name": "DUARTE",
     "starter": false
    },
    {
     "number": 7,
     "pos": "FWD",
-    "name": "ARIAS",
+    "name": "ZALAZAR",
+    "starter": false
+   },
+   {
+    "number": 11,
+    "pos": "FWD",
+    "name": "CANDIA",
     "starter": false
    }
   ]
@@ -3403,93 +3403,93 @@
   },
   "squad": [
    {
-    "number": 1,
+    "number": 42,
     "pos": "GK",
-    "name": "ARIAS",
+    "name": "ACOSTA",
     "starter": true
    },
    {
     "number": 2,
     "pos": "DEF",
-    "name": "GARCÍA",
+    "name": "PAREDES",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 32,
     "pos": "DEF",
-    "name": "ROMERO",
+    "name": "INSAURRALDE",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "SOSA",
+    "name": "MENDEZ",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "ORTIZ",
+    "name": "GAITAN",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "FERNÁNDEZ",
+    "name": "LÓPEZ",
     "starter": true
    },
    {
-    "number": 12,
+    "number": 1,
     "pos": "GK",
-    "name": "MARTÍNEZ",
+    "name": "POURTAU",
+    "starter": false
+   },
+   {
+    "number": 4,
+    "pos": "DEF",
+    "name": "ELÍAS LÓPEZ",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "LÓPEZ",
+    "name": "DÍAZ",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "DEF",
-    "name": "IBÁÑEZ",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "VERA",
+    "name": "RONCAGLIA",
     "starter": false
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "LUNA",
+    "name": "GARCÍA",
     "starter": false
    },
    {
-    "number": 14,
+    "number": 15,
     "pos": "MID",
-    "name": "PÉREZ",
+    "name": "BURGOA",
     "starter": false
    },
    {
-    "number": 16,
+    "number": 20,
     "pos": "MID",
-    "name": "GÓMEZ",
+    "name": "GUDIÑO",
     "starter": false
    },
    {
-    "number": 11,
+    "number": 18,
     "pos": "FWD",
-    "name": "CASTRO",
+    "name": "MORALES",
     "starter": false
    },
    {
     "number": 7,
     "pos": "FWD",
-    "name": "ROJAS",
+    "name": "HAUCHE",
     "starter": false
    }
   ]
@@ -3534,91 +3534,91 @@
    {
     "number": 1,
     "pos": "GK",
-    "name": "DEVECCHI",
+    "name": "CARRANZA",
     "starter": true
    },
    {
     "number": 2,
     "pos": "DEF",
-    "name": "GARCÍA",
+    "name": "SOTO",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 6,
     "pos": "DEF",
-    "name": "ROMERO",
+    "name": "MOTTES",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "SOSA",
+    "name": "ESQUIVEL",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "ORTIZ",
+    "name": "PIÑEIRO",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "FERNÁNDEZ",
+    "name": "TORRES",
     "starter": true
    },
    {
     "number": 12,
     "pos": "GK",
-    "name": "MARTÍNEZ",
+    "name": "ATAMAÑUK",
+    "starter": false
+   },
+   {
+    "number": 4,
+    "pos": "DEF",
+    "name": "IÑIGUEZ",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "LÓPEZ",
+    "name": "GUERRICO",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "DEF",
-    "name": "IBÁÑEZ",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "VERA",
+    "name": "GONZÁLEZ",
     "starter": false
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "LUNA",
+    "name": "LARRALDE",
     "starter": false
    },
    {
-    "number": 14,
+    "number": 15,
     "pos": "MID",
-    "name": "PÉREZ",
+    "name": "SOSA",
     "starter": false
    },
    {
-    "number": 16,
+    "number": 20,
     "pos": "MID",
-    "name": "GÓMEZ",
-    "starter": false
-   },
-   {
-    "number": 11,
-    "pos": "FWD",
-    "name": "CASTRO",
+    "name": "ALONSO",
     "starter": false
    },
    {
     "number": 7,
     "pos": "FWD",
-    "name": "ROJAS",
+    "name": "COLAZO",
+    "starter": false
+   },
+   {
+    "number": 11,
+    "pos": "FWD",
+    "name": "LAMÉNDOLLA",
     "starter": false
    }
   ]
@@ -3663,91 +3663,91 @@
    {
     "number": 1,
     "pos": "GK",
-    "name": "BRUNO",
+    "name": "ARCE",
     "starter": true
    },
    {
-    "number": 2,
+    "number": 24,
     "pos": "DEF",
-    "name": "GARCÍA",
+    "name": "CARO TORRES",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 6,
     "pos": "DEF",
-    "name": "ROMERO",
+    "name": "BARRIONUEVO",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "SOSA",
+    "name": "CELIZ",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "ORTIZ",
+    "name": "BRAVO",
     "starter": true
    },
    {
     "number": 9,
     "pos": "FWD",
-    "name": "FERNÁNDEZ",
+    "name": "HERRERA",
     "starter": true
    },
    {
     "number": 12,
     "pos": "GK",
-    "name": "MARTÍNEZ",
+    "name": "DOBBOLETTA",
+    "starter": false
+   },
+   {
+    "number": 2,
+    "pos": "DEF",
+    "name": "SANSOTRE",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "LÓPEZ",
+    "name": "RAMÍREZ",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "DEF",
-    "name": "IBÁÑEZ",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "VERA",
+    "name": "MINERVINO",
     "starter": false
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "LUNA",
+    "name": "GOITIA",
     "starter": false
    },
    {
-    "number": 14,
+    "number": 15,
     "pos": "MID",
-    "name": "PÉREZ",
+    "name": "PEREIRA",
     "starter": false
    },
    {
-    "number": 16,
+    "number": 20,
     "pos": "MID",
-    "name": "GÓMEZ",
-    "starter": false
-   },
-   {
-    "number": 11,
-    "pos": "FWD",
-    "name": "CASTRO",
+    "name": "LANDRIEL",
     "starter": false
    },
    {
     "number": 7,
     "pos": "FWD",
-    "name": "ROJAS",
+    "name": "BENEGAS",
+    "starter": false
+   },
+   {
+    "number": 11,
+    "pos": "FWD",
+    "name": "FERNÁNDEZ",
     "starter": false
    }
   ]
@@ -3792,91 +3792,91 @@
    {
     "number": 1,
     "pos": "GK",
-    "name": "GARNERONE",
+    "name": "BARLASINA",
     "starter": true
    },
    {
     "number": 2,
     "pos": "DEF",
-    "name": "GARCÍA",
+    "name": "MAFFINI",
     "starter": true
    },
    {
-    "number": 4,
+    "number": 6,
     "pos": "DEF",
-    "name": "ROMERO",
+    "name": "ARTÚNDO",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "SOSA",
+    "name": "CABRERA",
     "starter": true
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "ORTIZ",
+    "name": "VALIENTE",
     "starter": true
    },
    {
-    "number": 99,
+    "number": 9,
     "pos": "FWD",
-    "name": "ÁBILA",
+    "name": "BAJAMIICH",
     "starter": true
    },
    {
     "number": 12,
     "pos": "GK",
-    "name": "MARTÍNEZ",
+    "name": "STRUMIA",
+    "starter": false
+   },
+   {
+    "number": 4,
+    "pos": "DEF",
+    "name": "BONACORSO",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "LÓPEZ",
+    "name": "ABRAHAM",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "DEF",
-    "name": "IBÁÑEZ",
-    "starter": false
-   },
-   {
-    "number": 13,
-    "pos": "DEF",
-    "name": "VERA",
+    "name": "MARCIANO",
     "starter": false
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "LUNA",
+    "name": "ROMERO",
     "starter": false
    },
    {
-    "number": 14,
+    "number": 15,
     "pos": "MID",
-    "name": "PÉREZ",
+    "name": "BLANCO",
     "starter": false
    },
    {
-    "number": 50,
+    "number": 20,
     "pos": "MID",
-    "name": "BAJAMICH",
-    "starter": false
-   },
-   {
-    "number": 32,
-    "pos": "FWD",
-    "name": "GALVÁN",
+    "name": "PAVÓN",
     "starter": false
    },
    {
     "number": 7,
     "pos": "FWD",
-    "name": "GÓMEZ",
+    "name": "REYNAGA",
+    "starter": false
+   },
+   {
+    "number": 11,
+    "pos": "FWD",
+    "name": "GALVÁN",
     "starter": false
    }
   ]
