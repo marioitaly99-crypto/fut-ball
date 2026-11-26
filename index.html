@@ -263,38 +263,37 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
  background:url('menu_bg.png') center center / cover no-repeat,#0a7a24}
 #career-screen{flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:16px;
  background:linear-gradient(rgba(3,12,32,.66),rgba(3,12,32,.66)),url('menu_bg.png') center center / cover no-repeat,#06240f}
-#screen-home .sr-only,#career-screen .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-#screen-home .hmenu{position:absolute;top:36%;left:calc(3% + env(safe-area-inset-left,0px));width:min(36vw,560px);
- display:flex;flex-direction:column;gap:clamp(8px,1.8vh,20px)}
-#screen-home .hbar{--h:clamp(40px,9.5vh,88px);position:relative;display:flex;align-items:center;justify-content:flex-start;
- width:100%;height:var(--h);padding:0 6%;border-radius:8px;transform:skewX(-18deg);transform-origin:left center;cursor:pointer;
- color:#fff;text-align:left;white-space:nowrap;overflow:hidden;
- transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease,filter .16s ease;
- -webkit-tap-highlight-color:transparent;outline:none}
-#screen-home .hbar>span{display:block;transform:skewX(18deg);font-size:clamp(.82rem,min(4.2vh,2.8vw),2rem);font-weight:900;font-style:italic;
- letter-spacing:.04em;text-transform:uppercase;color:#fff;text-shadow:0 2px 0 rgba(0,20,60,.85),0 3px 8px rgba(0,0,0,.65)}
-#screen-home .hbar::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
- background:linear-gradient(180deg,rgba(255,255,255,.34) 0%,rgba(255,255,255,0) 52%)}
-#screen-home .hbar.main{background:linear-gradient(90deg,#0284c7,#38bdf8,#7dd3fc);border:3px solid #e0f7ff;
- box-shadow:0 0 0 2px rgba(56,189,248,.55),0 0 22px rgba(56,189,248,.75),0 6px 14px rgba(0,0,0,.45)}
-#screen-home .hbar.sec{width:92%;background:rgba(7,25,56,.92);border:2px solid rgba(125,211,252,.4);
- box-shadow:0 5px 12px rgba(0,0,0,.5)}
-#screen-home .hbar:hover,#screen-home .hbar:focus-visible{filter:none;transform:skewX(-18deg) translateX(10px)}
-#screen-home .hbar.main:hover,#screen-home .hbar.main:focus-visible{box-shadow:0 0 0 2px rgba(125,211,252,.9),0 0 32px rgba(56,189,248,.95),0 6px 14px rgba(0,0,0,.45)}
-#screen-home .hbar.sec:hover,#screen-home .hbar.sec:focus-visible{background:linear-gradient(90deg,rgba(2,132,199,.95),rgba(56,189,248,.92),rgba(125,211,252,.9));
- border-color:#e0f7ff;box-shadow:0 0 0 2px rgba(56,189,248,.55),0 0 22px rgba(56,189,248,.75),0 6px 14px rgba(0,0,0,.45)}
-#screen-home .hbar:active{transform:skewX(-18deg) translateX(10px) scale(.985)}
-#screen-home #homeHelp{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:calc(env(safe-area-inset-right,0px) + 16px);
- padding:7px 16px;font-size:clamp(.74rem,2.2vh,.95rem);border-radius:999px;background:rgba(7,25,56,.82);color:#fff;
- border:1.5px solid rgba(125,211,252,.7);box-shadow:0 2px 10px rgba(0,0,0,.4);font-weight:800;white-space:nowrap;
- -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
-#screen-home #homeHelp:hover,#screen-home #homeHelp:focus-visible{filter:none;background:rgba(2,132,199,.9);border-color:#e0f7ff;outline:none}
-#screen-home .hinfo{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:12px;
- min-height:clamp(32px,7vh,58px);padding:4px calc(env(safe-area-inset-right,0px) + 18px) calc(4px + env(safe-area-inset-bottom,0px)) calc(env(safe-area-inset-left,0px) + 18px);
- background:rgba(3,12,32,.78);border-top:2px solid rgba(56,189,248,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
- color:#fff;font-weight:700;font-size:clamp(.78rem,2.5vh,1.1rem);text-shadow:0 1px 2px #000}
-#screen-home .hinfo .ic{flex:none;width:1.5em;height:1.5em;border-radius:50%;background:#fff;color:#0b1f4a;display:flex;align-items:center;justify-content:center;
- font-family:Georgia,serif;font-style:italic;font-weight:900;font-size:1em;line-height:1;text-shadow:none}
+#career-screen .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#screen-home{background:#57b446 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='400'%3E%3Cpath d='M40 60l-7 -12M40 60v-15M40 60l7 -12M300 35l-7 -12M300 35v-15M300 35l7 -12M520 110l-7 -12M520 110v-15M520 110l7 -12M170 150l-7 -12M170 150v-15M170 150l7 -12M420 230l-7 -12M420 230v-15M420 230l7 -12M80 300l-7 -12M80 300v-15M80 300l7 -12M300 330l-7 -12M300 330v-15M300 330l7 -12M500 360l-7 -12M500 360v-15M500 360l7 -12M210 40l-7 -12M210 40v-15M210 40l7 -12' fill='none' stroke='%233f8f32' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") 0 0/560px 400px repeat}
+#screen-home .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#screen-home .hscene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+#screen-home .hlogo{position:absolute;z-index:1;left:4.5%;top:8%;width:min(46vw,640px);height:auto;overflow:visible;filter:drop-shadow(0 6px 4px rgba(0,0,0,.22))}
+#screen-home .hmenu{position:absolute;z-index:2;top:38%;left:calc(7.6% + env(safe-area-inset-left,0px));width:min(36vw,500px);
+ display:flex;flex-direction:column;gap:clamp(10px,2.4vh,22px)}
+#screen-home .hbar{--h:clamp(54px,12.5vh,100px);position:relative;display:flex;align-items:center;justify-content:flex-start;gap:5%;
+ width:100%;height:var(--h);padding:0 6%;box-sizing:border-box;border-radius:clamp(18px,3.6vh,32px);border:2.5px solid #0a1f3d;cursor:pointer;
+ color:#fff;text-align:left;white-space:nowrap;overflow:hidden;transform:none;
+ box-shadow:0 5px 0 rgba(0,0,0,.38),0 8px 10px rgba(0,0,0,.18);
+ transition:transform .12s ease,box-shadow .12s ease,filter .12s ease;-webkit-tap-highlight-color:transparent;outline:none}
+#screen-home .hbar .hico{flex:none;height:72%;width:auto;aspect-ratio:1;display:block;overflow:visible}
+#screen-home .hbar>span{display:block;font-size:clamp(1rem,min(4.8vh,3.6vw),2.3rem);font-weight:900;font-style:italic;letter-spacing:.01em;text-transform:uppercase;color:#fff;
+ text-shadow:-1.5px -1.5px 0 #0a1f3d,1.5px -1.5px 0 #0a1f3d,-1.5px 1.5px 0 #0a1f3d,1.5px 1.5px 0 #0a1f3d,0 3px 3px rgba(0,0,0,.35)}
+#screen-home .hbar::after{content:"";position:absolute;left:3%;right:3%;top:5%;height:42%;border-radius:inherit;pointer-events:none;
+ background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,0))}
+#screen-home .hbar.main{background:linear-gradient(180deg,#4cb5f7 0%,#1f8be3 100%)}
+#screen-home .hbar:hover,#screen-home .hbar:focus-visible{transform:translateY(-2px);filter:brightness(1.07);box-shadow:0 7px 0 rgba(0,0,0,.38),0 10px 12px rgba(0,0,0,.2)}
+#screen-home .hbar:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.38)}
+#screen-home #homeHelp{position:absolute;z-index:3;top:calc(env(safe-area-inset-top,0px) + 14px);right:calc(env(safe-area-inset-right,0px) + 16px);
+ display:flex;align-items:center;gap:10px;padding:7px 18px 7px 8px;font-size:clamp(.78rem,2.4vh,1rem);border-radius:999px;background:rgba(18,48,40,.88);color:#fff;
+ border:none;box-shadow:0 3px 8px rgba(0,0,0,.3);font-weight:800;white-space:nowrap}
+#screen-home #homeHelp .q{flex:none;width:1.9em;height:1.9em;border-radius:50%;background:#fff;color:#12302a;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1em;line-height:1}
+#screen-home #homeHelp:hover,#screen-home #homeHelp:focus-visible{filter:brightness(1.2);outline:none}
+#screen-home .hinfo{position:absolute;z-index:3;left:0;right:0;bottom:0;display:flex;align-items:center;gap:12px;
+ min-height:clamp(34px,7.4vh,58px);padding:4px calc(env(safe-area-inset-right,0px) + 18px) calc(4px + env(safe-area-inset-bottom,0px)) calc(env(safe-area-inset-left,0px) + 18px);
+ background:rgba(20,38,34,.84);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+ color:#fff;font-weight:600;font-size:clamp(.78rem,2.5vh,1.1rem)}
+#screen-home .hinfo .ic{flex:none;width:1.5em;height:1.5em;border-radius:50%;background:#fff;color:#12302a;display:flex;align-items:center;justify-content:center;
+ font-family:Georgia,serif;font-style:normal;font-weight:900;font-size:1em;line-height:1}
 #screen-home .hinfo #homeInfo{min-width:0}
 .backBtn{padding:6px 14px;font-size:.82rem;border-radius:999px;background:rgba(4,18,48,.88);color:#fff;border:1.5px solid #38bdf8;box-shadow:none;white-space:nowrap}
 #screen-login #backLogin{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(env(safe-area-inset-left,0px) + 12px);z-index:5}
@@ -303,10 +302,12 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
 #career-screen .careerCard{width:min(760px,92vw);padding:clamp(18px,4vh,34px) clamp(16px,3vw,32px);text-align:center;background:rgba(7,25,56,.9);
  border:2px solid #38bdf8;border-radius:18px;box-shadow:0 0 28px rgba(56,189,248,.35)}
 #career-screen .careerCard h1{font-size:clamp(1.05rem,4.2vh,1.9rem);line-height:1.35;color:#fff;font-weight:900;font-style:italic;text-shadow:0 2px 6px rgba(0,0,0,.6)}
-@media (max-aspect-ratio:4/3){#screen-home .hmenu{width:min(32vw,560px)}}
+@media (max-aspect-ratio:4/3){#screen-home .hmenu{width:min(44vw,520px)}#screen-home .hlogo{width:min(52vw,640px)}}
 @media (max-aspect-ratio:1/1){
- #screen-home,#career-screen{background-position:4% center}
- #screen-home .hmenu{width:min(82vw,560px)}
+ #career-screen{background-position:4% center}
+ #screen-home .hscene{opacity:.45}
+ #screen-home .hlogo{left:6%;top:7%;width:88vw}
+ #screen-home .hmenu{top:36%;left:6%;width:88vw}
 }
 
 
@@ -368,12 +369,15 @@ html.is-touch:not(.is-standalone) #screen-lobby #helpLobby{top:40px}
 
 <div id="screen-home" class="screen active">
   <h1 class="sr-only">Fut-ball</h1>
-  <button id="homeHelp" type="button">❓ Cómo jugar</button>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="fbBall" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#fff" stroke="#0a1f3d" stroke-width="5"/><polygon points="50,33 66,45 60,64 40,64 34,45" fill="#0a1f3d"/><path d="M50 33V17M66 45L82 38M60 64L70 80M40 64L30 80M34 45L18 38" stroke="#0a1f3d" stroke-width="4" stroke-linecap="round"/><polygon points="40,8 60,8 50,18" fill="#0a1f3d"/><polygon points="90,36 94,54 82,48" fill="#0a1f3d"/><polygon points="10,36 6,54 18,48" fill="#0a1f3d"/><polygon points="72,88 56,92 62,80" fill="#0a1f3d"/><polygon points="28,88 44,92 38,80" fill="#0a1f3d"/></symbol></defs></svg>
+  <svg class="hscene" viewBox="0 0 1376 768" preserveAspectRatio="xMaxYMid slice" aria-hidden="true"><ellipse cx="1241" cy="224" rx="57" ry="55" fill="rgba(0,0,0,.2)"/><circle cx="1236" cy="208" r="56" fill="#e3141b" stroke="#0a1f3d" stroke-width="3" vector-effect="non-scaling-stroke"/><circle cx="1236" cy="208" r="50" fill="none" stroke="#8e0a10" stroke-width="5" opacity=".55"/><ellipse cx="1230" cy="182" rx="30" ry="16" fill="#fff" opacity=".32"/><ellipse cx="795" cy="328" rx="57" ry="55" fill="rgba(0,0,0,.2)"/><circle cx="790" cy="312" r="56" fill="#e3141b" stroke="#0a1f3d" stroke-width="3" vector-effect="non-scaling-stroke"/><circle cx="790" cy="312" r="50" fill="none" stroke="#8e0a10" stroke-width="5" opacity=".55"/><ellipse cx="784" cy="286" rx="30" ry="16" fill="#fff" opacity=".32"/><ellipse cx="1304" cy="626" rx="57" ry="55" fill="rgba(0,0,0,.2)"/><circle cx="1299" cy="610" r="56" fill="#1f6fd6" stroke="#0a1f3d" stroke-width="3" vector-effect="non-scaling-stroke"/><circle cx="1299" cy="610" r="50" fill="none" stroke="#0c3e86" stroke-width="5" opacity=".55"/><ellipse cx="1293" cy="584" rx="30" ry="16" fill="#fff" opacity=".32"/><ellipse cx="889" cy="708" rx="57" ry="55" fill="rgba(0,0,0,.2)"/><circle cx="884" cy="692" r="56" fill="#1f6fd6" stroke="#0a1f3d" stroke-width="3" vector-effect="non-scaling-stroke"/><circle cx="884" cy="692" r="50" fill="none" stroke="#0c3e86" stroke-width="5" opacity=".55"/><ellipse cx="878" cy="666" rx="30" ry="16" fill="#fff" opacity=".32"/><polygon points="1215,398 1190,402 1175,392 1160,404 1135,410 1110,422 1075,440 1110,452 1135,462 1160,474 1175,486 1190,478 1215,482" fill="#ffc400" stroke="#ff9d00" stroke-width="3" stroke-linejoin="round"/><polygon points="1205,414 1170,418 1135,426 1105,440 1135,450 1170,460 1205,466" fill="#fff3a0"/><ellipse cx="1031" cy="453" rx="57" ry="55" fill="rgba(0,0,0,.2)"/><circle cx="1026" cy="437" r="56" fill="#e3141b" stroke="#0a1f3d" stroke-width="3" vector-effect="non-scaling-stroke"/><circle cx="1026" cy="437" r="50" fill="none" stroke="#8e0a10" stroke-width="5" opacity=".55"/><ellipse cx="1020" cy="411" rx="30" ry="16" fill="#fff" opacity=".32"/><text x="1026" y="460" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-style="italic" font-size="64" fill="#fff" stroke="#0a1f3d" stroke-width="3" paint-order="stroke">10</text><ellipse cx="1254" cy="484" rx="40" ry="10" fill="rgba(0,0,0,.18)"/><use href="#fbBall" x="1206" y="393" width="90" height="90"/></svg>
+  <svg class="hlogo" viewBox="0 0 620 190" role="img" aria-label="Fut-ball"><g transform="translate(22 0) skewX(-8)"><rect x="20" y="112" width="560" height="44" rx="16" fill="#2f9bf0" stroke="#0a1f3d" stroke-width="5"/><rect x="30" y="118" width="540" height="12" rx="6" fill="#fff" opacity=".28"/></g><text x="52" y="136" font-family="Arial Black,Impact,Helvetica,sans-serif" font-weight="900" font-style="italic" font-size="128" fill="#fff" stroke="#0a1f3d" stroke-width="14" stroke-linejoin="round" paint-order="stroke" letter-spacing="-2">Fut-ball</text></svg>
+  <button id="homeHelp" type="button"><span class="q" aria-hidden="true">?</span>Cómo jugar</button>
   <nav class="hmenu" aria-label="Menú principal">
-    <button id="homeOnline" class="hbar main" type="button" data-info="Juega salas públicas o privadas con amigos y bots en tiempo real."><span>⚽ ONLINE</span></button>
-    <button id="homeCareer" class="hbar sec" type="button" data-info="Elige tu club de Primera División, disputa las 16 fechas y pelea por el título en los Playoffs."><span>🏆 MODO CARRERA</span></button>
+    <button id="homeOnline" class="hbar main" type="button" data-info="Elegí tu equipo favorito y llevalo hasta la gloria máxima."><svg class="hico" viewBox="0 0 100 100" aria-hidden="true"><use href="#fbBall"/></svg><span>JUGAR ONLINE</span></button>
+    <button id="homeCareer" class="hbar sec" type="button"><span>MODO CARRERA</span></button>
   </nav>
-  <div class="hinfo" role="status" aria-live="polite"><span class="ic" aria-hidden="true">i</span><span id="homeInfo">Selecciona una opción para continuar.</span></div>
+  <div class="hinfo" role="status" aria-live="polite"><span class="ic" aria-hidden="true">i</span><span id="homeInfo">Selecciona una opción para continuar</span></div>
 </div>
 
 <div id="career-screen" class="screen">
@@ -2062,7 +2066,7 @@ let last=performance.now(),acc=0;
 <script>
 /* ===== 🏠 Pantalla Principal · solo navegación entre pantallas (no toca lógica de juego/red) ===== */
 (()=>{
- const DEF='Selecciona una opción para continuar.',info=$('homeInfo');
+ const DEF='Selecciona una opción para continuar',info=$('homeInfo');
  const go=id=>{if(typeof show==='function')show(id);else document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id))};
  const setInfo=t=>{info.textContent=t||DEF};
  document.querySelectorAll('#screen-home .hbar').forEach(b=>{

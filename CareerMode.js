@@ -875,8 +875,40 @@ body.careerOn #chat{background:transparent!important;border:none!important;point
   $('cmCont1').onclick=()=>{S=loadSave();if(S)openHub('next')};
  }
 
+ /* ------------------------------------------------------------------
+  Portada · botón MODO CARRERA (solo UI: estilo + barra de info; no toca lógica)
+  ------------------------------------------------------------------ */
+ const START_INFO='Convertite en un crack y llevá a tu equipo favorito hasta la cima.',START_DEF='Selecciona una opción para continuar';
+ function injectStartButton(){
+  const btn=$('homeCareer');if(!btn)return;
+  if(!$('cmStartCSS')){
+   const s=document.createElement('style');s.id='cmStartCSS';
+   s.textContent=`
+#screen-home #homeCareer.hbar{width:100%;height:var(--h);padding:0 6%;gap:5%;border:2.5px solid #0a1f3d;border-radius:clamp(18px,3.6vh,32px);
+ background:linear-gradient(180deg,#26804c 0%,#1b5e36 100%);
+ box-shadow:inset 0 0 0 2px #d4af37,0 5px 0 rgba(0,0,0,.38),0 8px 10px rgba(0,0,0,.18)}
+#screen-home #homeCareer.hbar:hover,#screen-home #homeCareer.hbar:focus-visible{box-shadow:inset 0 0 0 2px #d4af37,0 7px 0 rgba(0,0,0,.38),0 10px 12px rgba(0,0,0,.2)}
+#screen-home #homeCareer.hbar:active{box-shadow:inset 0 0 0 2px #d4af37,0 2px 0 rgba(0,0,0,.38)}
+#screen-home #homeCareer .hico{height:72%;width:auto;aspect-ratio:1;flex:none;display:block;overflow:visible}
+#screen-home #homeCareer .hsub{display:none!important}`;
+   document.head.appendChild(s);
+  }
+  if(btn.dataset.cmStart)return;btn.dataset.cmStart='1';
+  btn.removeAttribute('data-info');
+  btn.innerHTML='<svg class="hico" viewBox="0 0 64 64" aria-hidden="true">'
+   +'<path d="M18 14H8c0 10 4 16 11 17M46 14h10c0 10-4 16-11 17" fill="none" stroke="#d4af37" stroke-width="4" stroke-linecap="round"/>'
+   +'<path d="M17 6h30v18c0 10-6 17-15 17S17 34 17 24z" fill="#f2c230" stroke="#8a6a10" stroke-width="2.5" stroke-linejoin="round"/>'
+   +'<path d="M23 11v13c0 6 3 10 7 12" fill="none" stroke="#fff3b0" stroke-width="3" stroke-linecap="round" opacity=".8"/>'
+   +'<rect x="28" y="41" width="8" height="9" fill="#d4af37" stroke="#8a6a10" stroke-width="2"/>'
+   +'<rect x="19" y="50" width="26" height="9" rx="2.5" fill="#f2c230" stroke="#8a6a10" stroke-width="2.5"/></svg><span>MODO CARRERA</span>';
+  const info=$('homeInfo');
+  const on=()=>{if(info)info.textContent=START_INFO},off=()=>{if(info)info.textContent=START_DEF};
+  btn.addEventListener('mouseenter',on);btn.addEventListener('focus',on);
+  btn.addEventListener('mouseleave',off);btn.addEventListener('blur',off);
+ }
+
  function init(){
-  injectCSS();ensureDom();wireGlobal();
+  injectCSS();injectStartButton();ensureDom();wireGlobal();
   const hc=$('homeCareer');
   if(hc)hc.addEventListener('click',()=>setTimeout(injectContinue,0));
   const root=$('career-root');
