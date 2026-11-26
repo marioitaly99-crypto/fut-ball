@@ -2166,30 +2166,43 @@ let last=performance.now(),acc=0;
  const VOL=.5,FADE_MS=900,SHOW_MS=5000;
  const g=id=>document.getElementById(id);
  const au=new Audio();au.preload='auto';au.volume=0;
- let TRACKS=[],order=[],pos=-1,cur=null,last=null,unlocked=false,dead=false,fails=0,fadeT=null,shownFor=null,hideT=null;
+ let TRACKS=[],order=[],pos=-1,cur=null,last=null,unlocked=false,dead=false,fails=0,fadeT=null,shownFor=null,hideT=null,userPaused=false,musicMuted=false,hover=false,hist=[];
 
  /* --- CSS de la cápsula --- */
  const st=document.createElement('style');
  st.textContent=`
 #npCap{position:fixed;right:calc(env(safe-area-inset-right,0px) + 14px);bottom:calc(env(safe-area-inset-bottom,0px) + 6px);z-index:250;display:flex;align-items:center;gap:12px;
- max-width:calc(100vw - 28px);padding:6px 20px 6px 8px;border-radius:12px;background:#1e2329;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.45);
+ max-width:calc(100vw - 28px);padding:6px 12px 6px 8px;border-radius:12px;background:#1e2329;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.45);
  transform:translateX(130%);opacity:0;pointer-events:none;transition:transform .45s ease,opacity .45s ease}
-#npCap.show{transform:translateX(0);opacity:1}
+#npCap.show{transform:translateX(0);opacity:1;pointer-events:auto}
 #npCap .npArt{position:relative;flex:none;width:76px;height:44px}
 #npCap .npCover{position:absolute;left:0;top:0;z-index:2;width:44px;height:44px;border-radius:5px;display:flex;align-items:center;justify-content:center;
  background:linear-gradient(135deg,#1d86c9,#185a32);border:2px solid #facc15;box-sizing:border-box;font:900 italic .8rem/1 Arial,sans-serif;letter-spacing:.04em;color:#fff;text-shadow:0 1px 2px #000}
 #npCap .npDisc{position:absolute;left:30px;top:2px;z-index:1;width:40px;height:40px;border-radius:50%;
  background:radial-gradient(circle,#facc15 0 12%,#111 13% 16%,#2b3038 17% 40%,#111 41% 44%,#2b3038 45% 70%,#111 71% 100%);
- box-shadow:inset 0 0 0 1.5px #3a414b;animation:spin 3s linear infinite}
+ box-shadow:inset 0 0 0 1.5px #3a414b;animation:spin 3s linear infinite;animation-play-state:running}
+#npCap.npOff .npDisc{animation-play-state:paused}
 #npCap .npDisc::after{content:"";position:absolute;left:46%;top:6%;width:8%;height:30%;border-radius:4px;background:rgba(255,255,255,.28)}
 @keyframes spin{to{transform:rotate(360deg)}}
-#npCap .npTxt{min-width:0;display:flex;flex-direction:column;gap:1px;line-height:1.2}
+#npCap .npTxt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px;line-height:1.2}
 #npCap .npTitle{font-size:.95rem;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#npCap .npAlbum{font-size:.74rem;font-weight:700;color:#facc15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}`;
+#npCap .npAlbum{font-size:.74rem;font-weight:700;color:#facc15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#npCap .npBtns{flex:none;display:flex;align-items:center;gap:4px}
+#npCap .npBtn,#npTab{appearance:none;-webkit-appearance:none;margin:0;padding:0;cursor:pointer;color:#fff;font:700 .78rem/1 Arial,sans-serif;display:flex;align-items:center;justify-content:center;
+ background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);box-shadow:none;text-shadow:none;transform:none}
+#npCap .npBtn{flex:none;width:28px;height:28px;min-width:0;min-height:0;box-sizing:border-box;border-radius:50%}
+#npCap .npBtn:hover,#npTab:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.4);filter:none}
+#npCap .npBtn:active{background:rgba(255,255,255,.3)}
+#npTab{position:fixed;z-index:249;right:calc(env(safe-area-inset-right,0px) + 14px);bottom:calc(env(safe-area-inset-bottom,0px) + clamp(34px,7.4vh,58px) + 8px);
+ width:30px;height:26px;min-width:0;min-height:0;box-sizing:border-box;border-radius:13px;background:rgba(30,35,41,.72);font-size:.95rem;opacity:.7;
+ display:none;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+#npTab.on{display:flex}#npTab:hover{opacity:1}`;
  document.head.appendChild(st);
  const cap=document.createElement('div');cap.id='npCap';cap.setAttribute('role','status');cap.setAttribute('aria-live','polite');
- cap.innerHTML='<div class="npArt"><div class="npCover">OST</div><div class="npDisc"></div></div><div class="npTxt"><span class="npTitle"></span><span class="npAlbum"></span></div>';
+ cap.innerHTML='<div class="npArt"><div class="npCover">OST</div><div class="npDisc"></div></div><div class="npTxt"><span class="npTitle"></span><span class="npAlbum"></span></div><div class="npBtns"><button type="button" class="npBtn" data-a="prev" aria-label="Anterior" title="Anterior">⏮</button><button type="button" class="npBtn" data-a="pause" aria-label="Pausa" title="Pausa / Reanudar">⏸</button><button type="button" class="npBtn" data-a="next" aria-label="Siguiente" title="Siguiente">⏭</button><button type="button" class="npBtn" data-a="mute" aria-label="Silenciar música" title="Mute música">🔊</button></div>';
  document.body.appendChild(cap);
+ const tab=document.createElement('button');tab.id='npTab';tab.type='button';tab.textContent='♪';tab.setAttribute('aria-label','Mostrar reproductor de música');tab.title='Música';document.body.appendChild(tab);
+ cap.querySelectorAll('button').forEach(b=>b.tabIndex=-1);tab.tabIndex=-1; /* sin foco: Espacio/Enter del juego nunca activan estos botones */
  const q=s=>cap.querySelector(s);
 
  /* --- lectura de la playlist: "Nombre del tema - Album.mp3" → tema y álbum (sin guion: álbum por defecto) --- */
@@ -2208,7 +2221,16 @@ let last=performance.now(),acc=0;
  /* --- estado --- */
  const inGame=()=>{const s=g('screen-game');return !!(s&&s.classList.contains('active'))};
  const isMuted=()=>{const m=g('mute');return !!(m&&m.textContent.indexOf('🔇')>-1)};
- const shouldPlay=()=>unlocked&&!dead&&TRACKS.length>0&&!inGame()&&!isMuted();
+ const shouldPlay=()=>unlocked&&!dead&&TRACKS.length>0&&!inGame()&&!isMuted()&&!userPaused&&!musicMuted;
+ const bPause=q('[data-a=pause]'),bMute=q('[data-a=mute]');
+ function ui(){ /* disco, iconos y pestaña ♪ según el estado */
+  cap.classList.toggle('npOff',userPaused||musicMuted||isMuted());
+  bPause.textContent=userPaused?'▶':'⏸';bMute.textContent=musicMuted?'🔇':'🔊';
+  bPause.title=userPaused?'Reanudar':'Pausa';bMute.title=musicMuted?'Activar música':'Mute música';
+  tab.classList.toggle('on',!inGame()&&!dead&&TRACKS.length>0&&!cap.classList.contains('show'));
+ }
+ function setShown(v){cap.classList.toggle('show',!!v);ui()}
+ function armHide(){clearTimeout(hideT);if(!hover)hideT=setTimeout(()=>setShown(false),SHOW_MS)} /* auto-ocultado 5 s; en pausa mientras el cursor está encima */
 
  function shuffle(){
   order=TRACKS.map((_,i)=>i);
@@ -2225,26 +2247,51 @@ let last=performance.now(),acc=0;
  function showCap(t){
   if(!t||shownFor===t||inGame())return;shownFor=t;
   q('.npTitle').textContent=t.title||'';q('.npAlbum').textContent=ALBUM;
-  cap.classList.remove('show');void cap.offsetWidth;cap.classList.add('show');
-  clearTimeout(hideT);hideT=setTimeout(()=>cap.classList.remove('show'),SHOW_MS);
+  cap.classList.remove('show');void cap.offsetWidth;setShown(true);armHide();
+ }
+ function playTrack(t){
+  cur=t;last=t;au.src=enc(t.file);au.volume=0;shownFor=null;q('.npTitle').textContent=t.title||'';
+  if(shouldPlay()){au.play().catch(()=>{});fadeTo(VOL,FADE_MS)}else au.pause(); /* silenciada/en pausa: queda cargada y suena al reanudar */
  }
  function nextTrack(){
   if(!order.length||pos+1>=order.length)shuffle();
-  pos++;cur=TRACKS[order[pos]];last=cur;
-  au.src=enc(cur.file);au.volume=0;shownFor=null;
-  au.play().catch(()=>{});
-  if(shouldPlay())fadeTo(VOL,FADE_MS);
+  if(cur){hist.push(cur);if(hist.length>40)hist.shift()}
+  pos++;playTrack(TRACKS[order[pos]]);
+ }
+ function prevTrack(){
+  if(!cur||au.currentTime>3||!hist.length){if(cur){au.currentTime=0;shownFor=null;if(shouldPlay())au.play().catch(()=>{})}else nextTrack();return}
+  playTrack(hist.pop());
  }
  function sync(){
+  if(inGame()){clearTimeout(hideT);setShown(false)}
   if(shouldPlay()){
    if(!au.src||au.ended)nextTrack();
    else if(au.paused){const p=au.play();if(p&&p.catch)p.catch(()=>{})}
    fadeTo(VOL,FADE_MS);
   }else if(!au.paused){
-   clearTimeout(hideT);cap.classList.remove('show');
    fadeTo(0,FADE_MS,()=>{if(!shouldPlay())au.pause()});
   }
+  ui();
  }
+ /* --- controles del pop-up --- */
+ const act={
+  prev:()=>{userPaused=false;prevTrack()},
+  next:()=>{userPaused=false;nextTrack()},
+  pause:()=>{userPaused=!userPaused;if(userPaused){clearInterval(fadeT);fadeT=null;au.pause()}},
+  mute:()=>{musicMuted=!musicMuted;if(musicMuted){clearInterval(fadeT);fadeT=null;au.pause()}}
+ };
+ cap.querySelectorAll('.npBtn').forEach(b=>{
+  b.addEventListener('mousedown',e=>e.preventDefault()); /* no roba el foco */
+  b.addEventListener('click',e=>{e.stopPropagation();unlock();act[b.dataset.a]();sync();b.blur();armHide()});
+ });
+ cap.addEventListener('mouseenter',()=>{hover=true;clearTimeout(hideT)});
+ cap.addEventListener('mouseleave',()=>{hover=false;if(cap.classList.contains('show'))armHide()});
+ document.addEventListener('pointerdown',e=>{if(hover&&!cap.contains(e.target)){hover=false;if(cap.classList.contains('show'))armHide()}},true); /* táctil: evita que quede "pegado" */
+ tab.addEventListener('mousedown',e=>e.preventDefault());
+ tab.addEventListener('click',e=>{e.stopPropagation();unlock();if(inGame())return;
+  if(!cur&&shouldPlay())sync();
+  q('.npTitle').textContent=cur?cur.title:'';q('.npAlbum').textContent=ALBUM;
+  hover=false;setShown(true);armHide();tab.blur()});
 
  /* --- eventos del audio --- */
  au.addEventListener('playing',()=>{fails=0;if(shouldPlay())showCap(cur)});
@@ -2256,12 +2303,13 @@ let last=performance.now(),acc=0;
  });
 
  /* --- disparadores: primer clic, cambio de pantalla, mute --- */
- const unlock=()=>{if(unlocked)return;unlocked=true;sync()};
+ function unlock(){if(unlocked)return;unlocked=true;sync()}
  document.addEventListener('pointerdown',unlock,{capture:true,once:true});
  document.addEventListener('keydown',unlock,{capture:true,once:true});
  const mo=new MutationObserver(sync);
  document.querySelectorAll('.screen').forEach(s=>mo.observe(s,{attributes:true,attributeFilter:['class']}));
  const mb=g('mute');if(mb)mb.addEventListener('click',()=>setTimeout(sync,0));
+ ui();
 
  /* --- carga de music/playlist.json (si falta o no se puede leer, el módulo queda inactivo) --- */
  fetch(PLAYLIST_URL,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json()})
