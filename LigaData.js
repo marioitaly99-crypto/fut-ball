@@ -12,7 +12,7 @@
 (function(){
  const TEAMS=[
  {
-  "squadStatus": "sin-verificar",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "boca",
   "name": "Boca Juniors",
   "shortName": "BOC",
@@ -119,11 +119,29 @@
     "pos": "FWD",
     "name": "ZEBALLOS",
     "starter": false
+   },
+   {
+    "number": 17,
+    "pos": "DEF",
+    "name": "ADVÍNCULA",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "DEF",
+    "name": "FABRA",
+    "starter": false
+   },
+   {
+    "number": 4,
+    "pos": "DEF",
+    "name": "ANSELMINO",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "sin-verificar",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "river",
   "name": "River Plate",
   "shortName": "RIV",
@@ -230,11 +248,29 @@
     "pos": "FWD",
     "name": "SUBIABRE",
     "starter": false
+   },
+   {
+    "number": 2,
+    "pos": "DEF",
+    "name": "MAMMANA",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "MID",
+    "name": "ACUÑA",
+    "starter": false
+   },
+   {
+    "number": 5,
+    "pos": "MID",
+    "name": "KRANEVITTER",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "sin-verificar",
+  "squadStatus": "2026/27-lista-usuario",
   "id": "independiente",
   "name": "Independiente",
   "shortName": "IND",
@@ -273,25 +309,19 @@
    {
     "number": 1,
     "pos": "GK",
-    "name": "REY",
+    "name": "MELE",
     "starter": true
    },
    {
-    "number": 3,
+    "number": 2,
     "pos": "DEF",
-    "name": "LOMÓNACO",
+    "name": "VALDEZ",
     "starter": true
    },
    {
     "number": 4,
     "pos": "DEF",
-    "name": "BUSTOS",
-    "starter": true
-   },
-   {
-    "number": 20,
-    "pos": "MID",
-    "name": "LOYOLA",
+    "name": "GODOY",
     "starter": true
    },
    {
@@ -301,51 +331,75 @@
     "starter": true
    },
    {
-    "number": 9,
-    "pos": "FWD",
-    "name": "ÁVALOS",
+    "number": 8,
+    "pos": "MID",
+    "name": "MEZA",
     "starter": true
    },
    {
-    "number": 25,
+    "number": 9,
+    "pos": "FWD",
+    "name": "ABALDO",
+    "starter": true
+   },
+   {
+    "number": 12,
     "pos": "GK",
-    "name": "SOSA",
+    "name": "REY",
     "starter": false
    },
    {
-    "number": 2,
+    "number": 3,
     "pos": "DEF",
-    "name": "VALDEZ",
+    "name": "ZABALA",
+    "starter": false
+   },
+   {
+    "number": 6,
+    "pos": "DEF",
+    "name": "CABRAL",
+    "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "ARIAS",
+    "starter": false
+   },
+   {
+    "number": 15,
+    "pos": "DEF",
+    "name": "MILLÁN",
     "starter": false
    },
    {
     "number": 10,
     "pos": "MID",
-    "name": "MONTIEL",
+    "name": "ÁVILA",
     "starter": false
    },
    {
-    "number": 15,
+    "number": 14,
     "pos": "MID",
-    "name": "ZAMORA",
+    "name": "CALDERÓN",
+    "starter": false
+   },
+   {
+    "number": 16,
+    "pos": "MID",
+    "name": "PARMO",
     "starter": false
    },
    {
     "number": 11,
     "pos": "FWD",
-    "name": "GIMÉNEZ",
-    "starter": false
-   },
-   {
-    "number": 17,
-    "pos": "FWD",
-    "name": "ORTEGA",
+    "name": "MONTIEL",
     "starter": false
    }
   ]
  },
  {
-  "squadStatus": "sin-verificar",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "racing",
   "name": "Racing Club",
   "shortName": "RAC",
@@ -452,11 +506,29 @@
     "pos": "FWD",
     "name": "CONECHNY",
     "starter": false
+   },
+   {
+    "number": 2,
+    "pos": "DEF",
+    "name": "MURA",
+    "starter": false
+   },
+   {
+    "number": 22,
+    "pos": "DEF",
+    "name": "MARTIRENA",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "MID",
+    "name": "SOSA",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "sin-verificar",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "sanlorenzo",
   "name": "San Lorenzo",
   "shortName": "SLO",
@@ -563,11 +635,29 @@
     "pos": "FWD",
     "name": "GÓMEZ",
     "starter": false
+   },
+   {
+    "number": 6,
+    "pos": "DEF",
+    "name": "GATTONI",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "MID",
+    "name": "PEÑA BIAFORE",
+    "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "CERUTTI",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "sin-verificar",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "huracan",
   "name": "Huracán",
   "shortName": "HUR",
@@ -674,11 +764,29 @@
     "pos": "FWD",
     "name": "ZALAZAR",
     "starter": false
+   },
+   {
+    "number": 6,
+    "pos": "DEF",
+    "name": "MEROLLA",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "MID",
+    "name": "CECCHINI",
+    "starter": false
+   },
+   {
+    "number": 15,
+    "pos": "MID",
+    "name": "CARDOZO",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "sin-verificar",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "estudiantes",
   "name": "Estudiantes (LP)",
   "shortName": "EST",
@@ -785,11 +893,29 @@
     "pos": "FWD",
     "name": "GUZMÁN",
     "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "MANCUSO",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "MID",
+    "name": "ASCACÍBAR",
+    "starter": false
+   },
+   {
+    "number": 15,
+    "pos": "DEF",
+    "name": "NÚÑEZ",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "sin-verificar",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "gimnasia",
   "name": "Gimnasia (LP)",
   "shortName": "GLP",
@@ -896,11 +1022,29 @@
     "pos": "FWD",
     "name": "SALVIO",
     "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "MID",
+    "name": "CONTÍN",
+    "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "ROSALES",
+    "starter": false
+   },
+   {
+    "number": 15,
+    "pos": "DEF",
+    "name": "ALVARADO",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "newells",
   "name": "Newell's Old Boys",
   "shortName": "NOB",
@@ -1007,11 +1151,29 @@
     "pos": "FWD",
     "name": "HERRERA",
     "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "BERNABEI",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "MID",
+    "name": "CORDERO",
+    "starter": false
+   },
+   {
+    "number": 15,
+    "pos": "DEF",
+    "name": "LOZANO",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "sin-verificar",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "rosario",
   "name": "Rosario Central",
   "shortName": "ROS",
@@ -1118,11 +1280,29 @@
     "pos": "FWD",
     "name": "OVIEDO",
     "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "SANDEZ",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "MID",
+    "name": "GAMBA",
+    "starter": false
+   },
+   {
+    "number": 15,
+    "pos": "DEF",
+    "name": "MALLO",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "sin-verificar",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "talleres",
   "name": "Talleres (C)",
   "shortName": "TAL",
@@ -1167,7 +1347,7 @@
    {
     "number": 2,
     "pos": "DEF",
-    "name": "PORTILLO",
+    "name": "CATALÁN",
     "starter": true
    },
    {
@@ -1229,11 +1409,29 @@
     "pos": "FWD",
     "name": "VALOYES",
     "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "MORENO",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "MID",
+    "name": "DEPIETRI",
+    "starter": false
+   },
+   {
+    "number": 15,
+    "pos": "MID",
+    "name": "ORTEGOZA",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "sin-verificar",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "belgrano",
   "name": "Belgrano (C)",
   "shortName": "BEL",
@@ -1340,11 +1538,29 @@
     "pos": "FWD",
     "name": "VALDÉS",
     "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "MID",
+    "name": "VÁZQUEZ",
+    "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "MID",
+    "name": "NOVILLO",
+    "starter": false
+   },
+   {
+    "number": 15,
+    "pos": "DEF",
+    "name": "SUÁREZ",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "sin-verificar",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "lanus",
   "name": "Lanús",
   "shortName": "LAN",
@@ -1451,11 +1667,29 @@
     "pos": "FWD",
     "name": "BELMONTE",
     "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "ESQUIVEL",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "DEF",
+    "name": "LOAIZA",
+    "starter": false
+   },
+   {
+    "number": 15,
+    "pos": "MID",
+    "name": "MORENO",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "banfield",
   "name": "Banfield",
   "shortName": "BAN",
@@ -1562,11 +1796,29 @@
     "pos": "FWD",
     "name": "VALDEZ",
     "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "CORONEL",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "MID",
+    "name": "ESCALANTE",
+    "starter": false
+   },
+   {
+    "number": 15,
+    "pos": "DEF",
+    "name": "OLIVERA",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "velez",
   "name": "Vélez Sarsfield",
   "shortName": "VEL",
@@ -1673,11 +1925,29 @@
     "pos": "FWD",
     "name": "CASTRO",
     "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "GÓMEZ",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "DEF",
+    "name": "QUIRÓS",
+    "starter": false
+   },
+   {
+    "number": 15,
+    "pos": "MID",
+    "name": "AQUINO",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "sin-verificar",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "tigre",
   "name": "Tigre",
   "shortName": "TIG",
@@ -1784,11 +2054,29 @@
     "pos": "FWD",
     "name": "CAMPOS",
     "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "PREDIGER",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "MID",
+    "name": "BLANCO",
+    "starter": false
+   },
+   {
+    "number": 15,
+    "pos": "MID",
+    "name": "MORALES",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "argentinos",
   "name": "Argentinos Juniors",
   "shortName": "ARG",
@@ -1833,7 +2121,7 @@
    {
     "number": 2,
     "pos": "DEF",
-    "name": "LÓPEZ",
+    "name": "SÁNCHEZ",
     "starter": true
    },
    {
@@ -1845,7 +2133,7 @@
    {
     "number": 5,
     "pos": "MID",
-    "name": "RODRÍGUEZ",
+    "name": "MAC ALLISTER",
     "starter": true
    },
    {
@@ -1863,23 +2151,41 @@
    {
     "number": 12,
     "pos": "GK",
-    "name": "ANDRADA",
+    "name": "VILLALBA",
     "starter": false
    },
    {
     "number": 3,
     "pos": "DEF",
-    "name": "ROMERO",
+    "name": "AVILÉS",
+    "starter": false
+   },
+   {
+    "number": 6,
+    "pos": "DEF",
+    "name": "LÓPEZ",
+    "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "VALENZUELA",
     "starter": false
    },
    {
     "number": 8,
     "pos": "MID",
-    "name": "ORTIZ",
+    "name": "OROZ",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
+    "pos": "MID",
+    "name": "BARROS",
+    "starter": false
+   },
+   {
+    "number": 16,
     "pos": "MID",
     "name": "LUCERO",
     "starter": false
@@ -1893,13 +2199,13 @@
    {
     "number": 7,
     "pos": "FWD",
-    "name": "BARROS",
+    "name": "ROMERO",
     "starter": false
    }
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "platense",
   "name": "Platense",
   "shortName": "PLA",
@@ -1938,25 +2244,25 @@
    {
     "number": 1,
     "pos": "GK",
-    "name": "BRAVO",
+    "name": "ARCE",
     "starter": true
    },
    {
     "number": 2,
     "pos": "DEF",
-    "name": "GÓMEZ",
+    "name": "SUSO",
     "starter": true
    },
    {
     "number": 4,
     "pos": "DEF",
-    "name": "PÉREZ",
+    "name": "DEJESÚS",
     "starter": true
    },
    {
     "number": 5,
     "pos": "MID",
-    "name": "VALDEZ",
+    "name": "BALDASSARRA",
     "starter": true
    },
    {
@@ -1984,15 +2290,33 @@
     "starter": false
    },
    {
-    "number": 8,
-    "pos": "MID",
+    "number": 6,
+    "pos": "DEF",
+    "name": "VALDEZ",
+    "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
     "name": "ROJAS",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 8,
+    "pos": "MID",
+    "name": "CÁCERES",
+    "starter": false
+   },
+   {
+    "number": 14,
     "pos": "MID",
     "name": "MARTÍNEZ",
+    "starter": false
+   },
+   {
+    "number": 16,
+    "pos": "MID",
+    "name": "PÉREZ",
     "starter": false
    },
    {
@@ -2004,13 +2328,13 @@
    {
     "number": 7,
     "pos": "FWD",
-    "name": "CÁCERES",
+    "name": "GÓMEZ",
     "starter": false
    }
   ]
  },
  {
-  "squadStatus": "sin-verificar",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "union",
   "name": "Unión (SF)",
   "shortName": "UNI",
@@ -2117,11 +2441,29 @@
     "pos": "FWD",
     "name": "ROSALES",
     "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "CALDERÓN",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "MID",
+    "name": "PITTÓN",
+    "starter": false
+   },
+   {
+    "number": 15,
+    "pos": "DEF",
+    "name": "ACOSTA",
+    "starter": false
    }
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "instituto",
   "name": "Instituto (C)",
   "shortName": "INS",
@@ -2206,15 +2548,33 @@
     "starter": false
    },
    {
+    "number": 6,
+    "pos": "DEF",
+    "name": "PEREYRA",
+    "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "FERREYRA",
+    "starter": false
+   },
+   {
     "number": 8,
     "pos": "MID",
     "name": "ROMERO",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "MID",
     "name": "ORTIZ",
+    "starter": false
+   },
+   {
+    "number": 16,
+    "pos": "MID",
+    "name": "GUTIÉRREZ",
     "starter": false
    },
    {
@@ -2232,7 +2592,7 @@
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "atletico_tucuman",
   "name": "Atlético Tucumán",
   "shortName": "ATU",
@@ -2283,7 +2643,7 @@
    {
     "number": 4,
     "pos": "DEF",
-    "name": "ORTIZ",
+    "name": "BIANCHI",
     "starter": true
    },
    {
@@ -2301,7 +2661,7 @@
    {
     "number": 9,
     "pos": "FWD",
-    "name": "BENEDETTO",
+    "name": "HEREDIA",
     "starter": true
    },
    {
@@ -2317,33 +2677,51 @@
     "starter": false
    },
    {
-    "number": 8,
-    "pos": "MID",
+    "number": 6,
+    "pos": "DEF",
     "name": "SOSA",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 13,
+    "pos": "DEF",
+    "name": "ORTIZ",
+    "starter": false
+   },
+   {
+    "number": 8,
+    "pos": "MID",
+    "name": "ACOSTA",
+    "starter": false
+   },
+   {
+    "number": 14,
     "pos": "MID",
     "name": "PÉREZ",
     "starter": false
    },
    {
+    "number": 16,
+    "pos": "MID",
+    "name": "GUZMÁN",
+    "starter": false
+   },
+   {
     "number": 11,
     "pos": "FWD",
-    "name": "HEREDIA",
+    "name": "CASTRO",
     "starter": false
    },
    {
     "number": 7,
     "pos": "FWD",
-    "name": "CASTRO",
+    "name": "BENEDETTO",
     "starter": false
    }
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-sin-verificar",
   "id": "central_cordoba",
   "name": "Central Córdoba (SdE)",
   "shortName": "CCO",
@@ -2400,7 +2778,7 @@
    {
     "number": 5,
     "pos": "MID",
-    "name": "GARCÍA",
+    "name": "CORTÉS",
     "starter": true
    },
    {
@@ -2428,15 +2806,33 @@
     "starter": false
    },
    {
-    "number": 8,
-    "pos": "MID",
-    "name": "CORTÉS",
+    "number": 6,
+    "pos": "DEF",
+    "name": "GÓMEZ",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 13,
+    "pos": "DEF",
+    "name": "BRAVO",
+    "starter": false
+   },
+   {
+    "number": 8,
     "pos": "MID",
     "name": "PÉREZ",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "MID",
+    "name": "GARCÍA",
+    "starter": false
+   },
+   {
+    "number": 16,
+    "pos": "MID",
+    "name": "LÓPEZ",
     "starter": false
    },
    {
@@ -2454,7 +2850,7 @@
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-relleno",
   "id": "gimnasia_mza",
   "name": "Gimnasia (Mendoza)",
   "shortName": "GME",
@@ -2539,15 +2935,33 @@
     "starter": false
    },
    {
+    "number": 6,
+    "pos": "DEF",
+    "name": "DÍAZ",
+    "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "FUNES",
+    "starter": false
+   },
+   {
     "number": 8,
     "pos": "MID",
     "name": "ORTIZ",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "MID",
     "name": "LUNA",
+    "starter": false
+   },
+   {
+    "number": 16,
+    "pos": "MID",
+    "name": "MORÁN",
     "starter": false
    },
    {
@@ -2565,7 +2979,7 @@
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-relleno",
   "id": "independiente_riv",
   "name": "Independiente Rivadavia",
   "shortName": "IRI",
@@ -2650,15 +3064,33 @@
     "starter": false
    },
    {
-    "number": 8,
-    "pos": "MID",
+    "number": 6,
+    "pos": "DEF",
     "name": "ROMERO",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 13,
+    "pos": "DEF",
+    "name": "AGUIRRE",
+    "starter": false
+   },
+   {
+    "number": 8,
     "pos": "MID",
     "name": "LUNA",
+    "starter": false
+   },
+   {
+    "number": 14,
+    "pos": "MID",
+    "name": "PAZ",
+    "starter": false
+   },
+   {
+    "number": 16,
+    "pos": "MID",
+    "name": "VEGA",
     "starter": false
    },
    {
@@ -2676,7 +3108,7 @@
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-relleno",
   "id": "defensa",
   "name": "Defensa y Justicia",
   "shortName": "DYJ",
@@ -2761,15 +3193,33 @@
     "starter": false
    },
    {
+    "number": 6,
+    "pos": "DEF",
+    "name": "IBÁÑEZ",
+    "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "RUIZ",
+    "starter": false
+   },
+   {
     "number": 8,
     "pos": "MID",
     "name": "LUNA",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "MID",
     "name": "PÉREZ",
+    "starter": false
+   },
+   {
+    "number": 16,
+    "pos": "MID",
+    "name": "GÓMEZ",
     "starter": false
    },
    {
@@ -2787,7 +3237,7 @@
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-relleno",
   "id": "barracas",
   "name": "Barracas Central",
   "shortName": "BAR",
@@ -2872,15 +3322,33 @@
     "starter": false
    },
    {
+    "number": 6,
+    "pos": "DEF",
+    "name": "IBÁÑEZ",
+    "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "VERA",
+    "starter": false
+   },
+   {
     "number": 8,
     "pos": "MID",
     "name": "LUNA",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "MID",
     "name": "PÉREZ",
+    "starter": false
+   },
+   {
+    "number": 16,
+    "pos": "MID",
+    "name": "GÓMEZ",
     "starter": false
    },
    {
@@ -2898,7 +3366,7 @@
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-relleno",
   "id": "sarmiento",
   "name": "Sarmiento (J)",
   "shortName": "SAR",
@@ -2983,15 +3451,33 @@
     "starter": false
    },
    {
+    "number": 6,
+    "pos": "DEF",
+    "name": "IBÁÑEZ",
+    "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "VERA",
+    "starter": false
+   },
+   {
     "number": 8,
     "pos": "MID",
     "name": "LUNA",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "MID",
     "name": "PÉREZ",
+    "starter": false
+   },
+   {
+    "number": 16,
+    "pos": "MID",
+    "name": "GÓMEZ",
     "starter": false
    },
    {
@@ -3009,7 +3495,7 @@
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-relleno",
   "id": "aldosivi",
   "name": "Aldosivi",
   "shortName": "ALD",
@@ -3094,15 +3580,33 @@
     "starter": false
    },
    {
+    "number": 6,
+    "pos": "DEF",
+    "name": "IBÁÑEZ",
+    "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "VERA",
+    "starter": false
+   },
+   {
     "number": 8,
     "pos": "MID",
     "name": "LUNA",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "MID",
     "name": "PÉREZ",
+    "starter": false
+   },
+   {
+    "number": 16,
+    "pos": "MID",
+    "name": "GÓMEZ",
     "starter": false
    },
    {
@@ -3120,7 +3624,7 @@
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-relleno",
   "id": "riestra",
   "name": "Deportivo Riestra",
   "shortName": "RIE",
@@ -3205,15 +3709,33 @@
     "starter": false
    },
    {
+    "number": 6,
+    "pos": "DEF",
+    "name": "IBÁÑEZ",
+    "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "VERA",
+    "starter": false
+   },
+   {
     "number": 8,
     "pos": "MID",
     "name": "LUNA",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "MID",
     "name": "PÉREZ",
+    "starter": false
+   },
+   {
+    "number": 16,
+    "pos": "MID",
+    "name": "GÓMEZ",
     "starter": false
    },
    {
@@ -3231,7 +3753,7 @@
   ]
  },
  {
-  "squadStatus": "relleno",
+  "squadStatus": "2026/27-relleno",
   "id": "estudiantes_rc",
   "name": "Estudiantes (Río Cuarto)",
   "shortName": "ERC",
@@ -3316,20 +3838,32 @@
     "starter": false
    },
    {
+    "number": 6,
+    "pos": "DEF",
+    "name": "IBÁÑEZ",
+    "starter": false
+   },
+   {
+    "number": 13,
+    "pos": "DEF",
+    "name": "VERA",
+    "starter": false
+   },
+   {
     "number": 8,
     "pos": "MID",
     "name": "LUNA",
     "starter": false
    },
    {
-    "number": 6,
+    "number": 14,
     "pos": "MID",
     "name": "PÉREZ",
     "starter": false
    },
    {
     "number": 50,
-    "pos": "FWD",
+    "pos": "MID",
     "name": "BAJAMICH",
     "starter": false
    },
@@ -3337,6 +3871,12 @@
     "number": 32,
     "pos": "FWD",
     "name": "GALVÁN",
+    "starter": false
+   },
+   {
+    "number": 7,
+    "pos": "FWD",
+    "name": "GÓMEZ",
     "starter": false
    }
   ]

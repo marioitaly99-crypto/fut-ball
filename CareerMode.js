@@ -74,7 +74,7 @@
  }
  function newSquad(teamId,num){
   const r=D.resolverPlantelCancha(teamId,num),info={};
-  const st=r.starters.slice(0,5),bn=r.subs.slice(0,6); /* el 6.º titular del club es el lugar de tu jugador */
+  const st=r.starters.slice(0,5),bn=r.subs.slice(0,9); /* banco: hasta 9 suplentes; el 6.º titular del club es el lugar de tu jugador */
   const starters=[],bench=[];
   st.forEach((p,i)=>{const id='s'+i;info[id]={id,name:p.name,number:p.number,pos:p.pos,stam:100,ycTotal:0,susp:0};starters.push(id)});
   bn.forEach((p,i)=>{const id='b'+i;info[id]={id,name:p.name,number:p.number,pos:p.pos,stam:100,ycTotal:0,susp:0};bench.push(id)});
@@ -581,17 +581,37 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   const ic=m.kind==='C'?'🔥 ':m.kind==='I'?'🌐 ':'';
   return '<div class="gm'+(mine?' me':'')+'"><span class="h">'+E(h.shortName)+'<span class="cmBd">'+badge(h)+'</span></span><b>'+ic+sc+'</b><span class="a"><span class="cmBd">'+badge(a)+'</span>'+E(a.shortName)+'</span></div>';
  }
+ /* Ícono cartoon vector del trofeo (copa dorada con asas, base y estrella) */
+ function trophySvg(){
+  return '<svg class="cmTro" viewBox="0 0 64 64" width="26" height="26" style="vertical-align:middle;margin-right:4px" aria-hidden="true">'+
+   '<path d="M18 14H8c0 10 5 15 10 15M46 14h10c0 10-5 15-10 15" fill="none" stroke="#0a1f3d" stroke-width="9" stroke-linecap="round"/>'+
+   '<path d="M18 14H8c0 10 5 15 10 15M46 14h10c0 10-5 15-10 15" fill="none" stroke="#facc15" stroke-width="5" stroke-linecap="round"/>'+
+   '<path d="M17 6h30v18c0 11-7 18-15 18S17 35 17 24V6z" fill="#facc15" stroke="#0a1f3d" stroke-width="4" stroke-linejoin="round"/>'+
+   '<path d="M23 10v14c0 6 3 11 7 13" fill="none" stroke="#fff6bf" stroke-width="3" stroke-linecap="round"/>'+
+   '<path d="M32 15l2.4 5 5.4.6-4 3.7 1.1 5.3-4.9-2.7-4.9 2.7 1.1-5.3-4-3.7 5.4-.6z" fill="#0a1f3d"/>'+
+   '<rect x="28" y="42" width="8" height="8" fill="#e0a800" stroke="#0a1f3d" stroke-width="3"/>'+
+   '<rect x="19" y="50" width="26" height="8" rx="2.5" fill="#facc15" stroke="#0a1f3d" stroke-width="3.5"/></svg>';
+ }
+ /* Cruces proyectados de Octavos según la tabla actual (1º A vs 8º B … / 1º B vs 8º A …), igual que endRegular() */
+ function projOctavos(){
+  const qA=stats(S.zones.A).slice(0,8).map(r=>r.id),qB=stats(S.zones.B).slice(0,8).map(r=>r.id),o=[];
+  for(let i=0;i<4;i++)o.push({h:qA[i],a:qB[7-i],hg:null,ag:null,done:false,w:null,pen:null,proj:true});
+  for(let i=0;i<4;i++)o.push({h:qB[i],a:qA[7-i],hg:null,ag:null,done:false,w:null,pen:null,proj:true});
+  return o;
+ }
  function bracketHtml(){
   let cols='';
   STAGES.forEach(sg=>{
-   const rd=S.po&&S.po.rounds[sg]||[];
+   let rd=S.po&&S.po.rounds[sg]||[];
+   const proj=sg==='octavos'&&!rd.length&&S.phase==='regular';
+   if(proj)rd=projOctavos();
    const cnt={octavos:8,cuartos:4,semis:2,final:1}[sg];
    let ms='';
    if(rd.length){
     ms=rd.map(m=>{const mine=m.h===S.teamId||m.a===S.teamId,line=(id,g,isH)=>{const w=m.done&&m.w===id;return '<div class="l'+(w?' w':'')+'"><span><span class="cmBd">'+badge(T(id))+'</span>'+E(T(id).shortName)+'</span><b>'+(m.done?g+((m.pen)?' ('+(isH?m.pen.h:m.pen.a)+')':''):'')+'</b></div>'};
      return '<div class="bm'+(mine?' me':'')+'">'+line(m.h,m.hg,true)+line(m.a,m.ag,false)+'</div>'}).join('');
    }else{for(let i=0;i<cnt;i++)ms+='<div class="bm"><div class="l"><span>A definir</span></div><div class="l"><span>A definir</span></div></div>'}
-   cols+='<div class="col"><h4>'+STAGE_LBL[sg]+'</h4>'+ms+'</div>';
+   cols+='<div class="col"><h4>'+(sg==='final'?trophySvg():'')+STAGE_LBL[sg]+(proj?' (proyección)':'')+'</h4>'+ms+'</div>';
   });
   return '<div class="cmScroll"><div class="cmBr">'+cols+'</div></div>'+(S.po&&S.po.champ?'<div class="cmWarn">🏆 Campeón: <b>'+E(nameOf(S.po.champ))+'</b></div>':'');
  }
@@ -599,7 +619,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   const fx=S.fixture.map((f,i)=>{
    const n=i+1,played=f.every(m=>m.done),cur=S.phase==='regular'&&n===S.fecha;
    return '<details'+(cur?' open':'')+'><summary>Fecha '+n+(n===16?' · Interzonal':'')+(played?' ✅':cur?' ▶ (actual)':'')+'</summary>'+f.map(gmHtml).join('')+'</details>'}).join('');
-  return '<div class="cmCard cmFx"><h2>Fase regular · 16 fechas</h2>'+fx+'</div><div class="cmCard"><h2>Playoffs · Octavos → Cuartos → Semis → Final</h2>'+(S.po?'':'<div class="cmNote">Se definen al terminar la fecha 16: clasifican los 8 primeros de cada zona.</div>')+bracketHtml()+'</div>';
+  return '<div class="cmCard cmFx"><h2>Fase regular · 16 fechas</h2>'+fx+'</div><div class="cmCard"><h2>Playoffs · Octavos → Cuartos → Semis → Final</h2>'+(S.po?'':'<div class="cmNote">Octavos proyectados según la tabla actual; se confirman al terminar la fecha 16 (clasifican los 8 primeros de cada zona).</div>')+bracketHtml()+'</div>';
  }
 
  /* ---- Mi Plantel ---- */
@@ -635,7 +655,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   return '<div class="cmCard"><h2>Mi Plantel</h2>'+userRow()+
    '<h3>Titulares (bots)</h3>'+q.starters.map((id,i)=>prHtml(q.info[id],'s',i,SEL&&SEL.k==='s'&&SEL.i===i)).join('')+
    '<h3>Suplentes (banco)</h3>'+q.bench.map((id,i)=>prHtml(q.info[id],'b',i,SEL&&SEL.k==='b'&&SEL.i===i)).join('')+
-   '<div id="cmSqMsg" class="cmNote">Tocá un titular y después un suplente para intercambiarlos (el arquero solo por otro arquero). Con stamina baja, los bots corren menos: &lt;40% = 76% de velocidad · 40–69% = 88% · 70%+ = 100%.</div></div>';
+   '<div id="cmSqMsg" class="cmNote">Tocá un titular y después un suplente para intercambiarlos (el arquero solo por otro arquero). Con stamina baja los jugadores corren menos.</div></div>';
  }
  function swapOk(a,b){return (a.pos==='GK')===(b.pos==='GK')}
  function squadClick(k,i){
