@@ -99,14 +99,83 @@
  const st=id=>S.str[id]||1;
  function pois(l){const L=Math.exp(-l);let k=0,p=1;do{k++;p*=Math.random()}while(p>L&&k<9);return k-1}
  function simGoals(h,a){const sh=st(h),sa=st(a);return[Math.min(6,pois(1.3*Math.pow(sh/sa,.9)*1.08)),Math.min(6,pois(1.05*Math.pow(sa/sh,.9)))]}
- function simRegular(m){const g=simGoals(m.h,m.a);m.hg=g[0];m.ag=g[1];m.done=true}
+ function simRegular(m){const g=simGoals(m.h,m.a);m.hg=g[0];m.ag=g[1];m.done=true;simMatchStats(m)}
  function simKO(m){
   const g=simGoals(m.h,m.a);m.hg=g[0];m.ag=g[1];
   if(m.hg===m.ag){const r=Math.random();if(r<.22){m.hg++}else if(r<.44){m.ag++}}
   if(m.hg===m.ag){const ph=Math.max(.3,Math.min(.7,.5+(st(m.h)-st(m.a))*.25)),hw=Math.random()<ph,w=rnd(3,5),l=Math.max(0,w-rnd(1,2));m.pen=hw?{h:w,a:l}:{h:l,a:w};m.w=hw?m.h:m.a}
   else m.w=m.hg>m.ag?m.h:m.a;
-  m.done=true;
+  m.done=true;simMatchStats(m);
  }
+
+ /* ------------------------------------------------------------------
+  1b) ESTADÍSTICAS DE TEMPORADA de toda la liga (guardadas en S.ps):
+      g goles · a asistencias · r recuperaciones (DEF) · gr goles recibidos (GK) · v vallas invictas (GK) · pj partidos del GK
+      Tu partido: se acumula desde window.MATCH_STATS (lo genera index.html). Resto de la fecha / ronda: simulado.
+  ------------------------------------------------------------------ */
+ const nm0=s=>String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+ const posN=p=>{p=String(p||'').toUpperCase();return p==='GK'||p==='DEF'||p==='FWD'||p==='MID'||p==='USR'?p:/^(MED|MC)/.test(p)?'MID':/^(DEL|FW|EXT|ATA)/.test(p)?'FWD':/^(ARQ)/.test(p)?'GK':p};
+ function addP(o,t,name,num,pos,st){const id=t+'|'+num+'|'+name;if(!o[id])o[id]={id,t,n:name,num,pos:posN(pos),st:st?1:0,g:0,a:0,r:0,gr:0,v:0,pj:0};return o[id]}
+ let TCS=null,TC={};
+ function ps(){
+  if(!S)return null;
+  if(!S.ps){
+   const o={};
+   S.zones.A.concat(S.zones.B).forEach(tid=>{
+    if(tid===S.teamId){const q=S.squad;Object.keys(q.info).forEach(id=>{const p=q.info[id];addP(o,tid,p.name,p.number,p.pos,q.starters.indexOf(id)>=0)});return}
+    let r=null;try{r=D.resolverPlantelCancha(tid,null)}catch(e){try{r=D.resolverPlantelCancha(tid,-1)}catch(er){r=null}}
+    if(!r)return;
+    (r.starters||[]).forEach(p=>addP(o,tid,p.name,p.number,p.pos,true));(r.subs||[]).forEach(p=>addP(o,tid,p.name,p.number,p.pos,false));
+   });
+   o.USER={id:'USER',t:S.teamId,n:S.player.name,num:S.player.num,pos:'USR',st:1,g:0,a:0,r:0,gr:0,v:0,pj:0};
+   S.ps=o;
+  }
+  if(TCS!==S.ps){TCS=S.ps;TC={}}
+  return S.ps;
+ }
+ function teamList(tid){ps();return TC[tid]||(TC[tid]=Object.values(S.ps).filter(e=>e.t===tid&&e.id!=='USER'))}
+ function findP(tid,name,num){
+  const O=ps(),id=tid+'|'+num+'|'+name;if(O[id])return O[id];
+  const k=nm0(name),L=teamList(tid);
+  const e=L.find(x=>nm0(x.n)===k)||L.find(x=>String(x.num)===String(num)&&!name);
+  if(e)return e;
+  const n=addP(O,tid,name,num,'',false);TC={};return n;
+ }
+ function wpick(L,w,ex){let t=0;const ws=L.map(e=>e===ex?0:Math.max(0,w(e)));ws.forEach(x=>t+=x);if(t<=0)return null;let r=Math.random()*t;for(let i=0;i<L.length;i++){r-=ws[i];if(r<=0&&ws[i]>0)return L[i]}return L.find((e,i)=>ws[i]>0)||null}
+ /* Reparte en un equipo: gf goles (+70 % con asistencia), ga goles recibidos al arquero; full = partido completo (recuperaciones DEF, PJ y valla del arquero) */
+ function simTeamStats(tid,gf,ga,full){
+  const L=teamList(tid);if(!L.length)return;
+  const sf=e=>e.st?1:.3,WS={FWD:6,MID:3,DEF:1,GK:.03},WA={FWD:3,MID:4,DEF:1.5,GK:.05};
+  for(let i=0;i<gf;i++){const s=wpick(L,e=>sf(e)*(WS[e.pos]||1),null);if(!s)break;s.g++;
+   if(Math.random()<.7){const a=wpick(L,e=>sf(e)*(WA[e.pos]||1),s);if(a)a.a++}}
+  const gks=L.filter(e=>e.pos==='GK'),gk=gks.find(e=>e.st)||gks[0];
+  if(gk){gk.gr+=ga;if(full){gk.pj++;if(ga===0)gk.v++}}
+  if(full){const n=rnd(4,10);for(let i=0;i<n;i++){const d=wpick(L,e=>e.pos==='DEF'?sf(e):0,null);if(d)d.r++}}
+ }
+ function simMatchStats(m){try{if(!S||m.hg==null||m.ag==null)return;ps();simTeamStats(m.h,m.hg,m.ag,true);simTeamStats(m.a,m.ag,m.hg,true)}catch(e){console.warn('[CareerMode] stats sim',e)}}
+ /* Tu partido: acumula lo que registró index.html en window.MATCH_STATS (sin tocar el partido abandonado) */
+ function accumSeason(L,r){
+  if(!L||L.statsDone)return;L.statsDone=true;
+  const O=ps();if(!O||r.forfeit)return;
+  const m=L.m,tid={red:m.h,blue:m.a},ga={red:r.ag,blue:r.hg},MS=window.MATCH_STATS;
+  if(MS&&MS.jugadores&&MS.modo==='carrera'&&MS.inicio>=L.started){
+   Object.keys(MS.jugadores).forEach(k=>{const x=MS.jugadores[k];if(!x||!tid[x.equipo])return;
+    const e=x.usuario?O.USER:findP(tid[x.equipo],x.nombre,x.dorsal);if(!e)return;
+    e.g+=x.goles|0;e.a+=x.asistencias|0;
+    if(e.pos==='DEF')e.r+=x.recuperaciones|0;
+    if(e.pos==='GK'&&x.jugo){e.pj++;e.gr+=x.golesRecibidos|0;if(ga[x.equipo]===0&&!(x.golesRecibidos>0))e.v++} /* valla invicta: GK que jugó y su equipo no recibió goles */
+   });
+  }
+  if(L.simExtra){simTeamStats(tid.red,L.simExtra.red,L.simExtra.blue,false);simTeamStats(tid.blue,L.simExtra.blue,L.simExtra.red,false)} /* goles simulados tras tu expulsión */
+ }
+ /* Un bot cambia de identidad (cambio): separa lo acumulado hasta ahora para que no se mezcle con el que entra */
+ function splitStats(b){try{
+  const MS=window.MATCH_STATS;if(!MS||!MS.jugadores||MS.finalizado||!b)return;
+  const v=Object.keys(MS.jugadores).map(k=>MS.jugadores[k]).filter(x=>x&&x.equipo===b.team&&x.nombre===b.name&&String(x.dorsal)===String(b.num));
+  const r=v.find(x=>MS.jugadores[x.key]===x&&x.key===b.team+'|'+b.num+'|'+b.name)||v[0];if(!r)return;
+  const c=Object.assign({},r);MS.jugadores[r.key]=c;
+  r.goles=r.asistencias=r.recuperaciones=r.golesRecibidos=0;r.jugo=false;r.vallaInvicta=false;r.key='';
+ }catch(e){}}
 
  /* ---- tabla ---- */
  function stats(ids){
@@ -502,6 +571,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  function wireHub(){
   const hub=$('career-hub-screen');
   hub.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{TAB=b.dataset.tab;SEL=null;renderHub()});
+  hub.querySelectorAll('[data-rk]').forEach(b=>b.onclick=()=>{RK=b.dataset.rk;renderHub()});
   $('cmBack').onclick=()=>show('screen-home');
   $('cmNew').onclick=newSeasonFlow;
   const p=$('cmPlay');if(p)p.onclick=playMatch;
@@ -577,7 +647,54 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    rows.map((r,i)=>'<tr class="'+(i<8?'q':'')+(i===7?' cut':'')+(r.id===S.teamId?' me':'')+'"><td>'+(i+1)+'</td><td class="cl"><span class="cmBd">'+badge(T(r.id))+'</span>'+E(T(r.id).name)+'</td><td>'+r.pj+'</td><td>'+r.g+'</td><td>'+r.e+'</td><td>'+r.p+'</td><td>'+r.gf+'</td><td>'+r.gc+'</td><td>'+(r.gf-r.gc>0?'+':'')+(r.gf-r.gc)+'</td><td class="pt">'+r.pts+'</td></tr>').join('')+
    '</tbody></table></div></div>';
  }
- function tabTable(){return '<div class="cmZ">'+tableHtml('A')+tableHtml('B')+'</div><div class="cmNote">🟩 Los 8 primeros de cada zona clasifican a los Playoffs · Desempate: Puntos → Diferencia de Gol → Goles a Favor.</div>'}
+ function posHtml(){return '<div class="cmZ">'+tableHtml('A')+tableHtml('B')+'</div><div class="cmNote">🟩 Los 8 primeros de cada zona clasifican a los Playoffs · Desempate: Puntos → Diferencia de Gol → Goles a Favor.</div>'}
+ /* ---- Rankings de la liga (Tabla de Posiciones) ---- */
+ const RKS=[['pos','Posiciones'],['g','Goleadores'],['a','Asistidores'],['gk','Arqueros'],['def','Defensores']];
+ let RK='pos';
+ function rankHtml(kind){
+  const O=ps();if(!O)return '';
+  const L=Object.values(O),by=(f,tie)=>(x,y)=>f(y)-f(x)||(tie?tie(x,y):0)||String(x.n).localeCompare(String(y.n));
+  let rows,val,lbl,sub=null;
+  if(kind==='g'){rows=L.filter(e=>e.g>0).sort(by(e=>e.g,(x,y)=>y.a-x.a));val=e=>e.g;lbl='Goles'}
+  else if(kind==='a'){rows=L.filter(e=>e.a>0).sort(by(e=>e.a,(x,y)=>y.g-x.g));val=e=>e.a;lbl='Asistencias'}
+  else if(kind==='gk'){rows=L.filter(e=>e.pos==='GK'&&e.pj>0).sort(by(e=>e.v,(x,y)=>x.gr-y.gr));val=e=>e.v;lbl='Vallas Invictas';sub=e=>'Goles Recibidos '+e.gr}
+  else{rows=L.filter(e=>e.pos==='DEF'&&e.r>0).sort(by(e=>e.r));val=e=>e.r;lbl='Recuperaciones'}
+  rows=rows.slice(0,15);
+  const ttl=RKS.filter(x=>x[0]===kind)[0][1];
+  return '<h2>Top 15 · '+ttl+' <small style="color:#facc15">('+lbl+')</small></h2><div class="cmRk">'+
+   (rows.length?rows.map((e,i)=>{const t=T(e.t);
+    return '<div class="cmRkRow'+(e.id==='USER'?' me':'')+'"><span class="ps">'+(i+1)+'</span><span class="cmBd">'+badge(t)+'</span><span class="nm"><b>'+E(e.n)+(e.id==='USER'?' (TÚ)':'')+'</b><small>'+E(t.shortName||t.name)+' · #'+E(e.num)+'</small></span>'+
+     (sub?'<span class="cmPill s">'+sub(e)+'</span>':'')+'<span class="cmPill" title="'+lbl+'">'+val(e)+'</span></div>'}).join(''):
+    '<div class="cmNote">Todavía no hay datos: se completan a medida que se juegan las fechas.</div>')+'</div>';
+ }
+ function rkNav(){return '<div class="cmRkNav">'+RKS.map(x=>'<button type="button" data-rk="'+x[0]+'" class="'+(RK===x[0]?'on':'')+'">'+x[1]+'</button>').join('')+'</div>'}
+ function userStats(){const u=(ps()||{}).USER||{g:0,a:0};
+  return '<div class="cmUS"><span class="cmUSi">⚽ Goles <b class="cmPill">'+(u.g|0)+'</b></span><span class="cmUSi">🅰️ Asistencias <b class="cmPill">'+(u.a|0)+'</b></span></div>'}
+ function injectStatsCSS(){
+  if($('cmStatsCSS'))return;
+  const s=document.createElement('style');s.id='cmStatsCSS';
+  s.textContent=`
+.cmRkNav{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 7px}
+.cmRkNav button{flex:1;min-width:max-content;padding:8px 14px;font-size:.9rem;font-weight:900;font-style:italic;letter-spacing:.02em;color:#fff;background:linear-gradient(180deg,#303843 0%,#262c34 100%);border:2.5px solid #0a1f3d;border-radius:16px;box-shadow:0 4px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.2);text-shadow:-1px -1px 0 #0a1f3d,1px -1px 0 #0a1f3d,-1px 1px 0 #0a1f3d,1px 1px 0 #0a1f3d;transition:transform .08s ease,box-shadow .08s ease,filter .12s ease}
+.cmRkNav button.on{background:linear-gradient(180deg,#4cb5f7 0%,#1f8be3 100%)}
+.cmRkNav button:hover{filter:brightness(1.1)}
+.cmRkNav button:active{transform:translateY(3px);box-shadow:0 1px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.2)}
+.cmRk{display:flex;flex-direction:column;gap:6px}
+.cmRkRow{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:12px;background:#262c34;border:2px solid #0a1f3d;box-shadow:0 3px 0 rgba(0,0,0,.35);color:#fff}
+.cmRkRow.me{background:rgba(2,132,199,.6);border-color:#e0f7ff}
+.cmRkRow .ps{flex:none;width:24px;text-align:center;font-weight:900;color:#9fd5ff}
+.cmRkRow .cmBd{flex:none;width:28px;height:28px;display:block}
+.cmRkRow .cmBd svg{width:100%;height:100%;display:block}
+.cmRkRow .nm{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.15}
+.cmRkRow .nm b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.92rem}
+.cmRkRow .nm small{color:#9fc0ee;font-weight:700;font-size:.72rem}
+.cmPill{display:inline-block;flex:none;min-width:38px;text-align:center;padding:3px 12px;border-radius:999px;background:#facc15;color:#0a1f3d;border:2.5px solid #0a1f3d;box-shadow:0 2px 0 #0a1f3d;font-weight:900;font-size:1.05rem;font-style:normal}
+.cmPill.s{background:#cfe3ff;min-width:0;font-size:.7rem;padding:2px 8px;white-space:nowrap}
+.cmUS{display:flex;gap:10px;flex-wrap:wrap;margin:2px 0 4px}
+.cmUSi{display:inline-flex;align-items:center;gap:6px;font-weight:900;font-size:.85rem;color:#fff}`;
+  document.head.appendChild(s);
+ }
+ function tabTable(){return rkNav()+(RK==='pos'?posHtml():'<div class="cmCard">'+rankHtml(RK)+'</div>')}
 
  function gmHtml(m){
   const mine=m.h===S.teamId||m.a===S.teamId,h=T(m.h),a=T(m.a);
@@ -656,7 +773,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  }
  function tabSquad(){
   const q=S.squad;
-  return '<div class="cmCard"><h2>Mi Plantel</h2>'+userRow()+
+  return '<div class="cmCard"><h2>Mi Plantel</h2>'+userRow()+userStats()+
    '<h3>Titulares (bots)</h3>'+q.starters.map((id,i)=>prHtml(q.info[id],'s',i,SEL&&SEL.k==='s'&&SEL.i===i)).join('')+
    '<h3>Suplentes (banco)</h3>'+q.bench.map((id,i)=>prHtml(q.info[id],'b',i,SEL&&SEL.k==='b'&&SEL.i===i)).join('')+
    '<div id="cmSqMsg" class="cmNote">Tocá un titular y después un suplente para intercambiarlos (el arquero solo por otro arquero). Con stamina baja los jugadores corren menos.</div></div>';
@@ -812,7 +929,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   G.teamTactics={red:calcBias(m.h,true),blue:calcBias(m.a,false)};
   STAD=stadClean(m.neutral?null:hT.stadium);if(typeof STAD_CF!=='undefined')STAD_CF.length=0;
   CM.live=true;
-  LIVE={m,slots:mine.map((b,i)=>({bot:b,id:ids[i],t0:0})),bench:S.squad.bench.filter(id=>!ex||id!==ex.id),extraId:ex?ex.id:null,extraIdx:ex?ex.idx:-1,cards:{},subs:0,rival:{bots:rv,bench:rivalBench(rvT.id,rv),subs:0},played:{},inj:{},sel:null,res:null,done:false,timer:0};
+  LIVE={started:Date.now(),m,slots:mine.map((b,i)=>({bot:b,id:ids[i],t0:0})),bench:S.squad.bench.filter(id=>!ex||id!==ex.id),extraId:ex?ex.id:null,extraIdx:ex?ex.idx:-1,cards:{},subs:0,rival:{bots:rv,bench:rivalBench(rvT.id,rv),subs:0},played:{},inj:{},sel:null,res:null,done:false,timer:0};
   document.body.classList.add('careerOn','cmInGame');
   const lv=$('mLeave');if(lv)lv.textContent='Abandonar partido';
   const hn=$('hint');if(hn){if(!hn.dataset.o)hn.dataset.o=hn.textContent;hn.textContent='ESC: menú · P: pausa y cambios · Flechas / WASD: mover · Espacio / X: patear'}
@@ -867,6 +984,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   L.cards=L.cards||{};const prev=L.cards[inId];
   L.cards[outId]={yc:sl.bot.yc||0,exp:false}; /* el bot de la ranura se reutiliza: las tarjetas viajan con el jugador */
   out.inj=null;L.bench[bi]=outId;sl.id=inId;sl.t0=now;
+  splitStats(sl.bot);
   const b=sl.bot;b.name=inn.name;b.num=String(inn.number);b.pos=inn.pos;b.stam=inn.stam;b.cId=inId;b.cInj=false;b.yc=prev?prev.yc:0;b.fc=0;b.rc=0;
   try{injClear(b)}catch(e){}b.sl=null;
   L.subs++;
@@ -902,6 +1020,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    if(i<0)i=R.bench.findIndex(fits);
    if(i<0)return;
    const inn=R.bench.splice(i,1)[0],outName=b.name; /* el que sale no vuelve a entrar */
+   splitStats(b);
    b.name=inn.name;if('nick' in b)b.nick=inn.name;b.num=String(inn.number);b.pos=inn.pos;
    b.yc=0;b.fc=0;b.rc=0;b.sl=null;
    try{injClear(b)}catch(e){}
@@ -940,6 +1059,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    L.cards=L.cards||{};
    L.cards[outId]={yc:sl.bot.yc||0,exp:false};
    out.inj=null;L.bench[bi]=outId;sl.id=inId;sl.t0=now;
+   splitStats(sl.bot);
    const b=sl.bot;b.name=inn.name;b.num=String(inn.number);b.pos=inn.pos;b.stam=inn.stam;b.cId=inId;b.cInj=false;b.yc=pc?pc.yc:0;b.fc=0;b.rc=0;
    try{injClear(b)}catch(e){}b.sl=null;
    return inn;
@@ -966,6 +1086,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
     ph=hw?w:l;pa=hw?l:w;
    }
   }
+  L.simExtra={red:Math.max(0,hg-G.score.red),blue:Math.max(0,ag-G.score.blue)};
   G.score.red=hg;G.score.blue=ag;
   L.res={hg,ag,ph,pa,total:Math.max(base,G.clock||0)}; /* total = partido completo → desgaste de stamina completo */
   clearTimeout(L.timer);
@@ -1012,6 +1133,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   else L.slots.forEach(s=>{L.played[s.id]=(L.played[s.id]||0)+Math.max(0,total-s.t0);L.inj[s.id]=L.inj[s.id]||!!s.bot.cInj});
   applyStamina(L.played,L.inj,total);
   applyDiscipline();
+  try{accumSeason(L,r)}catch(e){console.warn('[CareerMode] stats',e)}
   if(L.extraId!=null){ /* S.player suspendido: el 6.º de cancha vuelve al banco */
    const sid=L.slots.map(s=>s.id),ex=sid.pop(),bn=L.bench.slice();bn.splice(Math.min(L.extraIdx,bn.length),0,ex);
    S.squad.starters=sid;S.squad.bench=bn;
@@ -1108,7 +1230,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  }
 
  function init(){
-  injectCSS();injectStartButton();ensureDom();wireGlobal();
+  injectCSS();injectStatsCSS();injectStartButton();ensureDom();wireGlobal();
   const hc=$('homeCareer');
   if(hc)hc.addEventListener('click',()=>setTimeout(injectContinue,0));
   const root=$('career-root');

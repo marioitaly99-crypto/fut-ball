@@ -165,15 +165,15 @@
    "enabled": true,
    "seats": {
     "n": 2,
-    "c1": "#e30613",
-    "c2": "#ffffff",
-    "c3": "#ffffff"
+    "c1": "#ffffff",
+    "c2": "#e30613",
+    "c3": "#e30613"
    },
    "flags": {
     "n": 2,
-    "c1": "#e30613",
-    "c2": "#ffffff",
-    "c3": "#ffffff"
+    "c1": "#ffffff",
+    "c2": "#e30613",
+    "c3": "#e30613"
    }
   },
   "squad": [

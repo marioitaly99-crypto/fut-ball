@@ -933,7 +933,16 @@ function teamLabel(el,team,txt){const u=(G&&G.uni&&G.uni[team])||{n:1,c1:team===
   :u.n===2?`background:linear-gradient(90deg,${u.c1} 50%,${u.c2} 50%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;-webkit-text-stroke:.5px rgba(255,255,255,.35)`
   :`color:${u.c1};-webkit-text-fill-color:${u.c1};-webkit-text-stroke:.5px rgba(255,255,255,.35)`}
 function paintTeams(){teamLabel($('tL'),'red','LOCAL');teamLabel($('tV'),'blue','VISITANTE');teamLabel($('pL'),'red','LOCAL');teamLabel($('pV'),'blue','VISITANTE')}
-function hud(){paintTeams();[['tL','red','#ff5a5f'],['tV','blue','#38bdf8']].forEach(([i,t,d])=>{const e=$(i),u=G.uni&&G.uni[t],c=(u&&u.c1)||d,k=e._k+'|'+c;if(e._hk===k)return;e._hk=k;e.style.color=c;e.style.webkitTextFillColor='currentColor'}); /* marcador: color principal (c1) del uniforme; #ff5a5f / #38bdf8 solo sin uniforme personalizado */
+/* Contraste automático del marcador: luminancia relativa (WCAG) del c1 de la camiseta elegida → fondo c1 + texto blanco (oscuro, L < 0.45) u oscuro #0b1220 (claro) */
+function relLum(c){let r=0,g=0,b=0;c=String(c||'').trim();
+ const h=/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(c),m=/^rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/i.exec(c);
+ if(h){let x=h[1];if(x.length===3)x=x.split('').map(q=>q+q).join('');const n=parseInt(x,16);r=(n>>16)&255;g=(n>>8)&255;b=n&255}else if(m){r=+m[1];g=+m[2];b=+m[3]}
+ const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(r)+.7152*f(g)+.0722*f(b)}
+function hud(){paintTeams();[['tL','red','#ff5a5f'],['tV','blue','#38bdf8'],['pL','red','#ff5a5f'],['pV','blue','#38bdf8']].forEach(([i,t,d])=>{const e=$(i);if(!e)return;const u=G.uni&&G.uni[t],c=(u&&u.c1)||d,k=e._k+'|'+c+'|'+e.textContent;if(e._hk===k)return;e._hk=k;
+  const dark=relLum(c)<.45,fg=dark?'#ffffff':'#0b1220',sx=e.style;
+  sx.setProperty('background',c,'important');sx.setProperty('background-clip','border-box');sx.setProperty('-webkit-background-clip','border-box');
+  sx.setProperty('color',fg,'important');sx.setProperty('-webkit-text-fill-color',fg,'important');sx.setProperty('-webkit-text-stroke','0');
+  sx.textShadow=dark?'0 1px 2px #000':'none';sx.padding='1px 10px';sx.borderRadius='10px';sx.boxShadow='0 0 0 2px rgba(255,255,255,.55)'}); /* marcador: fondo = c1 del uniforme (titular o suplente elegida); #ff5a5f / #38bdf8 solo sin uniforme personalizado */
  powerUI();$('score').textContent=`${G.score.red} : ${G.score.blue}`;
  $('clock').textContent=G.pen?'🥅 PENALES':G.golden?(G.super?'⚡ MUERTE SÚBITA':'⚡ GOL DE ORO'):G.duration?'⏱ '+fmt(Math.max(0,G.duration-G.clock))+(G.addedMins&&!G.cET?` (+${G.addedMins}')`:''):fmt(G.clock)}
 const hum=()=>G.players.filter(p=>!p.bot).length,nb=t=>G.players.filter(p=>p.bot&&p.team===t);
@@ -2554,6 +2563,80 @@ let last=performance.now(),acc=0;
  fetch(PLAYLIST_URL,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json()})
   .then(a=>{TRACKS=(Array.isArray(a)?a:[]).map(parse).filter(Boolean);sync()})
   .catch(()=>{dead=true});
+})();
+</script>
+<script>
+/* ===== 📊 Estadísticas de partido · Modo Carrera → window.MATCH_STATS =====
+   Por jugador (usuario y bots; clave "lado|dorsal|nombre"): goles (incl. penales de juego), asistencias (último toque de un compañero ≤ 6 s antes del gol),
+   recuperaciones (toque de un DEF en campo propio que le quita el balón al rival: robo o intercepción) y golesRecibidos (GK activo en cancha).
+   Además marca quién jugó (jugo) y, al terminar, calcula vallas invictas. Módulo autónomo: envuelve goal/foulPenEnd/step/restart/end sin tocar su lógica. */
+(()=>{
+ const ASSIST_S=6,REC_CD=1.5;
+ let rec=false,curG=null,MS=null,map=new Map(),PC=new Map(),RC=new Map(),RS=new Map(),log=[],penCtx=null;
+ const POSK=['pos','posicion','posición','position','puesto','posCarrera'],ROLEPOS={arquero:'GK',defensor_central:'DEF',lateral:'DEF',mediocampista:'MED',extremo:'DEL',delantero:'DEL'};
+ const other2=t=>t==='red'?'blue':'red',isSide=t=>t==='red'||t==='blue';
+ const cs=()=>{try{return window.CAREER_STATE||(window.CAREER_API&&window.CAREER_API.getState&&window.CAREER_API.getState())||null}catch(e){return null}};
+ const nn=s=>String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+ function normPos(s){if(s==null||s==='')return null;s=String(s).toUpperCase().trim();
+  if(/^(GK|ARQ|POR|GOAL)/.test(s))return'GK';if(/^(DEF|DF|DFC|LAT|LI$|LD$|CB|LB|RB|ZAG)/.test(s))return'DEF';
+  if(/^(MED|MC|MID|MF|VOL|CM|MCO|MCD)/.test(s))return'MED';if(/^(DEL|FW|ST|EXT|ATA|DC$|SD$)/.test(s))return'DEL';return s}
+ function fromObj(o){if(!o||typeof o!=='object')return null;for(const k of POSK){if(o[k]){const v=normPos(o[k]);if(v)return v}}return null}
+ const isEntry=o=>!!fromObj(o)&&(o.num!=null||o.dorsal!=null||o.numero!=null||o.name||o.nombre);
+ function flat(x,d){if(!x||typeof x!=='object'||d>3)return[];if(!Array.isArray(x)&&isEntry(x))return[x];return(Array.isArray(x)?x:Object.values(x)).flatMap(v=>flat(v,d+1))}
+ function teamIds(p){const st=cs()||{},ids=new Set();[st.teamId,st.rivalId,st.rivalTeamId,p&&p.teamId,p&&p.clubId,p&&p.equipoId,window.CAREER_MATCH&&window.CAREER_MATCH.rivalId].forEach(x=>x&&ids.add(x));
+  try{const D=window.LIGA_ARGENTINA_DATA,t=D&&D.getTeam&&st.teamId&&D.getTeam(st.teamId);if(t&&t.classicRivalId)ids.add(t.classicRivalId)}catch(e){}return[...ids]}
+ function rosterPos(p){try{const API=window.CAREER_API;if(!API||!API.rosterFor)return null;const num=String(p.num==null?'':p.num).trim(),nm=nn(p.name);
+  for(const id of teamIds(p)){let L=RS.get(id);if(!L){L=flat(API.rosterFor(id),0);RS.set(id,L)}
+   const c=L.filter(e=>String(e.num!=null?e.num:e.dorsal!=null?e.dorsal:e.numero).trim()===num);if(!c.length)continue;
+   const e=c.find(e=>nn(e.name||e.nombre)===nm)||(c.length===1?c[0]:null);if(e){const v=fromObj(e);if(v)return v}}}catch(e){}return null}
+ function posOf(p){if(!p)return null;let v=PC.get(p);if(v)return v;v=fromObj(p)||rosterPos(p);if(!v&&!p.bot)v=fromObj((cs()||{}).player);if(!v&&p.role)v=ROLEPOS[p.role]||null;if(v)PC.set(p,v);return v||null}
+ function teamName(side){try{const st=cs(),D=window.LIGA_ARGENTINA_DATA;if(!st||!D||!D.getTeam)return null;let id=null;
+  if(typeof me!=='undefined'&&me&&side===me.team)id=st.teamId;else{const b=G.players.find(q=>q.team===side&&(q.teamId||q.clubId||q.equipoId));id=(b&&(b.teamId||b.clubId||b.equipoId))||st.rivalId||st.rivalTeamId||(window.CAREER_MATCH&&window.CAREER_MATCH.rivalId)||null}
+  const t=id&&D.getTeam(id);return(t&&t.name)||null}catch(e){return null}}
+ function ensure(p){if(!rec||!p)return null;let r=map.get(p);
+  if(!r){if(!isSide(p.team))return null;r={key:'',nombre:'',dorsal:'',equipo:p.team,equipoNombre:null,pos:null,usuario:false,jugo:false,goles:0,asistencias:0,recuperaciones:0,golesRecibidos:0,vallaInvicta:false};map.set(p,r)}
+  if(isSide(p.team))r.equipo=p.team;r.nombre=p.name;r.dorsal=p.num;r.pos=posOf(p);r.usuario=!p.bot;if(r.usuario)MS.usuario=r.key||MS.usuario;
+  const nk=r.equipo+'|'+r.dorsal+'|'+r.nombre;
+  if(nk!==r.key){if(r.key&&MS.jugadores[r.key]===r)delete MS.jugadores[r.key];let k=nk,i=2;while(MS.jugadores[k]&&MS.jugadores[k]!==r)k=nk+'#'+i++;r.key=k;MS.jugadores[k]=r;if(r.usuario)MS.usuario=k}
+  return r}
+ function markPlayed(){if(!rec||!G)return;G.players.forEach(p=>{if(isSide(p.team)){const r=ensure(p);if(r)r.jugo=true}});
+  ['red','blue'].forEach(s=>{if(!MS.equipos[s].nombre)MS.equipos[s].nombre=teamName(s)});
+  map.forEach(r=>{if(!r.equipoNombre)r.equipoNombre=MS.equipos[r.equipo].nombre})}
+ function resolveGK(side){const L=G.players.filter(q=>q.team===side),ownX=side==='red'?0:G.w,d=q=>Math.abs(q.x-ownX);
+  let c=L.filter(q=>posOf(q)==='GK');if(!c.length)c=L.filter(q=>q.role==='arquero');
+  if(!c.length&&!L.some(q=>q.bot&&q.role==='arquero')){const hs=L.filter(q=>!q.bot&&!posOf(q));if(hs.length)c=[hs.reduce((a,b)=>d(b)<d(a)?b:a)]} /* sin arquero bot: el humano más cercano a su arco ataja */
+  return c.length?c.reduce((a,b)=>d(b)<d(a)?b:a):null}
+ const mmss=()=>{const t=Math.floor((G&&G.clock)||0);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
+ function onTouch(p){if(!rec||!G)return;if(!p){log.length=0;return}if(G.pen||!isSide(p.team))return;const t=G.clock||0,last=log[log.length-1];
+  if(last&&last.p===p){last.t=t;return}
+  const r=ensure(p);
+  if(r&&last&&last.team!==p.team&&!G.sp&&posOf(p)==='DEF'&&G.ball&&(p.team==='red'?G.ball.x<G.w/2:G.ball.x>G.w/2)&&t-(RC.has(p)?RC.get(p):-99)>=REC_CD){r.recuperaciones++;RC.set(p,t)} /* DEF recupera en campo propio (robo/intercepción; no vale saque de banda/pelota parada) */
+  log.push({p,team:p.team,t});if(log.length>6)log.shift()}
+ function install(){if(!G||G.__msI)return;let v=G.lastP;Object.defineProperty(G,'lastP',{configurable:true,enumerable:true,get(){return v},set(p){v=p;try{onTouch(p)}catch(e){console.warn('[MATCH_STATS]',e)}}});Object.defineProperty(G,'__msI',{value:true})}
+ function init(){map=new Map();PC=new Map();RC=new Map();RS=new Map();log=[];curG=G;
+  const eq=s=>({lado:s,nombre:null,goles:0,golesRecibidos:0,vallaInvicta:null});
+  MS={activo:true,modo:'carrera',finalizado:false,inicio:Date.now(),fin:null,marcador:{red:0,blue:0},equipos:{red:eq('red'),blue:eq('blue')},jugadores:{},usuario:null,eventos:[],vallasInvictas:[]};
+  window.MATCH_STATS=MS;rec=true;install();markPlayed()}
+ function onGoal(t,pc){const o=other2(t);let sc=null,as=null,own=false,tipo='gol';
+  if(pc&&pc.s){sc=pc.s;tipo='penal'}else{const last=log[log.length-1];if(last&&last.team===t)sc=last.p;else if(last){own=true;tipo='gol_en_contra'}}
+  MS.equipos[t].goles++;MS.equipos[o].golesRecibidos++;MS.marcador[t]=MS.equipos[t].goles;
+  const rs=sc&&!own?ensure(sc):null;if(rs){rs.goles++;rs.jugo=true;
+   if(tipo==='gol'){const prev=log[log.length-2],tm=G.clock||0;if(prev&&prev.team===t&&prev.p!==sc&&tm-prev.t<=ASSIST_S){as=ensure(prev.p);if(as){as.asistencias++;as.jugo=true}}}} /* asistencia: el toque inmediato anterior fue de un compañero ≤ 6 s antes */
+  let gk=resolveGK(o);if(!gk&&pc&&pc.k&&pc.k.team===o)gk=pc.k;const rg=gk?ensure(gk):null;if(rg){rg.golesRecibidos++;rg.jugo=true}
+  MS.eventos.push({tipo,lado:t,tiempo:mmss(),goleador:rs?rs.key:null,asistente:as?as.key:null,arquero:rg?rg.key:null,enContra:own?(log.length&&log[log.length-1].p?ensure(log[log.length-1].p)&&ensure(log[log.length-1].p).key:null):null})}
+ function finalize(){if(!rec||!MS||MS.finalizado)return;markPlayed();MS.finalizado=true;MS.fin=Date.now();MS.marcador={red:G.score.red,blue:G.score.blue};
+  ['red','blue'].forEach(s=>{MS.equipos[s].vallaInvicta=MS.equipos[s].golesRecibidos===0});
+  MS.vallasInvictas=[];map.forEach(r=>{r.vallaInvicta=!!(r.jugo&&r.pos==='GK'&&MS.equipos[r.equipo].golesRecibidos===0&&r.golesRecibidos===0);if(r.vallaInvicta)MS.vallasInvictas.push(r.key)}); /* valla invicta: GK que jugó y su equipo no recibió goles */
+  try{window.dispatchEvent(new CustomEvent('career:matchstats',{detail:MS}))}catch(e){}}
+ /* envoltorios (las funciones del juego son globales) */
+ const _goal=goal,_fpe=foulPenEnd,_step=step,_restart=restart,_end=end;
+ goal=function(t){try{if(rec&&G&&!G.pen&&!G.over&&NET.role!=='client')onGoal(t,penCtx)}catch(e){console.warn('[MATCH_STATS]',e)}penCtx=null;return _goal.apply(this,arguments)};
+ foulPenEnd=function(){const P=G&&G.pen;if(rec&&P&&P.single===true&&P.g===true&&P.s)penCtx={s:P.s,k:P.k};try{return _fpe.apply(this,arguments)}finally{penCtx=null}};
+ step=function(){try{if(G&&NET.role!=='client'){if(document.body.classList.contains('careerOn')){if(!rec||curG!==G)init();else install()}else rec=false}}catch(e){console.warn('[MATCH_STATS]',e)}
+  const r=_step.apply(this,arguments);try{if(rec&&G&&!G.over)markPlayed()}catch(e){}return r};
+ restart=function(){try{if(MS&&MS.finalizado){(window.MATCH_STATS_HISTORIAL=window.MATCH_STATS_HISTORIAL||[]).push(MS);if(window.MATCH_STATS_HISTORIAL.length>20)window.MATCH_STATS_HISTORIAL.shift()}}catch(e){}
+  const r=_restart.apply(this,arguments);try{if(G&&NET.role!=='client'&&document.body.classList.contains('careerOn'))init();else rec=false}catch(e){console.warn('[MATCH_STATS]',e)}return r};
+ end=function(){const r=_end.apply(this,arguments);try{finalize()}catch(e){console.warn('[MATCH_STATS]',e)}return r};
 })();
 </script>
 </body>
