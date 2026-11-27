@@ -1459,11 +1459,11 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  function injectTorneoCSS(){
   if($('cmTorneoCSS'))return;
   const st=document.createElement('style');st.id='cmTorneoCSS';
-  st.textContent='#cmTorneo{position:fixed;inset:0;z-index:9000;display:none;pointer-events:none;visibility:hidden;align-items:center;justify-content:center;padding:12px;background:transparent;overflow-y:auto}'+
+  st.textContent='#cmTorneo{position:fixed;inset:0;z-index:99999;display:none;pointer-events:none;visibility:hidden;align-items:center;justify-content:center;padding:12px;background:transparent;overflow-y:auto}'+
    '#cmTorneo.on{display:flex;pointer-events:auto;visibility:visible}#cmTorneo:not(.on){display:none!important;pointer-events:none!important}'+
-   '#cmTorneo .bk{position:fixed;inset:0;z-index:0;background:rgba(3,8,20,.82)}#cmTorneo .tc{position:relative;z-index:1;margin:auto}'+
-   '#cmTorneo .tc{width:min(420px,94vw);text-align:center;padding:18px 20px 16px;background:#fff7e6;color:#1b1b1b;border:4px solid #000;border-radius:24px;box-shadow:0 6px 0 #000,0 16px 30px rgba(0,0,0,.5);animation:cmTPop .3s cubic-bezier(.2,1.6,.4,1)}'+
-   '#cmTorneo .tc.gold{background:#fff3b0}'+
+   '#cmTorneo .cmBk{position:fixed;inset:0;z-index:99999;background:rgba(3,8,20,.82)}#cmTorneo .cmTc{position:relative;z-index:100000;margin:auto;display:block!important;opacity:1!important;visibility:visible!important}'+
+   '#cmTorneo .cmTc{width:min(420px,94vw);text-align:center;padding:18px 20px 16px;background:#fff7e6;color:#1b1b1b;border:4px solid #000;border-radius:24px;box-shadow:0 6px 0 #000,0 16px 30px rgba(0,0,0,.5);animation:cmTPop .3s cubic-bezier(.2,1.6,.4,1)}'+
+   '#cmTorneo .cmTc.gold{background:#fff3b0}'+
    '#cmTorneo h1{margin:6px 0 4px;font-size:clamp(1.3rem,6vw,1.8rem);font-weight:900;font-style:italic;color:#facc15;-webkit-text-stroke:2px #000;text-shadow:0 3px 0 #000;letter-spacing:.5px}'+
    '#cmTorneo p{margin:0 0 10px;font-size:.88rem;font-weight:700;color:#374151;line-height:1.35}'+
    '#cmTorneo .vs{display:flex;align-items:center;justify-content:center;gap:10px;margin:8px 0 10px;font-weight:900}#cmTorneo .vs .cmBd{width:64px;height:64px;display:block;margin:0 auto 2px}#cmTorneo .vs small{display:block;font-size:.66rem;color:#6b7280}#cmTorneo .vs div{flex:1;font-size:.82rem}'+
@@ -1475,7 +1475,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  /* elimina por completo la capa oscura de carteles (nada queda tapando ni bloqueando el hub) */
  function hideTorneoLayer(){
   const el=$('cmTorneo');
-  if(el){el.classList.remove('on');el.innerHTML='';el.style.display='none';el.style.pointerEvents='none';if(el.parentNode)el.parentNode.removeChild(el)}
+  if(el){el.classList.remove('on');el.innerHTML='';el.style.display='none';el.style.pointerEvents='none';el.remove()}
  }
  /* limpia capas colgadas al entrar al hub (fuera de partido) */
  function sweepOverlays(){
@@ -1496,21 +1496,25 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   let h='';
   if(it.k==='intro'){
    const cl=it.torneo==='clausura';
-   h='<div class="tc">'+cupSvg('#cbd5e1',84,true)+'<h1>🏆 '+TN_LBL[it.torneo]+'</h1><p>'+(cl?'Mismas zonas y mismos rivales que en el Apertura, con todas las localías invertidas.'+(it.prev?'<br>Campeón del Apertura: <b>'+E(T(it.prev).name)+'</b>':''):'16 fechas en la Zona '+E(S.myZone)+' y Playoffs: los 8 primeros de cada zona clasifican.')+'</p><button id="cmTorneoBtn" type="button">Comenzar Torneo</button></div>';
+   h='<div class="cmTc">'+cupSvg('#cbd5e1',84,true)+'<h1>🏆 '+TN_LBL[it.torneo]+'</h1><p>'+(cl?'Mismas zonas y mismos rivales que en el Apertura, con todas las localías invertidas.'+(it.prev?'<br>Campeón del Apertura: <b>'+E(T(it.prev).name)+'</b>':''):'16 fechas en la Zona '+E(S.myZone)+' y Playoffs: los 8 primeros de cada zona clasifican.')+'</p><button id="cmTorneoBtn" type="button">Comenzar Torneo</button></div>';
   }else if(it.k==='sorteo'&&S.copa){
    const C=S.copa,r=C.rounds.dieciseisavos,um=r.find(m=>m.h===S.teamId||m.a===S.teamId);
    const mine=um?(um.h===S.teamId?um.a:um.h):null,sg=id=>'<b>'+E(T(id).shortName)+'</b>';
    const rv=mine?'<p><span class="cmBd" style="display:block;width:72px;height:72px;margin:0 auto 4px">'+badge(T(mine))+'</span>Tu rival en Dieciseisavos: <b style="font-size:1.05rem">'+E(T(mine).name)+'</b><br>Sede neutral: <b>'+E(T(um.venue).shortName)+'</b> ('+E(T(um.venue).name)+')</p>':'<p><b>¡Bolilla de privilegio!</b> Tu equipo pasa directo a Octavos de Final.</p>';
-   h='<div class="tc">'+copaArgSvg(84)+'<h1>🏆 SORTEO COPA ARGENTINA</h1>'+rv+'<div class="sorteo">'+r.map(m=>'<div class="'+((m.h===S.teamId||m.a===S.teamId)?'me':'')+'">'+sg(m.h)+' vs '+sg(m.a)+' <small>🏟️ '+E(T(m.venue).shortName)+'</small></div>').join('')+'</div><p style="margin:8px 0">Directo a Octavos: '+C.byes.map(sg).join(' · ')+'</p><p>Partido único · penales directos si empatan.</p><button id="cmTorneoBtn" type="button">Continuar</button></div>';
+   h='<div class="cmTc">'+copaArgSvg(84)+'<h1>🏆 SORTEO COPA ARGENTINA</h1>'+rv+'<div class="sorteo">'+r.map(m=>'<div class="'+((m.h===S.teamId||m.a===S.teamId)?'me':'')+'">'+sg(m.h)+' vs '+sg(m.a)+' <small>🏟️ '+E(T(m.venue).shortName)+'</small></div>').join('')+'</div><p style="margin:8px 0">Directo a Octavos: '+C.byes.map(sg).join(' · ')+'</p><p>Partido único · penales directos si empatan.</p><button id="cmTorneoBtn" type="button">Continuar</button></div>';
   }else if(it.k==='champ'){
    const t=T(it.id),tr=it.torneo==='trofeo',cpa=it.torneo==='copa';
-   h='<div class="tc'+(tr?' gold':'')+'">'+(cpa?copaArgSvg(84):cupSvg(tr?'#facc15':'#cbd5e1',84,!tr))+'<h1>'+(tr?'¡TROFEO DE CAMPEONES!':cpa?'¡CAMPEÓN DE LA COPA ARGENTINA!':'¡CAMPEÓN DEL '+TN_LBL[it.torneo]+'!')+'</h1><span class="cmBd" style="display:block;width:96px;height:96px;margin:0 auto">'+badge(t)+'</span><p><b style="font-size:1.1rem">'+E(t.name)+'</b><br>'+E(S.player.name)+' (#'+S.player.num+') levantó la copa.</p><button id="cmTorneoBtn" type="button">Continuar</button></div>';
+   h='<div class="cmTc'+(tr?' gold':'')+'">'+(cpa?copaArgSvg(84):cupSvg(tr?'#facc15':'#cbd5e1',84,!tr))+'<h1>'+(tr?'¡TROFEO DE CAMPEONES!':cpa?'¡CAMPEÓN DE LA COPA ARGENTINA!':'¡CAMPEÓN DEL '+TN_LBL[it.torneo]+'!')+'</h1><span class="cmBd" style="display:block;width:96px;height:96px;margin:0 auto">'+badge(t)+'</span><p><b style="font-size:1.1rem">'+E(t.name)+'</b><br>'+E(S.player.name)+' (#'+S.player.num+') levantó la copa.</p><button id="cmTorneoBtn" type="button">Continuar</button></div>';
   }else if(it.k==='trofeo'&&S.trofeo){
    const t=S.trofeo,side=id=>'<div><span class="cmBd">'+badge(T(id))+'</span>'+E(T(id).name)+'<small>'+(id===S.aperturaChampionId&&id===S.clausuraChampionId?'BICAMPEÓN':id===S.aperturaChampionId?'CAMPEÓN APERTURA':id===S.clausuraChampionId?'CAMPEÓN CLAUSURA':'SUBCAMPEÓN')+'</small></div>';
-   h='<div class="tc gold">'+cupSvg('#facc15',96)+'<h1>🏆 TROFEO DE CAMPEONES</h1><div class="vs">'+side(t.h)+'<div>VS</div>'+side(t.a)+'</div><p>Partido único en cancha neutral. Si empatan, tiempo extra y penales.</p><button id="cmTorneoBtn" type="button">Continuar</button></div>';
+   h='<div class="cmTc gold">'+cupSvg('#facc15',96)+'<h1>🏆 TROFEO DE CAMPEONES</h1><div class="vs">'+side(t.h)+'<div>VS</div>'+side(t.a)+'</div><p>Partido único en cancha neutral. Si empatan, tiempo extra y penales.</p><button id="cmTorneoBtn" type="button">Continuar</button></div>';
   }else{q.shift();save();return flushModals()}
-  el.innerHTML='<div class="bk"></div>'+h;el.style.display='';el.style.pointerEvents='';el.classList.add('on');
+  el.innerHTML='<div class="cmBk"></div>'+h;el.style.display='';el.style.pointerEvents='';el.classList.add('on');
+  const card=el.querySelector('.cmTc');
+  if(card){['display:block','opacity:1','visibility:visible'].forEach(d=>{const k=d.split(':');card.style.setProperty(k[0],k[1],'important')})}
   const bt=$('cmTorneoBtn');if(bt){bt.onclick=modalDone;try{bt.focus({preventScroll:true})}catch(e){}}
+  el.onclick=e=>{if(!el.querySelector('.cmTc')||!$('cmTorneoBtn')){if(e.target===el||(e.target.classList&&e.target.classList.contains('cmBk')))modalDone()}}; /* modal vacío: clic en cualquier lugar lo elimina */
+  if(!card||!bt)setTimeout(()=>{const e2=$('cmTorneo');if(e2&&(!e2.querySelector('.cmTc')||!$('cmTorneoBtn')))modalDone()},0); /* nunca dejar un backdrop sin tarjeta */
  }
  /* ------------------------------------------------------------------
   7) Eventos globales (P, menú, abandonar, continuar campaña)
