@@ -729,7 +729,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   hub.querySelectorAll('[data-fx]').forEach(b=>b.onclick=()=>{FXV=b.dataset.fx;renderHub()});
   const calB=hub.querySelector('[data-cal]');if(calB)calB.onclick=()=>{CALALL=!CALALL;renderHub()};
   try{const on=hub.querySelector('.cmChips .on');if(on&&on.scrollIntoView)on.scrollIntoView({block:'nearest',inline:'center'})}catch(e){}
-  $('cmBack').onclick=()=>show('screen-home');
+  $('cmBack').onclick=()=>{resetMatchFlags();show('screen-home')};
   $('cmNew').onclick=newSeasonFlow;
   const p=$('cmPlay');if(p)p.onclick=playMatch;
   const sk=$('cmSkipSusp');if(sk)sk.onclick=()=>window.cmSkipExpelledMatch();
@@ -1266,8 +1266,16 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   if(pos<=10)return r<.25?'hard':r<.85?'normal':'easy';
   return r<.10?'hard':r<.80?'normal':'easy';
  }
+ /* Banderas globales para el motor (index.html): finales y estadio dividido */
+ function resetMatchFlags(){window._isFinalMatch=false;window._isSplitStadium=false}
+ function setMatchFlags(m){
+  const copa=isCopaM(m),poFinal=!copa&&!!S&&S.phase==='playoffs'&&!!S.po&&S.po.stage==='final',trofeo=!copa&&!!S&&S.phase==='trofeo';
+  window._isFinalMatch=!!((copa&&S.copaDue==='final')||poFinal||trofeo);
+  window._isSplitStadium=!!(copa||poFinal||trofeo);
+ }
  function playMatch(){
   const m=userMatch();if(!m||CM.live)return;
+  setMatchFlags(m);
   const hT=T(m.h),aT=T(m.a),myHome=m.h===S.teamId,rvT=myHome?aT:hT;
   const ks=kitsFor(m),kH=ks.kH,kA=ks.kA;
   user.nick=S.player.name;user.num=String(S.player.num);
@@ -1588,7 +1596,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   if(m&&m.copa&&m.venue){el.textContent='ESTADIO NEUTRAL: '+String(T(m.venue).shortName||'').toUpperCase();el.style.display='block'}else el.style.display='none';
  }
  function leaveGame(){
-  CM.live=false;LIVE=null;neutralTag(null);
+  CM.live=false;LIVE=null;neutralTag(null);resetMatchFlags();
   document.body.classList.remove('careerOn','cmInGame','cmRed');
   try{if(typeof setBotDiff==='function')setBotDiff('normal')}catch(e){}
   const rn=$('cmRivalSub');if(rn)rn.textContent='';
@@ -2063,7 +2071,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  }
 
  function init(){
-  injectCSS();injectStatsCSS();injectStartButton();ensureDom();wireGlobal();
+  resetMatchFlags();injectCSS();injectStatsCSS();injectStartButton();ensureDom();wireGlobal();
   const hc=$('homeCareer');
   if(hc)hc.addEventListener('click',()=>setTimeout(injectContinue,0));
   const root=$('career-root');
