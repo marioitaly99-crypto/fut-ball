@@ -358,6 +358,8 @@
 .cmPr em.wn{grid-column:1/-1;font-style:normal;color:#fbbf24;font-size:.72rem;font-weight:900}
 .cmPr.exp{filter:grayscale(100%);opacity:.45;cursor:not-allowed;border-color:#ef4444}
 .cmPr.exp:hover{filter:grayscale(100%);border-color:#ef4444}
+.cmPr.out,.cmPr.out:hover{filter:grayscale(100%);opacity:.45;cursor:not-allowed;border-color:#6b7280}
+#cmSubUndo{background:#262c34;color:#fff;border:2px solid #fbbf24;border-radius:12px;padding:8px 14px;font-weight:800;cursor:pointer}#cmSubUndo:disabled{opacity:.4;cursor:not-allowed}
 .cmNote{font-size:.78rem;color:#8fb2e6}
 .cmCols{display:grid;grid-template-columns:1fr 1fr;gap:14px}.cmCols>div{display:flex;flex-direction:column;gap:6px}
 #cmSub,#cmEnd,#cmChamp{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(3,8,20,.82);overflow-y:auto}
@@ -575,6 +577,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   $('cmBack').onclick=()=>show('screen-home');
   $('cmNew').onclick=newSeasonFlow;
   const p=$('cmPlay');if(p)p.onclick=playMatch;
+  const sk=$('cmSkipSusp');if(sk)sk.onclick=()=>window.cmSkipExpelledMatch();
   const sa=$('cmSimAll');if(sa)sa.onclick=()=>{simRest();renderHub();if(S.phase==='done'&&S.po.champ===S.teamId)showChamp()};
   const ns=$('cmNewSeason');if(ns)ns.onclick=newSeasonFlow;
   hub.querySelectorAll('.cmPr[data-k]').forEach(b=>b.onclick=()=>squadClick(b.dataset.k,+b.dataset.i));
@@ -627,7 +630,8 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    (rvSwapped?'<div class="cmNote">'+E(rv.name)+' usa su camiseta suplente para evitar el choque de colores.</div>':'')+
    '<div class="cmKits"><h3>👕 Camisetas del partido</h3><div class="cmKcols"><div><small>LOCAL · '+E(h.shortName)+'</small>'+kitPick('h',h,ks.sH)+'</div><div><small>VISITANTE · '+E(a.shortName)+'</small>'+kitPick('a',a,ks.sA)+'</div></div>'+(ks.clash?'<div class="cmNote">⚠️ Los colores de ambas camisetas son muy parecidos.</div>':'')+'</div>'+
    stand+
-   '<button id="cmPlay" class="cmBig" type="button">▶ JUGAR PARTIDO</button></div>';
+   '<button id="cmPlay" class="cmBig" type="button">▶ JUGAR PARTIDO</button>'+
+   ((S.player.susp||0)>0?'<button id="cmSkipSusp" class="cmBig" type="button">⏩ Simular partido (Suspendido)</button>':'')+'</div>';
  }
  function outHtml(){
   const msg=S.po.out==='nq'?'No clasificaste a los Playoffs':'Quedaste eliminado en '+STAGE_LBL[S.po.out];
@@ -753,13 +757,14 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  }
  /* card = {yc,exp,susp} → render dentro del modal de cambios (#cmSub); sin card → Mi Plantel */
  function prHtml(p,k,i,sel,card){
-  let cls='cmPr'+(sel?' sel':''),cd='',wn='';
+  let cls='cmPr'+(sel?' sel':''),cd='',wn='',dis='';
   if(card){
-   if(card.exp){cls+=' exp';cd='<span class="cd" style="color:#f87171;font-weight:900">🟥 Expulsado</span>'}
+   if(card.out){cls+=' out';dis=' disabled aria-disabled="true"';cd='<span class="cd" style="color:#9ca3af;font-weight:900">Salió</span>'}
+   else if(card.exp){cls+=' exp';cd='<span class="cd" style="color:#f87171;font-weight:900">🟥 Expulsado</span>'}
    else if(card.susp){cls+=' exp';cd='<span class="cd" style="color:#f87171;font-weight:900">🟥 Suspendido</span>'}
    else if(card.yc>0)cd='<span class="cd" title="Amonestado">🟨</span>';
   }else{const d=discHub(p);cls+=d.cls;cd=d.cd;wn=d.wn}
-  return '<button type="button" class="'+cls+'" data-k="'+k+'" data-i="'+i+'"><span class="n">#'+E(p.number)+'</span><span class="ps">'+(POSL[p.pos]||p.pos)+'</span><span class="nm">'+E(p.name)+injTag(p)+'</span>'+(cd||'<span class="cd"></span>')+'<span class="bar"><i style="width:'+p.stam+'%;background:'+stamCol(p.stam)+'"></i></span><b>'+p.stam+'%</b>'+wn+'</button>';
+  return '<button type="button"'+dis+' class="'+cls+'" data-k="'+k+'" data-i="'+i+'"><span class="n">#'+E(p.number)+'</span><span class="ps">'+(POSL[p.pos]||p.pos)+'</span><span class="nm">'+E(p.name)+injTag(p)+'</span>'+(cd||'<span class="cd"></span>')+'<span class="bar"><i style="width:'+p.stam+'%;background:'+stamCol(p.stam)+'"></i></span><b>'+p.stam+'%</b>'+wn+'</button>';
  }
  function userRow(modal){
   const P=S.player;let cls='cmPr me',cd='',wn='';
@@ -856,8 +861,8 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   L.meCards={yc:me._lastYc,exp:me._wasExp};
  }
  /* Suspensiones: cumplen fecha los ya suspendidos, después se procesan las tarjetas de este partido */
- function applyDiscipline(){
-  const L=LIVE,info=S.squad.info,P=S.player;
+ function applyDiscipline(L0){
+  const L=L0||LIVE,info=S.squad.info,P=S.player;
   [P].concat(Object.keys(info).map(id=>info[id])).forEach(p=>{if((p.susp||0)>0)p.susp=Math.max(0,p.susp-1)});
   const proc=(p,yc,exp)=>{
    if(exp){p.susp=1;return}
@@ -885,9 +890,9 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  /* Tarjetas en vivo de un jugador (modal de cambios): en cancha → su bot; en el banco → lo que quedó registrado */
  function liveCard(id){
   const L=LIVE,s=L&&L.slots.find(x=>x.id===id);
-  if(s){const b=s.bot;return{yc:b.yc||0,exp:b.team==='spec'||!!b.rt,susp:false}}
+  if(s){const b=s.bot;return{yc:b.yc||0,exp:b.team==='spec'||!!b.rt,susp:false,out:false}}
   const c=L&&L.cards&&L.cards[id];
-  return{yc:c?c.yc:0,exp:false,susp:((S.squad.info[id]||{}).susp||0)>0};
+  return{yc:c?c.yc:0,exp:false,susp:((S.squad.info[id]||{}).susp||0)>0,out:wasSubbedOut(id)};
  }
 
  /* Dificultad dinámica del rival: Playoffs = 100% hard; fase regular según su posición en la tabla (fecha 1: por fuerza del club) */
@@ -929,7 +934,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   G.teamTactics={red:calcBias(m.h,true),blue:calcBias(m.a,false)};
   STAD=stadClean(m.neutral?null:hT.stadium);if(typeof STAD_CF!=='undefined')STAD_CF.length=0;
   CM.live=true;
-  LIVE={started:Date.now(),m,slots:mine.map((b,i)=>({bot:b,id:ids[i],t0:0})),bench:S.squad.bench.filter(id=>!ex||id!==ex.id),extraId:ex?ex.id:null,extraIdx:ex?ex.idx:-1,cards:{},subs:0,rival:{bots:rv,bench:rivalBench(rvT.id,rv),subs:0},played:{},inj:{},sel:null,res:null,done:false,timer:0};
+  LIVE={started:Date.now(),m,slots:mine.map((b,i)=>({bot:b,id:ids[i],t0:0})),bench:S.squad.bench.filter(id=>!ex||id!==ex.id),extraId:ex?ex.id:null,extraIdx:ex?ex.idx:-1,cards:{},subs:0,subbedOutIds:[],win:null,rival:{bots:rv,bench:rivalBench(rvT.id,rv),subs:0},played:{},inj:{},sel:null,res:null,done:false,timer:0};
   document.body.classList.add('careerOn','cmInGame');
   const lv=$('mLeave');if(lv)lv.textContent='Abandonar partido';
   const hn=$('hint');if(hn){if(!hn.dataset.o)hn.dataset.o=hn.textContent;hn.textContent='ESC: menú · P: pausa y cambios · Flechas / WASD: mover · Espacio / X: patear'}
@@ -946,12 +951,37 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   if(!CM.live||!LIVE||!G||G.over||LIVE.res)return;
   if(G.pen){showEv('No hay cambios durante la tanda de penales',1800);return}
   G.paused=true;G.cd=0;Object.keys(keys).forEach(k=>keys[k]=0);
-  LIVE.sel=null;renderSub();$('cmSub').classList.add('on');
+  LIVE.sel=null;winSnap();renderSub();$('cmSub').classList.add('on');
  }
  function closeSub(){
+  if(LIVE)LIVE.win=null; /* reanudar = confirmar los cambios de esta ventana */
   $('cmSub').classList.remove('on');
   if(G&&!G.over&&CM.live&&!menuOpen){G.paused=false;G.cd=3}
   Object.keys(keys).forEach(k=>keys[k]=0);try{$('c').focus()}catch(e){}
+ }
+ /* jugadores ya reemplazados en este partido: no pueden volver a entrar */
+ const wasSubbedOut=id=>!!(LIVE&&LIVE.subbedOutIds&&LIVE.subbedOutIds.indexOf(id)>=0);
+ /* foto del estado al abrir la ventana de cambios (para ↩ Anular cambio) */
+ function winSnap(){
+  const L=LIVE,info=S.squad.info,MS=window.MATCH_STATS,w={subs:L.subs,bench:L.bench.slice(),out:(L.subbedOutIds||[]).slice(),
+   slots:L.slots.map(sl=>({sl,id:sl.id,t0:sl.t0,bot:sl.bot,snap:Object.assign({},sl.bot)})),
+   played:Object.assign({},L.played),inj:Object.assign({},L.inj),cards:JSON.parse(JSON.stringify(L.cards||{})),
+   pinj:{},ms:null};
+  Object.keys(info).forEach(id=>{w.pinj[id]=info[id].inj});
+  try{if(MS&&MS.jugadores)w.ms=Object.keys(MS.jugadores).map(k=>({k,o:MS.jugadores[k],c:Object.assign({},MS.jugadores[k])}))}catch(e){}
+  L.win=w;
+ }
+ function undoSubs(){
+  const L=LIVE,w=L&&L.win;
+  if(!w||L.subs<=w.subs)return renderSub('No hay cambios para anular en esta ventana.');
+  const info=S.squad.info;
+  L.subs=w.subs;L.bench=w.bench.slice();L.subbedOutIds=w.out.slice();
+  w.slots.forEach(x=>{x.sl.id=x.id;x.sl.t0=x.t0;const b=x.bot;Object.keys(b).forEach(k=>{if(!(k in x.snap))delete b[k]});Object.assign(b,x.snap)});
+  L.played=Object.assign({},w.played);L.inj=Object.assign({},w.inj);L.cards=JSON.parse(JSON.stringify(w.cards));
+  Object.keys(w.pinj).forEach(id=>{if(info[id])info[id].inj=w.pinj[id]});
+  try{const MS=window.MATCH_STATS;if(w.ms&&MS&&MS.jugadores){Object.keys(MS.jugadores).forEach(k=>delete MS.jugadores[k]);w.ms.forEach(e=>{Object.assign(e.o,e.c);MS.jugadores[e.k]=e.o})}}catch(e){}
+  L.sel=null;
+  renderSub('↩ Cambios anulados: el plantel volvió a como estaba al abrir la ventana.');
  }
  function renderSub(msg){
   const q=S.squad,L=LIVE;
@@ -959,14 +989,16 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    L.slots.map((s,i)=>prHtml(q.info[s.id],'s',i,L.sel&&L.sel.k==='s'&&L.sel.i===i,liveCard(s.id))).join('')+'</div>'+
    '<div><h3>Banco de suplentes</h3>'+L.bench.map((id,i)=>prHtml(q.info[id],'b',i,L.sel&&L.sel.k==='b'&&L.sel.i===i,liveCard(id))).join('')+'</div></div>'+
    '<div class="cmNote" id="cmSubMsg">'+(msg?E(msg):'Tocá un jugador en cancha y después un suplente. Máximo 3 cambios por partido; el arquero solo por otro arquero.')+'</div>'+
-   '<div class="cmRow"><button id="cmSubClose" class="cmBig" type="button">▶ Reanudar partido</button>'+(meRed()?'<button id="cmSubSim" class="cmBig" type="button">⏩ Reemplazar y simular resto</button>':'')+'</div></div>';
+   '<div class="cmRow"><button id="cmSubUndo" type="button"'+((L.win&&L.subs>L.win.subs)?'':' disabled')+'>↩ Anular cambio</button><button id="cmSubClose" class="cmBig" type="button">▶ Reanudar partido</button>'+(meRed()?'<button id="cmSubSim" class="cmBig" type="button">⏩ Reemplazar y simular resto</button>':'')+'</div></div>';
   $('cmSubClose').onclick=closeSub;
+  $('cmSubUndo').onclick=undoSubs;
   const bsim=$('cmSubSim');if(bsim)bsim.onclick=simRestMatch;
   $('cmSub').querySelectorAll('.cmPr[data-k]').forEach(b=>b.onclick=()=>subClick(b.dataset.k,+b.dataset.i));
  }
  function subClick(k,i){
   const L=LIVE;
   if(k==='s'){const s=L.slots[i];if(s&&(s.bot.team==='spec'||!!s.bot.rt))return renderSub('⚠️ No podés sustituir a un jugador expulsado.')}
+  if(k==='b'&&wasSubbedOut(L.bench[i]))return renderSub('⚠️ Ese jugador ya salió y no puede volver a entrar.');
   if(k==='b'&&((S.squad.info[L.bench[i]].susp||0)>0))return renderSub('⚠️ Ese jugador está suspendido y no puede ingresar.');
   if(!L.sel||L.sel.k===k){L.sel={k,i};return renderSub()}
   const si=k==='s'?i:L.sel.i,bi=k==='b'?i:L.sel.i;L.sel=null;
@@ -975,6 +1007,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  function doSub(si,bi){
   const L=LIVE,q=S.squad,sl=L.slots[si],outId=sl.id,inId=L.bench[bi],out=q.info[outId],inn=q.info[inId];
   if(sl.bot.team==='spec'||!!sl.bot.rt)return renderSub('⚠️ No podés sustituir a un jugador expulsado.');
+  if(wasSubbedOut(inId))return renderSub('⚠️ Ese jugador ya salió y no puede volver a entrar.');
   if((inn.susp||0)>0)return renderSub('⚠️ Ese jugador está suspendido y no puede ingresar.');
   if(L.subs>=3)return renderSub('⚠️ Ya usaste los 3 cambios.');
   if((out.pos==='GK')!==(inn.pos==='GK'))return renderSub('⚠️ El arquero solo puede cambiarse por otro arquero.');
@@ -983,6 +1016,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   L.inj[outId]=L.inj[outId]||!!sl.bot.cInj;
   L.cards=L.cards||{};const prev=L.cards[inId];
   L.cards[outId]={yc:sl.bot.yc||0,exp:false}; /* el bot de la ranura se reutiliza: las tarjetas viajan con el jugador */
+  L.subbedOutIds=L.subbedOutIds||[];if(L.subbedOutIds.indexOf(outId)<0)L.subbedOutIds.push(outId);
   out.inj=null;L.bench[bi]=outId;sl.id=inId;sl.t0=now;
   splitStats(sl.bot);
   const b=sl.bot;b.name=inn.name;b.num=String(inn.number);b.pos=inn.pos;b.stam=inn.stam;b.cId=inId;b.cInj=false;b.yc=prev?prev.yc:0;b.fc=0;b.rc=0;
@@ -1045,7 +1079,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   const L=LIVE,info=S.squad.info,now=G.clock||0;
   for(let bi=0;bi<L.bench.length;bi++){
    const inId=L.bench[bi],inn=info[inId],pc=L.cards&&L.cards[inId];
-   if((inn.susp||0)>0||(pc&&pc.exp))continue;
+   if((inn.susp||0)>0||(pc&&pc.exp)||wasSubbedOut(inId))continue;
    let si=-1;
    L.slots.forEach((s,i)=>{
     if(s.bot.team==='spec'||!!s.bot.rt)return;
@@ -1058,6 +1092,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    L.inj[outId]=L.inj[outId]||!!sl.bot.cInj;
    L.cards=L.cards||{};
    L.cards[outId]={yc:sl.bot.yc||0,exp:false};
+   L.subbedOutIds=L.subbedOutIds||[];if(L.subbedOutIds.indexOf(outId)<0)L.subbedOutIds.push(outId);
    out.inj=null;L.bench[bi]=outId;sl.id=inId;sl.t0=now;
    splitStats(sl.bot);
    const b=sl.bot;b.name=inn.name;b.num=String(inn.number);b.pos=inn.pos;b.stam=inn.stam;b.cId=inId;b.cInj=false;b.yc=pc?pc.yc:0;b.fc=0;b.rc=0;
@@ -1069,6 +1104,11 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  function simRestMatch(){
   if(!meRed())return;
   if(!confirm('Quedaste expulsado. ¿Reemplazar y simular el resto del partido? Entra un suplente y el resultado se calcula con los minutos que faltan.'))return;
+  doSimRest();
+ }
+ function doSimRest(){
+  if(!meRed())return false;
+  if(LIVE)LIVE.win=null;
   const L=LIVE,m=L.m,myHome=m.h===S.teamId,base=S.minutes*60;
   const rem=Math.max(0,G.duration-G.clock);
   autoSubIn();
@@ -1091,7 +1131,49 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   L.res={hg,ag,ph,pa,total:Math.max(base,G.clock||0)}; /* total = partido completo → desgaste de stamina completo */
   clearTimeout(L.timer);
   finishMatch();
+  return true;
  }
+
+ /* ---- Suspendido: simular el partido completo sin jugarlo (1 fecha de suspensión) ---- */
+ function skipSuspendedMatch(){
+  const m=userMatch();
+  if(!m||CM.live||(S.player.susp||0)<=0)return false;
+  const myHome=m.h===S.teamId,base=S.minutes*60,sh=st(m.h),sa=st(m.a);
+  fixSuspended();
+  const ex=pickExtra(),ids=S.squad.starters.concat(ex?[ex.id]:[]);
+  let lh=1.3*Math.pow(sh/sa,.9)*1.08,la=1.05*Math.pow(sa/sh,.9);
+  if(myHome)lh*=.92;else la*=.92; /* jugás sin el crack: el equipo rinde un poco menos */
+  let hg=Math.min(6,pois(lh)),ag=Math.min(6,pois(la)),ph=null,pa=null;
+  if(S.phase==='playoffs'&&hg===ag){
+   const r=Math.random();
+   if(r<.22)hg++;else if(r<.44)ag++;
+   else{
+    const hw=Math.random()<Math.max(.3,Math.min(.7,.5+(sh-sa)*.25)),w=rnd(3,5),l=Math.max(0,w-rnd(1,2));
+    ph=hw?w:l;pa=hw?l:w;
+   }
+  }
+  const played={};ids.forEach(id=>{played[id]=base});
+  m.hg=hg;m.ag=ag;
+  applyStamina(played,{},base);
+  applyDiscipline({cards:{}}); /* cumple la fecha de suspensión */
+  const res={hg,ag,ph,pa,total:base};
+  m.done=false;
+  recordUser(m,res);
+  save();
+  const champ=S.phase==='done'&&S.po.champ===S.teamId&&!S.champShown;
+  if(champ){S.champShown=true;save()}
+  openHub('next');
+  if(champ)showChamp();
+  return true;
+ }
+ /* Global: si estás expulsado en el partido actual simula los minutos restantes (la suspensión de 1 fecha se aplica al terminar);
+    si estás suspendido en Próximo Partido simula ese partido completo */
+ window.cmSkipExpelledMatch=function(){
+  try{
+   if(meRed())return doSimRest();
+   return skipSuspendedMatch();
+  }catch(e){console.warn('[CareerMode] cmSkipExpelledMatch',e);return false}
+ };
 
  /* ---- fin de partido ---- */
  function onEnd(){

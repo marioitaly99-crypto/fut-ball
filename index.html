@@ -1475,7 +1475,7 @@ function whistle(){if(NET.role==='host')bc({t:'snd',k:'w'});if(!AC||muted)return
  o.type='triangle';o.frequency.value=2900;l.frequency.value=38;lg.gain.value=170;l.connect(lg).connect(o.frequency);
  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.35,t+.03);g.gain.setValueAtTime(.35,t+.5);g.gain.exponentialRampToValueAtTime(.001,t+.62);
  o.connect(g).connect(AC.destination);o.start(t);l.start(t);o.stop(t+.65);l.stop(t+.65)}
-function expel(p){const from=p.team;p.rt=from;p.rc=0;p.yc=0;p.team='spec';p.sl=null;p.cd=1;assignRoles(from);botUI()} /* Espectador hasta que termine o se reinicie el partido (restart() lo devuelve a su equipo y limpia tarjetas) */
+function expel(p){const from=p.team;p.rt=from;p.rc=0;p.yc=0;p.team='spec';p.sl=null;p.cd=1;assignRoles(from);botUI();try{if(p===me)cmRedModal()}catch(e){}} /* Espectador hasta que termine o se reinicie el partido (restart() lo devuelve a su equipo y limpia tarjetas) */
 /* Flecha punteada guía de la mira direccional (solo la ve el equipo que saca) */
 function spAimArrow(){const S=G.sp;if(!S||G.pen||S.aimAng==null||S.botTake||!me||me.team!==S.team||!SP_AIM_T.includes(S.type))return;
  const k=G.k,a=S.aimAng,c=Math.cos(a),n=Math.sin(a),x0=S.x+c*(G.ball.r+4),y0=S.y+n*(G.ball.r+4),x1=S.x+c*150*k,y1=S.y+n*150*k,h=14*k;
@@ -1532,6 +1532,37 @@ function spExecId(){const S=G.sp;if(!S)return undefined;
  if(S.type==='lateral')return S.exId!=null&&act().some(q=>q.id===S.exId)?S.exId:undefined;
  if(carOn()&&spSwapT.includes(S.type)){const ex=spExecutor();return ex?ex.id:undefined}
  return undefined}
+/* Modo Carrera: modal "¡Expulsado!" cuando el jugador del usuario ve la roja (Saltar partido → cmSkipExpelledMatch / Seguir mirando) */
+function cmRedModal(){
+ if(!document.body.classList.contains('cmInGame'))return;
+ setTimeout(()=>{
+  if(!G||G.over||G.pen||!me||me.team!=='spec'||!me.rt||document.getElementById('cmRedModal'))return;
+  if(!document.getElementById('cmRedCSS')){const st=document.createElement('style');st.id='cmRedCSS';
+   st.textContent='#cmRedModal{position:fixed;inset:0;z-index:460;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(3,8,20,.7)}'+
+    '#cmRedModal .rc{width:min(340px,92vw);text-align:center;padding:16px 18px 14px;background:#fff7e6;color:#1b1b1b;border:4px solid #111827;border-radius:22px;box-shadow:0 6px 0 #111827,0 14px 26px rgba(0,0,0,.45);animation:cmRedPop .28s cubic-bezier(.2,1.6,.4,1)}'+
+    '#cmRedModal .cd{display:block;width:44px;height:60px;margin:0 auto 6px;background:linear-gradient(180deg,#ff4d4d 0%,#d91f1f 100%);border:4px solid #111827;border-radius:8px;box-shadow:0 4px 0 #111827;transform:rotate(-8deg)}'+
+    '#cmRedModal h2{margin:0 0 4px;font-size:1.35rem;font-weight:900;font-style:italic;color:#d91f1f;text-shadow:0 2px 0 #111827;-webkit-text-stroke:1px #111827}'+
+    '#cmRedModal p{margin:0 0 12px;font-size:.84rem;font-weight:700;color:#374151;line-height:1.3}'+
+    '#cmRedModal .bt{display:flex;flex-direction:column;gap:8px}'+
+    '#cmRedModal button{width:100%;padding:10px 12px;font-size:.95rem;font-weight:900;border-radius:14px;border:3px solid #111827;color:#fff;cursor:pointer;box-shadow:0 4px 0 #111827}'+
+    '#cmRedModal button:active{transform:translateY(3px);box-shadow:0 1px 0 #111827}'+
+    '#cmRedModal #cmRedSkip{background:linear-gradient(180deg,#fb923c 0%,#ea580c 100%)}'+
+    '#cmRedModal #cmRedWatch{background:linear-gradient(180deg,#4cb5f7 0%,#1f8be3 100%)}'+
+    '@keyframes cmRedPop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}';
+   document.head.appendChild(st)}
+  const d=document.createElement('div');d.id='cmRedModal';
+  d.innerHTML='<div class="rc" role="dialog" aria-modal="true"><span class="cd"></span><h2>🟥 ¡Expulsado!</h2><p>Viste la roja y quedás afuera. Tenés 1 fecha de suspensión para el próximo partido.</p><div class="bt"><button id="cmRedSkip" type="button">⏩ Saltar partido</button><button id="cmRedWatch" type="button">Seguir mirando</button></div></div>';
+  document.body.appendChild(d);
+  G.paused=true;G.cd=0;Object.keys(keys).forEach(k=>keys[k]=0);
+  let t=0;const close=resume=>{clearInterval(t);d.remove();if(resume&&G&&!G.over&&!menuOpen){G.paused=false;G.cd=3}Object.keys(keys).forEach(k=>keys[k]=0);try{$('c').focus()}catch(e){}};
+  t=setInterval(()=>{if(!document.body.classList.contains('cmInGame')||!G||G.over)close(false)},500); /* partido terminado o abandonado */
+  document.getElementById('cmRedWatch').onclick=()=>close(true);
+  document.getElementById('cmRedSkip').onclick=()=>{
+   let ok=false;try{ok=typeof window.cmSkipExpelledMatch==='function'&&window.cmSkipExpelledMatch()}catch(e){}
+   close(!ok);
+  };
+ },900);
+}
 function refFoul(p,q,s){const W=G.w,H=G.h,b=G.ball,O=p.team,T=q.team,ownX=O==='red'?0:W,dirG=O==='red'?-1:1;
  const fx=clamp((p.x+q.x)/2,14,W-14),fy=clamp((p.y+q.y)/2,14,H-14),pen=Math.abs(fx-ownX)<areaD()&&Math.abs(fy-H/2)<areaH()/2; /* ¿dentro del área grande de quien cometió la falta? */
  let ux=q.vx,uy=q.vy,ul=Math.hypot(ux,uy);if(ul<.8){ux=q.ax||0;uy=q.ay||0;ul=Math.hypot(ux,uy)}if(ul<.05){ux=dirG;uy=0;ul=1}ux/=ul;uy/=ul; /* hacia dónde mira / avanza la víctima */
