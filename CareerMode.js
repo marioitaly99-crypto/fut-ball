@@ -715,17 +715,20 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   hub.innerHTML='<div class="cmWrap"><div class="cmHead"><button id="cmBack" class="cmGhost" type="button">← Menú</button>'+
    '<div class="cmTitle"><span class="bd">'+badge(t)+'</span><div><b>'+E(t.name)+'</b><small>'+E(S.player.name)+' (#'+S.player.num+') · '+statusText()+'</small></div></div>'+
    '<button id="cmNew" class="cmGhost" type="button">🆕 Nueva temporada</button></div>'+
-   '<nav class="cmTabs">'+[['next','⚽ Próximo Partido'],['table','📊 Tabla de Posiciones'],['fix','📅 Fixture / Playoffs'],['copa','🏆 Copa Argentina'],['squad','👕 Mi Plantel']]
+   '<nav class="cmTabs">'+[['next','⚽ Próximo Partido'],['table','📊 Tabla de Posiciones'],['fix','📅 Fixture / Playoffs'],['cal','🗓️ Calendario'],['copa','🏆 Copa Argentina'],['squad','👕 Mi Plantel']]
     .map(x=>'<button type="button" data-tab="'+x[0]+'" class="'+(TAB===x[0]?'on':'')+'">'+x[1]+'</button>').join('')+'</nav>'+
    '<div id="cmBody"></div></div>';
   const body=$('cmBody');
-  body.innerHTML=TAB==='table'?tabTable():TAB==='fix'?tabFixture():TAB==='copa'?tabCopa():TAB==='squad'?tabSquad():tabNext();
+  body.innerHTML=TAB==='table'?tabTable():TAB==='fix'?tabFixture():TAB==='cal'?tabCal():TAB==='copa'?tabCopa():TAB==='squad'?tabSquad():tabNext();
   wireHub();
  }
  function wireHub(){
   const hub=$('career-hub-screen');
   hub.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{TAB=b.dataset.tab;SEL=null;renderHub()});
   hub.querySelectorAll('[data-rk]').forEach(b=>b.onclick=()=>{RK=b.dataset.rk;renderHub()});
+  hub.querySelectorAll('[data-fx]').forEach(b=>b.onclick=()=>{FXV=b.dataset.fx;renderHub()});
+  const calB=hub.querySelector('[data-cal]');if(calB)calB.onclick=()=>{CALALL=!CALALL;renderHub()};
+  try{const on=hub.querySelector('.cmChips .on');if(on&&on.scrollIntoView)on.scrollIntoView({block:'nearest',inline:'center'})}catch(e){}
   $('cmBack').onclick=()=>show('screen-home');
   $('cmNew').onclick=newSeasonFlow;
   const p=$('cmPlay');if(p)p.onclick=playMatch;
@@ -860,7 +863,47 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
 .cmPill{display:inline-block;flex:none;min-width:38px;text-align:center;padding:3px 12px;border-radius:999px;background:#facc15;color:#0a1f3d;border:2.5px solid #0a1f3d;box-shadow:0 2px 0 #0a1f3d;font-weight:900;font-size:1.05rem;font-style:normal}
 .cmPill.s{background:#cfe3ff;min-width:0;font-size:.7rem;padding:2px 8px;white-space:nowrap}
 .cmUS{display:flex;gap:10px;flex-wrap:wrap;margin:2px 0 4px}
-.cmUSi{display:inline-flex;align-items:center;gap:6px;font-weight:900;font-size:.85rem;color:#fff}`;
+.cmUSi{display:inline-flex;align-items:center;gap:6px;font-weight:900;font-size:.85rem;color:#fff}
+/* ---- Fixture en cuadrícula · Calendario · Vitrina ---- */
+.cmGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:8px}
+.cmGc{display:flex;flex-direction:column;gap:3px;min-width:0;padding:6px 8px;background:#161a1f;border:2px solid #0a1f3d;border-radius:12px;box-shadow:0 3px 0 rgba(0,0,0,.4);font-weight:800;font-size:.78rem}
+.cmGc.me{background:#1f8be3}.cmGc.cur{outline:2px solid #facc15}
+.cmGc .gh,.cmGc .gf{display:flex;justify-content:space-between;gap:6px;font-size:.6rem;font-weight:900;color:#9fc0ee;text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;overflow:hidden}
+.cmGc.me .gh,.cmGc.me .gf{color:#e0f2ff}
+.cmGc .r{display:flex;align-items:center;gap:5px;min-width:0}
+.cmGc .r .cmBd{width:22px;height:22px}
+.cmGc .r b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.cmGc .r em{min-width:26px;text-align:right;font-style:normal;font-weight:900;color:#facc15}
+.cmGc.me .r em{color:#fff}.cmGc .r.w b,.cmGc .r.w em{color:#86efac}
+.cmBd.q{display:flex;align-items:center;justify-content:center;border:2px dashed #475569;border-radius:50%;color:#94a3b8;font-size:.7rem;font-weight:900}
+.cmLv{font-style:normal;font-size:.6rem;font-weight:900;line-height:1;padding:2px 5px;border-radius:999px;border:1.5px solid #000;color:#fff;white-space:nowrap}
+.cmLv.l{background:#16a34a}.cmLv.v{background:#ea580c}.cmLv.n{background:#7c3aed}
+.cmChips{display:flex;gap:5px;overflow-x:auto;padding:2px 0 6px;-webkit-overflow-scrolling:touch}
+.cmChip{flex:none;background:#262c34;color:#fff;border:2px solid #0a1f3d;border-radius:999px;padding:4px 10px;font-size:.74rem;font-weight:900;cursor:pointer}
+.cmChip.dn{color:#86efac}.cmChip.on{background:linear-gradient(180deg,#4cb5f7 0%,#1f8be3 100%);color:#fff;border-color:#0a1f3d}
+.cmCal{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:8px;padding-top:6px}
+.cmCc{position:relative;display:flex;flex-direction:column;gap:6px;min-width:0;padding:8px;background:#161a1f;border:2px solid #0a1f3d;border-radius:14px;box-shadow:0 3px 0 rgba(0,0,0,.4)}
+.cmCc.nx{border-color:#facc15;background:#1c2430}
+.cmCc .ct{display:flex;align-items:center;gap:8px;min-width:0}
+.cmCc .ci{flex:none;display:block;width:34px;height:34px}.cmCc .ci svg{width:34px;height:34px;margin:0!important;display:block}
+.cmCc .ct b{display:block;font-size:.78rem;color:#facc15;font-style:italic;line-height:1.1}
+.cmCc .ct small{display:block;font-size:.66rem;color:#9fc0ee;font-weight:800;line-height:1.15}
+.cmCc .cr{display:flex;align-items:center;gap:6px;min-width:0;font-weight:900;font-size:.82rem}
+.cmCc .cr .cmBd{width:26px;height:26px}.cmCc .cr b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmCc .cn{font-size:.64rem;color:#9fc0ee;font-weight:800}
+.cmCc .cx{position:absolute;top:-9px;right:8px;background:#facc15;color:#0a1f3d;border:2px solid #0a1f3d;border-radius:999px;font-size:.56rem;font-weight:900;padding:1px 7px}
+.cmVit{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.cmVt{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;text-align:center;padding:8px 6px;background:#161a1f;border:2px solid #0a1f3d;border-radius:14px;box-shadow:0 3px 0 rgba(0,0,0,.4)}
+.cmVt .ti{display:block}.cmVt .ti svg{display:block;margin:0!important;filter:grayscale(1) opacity(.45)}
+.cmVt.got .ti svg{filter:drop-shadow(0 0 6px rgba(250,204,21,.7))}
+.cmVt b{font-size:.72rem;color:#facc15;font-style:italic;text-transform:uppercase;line-height:1.1}
+.cmVt .cmBd{width:40px;height:40px}
+.cmVt .pd{font-size:.8rem;font-weight:900;color:#94a3b8;font-style:italic;padding:10px 0}
+.cmVt .cn2{font-size:.76rem;font-weight:900;line-height:1.1}
+.cmVt.me{border-color:#facc15;box-shadow:0 0 14px rgba(250,204,21,.5),0 3px 0 rgba(0,0,0,.4)}
+.cmVt em{font-style:normal;font-size:.6rem;font-weight:900;color:#0a1f3d;background:#facc15;border-radius:999px;padding:1px 8px}
+@media(max-width:420px){.cmGrid,.cmCal{grid-template-columns:repeat(2,minmax(0,1fr))}}
+`;
   document.head.appendChild(s);
  }
  function tabTable(){return rkNav()+(RK==='pos'?posHtml():'<div class="cmCard">'+rankHtml(RK)+'</div>')}
@@ -953,11 +996,111 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   return '<div class="cmCard"><h2>'+copaArgSvg(40)+' COPA ARGENTINA</h2><div class="cmNote">30 clubes de Primera · 28 juegan Dieciseisavos y 2 clasifican directo a Octavos · partido único en cancha neutral · penales directos si empatan.</div>'+
    '<div class="cmWarn">'+stg+'</div>'+copaBracketHtml()+'<div class="cmNote">📅 '+cal+'</div></div>';
  }
+ /* ---- Fixture / Playoffs en cuadrícula de tarjetas compactas ---- */
+ let FXV=null,FXK='',CALALL=false;
+ const FXS={octavos:'Octavos',cuartos:'Cuartos',semis:'Semis',final:'Final'};
+ const lvPill=(c,t)=>'<i class="cmLv '+c+'">'+t+'</i>';
+ /* tarjeta compacta: escudo + sigla + L/V (o sede neutral) + resultado/estado + fecha */
+ function gcHtml(m,head,cur,proj){
+  const mine=m.h===S.teamId||m.a===S.teamId,neutral=!!m.neutral;
+  const win=m.done?(m.w||(m.hg>m.ag?m.h:m.ag>m.hg?m.a:null)):null;
+  const row=(id,g,isH)=>{const t=T(id);return '<div class=\"r'+(win===id?' w':'')+'\"><span class=\"cmBd\">'+badge(t)+'</span><b>'+E(t.shortName)+'</b>'+(neutral?'':lvPill(isH?'l':'v',isH?'L':'V'))+'<em>'+(m.done?g+(m.pen?' ('+(isH?m.pen.h:m.pen.a)+')':''):'–')+'</em></div>'};
+  let st;
+  if(m.done){st='Final'+(m.pen?' · pen.':'');if(mine)st=win===S.teamId?'✅ Ganaste':win?'❌ Perdiste':'🤝 Empate'}
+  else st=proj?'Proyección':(cur&&mine)?'▶ Tu partido':'Por jugar';
+  const ic=m.kind==='C'?'🔥 Clásico':m.kind==='I'?'🌐 Interzonal':'';
+  const nt=neutral?'🏟️ Neutral'+(m.venue?' · '+E(T(m.venue).shortName):''):'';
+  return '<div class=\"cmGc'+(mine?' me':'')+(cur&&mine&&!m.done?' cur':'')+'\"><div class=\"gh\"><span>'+E(head)+'</span><span>'+ic+'</span></div>'+row(m.h,m.hg,true)+row(m.a,m.ag,false)+'<div class=\"gf\"><span>'+st+'</span><span>'+nt+'</span></div></div>';
+ }
  function tabFixture(){
-  const fx=S.fixture.map((f,i)=>{
-   const n=i+1,played=f.every(m=>m.done),cur=S.phase==='regular'&&n===S.fecha;
-   return '<details'+(cur?' open':'')+'><summary>Fecha '+n+(n===16?' · Interzonal':'')+(played?' ✅':cur?' ▶ (actual)':'')+'</summary>'+f.map(gmHtml).join('')+'</details>'}).join('');
-  return '<div class="cmCard cmFx"><h2>'+tnName()+' · Fase regular · 16 fechas</h2>'+fx+'</div><div class="cmCard"><h2>Playoffs · Octavos → Cuartos → Semis → Final</h2>'+(S.po?'':'<div class="cmNote">Octavos proyectados según la tabla actual; se confirman al terminar la fecha 16 (clasifican los 8 primeros de cada zona).</div>')+bracketHtml()+'</div>';
+  const key=S.torneo+'|'+S.phase+'|'+S.fecha+'|'+(S.po&&S.po.stage||'');
+  if(key!==FXK){FXK=key;FXV=null}
+  const opts=[];for(let n=1;n<=16;n++)opts.push(['f'+n,'F'+n]);STAGES.forEach(sg=>opts.push([sg,FXS[sg]]));
+  const def=S.phase==='regular'?'f'+Math.min(16,S.fecha):(S.phase==='playoffs'&&S.po)?S.po.stage:S.po?'final':'f16';
+  if(!FXV||!opts.some(o=>o[0]===FXV))FXV=def;
+  const isF=/^f\d+$/.test(FXV),mineN=m=>+(m.h===S.teamId||m.a===S.teamId);
+  let cards='',ttl='';
+  if(isF){
+   const n=+FXV.slice(1),fx=(S.fixture[n-1]||[]).slice().sort((a,b)=>mineN(b)-mineN(a));
+   ttl='Fase regular · Fecha '+n+' de 16'+(n===16?' · Interzonal':'');
+   cards=fx.map(m=>gcHtml(m,'Fecha '+n,S.phase==='regular'&&n===S.fecha,false)).join('');
+  }else{
+   let rd=S.po&&S.po.rounds[FXV]||[];const proj=FXV==='octavos'&&!rd.length&&S.phase==='regular';
+   if(proj)rd=projOctavos();
+   ttl='Playoffs · '+STAGE_LBL[FXV]+(proj?' (proyección)':'');
+   if(rd.length)cards=rd.slice().sort((a,b)=>mineN(b)-mineN(a)).map(m=>gcHtml(m,STAGE_LBL[FXV],S.phase==='playoffs'&&S.po.stage===FXV,proj)).join('');
+   else{const cnt={octavos:8,cuartos:4,semis:2,final:1}[FXV];for(let i=0;i<cnt;i++)cards+='<div class=\"cmGc\"><div class=\"gh\"><span>'+E(STAGE_LBL[FXV])+'</span><span></span></div><div class=\"r\"><span class=\"cmBd q\">?</span><b>A definir</b></div><div class=\"r\"><span class=\"cmBd q\">?</span><b>A definir</b></div><div class=\"gf\"><span>Por jugar</span><span></span></div></div>'}
+  }
+  const chips=opts.map(o=>{const done=/^f\d+$/.test(o[0])?(S.fixture[+o[0].slice(1)-1]||[]).every(m=>m.done):!!(S.po&&S.po.rounds[o[0]]&&S.po.rounds[o[0]].length&&S.po.rounds[o[0]].every(m=>m.done));return '<button type=\"button\" class=\"cmChip'+(FXV===o[0]?' on':'')+(done?' dn':'')+'\" data-fx=\"'+o[0]+'\">'+o[1]+'</button>'}).join('');
+  return '<div class=\"cmCard\"><h2>'+tnName()+' · '+ttl+'</h2><div class=\"cmChips\">'+chips+'</div><div class=\"cmGrid\">'+cards+'</div>'+
+   (!S.po?'<div class=\"cmNote\">Octavos proyectados según la tabla actual; se confirman al terminar la fecha 16 (clasifican los 8 primeros de cada zona).</div>':'')+
+   (S.po&&S.po.champ?'<div class=\"cmWarn\">🏆 Campeón: <b>'+E(nameOf(S.po.champ))+'</b></div>':'')+'</div>';
+ }
+
+ /* ---- Calendario (próximos compromisos del club) + vitrina Campeones de la Temporada ---- */
+ const CERT={apertura:'Torneo Apertura',clausura:'Torneo Clausura',copa:'Copa Argentina',trofeo:'Trofeo de Campeones'};
+ const certIcon=(k,sz)=>k==='copa'?copaArgSvg(sz):k==='trofeo'?cupSvg('#facc15',sz):cupSvg('#cbd5e1',sz,true);
+ function userFxM(n,inv){
+  const f=S.fixture[n-1],m=f&&f.find(x=>x.h===S.teamId||x.a===S.teamId);if(!m)return null;
+  const bh=m.h===S.teamId,home=inv?!bh:bh;
+  return{rival:bh?m.a:m.h,loc:home?'L':'V',kind:m.kind,done:m.done};
+ }
+ function calItems(){
+  const out=[],C=S.copa,tid=S.teamId;
+  if(!S||!(S.phase==='regular'||S.phase==='playoffs'||S.phase==='trofeo'))return out;
+  const copaOn=!!C&&!C.done&&!C.out;
+  const copaItem=i=>{
+   const stg=COPA_ST[i];let rival=null,venue=null,note='';
+   const known=C.rounds[stg]&&C.rounds[stg].length&&!(i===0&&C.next===0);
+   if(known){
+    const m=C.rounds[stg].find(x=>x.h===tid||x.a===tid);
+    if(m){rival=m.h===tid?m.a:m.h;venue=m.venue}
+    else if(i===0&&C.byes.indexOf(tid)>=0)note='Libre: clasificado directo a Octavos';
+   }else if(i===0)note='Sorteo pendiente';
+   else note='Si avanzás de ronda';
+   out.push({ic:'copa',title:CERT.copa,sub:COPA_LBL[stg],rival,loc:'N',venue,note});
+  };
+  if(copaOn&&S.copaDue)copaItem(COPA_ST.indexOf(S.copaDue));
+  const tns=S.phase==='trofeo'?[]:S.torneo==='apertura'?['apertura','clausura']:['clausura'];
+  tns.forEach(tn=>{
+   const cur=tn===S.torneo,f0=cur?(S.phase==='regular'?S.fecha:17):1;
+   for(let n=f0;n<=16;n++){
+    const u=userFxM(n,!cur);
+    if(u&&!(cur&&u.done))out.push({ic:tn,title:CERT[tn],sub:'Fecha '+n+(n===16?' · Interzonal':''),rival:u.rival,loc:u.loc,venue:null,note:u.kind==='C'?'🔥 Clásico':u.kind==='I'?'🌐 Interzonal':''});
+    if(copaOn)COPA_PTS.forEach((pt,i)=>{if(pt[0]===tn&&pt[1]===n&&i>=C.next)copaItem(i)});
+   }
+   if(cur&&S.phase==='playoffs'){
+    if(!S.po.out)STAGES.forEach((sg,si)=>{
+     if(si<STAGES.indexOf(S.po.stage))return;
+     const m=(S.po.rounds[sg]||[]).find(x=>!x.done&&(x.h===tid||x.a===tid));
+     out.push({ic:tn,title:CERT[tn],sub:'Playoffs · '+STAGE_LBL[sg],rival:m?(m.h===tid?m.a:m.h):null,loc:m?(m.neutral?'N':m.h===tid?'L':'V'):(sg==='final'?'N':''),venue:null,note:m?'':'Si avanzás de ronda'});
+    });
+   }else out.push({ic:tn,title:CERT[tn],sub:'Playoffs · Octavos → Final',rival:null,loc:'',venue:null,note:'Si clasificás (8 primeros de la zona)'});
+  });
+  const tr=S.trofeo;
+  if(S.phase==='trofeo'){if(tr&&!tr.done&&(tr.h===tid||tr.a===tid))out.push({ic:'trofeo',title:CERT.trofeo,sub:'Partido único',rival:tr.h===tid?tr.a:tr.h,loc:'N',venue:null,note:''})}
+  else out.push({ic:'trofeo',title:CERT.trofeo,sub:'Campeón Apertura vs Campeón Clausura',rival:null,loc:'N',venue:null,note:'Si ganás un torneo'});
+  return out;
+ }
+ function calCard(it,i){
+  const rv=it.rival?T(it.rival):null;
+  const sh=rv?'<span class=\"cmBd\">'+badge(rv)+'</span><b>'+E(rv.shortName)+'</b>':'<span class=\"cmBd q\">?</span><b>Por definir</b>';
+  const loc=it.loc==='L'||it.loc==='V'?lvPill(it.loc==='L'?'l':'v',it.loc):it.loc==='N'?'<i class=\"cmLv n\">🏟️ Neutral</i>':'';
+  const note=(it.venue?'🏟️ Sede: '+E(T(it.venue).shortName)+(it.note?' · ':''):'')+E(it.note||'');
+  return '<div class=\"cmCc'+(i===0?' nx':'')+'\">'+(i===0?'<span class=\"cx\">PRÓXIMO</span>':'')+'<div class=\"ct\"><span class=\"ci\">'+certIcon(it.ic,34)+'</span><div><b>'+E(it.title)+'</b><small>'+E(it.sub)+'</small></div></div><div class=\"cr\">'+sh+loc+'</div>'+(note?'<div class=\"cn\">'+note+'</div>':'')+'</div>';
+ }
+ function vitrinaHtml(){
+  const C=S.copa,tr=S.trofeo;
+  const L=[['apertura',S.aperturaChampionId],['copa',C&&C.done?C.champ:null],['clausura',S.clausuraChampionId],['trofeo',tr&&tr.done?tr.w:null]];
+  return '<div class=\"cmCard\"><h2>🏆 Campeones de la Temporada</h2><div class=\"cmVit\">'+L.map(x=>{
+   const id=x[1],t=id?T(id):null,mine=!!id&&id===S.teamId;
+   return '<div class=\"cmVt'+(id?' got':'')+(mine?' me':'')+'\"><span class=\"ti\">'+certIcon(x[0],46)+'</span><b>'+E(CERT[x[0]])+'</b>'+(t?'<span class=\"cmBd\">'+badge(t)+'</span><span class=\"cn2\">'+E(t.name)+'</span>'+(mine?'<em>¡Tu club!</em>':''):'<span class=\"pd\">Por definir</span>')+'</div>';
+  }).join('')+'</div></div>';
+ }
+ function tabCal(){
+  const it=calItems(),lim=12,show=CALALL?it:it.slice(0,lim);
+  return vitrinaHtml()+'<div class=\"cmCard\"><h2>🗓️ Calendario · Próximos compromisos</h2>'+
+   (it.length?'<div class=\"cmCal\">'+show.map(calCard).join('')+'</div>'+(it.length>lim?'<button type=\"button\" class=\"cmGhost\" data-cal=\"1\" style=\"align-self:center\">'+(CALALL?'Ver menos':'Ver todos ('+it.length+')')+'</button>':''):'<div class=\"cmNote\">No hay más compromisos programados para tu club en esta temporada.</div>')+'</div>';
  }
 
  /* ---- Mi Plantel ---- */
@@ -1456,6 +1599,357 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   const hn=$('hint');if(hn&&hn.dataset.o)hn.textContent=hn.dataset.o;
  }
  /* ---- cola de carteles (persistida en S.modalQ): inicio de torneo, campeón, Trofeo de Campeones ---- */
+ /* ---- Escena de celebración del campeón: <canvas> cartoon vector (estadio nocturno, 6 titulares, trofeo, fuegos artificiales, confeti y fanfarria) ---- */
+ var CAMP=null;
+ function stopCampScene(){
+  const C=CAMP;if(!C)return;
+  CAMP=null;
+  try{if(C.raf)cancelAnimationFrame(C.raf)}catch(e){}
+  try{if(C.onResize){window.removeEventListener('resize',C.onResize);window.removeEventListener('orientationchange',C.onResize)}}catch(e){}
+  try{if(C.onUnlock)document.removeEventListener('pointerdown',C.onUnlock,true)}catch(e){}
+  try{if(C.ac)C.ac.close()}catch(e){}
+ }
+ const campRgb=(h,f)=>'rgb('+hexRgb(h).map(v=>Math.max(0,Math.min(255,Math.round(f(v))))).join(',')+')';
+ const campDark=(h,a)=>campRgb(h,v=>v*a);
+ const campLight=(h,a)=>campRgb(h,v=>v+(255-v)*a);
+ const campFont=sz=>'italic 900 '+sz+'px "Arial Black","Impact","Segoe UI Black",Arial,sans-serif';
+ function campRR(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+ /* Letras gruesas cartoon: sombra negra extruida + contorno negro + relleno */
+ function campText(c,txt,x,y,sz,fill,maxW){
+  c.save();c.font=campFont(sz);
+  if(maxW){const w=c.measureText(txt).width;if(w>maxW){sz*=maxW/w;c.font=campFont(sz)}}
+  c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.miterLimit=2;
+  c.fillStyle='#000';c.strokeStyle='#000';c.lineWidth=sz*.3;
+  c.strokeText(txt,x,y+sz*.1);c.fillText(txt,x,y+sz*.1);
+  c.strokeText(txt,x,y);
+  c.fillStyle=fill;c.fillText(txt,x,y);
+  c.restore();
+ }
+ /* Ficha circular de la camiseta (mismo diseño que kitSvg) con contorno negro grueso y dorsal */
+ function campKit(c,k,x,y,R,num){
+  const c1=k.c1||'#1d4ed8',c2=k.c2||'#ffffff',c3=k.c3||'#ffffff',s=k.st,n=k.n;
+  const rc=(col,rx,ry,w,h)=>{c.fillStyle=col;c.fillRect(rx,ry,w,h)};
+  c.save();c.translate(x-R,y-R);const f=2*R/64;c.scale(f,f);
+  c.beginPath();c.arc(32,32,32,0,Math.PI*2);c.clip();
+  rc(c1,0,0,64,64);
+  if(n===2){
+   if(s==='v1')rc(c2,22,0,20,64);
+   else if(s==='h1')rc(c2,0,22,64,20);
+   else if(s==='vs'){for(let i=1;i<5;i+=2)rc(c2,i*12.8,0,12.8,64)}
+   else if(s==='hs'){for(let i=1;i<5;i+=2)rc(c2,0,i*12.8,64,12.8)}
+   else if(s==='mv')rc(c2,32,0,32,64);
+   else if(s==='mh')rc(c2,0,32,64,32);
+   else if(s==='vv'){c.strokeStyle=c2;c.lineWidth=14;c.beginPath();c.moveTo(2,18);c.lineTo(32,46);c.lineTo(62,18);c.stroke()}
+   else{c.strokeStyle=c2;c.lineWidth=17;c.beginPath();c.moveTo(-4,-4);c.lineTo(68,68);c.stroke()}
+  }else if(n===3){
+   if(s==='bv'){for(let i=1;i<5;i+=2)rc(c2,i*12.8,0,12.8,64);for(let i=1;i<5;i++)rc(c3,i*12.8-1,0,2,64)}
+   else if(s==='bh'){for(let i=1;i<5;i+=2)rc(c2,0,i*12.8,64,12.8);for(let i=1;i<5;i++)rc(c3,0,i*12.8-1,64,2)}
+   else if(s==='cb'){rc(c2,0,20,64,10);rc(c3,0,34,64,10)}
+   else{rc(c2,21.3,0,21.4,64);rc(c3,42.7,0,21.3,64)}
+  }
+  c.restore();
+  c.save();c.strokeStyle='#000';c.lineWidth=R*.17;c.beginPath();c.arc(x,y,R-R*.085,0,Math.PI*2);c.stroke();c.restore();
+  if(num!==''&&num!=null){
+   c.save();let fs=R*.95;c.font='900 '+fs+'px "Segoe UI",system-ui,sans-serif';
+   const w=c.measureText(String(num)).width;if(w>R*1.45){fs*=R*1.45/w;c.font='900 '+fs+'px "Segoe UI",system-ui,sans-serif'}
+   c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=fs*.26;c.strokeStyle='#000';c.fillStyle='#fff';
+   c.strokeText(String(num),x,y+R*.05);c.fillText(String(num),x,y+R*.05);c.restore();
+  }
+ }
+ /* Copas cartoon vector (mismos trazos que cupSvg/copaArgSvg): 'lpf' plateada, 'gold' dorada, 'copa' celeste/plateada. (cx,by) = centro de la base */
+ function campCup(c,type,cx,by,size){
+  const s=size/64,gold=type==='gold',copa=type==='copa',bot=copa?60:58;
+  c.save();c.translate(cx-32*s,by-bot*s);c.scale(s,s);c.lineJoin='round';c.lineCap='round';
+  const st=(col,w)=>{c.strokeStyle=col;c.lineWidth=w};
+  if(copa){
+   const hd=new Path2D('M17 12H7c0 11 5 16 11 16M47 12h10c0 11-5 16-11 16'),bd=new Path2D('M16 5h32v17c0 12-7 19-16 19S16 34 16 22V5z');
+   c.fillStyle='none';st('#000',9);c.stroke(hd);st('#e2e8f0',4.5);c.stroke(hd);
+   c.fillStyle='#e2e8f0';c.fill(bd);
+   c.save();c.clip(bd);const cols=['#38bdf8','#ffffff','#38bdf8','#ffffff','#38bdf8'];cols.forEach((k,i)=>{c.fillStyle=k;c.fillRect(16+i*6.4,5,6.4,40)});c.restore();
+   st('#000',4);c.stroke(bd);
+   campRR(c,12,4,40,5,2);c.fillStyle='#cbd5e1';c.fill();st('#000',3);c.stroke();
+   c.fillStyle='#cbd5e1';c.fillRect(28,41,8,8);st('#000',3);c.strokeRect(28,41,8,8);
+   c.fillStyle='#334155';c.fillRect(21,49,22,5);c.strokeRect(21,49,22,5);
+   campRR(c,15,54,34,6,1.5);c.fillStyle='#1f2937';c.fill();st('#000',3.5);c.stroke();
+  }else{
+   const col=gold?'#facc15':'#cbd5e1',dk=gold?'#e0a800':'#94a3b8',hi=gold?'#fff6bf':'#ffffff';
+   const hd=new Path2D('M18 14H8c0 10 5 15 10 15M46 14h10c0 10-5 15-10 15'),bd=new Path2D('M17 6h30v18c0 11-7 18-15 18S17 35 17 24V6z');
+   st('#000',9);c.stroke(hd);st(col,5);c.stroke(hd);
+   c.fillStyle=col;c.fill(bd);st('#000',4);c.stroke(bd);
+   st(hi,3);c.stroke(new Path2D('M23 10v14c0 6 3 11 7 13'));
+   if(gold){c.fillStyle='#000';c.fill(new Path2D('M32 15l2.4 5 5.4.6-4 3.7 1.1 5.3-4.9-2.7-4.9 2.7 1.1-5.3-4-3.7 5.4-.6z'))}
+   else{c.fillStyle='#000';c.font='900 9px Arial,sans-serif';c.textAlign='center';c.textBaseline='alphabetic';c.fillText('LPF',32,26)}
+   c.fillStyle=dk;c.fillRect(28,42,8,8);st('#000',3);c.strokeRect(28,42,8,8);
+   campRR(c,19,50,26,8,2.5);c.fillStyle=col;c.fill();st('#000',3.5);c.stroke();
+  }
+  c.restore();
+ }
+ function campStar(c,x,y,r,rot){
+  c.beginPath();for(let i=0;i<8;i++){const a=rot+i*Math.PI/4,d=i%2?r*.28:r;c.lineTo(x+Math.cos(a)*d,y+Math.sin(a)*d)}c.closePath();c.fill();
+ }
+ /* Fanfarria triunfal breve (Web Audio): tres notas rápidas + arpegio ascendente + acorde final */
+ function campFanfare(ST){
+  let played=false;
+  try{
+   const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+   const ac=new AC();ST.ac=ac;
+   const play=()=>{
+    if(played||CAMP!==ST||ac.state!=='running')return;played=true;
+    const t0=ac.currentTime+.05,master=ac.createGain();
+    master.gain.setValueAtTime(.55,t0);master.gain.setValueAtTime(.55,t0+1.9);master.gain.exponentialRampToValueAtTime(.001,t0+2.6);master.connect(ac.destination);
+    const tone=(f,at,d,vol,type)=>{
+     const o=ac.createOscillator(),g=ac.createGain(),fl=ac.createBiquadFilter();
+     o.type=type;o.frequency.value=f;fl.type='lowpass';fl.frequency.value=3000;
+     g.gain.setValueAtTime(.0001,t0+at);g.gain.exponentialRampToValueAtTime(vol,t0+at+.02);
+     g.gain.setValueAtTime(vol,t0+at+Math.max(.03,d-.08));g.gain.exponentialRampToValueAtTime(.0001,t0+at+d);
+     o.connect(fl);fl.connect(g);g.connect(master);o.start(t0+at);o.stop(t0+at+d+.05);
+    };
+    const note=(f,at,d,v)=>{tone(f,at,d,v||.2,'square');tone(f*1.003,at,d,(v||.2)*.55,'sawtooth')};
+    note(392,0,.11);note(392,.14,.11);note(392,.28,.11);
+    note(523.25,.44,.3);note(659.25,.78,.18);note(783.99,.98,.18);
+    note(1046.5,1.18,.95,.22);note(523.25,1.18,.95,.13);note(659.25,1.18,.95,.13);note(783.99,1.18,.95,.13);
+    tone(130.81,1.18,.95,.25,'triangle');tone(130.81,.44,.3,.2,'triangle');
+   };
+   if(ac.resume){try{ac.resume().then(play,function(){})}catch(e){}}
+   play();
+   if(!played){ST.onUnlock=()=>{try{ac.resume().then(play,function(){})}catch(e){}play()};document.addEventListener('pointerdown',ST.onUnlock,true)}
+  }catch(e){console.warn('[CareerMode] fanfarria',e)}
+ }
+ function startCampScene(cv,it){
+  stopCampScene();
+  const t=T(it.id),kit=t.kitHome||{c1:'#1d4ed8',c2:'#facc15',n:1},c1=kit.c1||'#1d4ed8',c2=kit.c2||'#facc15';
+  const TNAME={apertura:'TORNEO APERTURA',clausura:'TORNEO CLAUSURA',copa:'COPA ARGENTINA',trofeo:'TROFEO DE CAMPEONES'};
+  const line1='CAMPEÓN '+(TNAME[it.torneo]||'TORNEO'),line2=String(t.name||'').toLocaleUpperCase('es');
+  const cupType=it.torneo==='trofeo'?'gold':it.torneo==='copa'?'copa':'lpf';
+  const q=S.squad,nums=[];
+  q.starters.forEach(id=>{const p=q.info[id];if(p)nums.push(String(p.number))});
+  q.bench.forEach(id=>{const p=q.info[id];if(p&&nums.length<5)nums.push(String(p.number))});
+  while(nums.length<5)nums.push('');
+  const userNum=String(S.player.num),userName=String(S.player.name||'').toLocaleUpperCase('es');
+  const c=cv.getContext('2d');
+  const ST={raf:0,cv,ac:null,onResize:null,onUnlock:null};CAMP=ST;
+  /* escudo del club (SVG → Image) con respaldo dibujado */
+  let bimg=null,bok=false;
+  try{
+   let sv=String(t.badgeSvg||'');
+   if(sv){if(!/xmlns=/.test(sv))sv=sv.replace('<svg','<svg xmlns="http://www.w3.org/2000/svg"');bimg=new Image();bimg.onload=()=>{bok=true};bimg.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(sv)}
+  }catch(e){bimg=null}
+  const rn=(a,b)=>a+Math.random()*(b-a);
+  const PAL=['#facc15','#ffffff','#f472b6','#38bdf8','#4ade80','#fb923c','#c084fc',campLight(c1,.35),campLight(c2,.35)];
+  const SKIN=['#f5cba7','#e0ac69','#c68642','#8d5524','#ffdbac'];
+  let W=0,H=0,dpr=1,L={};
+  const layout=()=>{
+   const r=cv.getBoundingClientRect();
+   W=Math.max(240,Math.round(r.width||window.innerWidth));H=Math.max(240,Math.round(r.height||window.innerHeight));
+   dpr=Math.min(2,window.devicePixelRatio||1);cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+   const cp=H<460,pad=Math.max(6,H*.012),B=Math.min(H*(cp?.085:.1),W*.2);
+   let F1=Math.min(H*(cp?.05:.046),W*.07),F2=Math.min(H*(cp?.085:.078),W*.115);
+   const mw=W*.9-2*pad;
+   c.font=campFont(F1);let w1=c.measureText(line1).width;if(w1>mw){F1*=mw/w1;w1=mw}
+   c.font=campFont(F2);let w2=c.measureText(line2).width;if(w2>mw){F2*=mw/w2;w2=mw}
+   const gap=F1*.25,top=Math.max(4,H*.012),pw=Math.min(W-8,Math.max(w1,w2,B)+F2*.9);
+   const l1=top+pad+B+gap+F1*.55,l2=l1+F1*.55+gap*.6+F2*.6,ph=l2+F2*.62+pad-top,bb=top+ph;
+   const G=Math.min(H*.8,H-72),R=Math.max(12,Math.min(W*.062,H*.07,(G-bb-6)/9.6));
+   L={pad,B,F1,F2,pw,ph,top,l1,l2,bb,standTop:H*.4,standBot:H*.66,pitchTop:H*.69,G,R};
+  };
+  layout();
+  ST.onResize=()=>{if(CAMP===ST&&cv.isConnected)layout()};
+  window.addEventListener('resize',ST.onResize);window.addEventListener('orientationchange',ST.onResize);
+  /* elementos de la escena */
+  const stars=[];for(let i=0;i<80;i++)stars.push({u:Math.random(),v:Math.random()*.4,r:rn(.6,1.6),ph:rn(0,6.28)});
+  const ROWS=7,crowd=[];
+  for(let r=0;r<ROWS;r++){const n=32+r*3;for(let i=0;i<n;i++)crowd.push({r,n,u:(i+.5+rn(-.25,.25))/n,ph:rn(0,6.28),sk:SKIN[(Math.random()*5)|0],arm:Math.random()<.45,w:i%3===0})}
+  const camF=[];let nextCam=.3;
+  const slots=[{dx:-3.4,row:0},{dx:3.4,row:0},{dx:-5.7,row:1},{dx:5.7,row:1},{dx:-1.9,row:1}],AMP=[1,1.15,.85,1.05,.95];
+  const players=slots.map((s,i)=>({kit,num:nums[i],dx:s.dx,row:s.row,sc:s.row?.92:1,per:.62+.07*i,phase:(i*.23)%1,amp:AMP[i],skin:SKIN[(i+1)%5],user:false}));
+  const user={kit,num:userNum,dx:0,row:0,sc:1.25,per:.8,phase:0,amp:1.5,skin:SKIN[0],user:true};
+  const rockets=[],sparks=[],flashes=[],conf=[];
+  let nextL=.15,nL=0,T0=0;
+  const hs=()=>H/700;
+  const launch=()=>{rockets.push({x0:W*rn(.1,.9),y0:L.standTop,x:0,ty:H*rn(.07,.3),age:0,dur:rn(.7,1),col:PAL[(Math.random()*PAL.length)|0]});const r=rockets[rockets.length-1];r.x=r.x0+rn(-W*.04,W*.04)};
+  const explode=(x,y,col)=>{
+   const n=44+((Math.random()*26)|0),k=hs(),ring=Math.random()<.35,col2=PAL[(Math.random()*PAL.length)|0];
+   for(let i=0;i<n;i++){const a=i/n*6.2832+rn(-.05,.05),sp=(ring?170:rn(70,230))*k;sparks.push({x,y,px:x,py:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:0,max:rn(.9,1.5),col:i%3===0?col2:col,w:rn(1.6,2.6)*Math.max(.7,k),g:1})}
+   flashes.push({x,y,age:0});
+   if(sparks.length>900)sparks.splice(0,sparks.length-900);
+  };
+  const NC=Math.round(Math.min(260,Math.max(120,W*H/3200)));
+  const mkConf=(init)=>({bx:rn(0,W),y:init?rn(-H*.1,H):-rn(10,H*.15),vy:rn(70,150)*Math.max(.8,hs()),sw:rn(.8,2.2),ph:rn(0,6.28),amp:rn(10,36),rot:rn(0,6.28),vr:rn(-5,5),fl:rn(0,6.28),vf:rn(4,10),w:rn(6,11)*Math.max(.8,Math.min(1.4,hs())),h:rn(3,6)*Math.max(.8,Math.min(1.4,hs())),col:Math.random()<.5?c1:c2,x:0});
+  for(let i=0;i<NC;i++)conf.push(mkConf(true));
+  /* ---- actualización ---- */
+  const update=(dt,tm)=>{
+   nextL-=dt;if(nextL<=0){launch();nextL=nL<3?rn(.15,.35):rn(.35,.8);nL++}
+   for(let i=rockets.length-1;i>=0;i--){
+    const r=rockets[i];r.age+=dt;const k=Math.min(1,r.age/r.dur),e=1-(1-k)*(1-k);
+    r.cx=r.x0+(r.x-r.x0)*e;r.cy=r.y0+(r.ty-r.y0)*e;
+    sparks.push({x:r.cx,y:r.cy,px:r.cx,py:r.cy,vx:rn(-12,12),vy:rn(10,40),life:0,max:.35,col:'#fde68a',w:1.4,g:1});
+    if(k>=1){explode(r.cx,r.cy,r.col);rockets.splice(i,1)}
+   }
+   const k=hs(),dr=Math.exp(-2*dt);
+   for(let i=sparks.length-1;i>=0;i--){
+    const s=sparks[i];s.life+=dt;if(s.life>=s.max){sparks.splice(i,1);continue}
+    s.px=s.x;s.py=s.y;s.vx*=dr;s.vy=s.vy*dr+140*k*dt;s.x+=s.vx*dt;s.y+=s.vy*dt;
+   }
+   for(let i=flashes.length-1;i>=0;i--){flashes[i].age+=dt;if(flashes[i].age>.2)flashes.splice(i,1)}
+   conf.forEach(p=>{p.y+=p.vy*dt;p.rot+=p.vr*dt;p.fl+=p.vf*dt;p.x=p.bx+Math.sin(tm*p.sw+p.ph)*p.amp;if(p.y>H+20){p.y=-rn(10,40);p.bx=rn(0,W)}});
+   nextCam-=dt;if(nextCam<=0){camF.push({u:Math.random(),v:rn(.05,.95),age:0});nextCam=rn(.05,.18)}
+   for(let i=camF.length-1;i>=0;i--){camF[i].age+=dt;if(camF[i].age>.12)camF.splice(i,1)}
+  };
+  /* ---- dibujo ---- */
+  const drawSky=tm=>{
+   const g=c.createLinearGradient(0,0,0,H*.7);g.addColorStop(0,'#030712');g.addColorStop(.55,'#0a1a44');g.addColorStop(1,'#16295f');
+   c.fillStyle=g;c.fillRect(0,0,W,H);
+   c.fillStyle='#fff';
+   stars.forEach(s=>{c.globalAlpha=.35+.55*Math.abs(Math.sin(tm*1.5+s.ph));c.beginPath();c.arc(s.u*W,s.v*H,s.r,0,6.2832);c.fill()});
+   c.globalAlpha=1;
+  };
+  const drawFireworks=()=>{
+   c.save();c.globalCompositeOperation='lighter';c.lineCap='round';
+   flashes.forEach(f=>{const a=(1-f.age/.2)*.45,g=c.createRadialGradient(f.x,f.y,0,f.x,f.y,H*.22);g.addColorStop(0,'rgba(255,240,200,'+a+')');g.addColorStop(1,'rgba(255,240,200,0)');c.fillStyle=g;c.fillRect(f.x-H*.22,f.y-H*.22,H*.44,H*.44)});
+   sparks.forEach(s=>{const a=Math.max(0,1-s.life/s.max);c.globalAlpha=a;c.strokeStyle=s.col;c.lineWidth=s.w;c.beginPath();c.moveTo(s.px,s.py);c.lineTo(s.x,s.y);c.stroke();c.fillStyle=s.col;c.beginPath();c.arc(s.x,s.y,s.w*.9,0,6.2832);c.fill()});
+   c.globalAlpha=1;
+   rockets.forEach(r=>{if(r.cx==null)return;c.fillStyle='#fff7d6';c.beginPath();c.arc(r.cx,r.cy,2.4,0,6.2832);c.fill()});
+   c.restore();
+  };
+  const drawStadium=tm=>{
+   const sT=L.standTop,sB=L.standBot,rh=(sB-sT)/ROWS,SEC=8,sw=W/SEC;
+   /* techo y reflectores */
+   c.fillStyle='#0a0f1f';c.fillRect(0,sT-H*.03,W,H*.03);
+   c.fillStyle='#fef3c7';for(let x=10;x<W;x+=Math.max(26,W/40)){c.globalAlpha=.5+.4*Math.sin(tm*3+x);c.beginPath();c.arc(x,sT-H*.015,2,0,6.2832);c.fill()}
+   c.globalAlpha=1;
+   /* tribunas con los colores del campeón */
+   for(let s=0;s<SEC;s++){c.fillStyle=campDark(s%2?c2:c1,.5);c.fillRect(s*sw,sT,sw+1,sB-sT)}
+   c.strokeStyle='rgba(0,0,0,.45)';c.lineWidth=2;
+   for(let r=0;r<=ROWS;r++){c.beginPath();c.moveTo(0,sT+r*rh);c.lineTo(W,sT+r*rh);c.stroke()}
+   for(let s=1;s<SEC;s++){c.beginPath();c.moveTo(s*sw,sT);c.lineTo(s*sw,sB);c.stroke()}
+   /* hinchada */
+   crowd.forEach(p=>{
+    const x=p.u*W,pr=Math.min(rh*.27,(W/p.n)*.42),base=sT+(p.r+1)*rh-rh*.08,bob=Math.abs(Math.sin(tm*5+p.ph))*rh*.16,sec=Math.min(SEC-1,Math.floor(p.u*SEC));
+    const body=p.w?'#ffffff':(sec%2?c1:c2),y=base-bob;
+    if(p.arm){c.strokeStyle=p.sk;c.lineWidth=Math.max(1.2,pr*.5);c.lineCap='round';c.beginPath();c.moveTo(x-pr*1.1,y-pr*.4);c.lineTo(x-pr*1.5,y-pr*2.9-Math.sin(tm*8+p.ph)*pr*.5);c.moveTo(x+pr*1.1,y-pr*.4);c.lineTo(x+pr*1.5,y-pr*2.9+Math.sin(tm*8+p.ph)*pr*.5);c.stroke()}
+    c.fillStyle=body;c.beginPath();c.arc(x,y,pr*1.3,Math.PI,0);c.fill();
+    c.fillStyle=p.sk;c.beginPath();c.arc(x,y-pr*1.4,pr,0,6.2832);c.fill();
+   });
+   /* flashes de cámaras */
+   c.fillStyle='#fff';camF.forEach(f=>{c.globalAlpha=1-f.age/.12;campStar(c,f.u*W,sT+f.v*(sB-sT),Math.max(3,H*.009),0)});c.globalAlpha=1;
+   /* torres de reflectores */
+   [W*.05,W*.95].forEach(x=>{
+    const hy=H*.15,hw=Math.min(W*.07,52),hh=hw*.55;
+    c.fillStyle='#1f2937';c.fillRect(x-3,hy,6,sT-hy);
+    const g=c.createRadialGradient(x,hy,0,x,hy,hw*2.4);g.addColorStop(0,'rgba(255,255,255,.55)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(x-hw*2.4,hy-hw*2.4,hw*4.8,hw*4.8);
+    c.fillStyle='#111827';c.strokeStyle='#000';c.lineWidth=2.5;campRR(c,x-hw/2,hy-hh/2,hw,hh,3);c.fill();c.stroke();
+    c.fillStyle='#fff';for(let i=0;i<3;i++)for(let j=0;j<2;j++){c.beginPath();c.arc(x-hw/3+i*hw/3,hy-hh/4+j*hh/2,hw*.09,0,6.2832);c.fill()}
+   });
+   /* vallas con las siglas del club */
+   const by=sB,bh=L.pitchTop-sB,bw=W/10;
+   c.font='900 '+Math.max(8,bh*.6)+'px Arial,sans-serif';c.textAlign='center';c.textBaseline='middle';
+   for(let i=0;i<10;i++){c.fillStyle=i%2?c2:c1;c.fillRect(i*bw,by,bw+1,bh);c.fillStyle='#fff';c.strokeStyle='#000';c.lineWidth=3;c.lineJoin='round';c.strokeText(t.shortName||'',i*bw+bw/2,by+bh/2);c.fillText(t.shortName||'',i*bw+bw/2,by+bh/2)}
+   c.strokeStyle='#000';c.lineWidth=3;c.strokeRect(-2,by,W+4,bh);
+  };
+  const drawPitch=()=>{
+   const py=L.pitchTop,nb=7,bh=(H-py)/nb;
+   c.fillStyle='#157a37';c.fillRect(0,py,W,H-py);
+   c.fillStyle='#1b8f41';for(let i=1;i<nb;i+=2)c.fillRect(0,py+i*bh,W,bh);
+   c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=3;
+   c.beginPath();c.moveTo(0,py+bh*.7);c.lineTo(W,py+bh*.7);c.stroke();
+   c.beginPath();c.ellipse(W/2,H*.93,W*.26,H*.055,0,0,6.2832);c.stroke();
+   /* haces de luz */
+   c.save();c.globalCompositeOperation='lighter';
+   [W*.05,W*.95].forEach(x=>{const g=c.createLinearGradient(x,H*.15,W/2,L.G);g.addColorStop(0,'rgba(255,255,255,.16)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.beginPath();c.moveTo(x-6,H*.15);c.lineTo(x+6,H*.15);c.lineTo(W*.5+W*.35,H);c.lineTo(W*.5-W*.35,H);c.closePath();c.fill()});
+   const g2=c.createRadialGradient(W/2,L.G-L.R*3,10,W/2,L.G-L.R*3,W*.6);g2.addColorStop(0,'rgba(255,255,255,.2)');g2.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g2;c.fillRect(0,0,W,H);
+   c.restore();
+  };
+  const limb=(x0,y0,qx,qy,x1,y1,w,skin)=>{
+   c.lineCap='round';c.lineJoin='round';c.beginPath();c.moveTo(x0,y0);c.quadraticCurveTo(qx,qy,x1,y1);
+   c.strokeStyle='#000';c.lineWidth=w*1.8;c.stroke();c.strokeStyle=skin;c.lineWidth=w;c.stroke();
+  };
+  const hand=(x,y,r,skin)=>{c.fillStyle=skin;c.strokeStyle='#000';c.lineWidth=r*.45;c.beginPath();c.arc(x,y,r,0,6.2832);c.stroke();c.fill()};
+  const drawPlayer=(p,tm)=>{
+   const R=L.R*p.sc,gy=L.G-p.row*L.R*1.15,ph=((tm/p.per)+p.phase)%1,h=4*ph*(1-ph),jump=h*p.amp*L.R;
+   const crouch=ph<.1?(.1-ph)/.1:ph>.9?(ph-.9)/.1:0,cx=W/2+p.dx*L.R;
+   const legL=R*(1.5-crouch*.45),feet=gy-jump,cy=feet-legL-R*.85,k=R*.2;
+   /* sombra */
+   c.fillStyle='rgba(0,0,0,'+(.35*(1-.4*Math.min(1,h*1.3)))+')';c.beginPath();c.ellipse(cx,gy+R*.05,R*(.9-.25*h),R*.2,0,0,6.2832);c.fill();
+   /* piernas y botines */
+   for(let s=-1;s<=1;s+=2){
+    const ex=cx+s*(R*.5+h*R*.35),sw=h>.02?Math.sin(tm*14+p.phase*6+s)*R*.12:0;
+    limb(cx+s*R*.38,cy+R*.75,cx+s*R*.55,(cy+R*.75+feet)/2,ex+sw,feet-R*.08,k,p.skin);
+    c.fillStyle='#f8fafc';c.strokeStyle='#000';c.lineWidth=R*.1;c.beginPath();c.ellipse(ex+sw+s*R*.08,feet,R*.44,R*.2,0,0,6.2832);c.fill();c.stroke();
+   }
+   let tx=0,ty=0,tS=0,hx=0,hy=0;
+   if(p.user){
+    tS=L.R*3.1;hy=cy-R*1.55;hx=R*.42;ty=hy+tS*.04;
+    /* resplandor dorado detrás del jugador y del trofeo */
+    const gl=c.createRadialGradient(cx,cy-R*.6,R*.4,cx,cy-R*.6,R*3.2),pu=.28+.1*Math.sin(tm*4);
+    gl.addColorStop(0,'rgba(250,204,21,'+pu+')');gl.addColorStop(1,'rgba(250,204,21,0)');c.fillStyle=gl;c.fillRect(cx-R*3.2,cy-R*3.8,R*6.4,R*6.4);
+    for(let s=-1;s<=1;s+=2)limb(cx+s*R*.98,cy+R*.1,cx+s*R*1.45,cy-R*.6,cx+s*hx,hy,k,p.skin);
+   }else{
+    const w1=Math.sin(tm*10+p.phase*7),w2=Math.cos(tm*10+p.phase*7);
+    for(let s=-1;s<=1;s+=2)limb(cx+s*R*.95,cy+R*.1,cx+s*R*1.9,cy-R*.3,cx+s*(R*1.5+R*.25*(s<0?w1:w2)),cy-R*(1.5+.25*(s<0?w2:w1)),k,p.skin);
+   }
+   campKit(c,p.kit,cx,cy,R,p.num);
+   if(!p.user){
+    for(let s=-1;s<=1;s+=2){const w1=Math.sin(tm*10+p.phase*7),w2=Math.cos(tm*10+p.phase*7);hand(cx+s*(R*1.5+R*.25*(s<0?w1:w2)),cy-R*(1.5+.25*(s<0?w2:w1)),R*.27,p.skin)}
+    return;
+   }
+   /* trofeo sobre la cabeza */
+   c.save();c.translate(cx,ty);c.rotate(Math.sin(tm*3)*.07);campCup(c,cupType,0,0,tS);c.restore();
+   for(let s=-1;s<=1;s+=2)hand(cx+s*hx,hy,R*.27,p.skin);
+   /* destellos */
+   c.save();c.fillStyle='#fff7d6';
+   for(let i=0;i<6;i++){const a=tm*1.2+i*1.047,rr=tS*(.55+.1*Math.sin(tm*3+i)),sz=tS*(.05+.05*Math.abs(Math.sin(tm*5+i*2)));campStar(c,cx+Math.cos(a)*rr,ty-tS*.45+Math.sin(a)*rr*.8,sz,a)}
+   c.restore();
+   campText(c,userName,cx,gy+L.R*.8,L.R*.6,'#ffffff',W*.34);
+  };
+  const drawConfetti=()=>{
+   c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=1;
+   conf.forEach(p=>{c.save();c.translate(p.x,p.y);c.rotate(p.rot);c.scale(1,Math.cos(p.fl));c.fillStyle=p.col;c.fillRect(-p.w/2,-p.h/2,p.w,p.h);c.strokeRect(-p.w/2,-p.h/2,p.w,p.h);c.restore()});
+  };
+  const drawBadge=(x,y,B,tm)=>{
+   const sc=1+.03*Math.sin(tm*4);
+   c.save();c.translate(x,y);c.scale(sc,sc);
+   const g=c.createRadialGradient(0,0,B*.2,0,0,B*.8);g.addColorStop(0,'rgba(255,255,255,.35)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(-B,-B,2*B,2*B);
+   let ok=false;
+   if(bok&&bimg){try{c.drawImage(bimg,-B/2,-B/2,B,B);ok=true}catch(e){ok=false}}
+   if(!ok){
+    c.fillStyle=c1;c.strokeStyle='#000';c.lineWidth=B*.1;c.beginPath();c.arc(0,0,B*.45,0,6.2832);c.fill();c.stroke();
+    c.strokeStyle=c2;c.lineWidth=B*.07;c.beginPath();c.arc(0,0,B*.34,0,6.2832);c.stroke();
+    campText(c,String(t.shortName||'').slice(0,3),0,0,B*.3,'#ffffff',B*.6);
+   }
+   c.restore();
+  };
+  const drawBanner=tm=>{
+   const k=Math.min(1,tm/.6),e=1+2.70158*Math.pow(k-1,3)+1.70158*Math.pow(k-1,2),sc=Math.max(.01,e)*(1+.015*Math.sin(tm*3)),cyy=L.top+L.ph/2;
+   c.save();c.globalAlpha=Math.min(1,k*2);c.translate(W/2,cyy);c.scale(sc,sc);c.translate(-W/2,-cyy);
+   const x=W/2-L.pw/2,g=c.createLinearGradient(0,L.top,0,L.top+L.ph);g.addColorStop(0,'rgba(18,30,76,.9)');g.addColorStop(1,'rgba(5,10,32,.9)');
+   campRR(c,x,L.top,L.pw,L.ph,L.F2*.45);c.fillStyle=g;c.fill();c.lineWidth=6;c.strokeStyle='#000';c.stroke();
+   campRR(c,x+5,L.top+5,L.pw-10,L.ph-10,L.F2*.38);c.lineWidth=2;c.strokeStyle='rgba(250,204,21,.9)';c.stroke();
+   drawBadge(W/2,L.top+L.pad+L.B/2,L.B,tm);
+   campText(c,line1,W/2,L.l1,L.F1,'#facc15',L.pw-L.F2*.6);
+   campText(c,line2,W/2,L.l2,L.F2,'#ffffff',L.pw-L.F2*.6);
+   c.restore();
+  };
+  const render=tm=>{
+   c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,H);
+   drawSky(tm);drawFireworks();drawStadium(tm);drawPitch();
+   players.filter(p=>p.row).concat(players.filter(p=>!p.row)).forEach(p=>drawPlayer(p,tm));
+   drawPlayer(user,tm);
+   drawConfetti();
+   drawBanner(tm);
+   const v=c.createRadialGradient(W/2,H/2,Math.min(W,H)*.45,W/2,H/2,Math.max(W,H)*.8);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.55)');c.fillStyle=v;c.fillRect(0,0,W,H);
+  };
+  /* ---- bucle ---- */
+  let last=0,tm=0;
+  const frame=now=>{
+   if(CAMP!==ST)return;
+   if(!cv.isConnected){stopCampScene();return}
+   const dt=last?Math.min(.05,(now-last)/1000):.016;last=now;tm+=dt;
+   try{update(dt,tm);render(tm)}catch(e){console.warn('[CareerMode] escena',e)}
+   ST.raf=requestAnimationFrame(frame);
+  };
+  ST.raf=requestAnimationFrame(frame);
+  campFanfare(ST);
+ }
  function injectTorneoCSS(){
   if($('cmTorneoCSS'))return;
   const st=document.createElement('style');st.id='cmTorneoCSS';
@@ -1469,11 +1963,15 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    '#cmTorneo .vs{display:flex;align-items:center;justify-content:center;gap:10px;margin:8px 0 10px;font-weight:900}#cmTorneo .vs .cmBd{width:64px;height:64px;display:block;margin:0 auto 2px}#cmTorneo .vs small{display:block;font-size:.66rem;color:#6b7280}#cmTorneo .vs div{flex:1;font-size:.82rem}'+
    '#cmTorneo button{width:100%;padding:11px 12px;font-size:1rem;font-weight:900;border-radius:14px;border:3px solid #000;color:#fff;cursor:pointer;background:linear-gradient(180deg,#4cb5f7 0%,#1f8be3 100%);box-shadow:0 4px 0 #000}#cmTorneo button:active{transform:translateY(3px);box-shadow:0 1px 0 #000}'+
    '#cmTorneo .sorteo{max-height:34vh;overflow-y:auto;margin:6px 0;padding:6px;border:2px solid #000;border-radius:12px;background:#fff;font-size:.78rem;text-align:left}#cmTorneo .sorteo div{padding:2px 4px;border-radius:6px}#cmTorneo .sorteo .me{background:#bae6fd;font-weight:900}#cmTorneo .sorteo small{opacity:.7}'+
+   '#cmTorneo.cmScene{padding:0;overflow:hidden;align-items:stretch;justify-content:stretch;background:#030712}'+
+   '#cmTorneo .cmSc{position:fixed;inset:0;z-index:100000;margin:0}#cmTorneo .cmSc canvas{position:absolute;inset:0;width:100%;height:100%;display:block}'+
+   '#cmTorneo .cmScBtn{position:absolute;left:0;right:0;bottom:max(12px,env(safe-area-inset-bottom));display:flex;justify-content:center;padding:0 12px}#cmTorneo .cmScBtn button{width:min(340px,86vw);font-size:1.15rem;padding:12px 14px}'+
    '@keyframes cmTPop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}';
   document.head.appendChild(st);
  }
  /* elimina por completo la capa oscura de carteles (nada queda tapando ni bloqueando el hub) */
  function hideTorneoLayer(){
+  stopCampScene();
   const el=$('cmTorneo');
   if(el){el.classList.remove('on');el.innerHTML='';el.style.display='none';el.style.pointerEvents='none';el.remove()}
  }
@@ -1493,6 +1991,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   const q=S.modalQ;if(!q||!q.length){hideTorneoLayer();return}
   const it=q[0];injectTorneoCSS();
   let el=$('cmTorneo');if(!el){el=document.createElement('div');el.id='cmTorneo';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');document.body.appendChild(el)}
+  if(it.k!=='champ'){el.classList.remove('cmScene');stopCampScene()}
   let h='';
   if(it.k==='intro'){
    const cl=it.torneo==='clausura';
@@ -1503,8 +2002,13 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    const rv=mine?'<p><span class="cmBd" style="display:block;width:72px;height:72px;margin:0 auto 4px">'+badge(T(mine))+'</span>Tu rival en Dieciseisavos: <b style="font-size:1.05rem">'+E(T(mine).name)+'</b><br>Sede neutral: <b>'+E(T(um.venue).shortName)+'</b> ('+E(T(um.venue).name)+')</p>':'<p><b>¡Bolilla de privilegio!</b> Tu equipo pasa directo a Octavos de Final.</p>';
    h='<div class="cmTc">'+copaArgSvg(84)+'<h1>🏆 SORTEO COPA ARGENTINA</h1>'+rv+'<div class="sorteo">'+r.map(m=>'<div class="'+((m.h===S.teamId||m.a===S.teamId)?'me':'')+'">'+sg(m.h)+' vs '+sg(m.a)+' <small>🏟️ '+E(T(m.venue).shortName)+'</small></div>').join('')+'</div><p style="margin:8px 0">Directo a Octavos: '+C.byes.map(sg).join(' · ')+'</p><p>Partido único · penales directos si empatan.</p><button id="cmTorneoBtn" type="button">Continuar</button></div>';
   }else if(it.k==='champ'){
-   const t=T(it.id),tr=it.torneo==='trofeo',cpa=it.torneo==='copa';
-   h='<div class="cmTc'+(tr?' gold':'')+'">'+(cpa?copaArgSvg(84):cupSvg(tr?'#facc15':'#cbd5e1',84,!tr))+'<h1>'+(tr?'¡TROFEO DE CAMPEONES!':cpa?'¡CAMPEÓN DE LA COPA ARGENTINA!':'¡CAMPEÓN DEL '+TN_LBL[it.torneo]+'!')+'</h1><span class="cmBd" style="display:block;width:96px;height:96px;margin:0 auto">'+badge(t)+'</span><p><b style="font-size:1.1rem">'+E(t.name)+'</b><br>'+E(S.player.name)+' (#'+S.player.num+') levantó la copa.</p><button id="cmTorneoBtn" type="button">Continuar</button></div>';
+   el.classList.add('cmScene');
+   if(CAMP&&CAMP.cv&&CAMP.cv.isConnected&&el.contains(CAMP.cv))return; /* la escena ya está en curso */
+   el.innerHTML='<div class="cmSc"><canvas id="cmCampCv"></canvas><div class="cmScBtn"><button id="cmTorneoBtn" type="button">Continuar</button></div></div>';
+   el.style.display='';el.style.pointerEvents='';el.classList.add('on');el.onclick=null;
+   const cb=$('cmTorneoBtn');cb.onclick=modalDone;try{cb.focus({preventScroll:true})}catch(e){}
+   startCampScene($('cmCampCv'),it);
+   return;
   }else if(it.k==='trofeo'&&S.trofeo){
    const t=S.trofeo,side=id=>'<div><span class="cmBd">'+badge(T(id))+'</span>'+E(T(id).name)+'<small>'+(id===S.aperturaChampionId&&id===S.clausuraChampionId?'BICAMPEÓN':id===S.aperturaChampionId?'CAMPEÓN APERTURA':id===S.clausuraChampionId?'CAMPEÓN CLAUSURA':'SUBCAMPEÓN')+'</small></div>';
    h='<div class="cmTc gold">'+cupSvg('#facc15',96)+'<h1>🏆 TROFEO DE CAMPEONES</h1><div class="vs">'+side(t.h)+'<div>VS</div>'+side(t.a)+'</div><p>Partido único en cancha neutral. Si empatan, tiempo extra y penales.</p><button id="cmTorneoBtn" type="button">Continuar</button></div>';
