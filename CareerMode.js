@@ -1859,43 +1859,20 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    const g2=c.createRadialGradient(W/2,L.G-L.R*3,10,W/2,L.G-L.R*3,W*.6);g2.addColorStop(0,'rgba(255,255,255,.2)');g2.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g2;c.fillRect(0,0,W,H);
    c.restore();
   };
-  const limb=(x0,y0,qx,qy,x1,y1,w,skin)=>{
-   c.lineCap='round';c.lineJoin='round';c.beginPath();c.moveTo(x0,y0);c.quadraticCurveTo(qx,qy,x1,y1);
-   c.strokeStyle='#000';c.lineWidth=w*1.8;c.stroke();c.strokeStyle=skin;c.lineWidth=w;c.stroke();
-  };
-  const hand=(x,y,r,skin)=>{c.fillStyle=skin;c.strokeStyle='#000';c.lineWidth=r*.45;c.beginPath();c.arc(x,y,r,0,6.2832);c.stroke();c.fill()};
+  /* ficha circular pura: camiseta + dorsal + contorno negro grueso, sombra ovalada en el césped que se achica al saltar */
   const drawPlayer=(p,tm)=>{
    const R=L.R*p.sc,gy=L.G-p.row*L.R*1.15,ph=((tm/p.per)+p.phase)%1,h=4*ph*(1-ph),jump=h*p.amp*L.R;
-   const crouch=ph<.1?(.1-ph)/.1:ph>.9?(ph-.9)/.1:0,cx=W/2+p.dx*L.R;
-   const legL=R*(1.5-crouch*.45),feet=gy-jump,cy=feet-legL-R*.85,k=R*.2;
-   /* sombra */
-   c.fillStyle='rgba(0,0,0,'+(.35*(1-.4*Math.min(1,h*1.3)))+')';c.beginPath();c.ellipse(cx,gy+R*.05,R*(.9-.25*h),R*.2,0,0,6.2832);c.fill();
-   /* piernas y botines */
-   for(let s=-1;s<=1;s+=2){
-    const ex=cx+s*(R*.5+h*R*.35),sw=h>.02?Math.sin(tm*14+p.phase*6+s)*R*.12:0;
-    limb(cx+s*R*.38,cy+R*.75,cx+s*R*.55,(cy+R*.75+feet)/2,ex+sw,feet-R*.08,k,p.skin);
-    c.fillStyle='#f8fafc';c.strokeStyle='#000';c.lineWidth=R*.1;c.beginPath();c.ellipse(ex+sw+s*R*.08,feet,R*.44,R*.2,0,0,6.2832);c.fill();c.stroke();
-   }
-   let tx=0,ty=0,tS=0,hx=0,hy=0;
+   const cx=W/2+p.dx*L.R,cy=gy-R-jump,f=Math.min(1,jump/(2.4*L.R));
+   c.fillStyle='rgba(0,0,0,'+(.45-.25*f)+')';c.beginPath();c.ellipse(cx,gy+R*.04,R*(1-.45*f),R*(.26-.1*f),0,0,6.2832);c.fill();
    if(p.user){
-    tS=L.R*3.1;hy=cy-R*1.55;hx=R*.42;ty=hy+tS*.04;
-    /* resplandor dorado detrás del jugador y del trofeo */
     const gl=c.createRadialGradient(cx,cy-R*.6,R*.4,cx,cy-R*.6,R*3.2),pu=.28+.1*Math.sin(tm*4);
     gl.addColorStop(0,'rgba(250,204,21,'+pu+')');gl.addColorStop(1,'rgba(250,204,21,0)');c.fillStyle=gl;c.fillRect(cx-R*3.2,cy-R*3.8,R*6.4,R*6.4);
-    for(let s=-1;s<=1;s+=2)limb(cx+s*R*.98,cy+R*.1,cx+s*R*1.45,cy-R*.6,cx+s*hx,hy,k,p.skin);
-   }else{
-    const w1=Math.sin(tm*10+p.phase*7),w2=Math.cos(tm*10+p.phase*7);
-    for(let s=-1;s<=1;s+=2)limb(cx+s*R*.95,cy+R*.1,cx+s*R*1.9,cy-R*.3,cx+s*(R*1.5+R*.25*(s<0?w1:w2)),cy-R*(1.5+.25*(s<0?w2:w1)),k,p.skin);
    }
    campKit(c,p.kit,cx,cy,R,p.num);
-   if(!p.user){
-    for(let s=-1;s<=1;s+=2){const w1=Math.sin(tm*10+p.phase*7),w2=Math.cos(tm*10+p.phase*7);hand(cx+s*(R*1.5+R*.25*(s<0?w1:w2)),cy-R*(1.5+.25*(s<0?w2:w1)),R*.27,p.skin)}
-    return;
-   }
-   /* trofeo sobre la cabeza */
-   c.save();c.translate(cx,ty);c.rotate(Math.sin(tm*3)*.07);campCup(c,cupType,0,0,tS);c.restore();
-   for(let s=-1;s<=1;s+=2)hand(cx+s*hx,hy,R*.27,p.skin);
-   /* destellos */
+   if(!p.user)return;
+   /* trofeo flotando justo encima de la ficha */
+   const tS=L.R*3.1,ty=cy-R-L.R*.3-Math.sin(tm*3)*L.R*.12;
+   c.save();c.translate(cx,ty);c.rotate(Math.sin(tm*2.4)*.07);campCup(c,cupType,0,0,tS);c.restore();
    c.save();c.fillStyle='#fff7d6';
    for(let i=0;i<6;i++){const a=tm*1.2+i*1.047,rr=tS*(.55+.1*Math.sin(tm*3+i)),sz=tS*(.05+.05*Math.abs(Math.sin(tm*5+i*2)));campStar(c,cx+Math.cos(a)*rr,ty-tS*.45+Math.sin(a)*rr*.8,sz,a)}
    c.restore();
