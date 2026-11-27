@@ -513,6 +513,7 @@
 .cmCols{display:grid;grid-template-columns:1fr 1fr;gap:14px}.cmCols>div{display:flex;flex-direction:column;gap:6px}
 #cmSub,#cmEnd,#cmChamp{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(3,8,20,.82);overflow-y:auto}
 #cmSub.on,#cmEnd.on,#cmChamp.on{display:flex}
+#cmSub:not(.on),#cmEnd:not(.on),#cmChamp:not(.on){display:none!important;pointer-events:none!important}
 #cmSub .cmCard,#cmEnd .cmCard,#cmChamp .cmCard{width:min(900px,100%);max-height:96vh;overflow-y:auto}
 #cmEnd .cmCard,#cmChamp .cmCard{width:min(520px,100%);text-align:center;align-items:center}
 #cmEnd .sc{font-size:1.9rem;font-weight:900;letter-spacing:1px}#cmEnd .rs{font-weight:900;font-size:1.05rem}
@@ -1004,7 +1005,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   if(!swapOk(q.info[sid],q.info[bid])){SEL=null;renderHub();const m=$('cmSqMsg');if(m)m.textContent='⚠️ El arquero solo puede cambiarse por otro arquero.';return}
   q.starters[si]=bid;q.bench[bi]=sid;SEL=null;save();renderHub();
  }
- function openHub(tab){if(tab)TAB=tab;SEL=null;renderHub();show('career-hub-screen')}
+ function openHub(tab){if(tab)TAB=tab;SEL=null;sweepOverlays();renderHub();show('career-hub-screen')}
 
  /* ------------------------------------------------------------------
   6) PARTIDO: integración con el motor de index.html
@@ -1145,7 +1146,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   G.duration=S.minutes*60;G.goalLimit=0;G.super=false;G.cET=false;
   G.teamTactics={red:calcBias(m.h,true),blue:calcBias(m.a,false)};
   STAD=stadClean(m.copa&&m.venue?T(m.venue).stadium:m.neutral?null:hT.stadium); /* Copa: colores de tribunas de la sede neutral */if(typeof STAD_CF!=='undefined')STAD_CF.length=0;
-  CM.live=true;
+  CM.live=true;hideTorneoLayer();
   LIVE={started:Date.now(),m,slots:mine.map((b,i)=>({bot:b,id:ids[i],t0:0})),bench:S.squad.bench.filter(id=>!ex||id!==ex.id),extraId:ex?ex.id:null,extraIdx:ex?ex.idx:-1,cards:{},subs:0,subbedOutIds:[],win:null,rival:{bots:rv,bench:rivalBench(rvT.id,rv),subs:0},played:{},inj:{},sel:null,res:null,done:false,timer:0};
   document.body.classList.add('careerOn','cmInGame');
   const lv=$('mLeave');if(lv)lv.textContent='Abandonar partido';
@@ -1458,7 +1459,9 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  function injectTorneoCSS(){
   if($('cmTorneoCSS'))return;
   const st=document.createElement('style');st.id='cmTorneoCSS';
-  st.textContent='#cmTorneo{position:fixed;inset:0;z-index:470;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(3,8,20,.82);overflow-y:auto}#cmTorneo.on{display:flex}'+
+  st.textContent='#cmTorneo{position:fixed;inset:0;z-index:9000;display:none;pointer-events:none;visibility:hidden;align-items:center;justify-content:center;padding:12px;background:transparent;overflow-y:auto}'+
+   '#cmTorneo.on{display:flex;pointer-events:auto;visibility:visible}#cmTorneo:not(.on){display:none!important;pointer-events:none!important}'+
+   '#cmTorneo .bk{position:fixed;inset:0;z-index:0;background:rgba(3,8,20,.82)}#cmTorneo .tc{position:relative;z-index:1;margin:auto}'+
    '#cmTorneo .tc{width:min(420px,94vw);text-align:center;padding:18px 20px 16px;background:#fff7e6;color:#1b1b1b;border:4px solid #000;border-radius:24px;box-shadow:0 6px 0 #000,0 16px 30px rgba(0,0,0,.5);animation:cmTPop .3s cubic-bezier(.2,1.6,.4,1)}'+
    '#cmTorneo .tc.gold{background:#fff3b0}'+
    '#cmTorneo h1{margin:6px 0 4px;font-size:clamp(1.3rem,6vw,1.8rem);font-weight:900;font-style:italic;color:#facc15;-webkit-text-stroke:2px #000;text-shadow:0 3px 0 #000;letter-spacing:.5px}'+
@@ -1469,16 +1472,27 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    '@keyframes cmTPop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}';
   document.head.appendChild(st);
  }
+ /* elimina por completo la capa oscura de carteles (nada queda tapando ni bloqueando el hub) */
+ function hideTorneoLayer(){
+  const el=$('cmTorneo');
+  if(el){el.classList.remove('on');el.innerHTML='';el.style.display='none';el.style.pointerEvents='none';if(el.parentNode)el.parentNode.removeChild(el)}
+ }
+ /* limpia capas colgadas al entrar al hub (fuera de partido) */
+ function sweepOverlays(){
+  if(CM.live)return;
+  ['cmSub','cmEnd','cmChamp'].forEach(i=>{const e=$(i);if(e)e.classList.remove('on')});
+  if(!(S&&S.modalQ&&S.modalQ.length))hideTorneoLayer();
+ }
  function modalDone(){
-  const q=S&&S.modalQ;if(q&&q.length)q.shift();
-  save();const el=$('cmTorneo');if(el)el.classList.remove('on');
-  renderHub();flushModals();
+  try{const q=S&&S.modalQ;if(q&&q.length)q.shift();save()}catch(e){console.warn('[CareerMode] modal',e)}
+  hideTorneoLayer(); /* primero se quita la capa; si queda otro cartel en cola se vuelve a crear */
+  try{renderHub()}finally{flushModals()}
  }
  function flushModals(){
-  if(!S||CM.live)return;
-  const q=S.modalQ;if(!q||!q.length)return;
+  if(!S||CM.live){hideTorneoLayer();return}
+  const q=S.modalQ;if(!q||!q.length){hideTorneoLayer();return}
   const it=q[0];injectTorneoCSS();
-  let el=$('cmTorneo');if(!el){el=document.createElement('div');el.id='cmTorneo';document.body.appendChild(el)}
+  let el=$('cmTorneo');if(!el){el=document.createElement('div');el.id='cmTorneo';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');document.body.appendChild(el)}
   let h='';
   if(it.k==='intro'){
    const cl=it.torneo==='clausura';
@@ -1495,8 +1509,8 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    const t=S.trofeo,side=id=>'<div><span class="cmBd">'+badge(T(id))+'</span>'+E(T(id).name)+'<small>'+(id===S.aperturaChampionId&&id===S.clausuraChampionId?'BICAMPEÓN':id===S.aperturaChampionId?'CAMPEÓN APERTURA':id===S.clausuraChampionId?'CAMPEÓN CLAUSURA':'SUBCAMPEÓN')+'</small></div>';
    h='<div class="tc gold">'+cupSvg('#facc15',96)+'<h1>🏆 TROFEO DE CAMPEONES</h1><div class="vs">'+side(t.h)+'<div>VS</div>'+side(t.a)+'</div><p>Partido único en cancha neutral. Si empatan, tiempo extra y penales.</p><button id="cmTorneoBtn" type="button">Continuar</button></div>';
   }else{q.shift();save();return flushModals()}
-  el.innerHTML=h;el.classList.add('on');
-  $('cmTorneoBtn').onclick=modalDone;
+  el.innerHTML='<div class="bk"></div>'+h;el.style.display='';el.style.pointerEvents='';el.classList.add('on');
+  const bt=$('cmTorneoBtn');if(bt){bt.onclick=modalDone;try{bt.focus({preventScroll:true})}catch(e){}}
  }
  /* ------------------------------------------------------------------
   7) Eventos globales (P, menú, abandonar, continuar campaña)
