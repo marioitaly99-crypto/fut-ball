@@ -1453,7 +1453,7 @@ function chargedShot(p,c){const b=G.ball,d=Math.hypot(b.x-p.x,b.y-p.y);if(!d)ret
  const fire=G.activePowerEvent==='fire';let dx=(b.x-p.x)/d,dy=(b.y-p.y)/d,pm,strong=true;
  {pm=c<.30?.75+c*.65:.95+Math.pow((c-.30)/.70,1.35)*1.60; /* toque rápido 0.75x · hasta 2.55x al 100% (+50%) */
   let aimed=false;
-  if(!p.bot&&c>=.35&&(p.team==='red'?b.x>G.w*.52:b.x<G.w*.48)){const f=chFarPost(p),ty=f.up?f.gT+f.gh*.22:f.gB-f.gh*.22,l=Math.hypot(f.gx-b.x,ty-b.y)||1,n=Math.hypot(dx*.65+(f.gx-b.x)/l*.35,dy*.65+(ty-b.y)/l*.35)||1;[dx,dy]=[(dx*.65+(f.gx-b.x)/l*.35)/n,(dy*.65+(ty-b.y)/l*.35)/n]} /* humano cargado desde campo rival: 35 % de asistencia hacia el palo más alejado del arquero rival */
+  if(!p.bot&&c>=.35&&(p.team==='red'?b.x>G.w*.52:b.x<G.w*.48)){const f=chFarPost(p),ty=f.up?f.gT+f.gh*.22:f.gB-f.gh*.22,l=Math.hypot(f.gx-b.x,ty-b.y)||1,n=Math.hypot(dx*.545+(f.gx-b.x)/l*.455,dy*.545+(ty-b.y)/l*.455)||1;[dx,dy]=[(dx*.545+(f.gx-b.x)/l*.455)/n,(dy*.545+(ty-b.y)/l*.455)/n]} /* humano cargado desde campo rival: 45,5 % de asistencia hacia el palo más alejado del arquero rival */
   else if(p.bot&&c>=.50&&(p.team==='red'?b.x>G.w*.55:b.x<G.w*.45)){const f=chFarPost(p),ty=(f.up?f.gT+f.gh*.22:f.gB-f.gh*.22)+(Math.random()-.5)*f.gh*.08,l=Math.hypot(f.gx-b.x,ty-b.y)||1,a=(Math.random()-.5)*.06,ca=Math.cos(a),sa=Math.sin(a),ux=(f.gx-b.x)/l,uy=(ty-b.y)/l;dx=ux*ca-uy*sa;dy=ux*sa+uy*ca;aimed=true} /* bot cargado desde campo rival: apunta al palo más libre con leve variación (reemplaza el desvío por sobrecarga) */
   if(c>CH_R&&!aimed){const a=((c-CH_R)/.22)*(Math.random()<.5?1:-1)*(.14+Math.random()*.125),ca=Math.cos(a),sa=Math.sin(a),nx=dx*ca-dy*sa;dy=dx*sa+dy*ca;dx=nx} /* zona roja: desvío aleatorio reducido a la mitad */
   else if(c<CH_Y)strong=false}
@@ -1656,10 +1656,10 @@ function end(msg){G.over=true;powerReset();G.players.forEach(p=>{p.yc=0;p.fc=0;p
 /* Tanda de penales */
 const rnd=a=>a[Math.floor(Math.random()*a.length)],sh=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 /* Arquero de la tanda: sorteo uniforme entre TODOS los integrantes activos del equipo (humanos y bots por igual); si es bot, penAI() lo maneja con su IA de arquero */
-function penPickKeeper(L){const a=L.filter(p=>G.players.includes(p)&&p.team!=='spec');return rnd(a.length?a:L)}
+function penPickKeeper(L){const a=L.filter(p=>G.players.includes(p)&&p.team!=='spec'),c=a.length?a:L,cp=window.CAREER_STATE&&window.CAREER_STATE.player,isGK=o=>!!o&&[o.pos,o.posicion,o['posición'],o.position,o.puesto,o.posCarrera].some(v=>/^(GK|ARQ|POR|GOAL)/i.test(v||'')),d=p=>Math.abs(p.x-(p.team==='red'?0:G.w));let g=[];for(const f of [p=>isGK(p)||(!p.bot&&cp&&cp.name===p.name&&isGK(cp)),p=>p.bot&&p.role==='arquero',p=>normNum(p.num)==='1',()=>true]){g=c.filter(f);if(g.length)break}return g.reduce((m,p)=>!m||d(p)<d(m)?p:m,null)}
 function startPens(){const lists={red:sh(act().filter(p=>p.team==='red')),blue:sh(act().filter(p=>p.team==='blue'))}; /* orden de pateadores al azar */
  if(!lists.red.length||!lists.blue.length){end('🤝 ¡PARTIDO FINALIZADO EN EMPATE!');return}
- ['red','blue'].forEach(t=>{const L=lists[t],i=L.findIndex(p=>!p.bot);if(i<0)return;const j=Math.min(L.length-1,Math.floor(Math.random()*3));[L[i],L[j]]=[L[j],L[i]]}); /* el humano patea 1.º, 2.º o 3.º al azar */
+ ['red','blue'].forEach(t=>{const L=lists[t],g=penPickKeeper(L);L.splice(L.indexOf(g),1);const i=L.findIndex(p=>!p.bot);if(i>=0){const j=Math.min(L.length-1,Math.floor(Math.random()*3));[L[i],L[j]]=[L[j],L[i]]}L.push(g)}); /* el arquero patea último; el humano (si no es el arquero) patea 1.º, 2.º o 3.º al azar */
  const side=Math.random()<.5?'left':'right',din=side==='left'?1:-1,gx=side==='left'?0:G.w; /* sorteo de arco */
  G.ko=null;G.sp=null;G.pen={side,gx,din,sd:spotD(),kx:gx,list:lists,keeper:{red:penPickKeeper(lists.red),blue:penPickKeeper(lists.blue)},n:{red:0,blue:0},res:{red:[],blue:[]},team:'red',ph:'intro',t:0,parts:[]};
  $('penbar').classList.remove('hidden');$('sb').classList.add('hidden');$('pRow').appendChild($('mute'));$('pbR').style.display=$('pbB').style.display='';penTurn();G.pen.ph='intro';G.pen.t=0;showEv('🥅 ¡TANDA DE PENALES!',2000);hud()}
