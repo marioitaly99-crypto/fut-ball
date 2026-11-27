@@ -157,7 +157,13 @@ html.is-touch:not(.is-standalone) .pwaBtn{display:flex}
 #screen-lobby #pwaLobby{position:absolute;top:8px;right:52px;padding:5px 12px;font-size:.78rem;border-radius:999px;background:rgba(4,18,48,.88);color:#fff;border:1.5px solid #38bdf8;box-shadow:none;z-index:5}
 #pwaModal{z-index:200}
 #pwaModal .card{width:min(380px,92vw);text-align:center}
-#pwaModal ol{text-align:left;padding-left:22px;line-height:1.7;font-size:1rem}
+#pwaModal ol{text-align:left;padding-left:22px;margin:6px 0 0;line-height:1.6;font-size:.92rem}
+#pwaModal .card{max-height:92dvh;overflow-y:auto}
+#pwaModal .pwaBox{text-align:left;margin:8px 0;padding:10px 12px;border:2px solid #0a1f3d;border-radius:14px;background:#161a1f;color:#fff}
+#pwaModal .pwaBox h3{margin:0;font-size:.98rem;color:#38bdf8}
+#pwaModal #pwaNow{width:100%;margin:4px 0;padding:12px;font-size:1rem;font-weight:900;color:#fff;background:linear-gradient(180deg,#62c74f,#439e34);border:3px solid #0a1f3d;border-radius:16px}
+#pwaModal #pwaNow[hidden]{display:none}
+#pwaModal .pwaNote{margin:8px 0;font-size:.82rem;line-height:1.45;color:#7cc8f2}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);transform:translateX(-50%);z-index:300;max-width:90vw;padding:9px 16px;border-radius:12px;background:rgba(11,15,26,.95);border:1px solid #38bdf8;color:#fff;font-size:.85rem;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.show{opacity:1}
 
@@ -2363,10 +2369,14 @@ let last=performance.now(),acc=0;
  const modal=(title,html)=>{$('pwaTitle').textContent=title;$('pwaBody').innerHTML=html;$('pwaModal').classList.remove('hidden')};
  $('pwaOk').onclick=()=>$('pwaModal').classList.add('hidden');
  $('pwaModal').addEventListener('click',e=>{if(e.target===$('pwaModal'))$('pwaModal').classList.add('hidden')});
- const install=async()=>{
-  if(dip){const e=dip;dip=null;try{await e.prompt();await e.userChoice}catch(_){}return}
-  if(isIOS)return modal('📲 Agregar a inicio (iPhone / iPad)','<ol><li>Tocá <b>Compartir ⬆️</b> abajo.</li><li>Elegí <b>“Agregar a inicio”</b>.</li></ol><div class="label">Si no ves la opción, abrí esta página en Safari.</div>');
-  modal('📲 Crear Acceso Directo','<div style="line-height:1.7">Tocá los 3 puntos <b>⋮</b> arriba a la derecha → <b>“Agregar a la pantalla principal”</b>.</div>')};
+ const GUIA='<button id="pwaNow" type="button" hidden>⚡ Instalar ahora en 1 toque</button>'
+  +'<div class="pwaBox"><h3>🤖 Android (Chrome)</h3><ol><li>Tocá los <b>3 puntitos ⋮</b> arriba a la derecha.</li><li>Elegí <b>“Agregar a la pantalla principal”</b> (o <b>“Instalar aplicación”</b>).</li><li>Confirmá <b>Instalar / Agregar</b>.</li></ol></div>'
+  +'<div class="pwaBox"><h3>🍎 iPhone / iPad (Safari)</h3><ol><li>Tocá <b>Compartir ⬆️</b> en la barra inferior.</li><li>Elegí <b>“Agregar a inicio”</b>.</li><li>Tocá <b>“Agregar”</b> arriba a la derecha.</li></ol></div>'
+  +'<div class="pwaNote">📺 Abriendo el juego desde el ícono jugás a <b>pantalla completa</b>, y el progreso del <b>Modo Carrera</b> se conserva entre partidas.<br>En iPhone / iPad, el ícono guarda sus datos aparte de Safari: una carrera empezada en Safari no pasa al ícono.</div>';
+ const syncNow=()=>{const b=$('pwaNow');if(b)b.hidden=!dip};
+ addEventListener('beforeinstallprompt',syncNow);addEventListener('appinstalled',()=>$('pwaModal').classList.add('hidden'));
+ const install=()=>{modal('📲 Crear Acceso Directo',GUIA);syncNow();
+  $('pwaNow').onclick=async()=>{if(!dip)return;const e=dip;dip=null;syncNow();try{await e.prompt();await e.userChoice}catch(_){}}};
  ['pwaLogin','pwaLobby'].forEach(i=>$(i).addEventListener('click',install));
  /* --- Service Worker (requiere HTTPS o localhost) --- */
  if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))
