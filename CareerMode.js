@@ -1591,9 +1591,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  }
  /* rótulo de la sede neutral (Copa Argentina) */
  function neutralTag(m){
-  let el=$('cmVenue');
-  if(!el){el=document.createElement('div');el.id='cmVenue';el.setAttribute('role','status');el.style.cssText='position:fixed;z-index:130;left:calc(env(safe-area-inset-left,0px) + 12px);bottom:calc(env(safe-area-inset-bottom,0px) + 10px);padding:5px 12px;border-radius:10px;font:900 .78rem/1.2 Arial,sans-serif;letter-spacing:.5px;color:#fff;background:#1f2937;border:2.5px solid #000;box-shadow:0 3px 0 #000;pointer-events:none;display:none';document.body.appendChild(el)}
-  if(m&&m.copa&&m.venue){el.textContent='ESTADIO NEUTRAL: '+String(T(m.venue).shortName||'').toUpperCase();el.style.display='block'}else el.style.display='none';
+  const el=$('cmVenue');if(el)el.remove(); /* sin cartel inferior izquierdo: nunca se crea ni se muestra */
  }
  function leaveGame(){
   CM.live=false;LIVE=null;neutralTag(null);resetMatchFlags();

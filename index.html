@@ -826,24 +826,24 @@ const unlockAudio=()=>{if(!AC||AC.state!=='running')audio()}; /* sin once: si el
 ['pointerdown','pointerup','touchend','click','keydown'].forEach(ev=>window.addEventListener(ev,unlockAudio,{capture:true,passive:true}));
 syncMuteIcon();
 
-/* ===== 🏟️ Ambiente de estadio: audio/estadio.mp3 en loop (Web Audio: source.loop → lowpass 3000 Hz → GainNode) ===== */
+/* ===== 🏟️ Ambiente de estadio: audio/estadio.mp3 en loop (Web Audio: source.loop → lowpass 4500 Hz → GainNode) ===== */
 const CROWD={buf:null,loading:false,failed:false,src:null,lp:null,g:null,off:0,t0:0,until:0,on:false};
 function crowdLoad(){if(CROWD.buf||CROWD.loading||CROWD.failed||!AC)return;CROWD.loading=true;
  fetch('audio/estadio.mp3').then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.arrayBuffer()})
  .then(ab=>new Promise((ok,ko)=>{const p=AC.decodeAudioData(ab,ok,ko);if(p&&p.catch)p.catch(ko)}))
  .then(b=>{CROWD.buf=b;CROWD.loading=false}).catch(()=>{CROWD.failed=true;CROWD.loading=false})}
-function crowdNodes(){if(CROWD.g||!AC)return;CROWD.lp=AC.createBiquadFilter();CROWD.lp.type='lowpass';CROWD.lp.frequency.value=3000;CROWD.g=AC.createGain();CROWD.g.gain.value=0;CROWD.lp.connect(CROWD.g);CROWD.g.connect(AC.destination)}
+function crowdNodes(){if(CROWD.g||!AC)return;CROWD.lp=AC.createBiquadFilter();CROWD.lp.type='lowpass';CROWD.lp.frequency.value=4500;CROWD.g=AC.createGain();CROWD.g.gain.value=0;CROWD.lp.connect(CROWD.g);CROWD.g.connect(AC.destination)}
 function crowdStart(){if(CROWD.src||!CROWD.buf||!AC||AC.state!=='running')return;crowdNodes();
  const s=AC.createBufferSource();s.buffer=CROWD.buf;s.loop=true;s.connect(CROWD.lp);CROWD.off=CROWD.off%CROWD.buf.duration;s.start(0,CROWD.off);CROWD.t0=AC.currentTime;CROWD.src=s}
 function crowdStop(){const s=CROWD.src;if(!s)return;CROWD.src=null;
  try{CROWD.off=(CROWD.off+(AC.currentTime-CROWD.t0))%CROWD.buf.duration}catch(e){}
  try{const n=AC.currentTime;CROWD.g.gain.cancelScheduledValues(n);CROWD.g.gain.setTargetAtTime(0,n,.05);s.stop(n+.3)}catch(e){try{s.stop()}catch(_){}}}
-function crowdSwell(){CROWD.until=performance.now()+3000} /* gol: sube a .26 durante 3 s y vuelve a .12 */
+function crowdSwell(){CROWD.until=performance.now()+3000} /* gol: sube a .55 durante 3 s y vuelve a .32 */
 function crowdTick(){try{
  const act=!!(inGame&&G&&!G.paused&&!G.over&&!G.pen&&AC);
  if(act||(inGame&&G&&!G.paused&&AC))crowdLoad();
  const play=!!(inGame&&G&&!G.paused&&AC&&AC.state==='running');
- if(play&&CROWD.buf){crowdStart();if(CROWD.g){const tg=muted?0:(performance.now()<CROWD.until?.26:.12);CROWD.g.gain.setTargetAtTime(tg,AC.currentTime,.35)}}
+ if(play&&CROWD.buf){crowdStart();if(CROWD.g){const tg=muted?0:(performance.now()<CROWD.until?.55:.32);CROWD.g.gain.setTargetAtTime(tg,AC.currentTime,.35)}}
  else if(CROWD.src)crowdStop();
 }catch(e){}}
 setInterval(crowdTick,150);
@@ -1200,7 +1200,7 @@ function stSignText(){try{if(carOn()){const n=stCareerLocal();return n?String(n)
  return'FUT-BALL'}
 /* Cartel central de cada lado (centro, tamaño y giro): sobresale de la valla hacia las gradas */
 function stSignBoxes(a,b,c,d){const F=ST_FW,h=F+16,w=ST_SIGN_W,cx=(a+c)/2;
- return[{x:cx,y:b-F/2-8,w,h,r:0}]} /* cartel SOLO en la tribuna superior; inferior, izquierda y derecha: valla continua */
+ if(splitOn())return[];return[{x:cx,y:b-F/2-8,w,h,r:0}]} /* cartel SOLO en la tribuna superior; inferior, izquierda y derecha: valla continua */
 function stSignRect(s){return Math.abs(s.r)>1?{x:s.x-s.h/2,y:s.y-s.w/2,w:s.h,h:s.w}:{x:s.x-s.w/2,y:s.y-s.h/2,w:s.w,h:s.h}}
 /* Cartel: marco claro + contorno negro; fondo según seats.n (1 sólido c1 · 2 franjas c1/c2 · 3 franjas c1/c2/c3); texto blanco grueso con trazo negro */
 function stSign(g,s,txt,S){g.save();g.translate(s.x,s.y);g.rotate(s.r);const w=s.w,h=s.h,P=5,iw=w-2*P,ih=h-2*P,cols=S.n===3?[S.c1,S.c2,S.c3]:S.n===2?[S.c1,S.c2]:[S.c1];
@@ -2063,7 +2063,7 @@ function draw(){if(VW!==Math.floor(window.innerWidth)||VH!==Math.floor(window.in
  grassTufts(G.cam.x-vw-8,G.cam.y-vh-8,2*vw+16,2*vh+16);
  if(SO){const vx0=G.cam.x-vw,vy0=G.cam.y-vh,vx1=G.cam.x+vw,vy1=G.cam.y+vh;drawStands(-GD-80,-100,W+GD+80,H+100,vx0,vy0,vx1,vy1);drawCrowd(vx0,vy0,vx1,vy1)}
  powerGround(W,H);
- if(G.night)nightTint(vw*2,vh*2);
+ if(G.night)nightTint(vw*2,vh*2,SO?[-GD-80,-100,W+GD+80,H+100]:null);
  if(SO)finalFx(-GD-80,-100,W+GD+80,H+100,G.cam.x-vw,G.cam.y-vh,G.cam.x+vw,G.cam.y+vh);
  ctx.strokeStyle='#fff';ctx.lineWidth=4;ctx.strokeRect(0,0,W,H);
  ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();ctx.beginPath();ctx.arc(W/2,H/2,H*.14,0,7);ctx.stroke();
@@ -2118,7 +2118,14 @@ function finalFx(a,b,c,d,vx0,vy0,vx1,vy1){
  ctx.restore()}
 
 /* ===== 🌙 Partidos de noche (~40%): cielo oscuro, tinte leve y 4 torres de reflectores ===== */
-function nightTint(vw2,vh2){const c=G.cam;if(!c)return;ctx.save();ctx.fillStyle='#0b1120';ctx.globalAlpha=.5;ctx.fillRect(c.x-vw2,c.y-vh2,vw2*2,vh2*2);ctx.restore()}
+function nightTint(vw2,vh2,R){const c=G.cam;if(!c)return;ctx.save();ctx.fillStyle='#0b1120';ctx.globalAlpha=.5;
+ if(R){const P=ST_D+16,a=R[0],b=R[1],e=R[2],d=R[3]; /* la capa oscura NO cubre la corona de tribunas (se deja iluminada) */
+  ctx.beginPath();ctx.rect(c.x-vw2,c.y-vh2,vw2*2,vh2*2);ctx.rect(a-P,b-P,e-a+2*P,d-b+2*P);ctx.rect(a,b,e-a,d-b);ctx.fill('evenodd');
+  ctx.globalAlpha=1;ctx.globalCompositeOperation='lighter'; /* resplandor cálido de reflectores sobre gradas, hinchas y banderas */
+  const t=performance.now(),fl=.94+.06*Math.sin(t*.002);ctx.fillStyle='rgba(255,240,205,'+(.13*fl)+')';
+  ctx.beginPath();ctx.rect(a-P,b-P,e-a+2*P,d-b+2*P);ctx.rect(a,b,e-a,d-b);ctx.fill('evenodd')}
+ else ctx.fillRect(c.x-vw2,c.y-vh2,vw2*2,vh2*2);
+ ctx.restore()}
 function nightLights(W,H){const t=performance.now(),m=Math.max(26,Math.min(W,H)*.05),cx=W/2,cy=H/2,R=Math.max(W,H)*.62;
  const T=[[-m,-m],[W+m,-m],[-m,H+m],[W+m,H+m]];
  ctx.save();
