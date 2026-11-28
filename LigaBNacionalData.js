@@ -7,11 +7,12 @@
       "name": "Chacarita Juniors",
       "shortName": "CHA",
       "classicRivalId": "atlanta",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-chacarita\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"#d6001c\"/><g clip-path=\"url(#b-chacarita)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-chacarita\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"#e30613\"/><g clip-path=\"url(#b-chacarita)\"><rect x=\"7.11\" y=\"0\" width=\"7.16\" height=\"64\" fill=\"#111111\"/><rect x=\"14.22\" y=\"0\" width=\"7.16\" height=\"64\" fill=\"#ffffff\"/><rect x=\"28.44\" y=\"0\" width=\"7.16\" height=\"64\" fill=\"#111111\"/><rect x=\"35.56\" y=\"0\" width=\"7.16\" height=\"64\" fill=\"#ffffff\"/><rect x=\"49.78\" y=\"0\" width=\"7.16\" height=\"64\" fill=\"#111111\"/><rect x=\"56.89\" y=\"0\" width=\"7.16\" height=\"64\" fill=\"#ffffff\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
-        "n": 2,
+        "n": 3,
         "c1": "#e30613",
         "c2": "#111111",
+        "c3": "#ffffff",
         "st": "vs"
       },
       "kitAway": {
@@ -632,11 +633,12 @@
       "name": "Almagro",
       "shortName": "ALM",
       "classicRivalId": "ferro",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-almagro\"><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\"/></clipPath></defs><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"#0b3d91\"/><g clip-path=\"url(#b-almagro)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/></g><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-almagro\"><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\"/></clipPath></defs><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"#004b9b\"/><g clip-path=\"url(#b-almagro)\"><rect x=\"7.11\" y=\"0\" width=\"7.16\" height=\"64\" fill=\"#111111\"/><rect x=\"14.22\" y=\"0\" width=\"7.16\" height=\"64\" fill=\"#ffffff\"/><rect x=\"28.44\" y=\"0\" width=\"7.16\" height=\"64\" fill=\"#111111\"/><rect x=\"35.56\" y=\"0\" width=\"7.16\" height=\"64\" fill=\"#ffffff\"/><rect x=\"49.78\" y=\"0\" width=\"7.16\" height=\"64\" fill=\"#111111\"/><rect x=\"56.89\" y=\"0\" width=\"7.16\" height=\"64\" fill=\"#ffffff\"/></g><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
-        "n": 2,
+        "n": 3,
         "c1": "#004b9b",
         "c2": "#111111",
+        "c3": "#ffffff",
         "st": "vs"
       },
       "kitAway": {
@@ -757,7 +759,7 @@
       "name": "Quilmes",
       "shortName": "QUI",
       "classicRivalId": "temperley",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-quilmes\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"#ffffff\"/><g clip-path=\"url(#b-quilmes)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#6ec6f0\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#6ec6f0\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#6ec6f0\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#6ec6f0\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#6ec6f0\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-quilmes\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"#ffffff\"/><g clip-path=\"url(#b-quilmes)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#0b1f3a\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#0b1f3a\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#0b1f3a\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#0b1f3a\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#0b1f3a\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
         "n": 1,
         "c1": "#ffffff",
@@ -1010,7 +1012,7 @@
         "n": 2,
         "c1": "#ffffff",
         "c2": "#e30613",
-        "st": "dg"
+        "st": "h1"
       },
       "kitAway": {
         "n": 1,
@@ -1130,7 +1132,7 @@
       "name": "San Miguel",
       "shortName": "SMI",
       "classicRivalId": "moron",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-sanmiguel\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"#0b3d91\"/><g clip-path=\"url(#b-sanmiguel)\"><rect x=\"0\" y=\"0\" width=\"64\" height=\"5.33\" fill=\"#ffd400\"/><rect x=\"0\" y=\"10.67\" width=\"64\" height=\"5.33\" fill=\"#ffd400\"/><rect x=\"0\" y=\"21.34\" width=\"64\" height=\"5.33\" fill=\"#ffd400\"/><rect x=\"0\" y=\"32.01\" width=\"64\" height=\"5.33\" fill=\"#ffd400\"/><rect x=\"0\" y=\"42.68\" width=\"64\" height=\"5.33\" fill=\"#ffd400\"/><rect x=\"0\" y=\"53.35\" width=\"64\" height=\"5.33\" fill=\"#ffd400\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-sanmiguel\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"#007a33\"/><g clip-path=\"url(#b-sanmiguel)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
         "n": 2,
         "c1": "#007a33",
@@ -1255,7 +1257,7 @@
       "name": "Colón (Santa Fe)",
       "shortName": "COL",
       "classicRivalId": "patronato",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-colon\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"#d6001c\"/><g clip-path=\"url(#b-colon)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-colon\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"#e30613\"/><g clip-path=\"url(#b-colon)\"><rect x=\"32\" y=\"0\" width=\"32\" height=\"64\" fill=\"#111111\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
         "n": 2,
         "c1": "#e30613",
@@ -1380,7 +1382,7 @@
       "name": "Patronato",
       "shortName": "PAT",
       "classicRivalId": "colon",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-patronato\"><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\"/></clipPath></defs><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"#d6001c\"/><g clip-path=\"url(#b-patronato)\"><rect x=\"32\" y=\"0\" width=\"32\" height=\"64\" fill=\"#111111\"/></g><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-patronato\"><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\"/></clipPath></defs><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"#e30613\"/><g clip-path=\"url(#b-patronato)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/></g><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
         "n": 2,
         "c1": "#e30613",
@@ -2255,7 +2257,7 @@
       "name": "Agropecuario",
       "shortName": "AGR",
       "classicRivalId": "defensores",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-agropecuario\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"#d6001c\"/><g clip-path=\"url(#b-agropecuario)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-agropecuario\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"#007a33\"/><g clip-path=\"url(#b-agropecuario)\"><rect x=\"32\" y=\"0\" width=\"32\" height=\"64\" fill=\"#e30613\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
         "n": 2,
         "c1": "#007a33",
@@ -2755,7 +2757,7 @@
       "name": "Güemes (SdE)",
       "shortName": "GUE",
       "classicRivalId": "gimnasia_salta",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-guemes\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"#0b3d91\"/><g clip-path=\"url(#b-guemes)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-guemes\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"#0a3c8f\"/><g clip-path=\"url(#b-guemes)\"><rect x=\"32\" y=\"0\" width=\"32\" height=\"64\" fill=\"#e30613\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
         "n": 2,
         "c1": "#0a3c8f",
@@ -3129,7 +3131,7 @@
       "name": "Alvarado",
       "shortName": "ALV",
       "classicRivalId": "central_norte",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-alvarado\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"#d6001c\"/><g clip-path=\"url(#b-alvarado)\"><rect x=\"0\" y=\"0\" width=\"64\" height=\"5.33\" fill=\"#ffffff\"/><rect x=\"0\" y=\"10.67\" width=\"64\" height=\"5.33\" fill=\"#ffffff\"/><rect x=\"0\" y=\"21.34\" width=\"64\" height=\"5.33\" fill=\"#ffffff\"/><rect x=\"0\" y=\"32.01\" width=\"64\" height=\"5.33\" fill=\"#ffffff\"/><rect x=\"0\" y=\"42.68\" width=\"64\" height=\"5.33\" fill=\"#ffffff\"/><rect x=\"0\" y=\"53.35\" width=\"64\" height=\"5.33\" fill=\"#ffffff\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-alvarado\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"#004b9b\"/><g clip-path=\"url(#b-alvarado)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
         "n": 2,
         "c1": "#004b9b",
@@ -3379,7 +3381,7 @@
       "name": "Deportivo Maipú",
       "shortName": "MAI",
       "classicRivalId": "racing_cba",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-maipu\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"#ffffff\"/><g clip-path=\"url(#b-maipu)\"><rect x=\"0\" y=\"26.5\" width=\"64\" height=\"11\" fill=\"#d6001c\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-maipu\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"#e30613\"/><g clip-path=\"url(#b-maipu)\"><polygon points=\"0,0 18,0 64,46 64,64 46,64 0,18\" fill=\"#ffffff\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
         "n": 2,
         "c1": "#e30613",
@@ -3504,7 +3506,7 @@
       "name": "San Telmo",
       "shortName": "STE",
       "classicRivalId": "arsenal",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-san_telmo\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"#0b3d91\"/><g clip-path=\"url(#b-san_telmo)\"><rect x=\"32\" y=\"0\" width=\"32\" height=\"64\" fill=\"#ffd400\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-san_telmo\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"#5bc2e7\"/><g clip-path=\"url(#b-san_telmo)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#0a3c8f\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#0a3c8f\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#0a3c8f\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#0a3c8f\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#0a3c8f\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
         "n": 2,
         "c1": "#5bc2e7",
@@ -3754,7 +3756,7 @@
       "name": "Brown de Adrogué",
       "shortName": "BRO",
       "classicRivalId": "talleres_re",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-brown_adrogue\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"#ffffff\"/><g clip-path=\"url(#b-brown_adrogue)\"><rect x=\"0\" y=\"26.5\" width=\"64\" height=\"11\" fill=\"#0b3d91\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-brown_adrogue\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"#5bc2e7\"/><g clip-path=\"url(#b-brown_adrogue)\"><rect x=\"21.33\" y=\"0\" width=\"21.34\" height=\"64\" fill=\"#e30613\"/><rect x=\"42.67\" y=\"0\" width=\"21.33\" height=\"64\" fill=\"#111111\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
         "n": 3,
         "c1": "#5bc2e7",
@@ -3880,7 +3882,7 @@
       "name": "Talleres (RdE)",
       "shortName": "TRE",
       "classicRivalId": "brown_adrogue",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-talleres_re\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"#0b3d91\"/><g clip-path=\"url(#b-talleres_re)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-talleres_re\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"#e30613\"/><g clip-path=\"url(#b-talleres_re)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
         "n": 2,
         "c1": "#e30613",
@@ -4003,7 +4005,7 @@
     {
       "id": "los_andes",
       "name": "Los Andes",
-      "shortName": "LAN_A",
+      "shortName": "LOS",
       "classicRivalId": "colegiales",
       "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-los_andes\"><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\"/></clipPath></defs><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"#d6001c\"/><g clip-path=\"url(#b-los_andes)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/></g><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
@@ -4128,9 +4130,9 @@
     {
       "id": "colegiales",
       "name": "Colegiales",
-      "shortName": "COL_E",
+      "shortName": "COL",
       "classicRivalId": "los_andes",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-colegiales\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"#0a8a3c\"/><g clip-path=\"url(#b-colegiales)\"><rect x=\"0\" y=\"0\" width=\"64\" height=\"5.33\" fill=\"#ffffff\"/><rect x=\"0\" y=\"10.67\" width=\"64\" height=\"5.33\" fill=\"#ffffff\"/><rect x=\"0\" y=\"21.34\" width=\"64\" height=\"5.33\" fill=\"#ffffff\"/><rect x=\"0\" y=\"32.01\" width=\"64\" height=\"5.33\" fill=\"#ffffff\"/><rect x=\"0\" y=\"42.68\" width=\"64\" height=\"5.33\" fill=\"#ffffff\"/><rect x=\"0\" y=\"53.35\" width=\"64\" height=\"5.33\" fill=\"#ffffff\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-colegiales\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"#0a3c8f\"/><g clip-path=\"url(#b-colegiales)\"><rect x=\"21.33\" y=\"0\" width=\"21.34\" height=\"64\" fill=\"#f6c600\"/><rect x=\"42.67\" y=\"0\" width=\"21.33\" height=\"64\" fill=\"#e30613\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
         "n": 3,
         "c1": "#0a3c8f",
@@ -4256,7 +4258,7 @@
       "name": "Deportivo Madryn",
       "shortName": "MAD",
       "classicRivalId": "brown_madryn",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-madryn\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"#0a8a3c\"/><g clip-path=\"url(#b-madryn)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#ffffff\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-madryn\"><circle cx=\"32\" cy=\"32\" r=\"27\"/></clipPath></defs><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"#f6c600\"/><g clip-path=\"url(#b-madryn)\"><rect x=\"0\" y=\"26.5\" width=\"64\" height=\"11\" fill=\"#111111\"/></g><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"32\" r=\"27\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
         "n": 2,
         "c1": "#f6c600",
@@ -4381,7 +4383,7 @@
       "name": "Guillermo Brown",
       "shortName": "GBM",
       "classicRivalId": "madryn",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-brown_madryn\"><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\"/></clipPath></defs><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"#ffd400\"/><g clip-path=\"url(#b-brown_madryn)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#111111\"/></g><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-brown_madryn\"><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\"/></clipPath></defs><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"#ffffff\"/><g clip-path=\"url(#b-brown_madryn)\"><polygon points=\"0,0 18,0 64,46 64,64 46,64 0,18\" fill=\"#0a3c8f\"/></g><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><polygon points=\"32,4 57,18 57,46 32,60 7,46 7,18\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
         "n": 2,
         "c1": "#ffffff",
