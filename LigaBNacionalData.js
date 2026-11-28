@@ -512,7 +512,7 @@
       "kitHome": {
         "n": 1,
         "c1": "#007a33",
-        "bv": "v1"
+        "st": "v1"
       },
       "kitAway": {
         "n": 2,
@@ -639,7 +639,7 @@
         "c1": "#004b9b",
         "c2": "#111111",
         "c3": "#ffffff",
-        "st": "vs"
+        "bv": "vs"
       },
       "kitAway": {
         "n": 1,
@@ -759,7 +759,7 @@
       "name": "Quilmes",
       "shortName": "QUI",
       "classicRivalId": "temperley",
-      "badgeSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><defs><clipPath id=\"b-quilmes\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"#ffffff\"/><g clip-path=\"url(#b-quilmes)\"><rect x=\"0\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#0b1f3a\"/><rect x=\"12.8\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#0b1f3a\"/><rect x=\"25.6\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#0b1f3a\"/><rect x=\"38.4\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#0b1f3a\"/><rect x=\"51.2\" y=\"0\" width=\"6.4\" height=\"64\" fill=\"#0b1f3a\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
+      "badgeSvg": "<svg xmlns=\"http://w3.org\" viewBox=\"0 0 64 64\"><defs><clipPath id=\"b-quilmes\"><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\"/></clipPath></defs><g clip-path=\"url(#b-quilmes)\"><rect width=\"64\" height=\"64\" fill=\"#ffffff\"/><path d=\"M-4 4L4 -4L68 60L60 68Z\" fill=\"#0b1f3a\"/></g><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\" stroke-linejoin=\"round\"/><path d=\"M8 6h48v26c0 14-10 22-24 28C18 54 8 46 8 32z\" fill=\"none\" stroke=\"#0b1220\" stroke-width=\"1.2\" opacity=\".6\"/></svg>",
       "kitHome": {
         "n": 1,
         "c1": "#ffffff",
