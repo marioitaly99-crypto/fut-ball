@@ -2423,9 +2423,11 @@ let last=performance.now(),acc=0;
  const root=$('career-root'),KEY='futball_career_v1';let D=window.LIGA_ARGENTINA_DATA;window._careerSelectedDivision='primera';
  if(!D){root.innerHTML='<div class="cPanel"><h2>Datos no disponibles</h2><div class="cErr">No se pudo cargar LigaData.js. Verificá que esté junto a index.html.</div></div>';return}
  const DIVS=[{id:'primera',key:'LIGA_ARGENTINA_DATA',name:'Liga Profesional Argentina (Primera División)',label:'Primera División',sub:'30 equipos · 2 Zonas · 16 Fechas + Playoffs'},
-  {id:'bnacional',key:'LIGA_BNACIONAL_DATA',name:'Primera Nacional (Segunda División)',label:'Segunda División',sub:'36 equipos · 2 Zonas · 17 Fechas + Final + Reducido'}];
+  {id:'bnacional',key:'LIGA_BNACIONAL_DATA',name:'Primera Nacional (Segunda División)',label:'Segunda División',sub:'36 equipos · 2 Zonas · 17 Fechas + Final + Reducido'},
+  {id:'uruguaya',key:'LIGA_URUGUAY_DATA',name:'Liga AUF Uruguaya (Primera División)',label:'Primera División',sub:'16 equipos · Apertura, Intermedio y Clausura'}];
  const divOf=id=>DIVS.find(x=>x.id===id)||DIVS[0],dataFor=id=>window[divOf(id).key]||null;
- const COUNTRIES=[{id:D.country.id,name:D.country.name,flag:D.country.flag,leagues:DIVS}];
+ const COUNTRIES=[{id:D.country.id,name:D.country.name,flag:D.country.flag,leagues:DIVS.filter(x=>x.id!=='uruguaya')},{id:'UY',name:'Uruguay',flag:'🇺🇾',leagues:DIVS.filter(x=>x.id==='uruguaya')}];
+ const countryOf=div=>COUNTRIES.find(c=>c.leagues.some(l=>l.id===div))||COUNTRIES[0];
  const E=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  let sel='',state=null,uid=0;
  const badge=t=>{const sfx='-'+(++uid);return t.badgeSvg.split('b-'+t.id).join('b-'+t.id+sfx)};
@@ -2450,11 +2452,11 @@ let last=performance.now(),acc=0;
  const kitName={v1:'Franja vertical',h1:'Franja horizontal',vs:'Franjas verticales',hs:'Franjas horizontales',vv:'Franja en V',dg:'Franja cruzada',mv:'Mitad vertical',mh:'Mitad horizontal'};
 
  function form(){
-  const c=COUNTRIES[0],l=c.leagues[0];
+  const c=countryOf(window._careerSelectedDivision);
   root.innerHTML=`<div class="cGrid">
   <section class="cPanel"><h2>Selección de club</h2>
    <label class="cLbl" for="cPais">País</label>
-   <select id="cPais">${COUNTRIES.map(x=>`<option value="${x.id}">${x.flag} ${E(x.name)}</option>`).join('')}</select>
+   <select id="cPais">${COUNTRIES.map(x=>`<option value="${x.id}"${x.id===c.id?' selected':''}>${x.flag} ${E(x.name)}</option>`).join('')}</select>
    <label class="cLbl" for="cLiga">Liga</label>
    <select id="cLiga">${c.leagues.map(x=>`<option value="${x.id}"${x.id===window._careerSelectedDivision?' selected':''}>${E(x.name)}</option>`).join('')}</select>
    <div class="cNote" id="cLigaNote">${E(divOf(window._careerSelectedDivision).sub)}</div>
@@ -2478,15 +2480,18 @@ let last=performance.now(),acc=0;
   $('cDurCustom').oninput=()=>{$('cErr').textContent=''};
   $('cNum').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,2);if(sel)preview()};
   $('cName').oninput=()=>{$('cErr').textContent=''};
-  $('cPais').onchange=()=>{};$('cLiga').onchange=()=>setDivision($('cLiga').value);
+  $('cPais').onchange=()=>setCountry($('cPais').value);$('cLiga').onchange=()=>setDivision($('cLiga').value);
   pick(sel,false);
  }
  function renderTeams(){const grid=$('cTeams');grid.innerHTML='';
   ((D&&D.teams)||[]).forEach(t=>{const b=document.createElement('button');b.type='button';b.className='tm';b.dataset.id=t.id;b.title=t.name;b.setAttribute('role','option');
    b.innerHTML=`<span class="bd">${badge(t)}</span><b>${E(t.shortName)}</b>`;b.onclick=()=>pick(t.id);grid.appendChild(b)})}
+ function setCountry(id){const c=COUNTRIES.find(x=>x.id===id)||COUNTRIES[0],dv=c.leagues[0];
+  if(!dataFor(dv.id)){$('cPais').value=countryOf(window._careerSelectedDivision).id;$('cErr').textContent='No se pudieron cargar los datos de '+c.name+'.';return}
+  $('cLiga').innerHTML=c.leagues.map(x=>`<option value="${x.id}">${E(x.name)}</option>`).join('');setDivision(dv.id)}
  function setDivision(id){const dv=divOf(id),nd=dataFor(dv.id);
   if(!nd){$('cLiga').value=window._careerSelectedDivision;$('cErr').textContent='No se pudieron cargar los datos de '+dv.name+'.';return}
-  D=nd;window._careerSelectedDivision=dv.id;$('cLiga').value=dv.id;$('cLigaNote').textContent=dv.sub;
+  D=nd;window._careerSelectedDivision=dv.id;$('cPais').value=countryOf(dv.id).id;$('cLiga').value=dv.id;$('cLigaNote').textContent=dv.sub;
   sel='';renderTeams();pick('',false)}
  function pick(id,scroll){sel=id||'';
   document.querySelectorAll('#cTeams .tm').forEach(b=>{const on=b.dataset.id===sel;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);if(on&&scroll)b.scrollIntoView({block:'nearest'})});
@@ -2509,7 +2514,7 @@ let last=performance.now(),acc=0;
   else mins=parseInt($('cDur').value,10)||5;
   if(typeof D.generarZonasAleatorias!=='function')return err.textContent='Esta división todavía no admite generar zonas.';
   const z=D.generarZonasAleatorias();
-  state={v:1,division:window._careerSelectedDivision,country:COUNTRIES[0].id,league:D.league.id,teamId:sel,player:{name,num:n},matchMinutes:mins,
+  state={v:1,division:window._careerSelectedDivision,country:countryOf(window._careerSelectedDivision).id,league:D.league.id,teamId:sel,player:{name,num:n},matchMinutes:mins,
    zones:{A:z.A,B:z.B},zonaDe:z.zonaDe,myZone:z.zonaDe[sel],fecha:1,createdAt:Date.now()};
   try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
   window.CAREER_STATE=state;
@@ -2532,6 +2537,7 @@ let last=performance.now(),acc=0;
 })();
 </script>
 <script src="LigaBNacionalData.js"></script>
+<script src="LigaUruguayData.js"></script>
 <script src="CareerMode.js"></script>
 <script>
 /* ===== 🎵 Música de menús (estilo PES) · módulo autónomo: no toca juego, red ni mecánicas ===== */

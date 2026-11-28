@@ -1,5 +1,5 @@
 /* =====================================================================
- CareerMode.js · Modo Carrera — Argentina · Primera División + Primera Nacional
+ CareerMode.js · Modo Carrera — Argentina · Primera División + Primera Nacional + Liga AUF Uruguaya
  (cruce entre categorías: Tabla Anual, ascensos/descensos y Copa Argentina de 64 equipos)
  ---------------------------------------------------------------------
  Se carga DESPUÉS de LigaData.js y del script principal de index.html.
@@ -9,29 +9,31 @@
  Guardado: localStorage 'futball_career_save_v2'.
  ===================================================================== */
 (function(){
- const D1=window.LIGA_ARGENTINA_DATA,DB=window.LIGA_BNACIONAL_DATA;
+ const D1=window.LIGA_ARGENTINA_DATA,DB=window.LIGA_BNACIONAL_DATA,DU=window.LIGA_URUGUAY_DATA;
  if(!D1){console.warn('[CareerMode] Falta LigaData.js');return}
- let D=D1; /* datos de la categoría activa (S.division): 'primera' → LIGA_ARGENTINA_DATA · 'bnacional' → LIGA_BNACIONAL_DATA */
- const dataOf=div=>div==='bnacional'&&DB?DB:D1;
+ let D=D1; /* datos de la categoría activa (S.division): 'primera' → LIGA_ARGENTINA_DATA · 'bnacional' → LIGA_BNACIONAL_DATA · 'uruguaya' → LIGA_URUGUAY_DATA */
+ const dataOf=div=>div==='uruguaya'&&DU?DU:div==='bnacional'&&DB?DB:D1;
  const $=id=>document.getElementById(id);
  const K2='futball_career_save_v2';
  const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
  const safeTeam=(d,id)=>{try{return d&&d.getTeam?d.getTeam(id)||null:null}catch(e){return null}};
- const T=id=>safeTeam(D,id)||safeTeam(D1,id)||safeTeam(DB,id); /* un club ascendido/descendido se resuelve en cualquiera de las dos bases */
- const ownerOf=id=>safeTeam(D,id)?D:safeTeam(D1,id)?D1:safeTeam(DB,id)?DB:D; /* base de datos (LIGA_ARGENTINA_DATA / LIGA_BNACIONAL_DATA) a la que pertenece el club */
+ const T=id=>safeTeam(D,id)||safeTeam(D1,id)||safeTeam(DB,id)||safeTeam(DU,id); /* un club ascendido/descendido se resuelve en cualquiera de las dos bases */
+ const ownerOf=id=>safeTeam(D,id)?D:safeTeam(D1,id)?D1:safeTeam(DB,id)?DB:safeTeam(DU,id)?DU:D; /* base de datos (LIGA_ARGENTINA_DATA / LIGA_BNACIONAL_DATA) a la que pertenece el club */
  const allTeams=()=>D1.teams.concat(DB&&DB.teams?DB.teams:[]);
  const STAGES_P=['octavos','cuartos','semis','final'],STAGES_B=['inicial','cuartos','semis','final']; /* Primera Nacional: 'inicial' = Final 1.º Ascenso + 1.ª Fase del Reducido */
  const LBL_P={octavos:'Octavos de Final',cuartos:'Cuartos de Final',semis:'Semifinales',final:'Final'};
  const LBL_B={inicial:'Final 1.º Ascenso y 1.ª Fase del Reducido',cuartos:'Cuartos de Final del Reducido',semis:'Semifinales del Reducido',final:'Final del Reducido (2.º Ascenso)',asc:'Campeón (1.º Ascenso)'};
+ const STAGES_U=['semi','final'],LBL_U={semi:'Semifinal',final:'Final'}; /* Liga AUF Uruguaya: definición del Campeón Uruguayo */
  let STAGES=STAGES_P,STAGE_LBL=LBL_P;
- const DIVN={primera:'Primera División',bnacional:'Primera Nacional'};
+ const DIVN={primera:'Primera División',bnacional:'Primera Nacional',uruguaya:'Liga AUF Uruguaya'};
  const POSL={GK:'ARQ',DEF:'DEF',MID:'MED',FWD:'DEL'};
  let S=null,TAB='next',uid=0,SEL=null,LIVE=null;
  const CM={live:false};
  const isBN=()=>!!S&&S.division==='bnacional';
- const NF=()=>isBN()?17:16; /* fechas de la fase regular */
- function setDiv(div){const b=div==='bnacional'&&!!DB;D=b?DB:D1;STAGES=b?STAGES_B:STAGES_P;STAGE_LBL=b?LBL_B:LBL_P;FXS=b?FXS_B:FXS_P;return b?'bnacional':'primera'}
+ const isUY=()=>!!S&&S.division==='uruguaya';
+ const NF=()=>isUY()?((S.fixture&&S.fixture.length)||15):isBN()?17:16; /* fechas de la fase regular */
+ function setDiv(div){const u=div==='uruguaya'&&!!DU&&!!DU.teams&&DU.teams.length>0,b=!u&&div==='bnacional'&&!!DB;D=u?DU:b?DB:D1;STAGES=u?STAGES_U:b?STAGES_B:STAGES_P;STAGE_LBL=u?LBL_U:b?LBL_B:LBL_P;FXS=u?FXS_U:b?FXS_B:FXS_P;return u?'uruguaya':b?'bnacional':'primera'}
  const isCopaM=m=>!!(m&&m.copa);
  const isKO=()=>!!S&&(S.phase==='playoffs'||S.phase==='trofeo'||!!(LIVE&&isCopaM(LIVE.m))); /* partido de eliminación (Copa: penales directos, sin tiempo extra) */
  /* ---- Copa Argentina: 64 equipos (30 de Primera División + 34 de Primera Nacional) desde 32avos de Final · cancha neutral ---- */
@@ -42,7 +44,7 @@
  const copaPts=()=>isBN()?COPA_PTS_B:COPA_PTS;
  const copaTn=t=>t==='apertura'?'Apertura':t==='clausura'?'Clausura':'torneo';
  const COPA_VENUES=['ROS','COR','MZA'];
- const TN_LBL={apertura:'TORNEO APERTURA',clausura:'TORNEO CLAUSURA',bnacional:'PRIMERA NACIONAL'};
+ const TN_LBL={apertura:'TORNEO APERTURA',clausura:'TORNEO CLAUSURA',bnacional:'PRIMERA NACIONAL',intermedio:'TORNEO INTERMEDIO',anual:'CAMPEONATO URUGUAYO'};
  const tnName=()=>TN_LBL[S.torneo]||'TORNEO';
 
  /* ------------------------------------------------------------------
@@ -105,7 +107,7 @@
  const BIG=['boca','river','racing','independiente','sanlorenzo','estudiantes','velez','talleres','rosario','lanus'];
  /* Tácticas por club (ADN): el resto es 'balanced' */
  const CLUB_STYLE={river:'offensive',racing:'offensive',boca:'offensive',velez:'offensive',argentinos:'offensive',talleres:'offensive',defensa:'offensive',estudiantes:'defensive',sanlorenzo:'defensive',belgrano:'defensive',platense:'defensive',riestra:'defensive',sarmiento:'defensive',barracas:'defensive',central_cordoba:'defensive'};
- const styleOf=id=>CLUB_STYLE[id]||'balanced';
+ const styleOf=id=>isUY()?(bigU(id)?'offensive':'balanced'):(CLUB_STYLE[id]||'balanced');
  function calcBias(id,isHome){
   let b=({offensive:.08,balanced:0,defensive:-.08})[styleOf(id)];
   if(S.phase==='regular'&&S.zonaDe[id]){
@@ -209,6 +211,7 @@
  }
  /* Tabla Anual de Primera: puntos del Apertura (guardados al cerrar el torneo) + Clausura en curso = 32 fechas */
  function annualRows(){
+  if(isUY())return annualRowsUY();
   const ids=S.zones.A.concat(S.zones.B),cur=stats(ids),ap=S.apS||{};
   return cur.map(r=>{const a=ap[r.id]||{pj:0,g:0,e:0,p:0,gf:0,gc:0,pts:0};
    return{id:r.id,pj:r.pj+a.pj,g:r.g+a.g,e:r.e+a.e,p:r.p+a.p,gf:r.gf+a.gf,gc:r.gc+a.gc,pts:r.pts+a.pts}})
@@ -275,6 +278,16 @@
  /* Siguiente temporada: aplica ascensos y descensos y arma la nueva temporada (categoría que corresponda) */
  function nextSeasonFlow(){
   if(!S||CM.live)return;
+  if(isUY()){ /* Liga AUF Uruguaya: sin ascensos ni descensos → la temporada siguiente sigue en la Liga AUF Uruguaya */
+   if(!yearOver()&&!confirm('¿Pasar a la siguiente temporada? Se simula lo que falta del año y continuás en la Liga AUF Uruguaya (sin ascensos ni descensos).'))return;
+   try{
+    finishYear();
+    const ns=newSeason({division:'uruguaya',teamId:S.teamId,player:{name:S.player.name,num:S.player.num},matchMinutes:S.minutes,year:(S.year||1)+1});
+    S=ns;TAB='next';SEL=null;
+    save();hideTorneoLayer();openHub('next');flushModals();
+   }catch(e){console.warn('[CareerMode] siguiente temporada (Uruguay)',e);try{renderHub()}catch(er){}}
+   return;
+  }
   if(!yearOver()&&!confirm('¿Pasar a la siguiente temporada? Se simula lo que falta del año y se aplican los ascensos y descensos entre Primera División y Primera Nacional.'))return;
   try{
    finishYear();
@@ -309,10 +322,16 @@
  }
  function newSeason(st){
   let div=st.division||window._careerSelectedDivision||window.CAREER_DIVISION||'primera';
-  if(div!=='bnacional')div='primera';
+  if(div!=='bnacional'&&div!=='uruguaya')div='primera';
   if(div==='bnacional'&&!DB)div='primera';
-  if(!st.cross&&!dataOf(div).getTeam(st.teamId)){const o=div==='bnacional'?'primera':'bnacional';if(o==='primera'||DB){if(dataOf(o).getTeam(st.teamId))div=o}}
+  if(div==='uruguaya'&&!(DU&&DU.teams&&DU.teams.length))div='primera';
+  /* Liga AUF Uruguaya: categoría elegida en el desplegable "Liga" o club de LIGA_URUGUAY_DATA.teams (que no existe en las ligas argentinas) */
+  const inU=!!DU&&!!safeTeam(DU,st.teamId),inAr=!!safeTeam(D1,st.teamId)||!!safeTeam(DB,st.teamId);
+  if(inU&&!st.division&&(window._careerSelectedDivision==='uruguaya'||!inAr))div='uruguaya';
+  if(div==='uruguaya'&&!inU&&inAr)div=safeTeam(D1,st.teamId)?'primera':'bnacional';
+  if(div!=='uruguaya'&&!st.cross&&!dataOf(div).getTeam(st.teamId)){const o=div==='bnacional'?'primera':'bnacional';if(o==='primera'||DB){if(dataOf(o).getTeam(st.teamId))div=o}}
   div=setDiv(div);window.CAREER_DIVISION=div;window._careerSelectedDivision=div;
+  if(div==='uruguaya')return newSeasonUY(st);
   if(div==='bnacional')return newSeasonBN(st);
   const A=st.zones.A.slice();
   const B=alignClassics(A,st.zones.B);
@@ -330,6 +349,7 @@
  function migrate(s){
   const prev=S;S=s;
   try{
+   if(s.division==='uruguaya'){s.modalQ=s.modalQ||[];s.cross=s.cross||{};s.copa=null;ensureStrUY(s);uyIds();if(!s.fxAp&&s.torneo==='apertura')s.fxAp=cleanFx(s.fixture);return} /* Liga AUF Uruguaya: sin Copa Argentina ni cruce de categorías */
    const legacy=!s.torneo;
    if(legacy){
     s.torneo='apertura';s.modalQ=s.modalQ||[];
@@ -441,6 +461,7 @@
 
  /* ---- playoffs ---- */
  function endRegular(){
+  if(isUY())return endRegularUY();
   if(isBN())return endRegularBN();
   const A=stats(S.zones.A),B=stats(S.zones.B),qA=A.slice(0,8).map(r=>r.id),qB=B.slice(0,8).map(r=>r.id);
   const oct=[];
@@ -452,6 +473,7 @@
   S.phase='playoffs';
  }
  function advanceStage(){
+  if(isUY())return advanceStageUY();
   if(isBN())return advanceStageBN();
   const i=STAGES.indexOf(S.po.stage),rd=S.po.rounds[S.po.stage];
   if(!rd.every(m=>m.done))return;
@@ -497,6 +519,238 @@
   S.po.rounds[nx]=nx==='semis'?[mk(w[0],w[1]),mk(w[2],w[3])]:[mk(w[0],w[1],true)];
   S.po.stage=nx;
  }
+ /* ------------------------------------------------------------------
+  0c) LIGA AUF URUGUAYA (S.division==='uruguaya'): 16 equipos de window.LIGA_URUGUAY_DATA · sin Copa Argentina ni ascensos/descensos
+      1) Torneo Apertura (15 fechas, tabla única) · 2) Torneo Intermedio (Serie A/B de 8 · 7 fechas + Final neutral)
+      3) Torneo Clausura (15 fechas, localías invertidas) · 4) Tabla Anual (Apertura + Intermedio + Clausura = 37 fechas)
+         y definición del Campeón Uruguayo (Semifinal Campeón Apertura vs Campeón Clausura → Final vs 1.º de la Tabla Anual)
+  ------------------------------------------------------------------ */
+ const bigU=id=>/penarol|nacional/i.test(String(id));
+ const uyRnd=id=>+(0.82+Math.random()*0.42+(bigU(id)?0.1:0)).toFixed(3);
+ function newStrUY(){const o={};DU.teams.forEach(t=>{o[t.id]=uyRnd(t.id)});return o}
+ function ensureStrUY(s){s.str=s.str||{};DU.teams.forEach(t=>{if(!(t.id in s.str))s.str[t.id]=uyRnd(t.id)})}
+ const uyIds=()=>(S.uyIds&&S.uyIds.length?S.uyIds:(S.uyIds=DU.teams.map(t=>t.id)));
+ const uyStages=()=>S.torneo==='intermedio'?['final']:S.torneo==='anual'?['semi','final']:[];
+ const uyLbl=stg=>S.torneo==='intermedio'?'Final del Torneo Intermedio':stg==='semi'?'Semifinal del Campeonato Uruguayo':'Final del Campeonato Uruguayo';
+ /* clásicos (classicRivalId) → fecha de clásico 🔥 */
+ function markClassics(fx){fx.forEach(f=>f.forEach(m=>{const th=T(m.h),ta=T(m.a);if((th&&th.classicRivalId===m.a)||(ta&&ta.classicRivalId===m.h))m.kind='C'}));return fx}
+ /* todos contra todos a UNA rueda: 16 equipos → 15 fechas × 8 partidos, sin libres */
+ function buildFixtureUY(ids){
+  const R=rounds18(ids.length),fx=[];
+  for(let r=0;r<R.length;r++){const f=[];R[r].forEach(([x,y])=>{f.push(((r+x+y)%2)?mm(ids[y],ids[x],'Z'):mm(ids[x],ids[y],'Z'))});fx.push(f)}
+  return markClassics(fx);
+ }
+ const cleanFx=fx=>fx.map(f=>f.map(m=>mm(m.h,m.a,m.kind)));
+ const snapRows=rows=>{const o={};rows.forEach(r=>{o[r.id]={pj:r.pj,g:r.g,e:r.e,p:r.p,gf:r.gf,gc:r.gc,pts:r.pts}});return o};
+ function setZonesUY(A,B){S.zones={A:A.slice(),B:B.slice()};S.zonaDe={};A.forEach(id=>{S.zonaDe[id]='A'});B.forEach(id=>{S.zonaDe[id]='B'});S.myZone=S.zonaDe[S.teamId]||'A'}
+ /* cada torneo arranca con el plantel descansado y sin amarillas acumuladas */
+ function resetTorneoUY(){
+  S.phase='regular';S.fecha=1;S.po=null;S.q=null;S.champShown=false;
+  Object.keys(S.squad.info).forEach(id=>{const p=S.squad.info[id];p.stam=100;p.inj=null;p.ycTotal=0});
+  S.player.ycTotal=0;
+ }
+ function newSeasonUY(st){
+  const ids=DU.teams.map(t=>t.id),fx=buildFixtureUY(shuffle(ids)),zd={};ids.forEach(id=>{zd[id]='A'});
+  return{v:2,division:'uruguaya',teamId:st.teamId,copa:null,cross:{},year:st.year||1,player:{name:st.player.name,num:st.player.num,ycTotal:0,susp:0},minutes:st.matchMinutes||5,
+   zones:{A:ids.slice(),B:[]},zonaDe:zd,myZone:'A',uyIds:ids.slice(),str:newStrUY(),fixture:fx,fxAp:cleanFx(fx),fecha:1,phase:'regular',
+   po:null,squad:newSquad(st.teamId,st.player.num),champShown:false,createdAt:Date.now(),
+   torneo:'apertura',aperturaChampionId:null,aperturaRunnerUpId:null,intermedioChampionId:null,intermedioRunnerUpId:null,clausuraChampionId:null,clausuraRunnerUpId:null,
+   apS:null,inS:null,clS:null,anualFirstId:null,uyChampId:null,uyRunnerUpId:null,trofeo:null,copaDue:null,copaInfo:null,
+   modalQ:[{k:'intro',torneo:'apertura'}]};
+ }
+ /* Tabla Anual: puntos del Apertura + Intermedio + Clausura (los ya cerrados se guardan en apS / inS / clS; el torneo en curso se suma en vivo) */
+ function annualRowsUY(){
+  const ids=uyIds(),K=['pj','g','e','p','gf','gc','pts'],saved={apertura:S.apS,intermedio:S.inS,clausura:S.clS}[S.torneo];
+  const parts=[S.apS,S.inS,S.clS].filter(Boolean);
+  if(S.torneo!=='anual'&&!saved){const cur={};statsFx(S.fixture,ids).forEach(r=>{cur[r.id]=r});parts.push(cur)}
+  return ids.map(id=>{const o={id,pj:0,g:0,e:0,p:0,gf:0,gc:0,pts:0};parts.forEach(src=>{const x=src[id];if(x)K.forEach(k=>{o[k]+=x[k]})});return o})
+   .sort((a,b)=>b.pts-a.pts||(b.gf-b.gc)-(a.gf-a.gc)||b.gf-a.gf||T(a.id).name.localeCompare(T(b.id).name));
+ }
+ /* fin de la fase regular de un torneo uruguayo */
+ function endRegularUY(){
+  const tn=S.torneo;S.modalQ=S.modalQ||[];
+  if(tn==='apertura'||tn==='clausura'){ /* tabla única de 16: el 1.º es campeón */
+   const rows=stats(uyIds()),ch=rows[0].id,ru=rows[1]?rows[1].id:null;
+   if(tn==='apertura'){S.apS=snapRows(rows);S.aperturaChampionId=ch;S.aperturaRunnerUpId=ru}
+   else{S.clS=snapRows(rows);S.clausuraChampionId=ch;S.clausuraRunnerUpId=ru}
+   if(ch===S.teamId)S.modalQ.push({k:'champ',torneo:tn,id:ch}); /* trofeo en la Vitrina + escena de campeón */
+   if(tn==='apertura')startIntermedio(rows.map(r=>r.id));else startDefinicion();
+   return;
+  }
+  /* Intermedio: terminaron las 7 fechas de ambas series → Final entre los ganadores (cancha neutral) */
+  const rA=stats(S.zones.A),rB=stats(S.zones.B),a=rA[0].id,b=rB[0].id;
+  S.inS=snapRows(rA.concat(rB));
+  const f=ko(a,b,true);f.tag='FI';
+  S.po={stage:'final',rounds:{final:[f]},out:(a===S.teamId||b===S.teamId)?null:'nq',champ:null,runnerUp:null};
+  S.q={A:[a],B:[b]};
+  S.phase='playoffs';
+ }
+ /* Intermedio: Serie A = puestos impares del Apertura (1.º, 3.º … 15.º) · Serie B = puestos pares (2.º, 4.º … 16.º) */
+ function startIntermedio(order){
+  const A=[],B=[];order.forEach((id,i)=>{(i%2?B:A).push(id)});
+  setZonesUY(A,B);
+  S.fixture=markClassics(buildFixtureBN(A,B));
+  S.torneo='intermedio';resetTorneoUY();
+  S.modalQ=S.modalQ||[];S.modalQ.push({k:'intro',torneo:'intermedio'});
+ }
+ /* Clausura: los 16 equipos, mismos rivales y fechas que el Apertura con todas las localías invertidas */
+ function startClausuraUY(){
+  setZonesUY(uyIds(),[]);
+  S.fixture=(S.fxAp&&S.fxAp.length?S.fxAp:buildFixtureUY(uyIds())).map(f=>f.map(m=>mm(m.a,m.h,m.kind)));
+  S.torneo='clausura';resetTorneoUY();
+  S.modalQ=S.modalQ||[];S.modalQ.push({k:'intro',torneo:'clausura',prev:S.aperturaChampionId});
+ }
+ const neuU=(a,b)=>ko(a,b,true); /* partido único en cancha neutral */
+ /* Campeón Uruguayo: trofeo AUF en la Vitrina + escena de campeón (si es tu club) */
+ function crownUY(id,ru){
+  S.uyChampId=id;S.uyRunnerUpId=ru||null;
+  if(S.po){S.po.champ=id;S.po.runnerUp=ru||null}
+  S.phase='done';
+  S.modalQ=S.modalQ||[];if(id===S.teamId)S.modalQ.push({k:'champ',torneo:'auf',id});
+ }
+ /* Tabla Anual completa → Semifinal (Campeón Apertura vs Campeón Clausura) y Final vs 1.º de la Tabla Anual */
+ function startDefinicion(){
+  S.torneo='anual';
+  const rows=annualRowsUY(),a1=rows[0].id,A=S.aperturaChampionId,C=S.clausuraChampionId;
+  S.anualFirstId=a1;S.q=null;
+  S.po={stage:'semi',rounds:{semi:[],final:[]},out:null,champ:null,runnerUp:null};
+  let mode;
+  if(A!==C){S.po.rounds.semi=[neuU(A,C)];mode='semi'}
+  else if(A===a1)mode='direct'; /* Apertura + Clausura + Tabla Anual del mismo club → Campeón Uruguayo directo */
+  else{S.po.rounds.final=[neuU(A,a1)];S.po.stage='final';mode='final'} /* doble campeón de torneos: pasa directo a la Final vs el 1.º de la Anual */
+  S.modalQ=S.modalQ||[];S.modalQ.push({k:'defin',mode,a:A,c:C,a1});
+  S.phase='playoffs';
+  const inRd=S.po.rounds[S.po.stage].some(m=>m.h===S.teamId||m.a===S.teamId);
+  S.po.out=(inRd||S.teamId===a1)?null:'nq';
+  if(mode==='direct')crownUY(A,rows[1]?rows[1].id:null);
+ }
+ function advanceStageUY(){
+  const stg=S.po.stage,rd=S.po.rounds[stg];
+  if(!rd.every(m=>m.done))return;
+  S.modalQ=S.modalQ||[];
+  if(S.torneo==='intermedio'){ /* Final del Intermedio → título oficial + Clausura */
+   const f=rd[0];
+   S.intermedioChampionId=f.w;S.intermedioRunnerUpId=f.w===f.h?f.a:f.h;
+   if(f.w===S.teamId)S.modalQ.push({k:'champ',torneo:'intermedio',id:f.w});
+   startClausuraUY();return;
+  }
+  const a1=S.anualFirstId;
+  if(stg==='semi'){
+   const m=rd[0],w=m.w,lo=w===m.h?m.a:m.h;
+   if(w===a1){crownUY(w,lo);return} /* el ganador de la Semifinal ya es 1.º de la Tabla Anual → campeón directo */
+   S.po.rounds.final=[neuU(w,a1)];S.po.stage='final';
+   if(w===S.teamId||a1===S.teamId)S.po.out=null;else S.po.out=S.po.out||'semi';
+   return;
+  }
+  const f=rd[0];crownUY(f.w,f.w===f.h?f.a:f.h);
+ }
+
+ /* ---- UI de la Liga AUF Uruguaya ---- */
+ function uyStand(r){
+  if(S.phase!=='regular')return '';
+  const tn=S.torneo,tot=S.zones[r.z]?S.zones[r.z].length:16;
+  return '<div class="cmNote">Posición actual: <b>'+r.pos+'º</b> '+(tn==='intermedio'?'en Serie '+E(r.z):'de '+tot)+' · '+r.row.pts+' pts ('+r.row.pj+' PJ) · '+(tn==='intermedio'?'el 1.º de cada serie juega la Final del Intermedio.':'el 1.º es Campeón del '+(tn==='clausura'?'Clausura':'Apertura')+'.')+'</div>';
+ }
+ function uyFxNote(){
+  const tn=S.torneo;
+  if(S.phase==='regular'&&tn==='intermedio')return '<div class="cmNote">La Final del Torneo Intermedio (1.º de la Serie A vs. 1.º de la Serie B) se confirma al terminar la fecha 7 · cancha neutral.</div>';
+  if(S.phase==='regular')return '<div class="cmNote">Todos contra todos a una rueda con los 16 equipos: el 1.º es Campeón del '+(tn==='clausura'?'Clausura':'Apertura')+'.</div>';
+  return '';
+ }
+ function tableHtmlU(ids,ttl,nQ){
+  const rows=stats(ids);
+  return '<div class="cmCard"><h2>'+E(ttl)+'</h2><div class="cmScroll"><table class="cmT"><thead><tr><th>Pos</th><th style="text-align:left">Club</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr></thead><tbody>'+
+   rows.map((r,i)=>'<tr class="'+(i<nQ?'q':'')+(i===nQ-1?' cut':'')+(r.id===S.teamId?' me':'')+'"><td>'+(i+1)+'</td><td class="cl"><span class="cmBd">'+badge(T(r.id))+'</span>'+E(T(r.id).name)+'</td><td>'+r.pj+'</td><td>'+r.g+'</td><td>'+r.e+'</td><td>'+r.p+'</td><td>'+r.gf+'</td><td>'+r.gc+'</td><td>'+(r.gf-r.gc>0?'+':'')+(r.gf-r.gc)+'</td><td class="pt">'+r.pts+'</td></tr>').join('')+
+   '</tbody></table></div></div>';
+ }
+ function posHtmlUY(){
+  const tn=S.torneo;
+  if(tn==='intermedio')return '<div class="cmZ">'+tableHtmlU(S.zones.A,'Serie A · puestos impares del Apertura',1)+tableHtmlU(S.zones.B,'Serie B · puestos pares del Apertura',1)+'</div><div class="cmNote">🟩 El 1.º de cada serie juega la Final del Torneo Intermedio (cancha neutral) · Desempate: Puntos → Diferencia de Gol → Goles a Favor.</div>';
+  const cl=tn==='clausura'||tn==='anual';
+  return tableHtmlU(S.zones.A,(cl?'Torneo Clausura':'Torneo Apertura')+' · 16 equipos',1)+'<div class="cmNote">🟩 El 1.º es Campeón del '+(cl?'Clausura':'Apertura')+' · Desempate: Puntos → Diferencia de Gol → Goles a Favor.</div>';
+ }
+ function tabAnualUY(){
+  injectAnualCSS();
+  const rows=annualRows(),n=rows.length,me=rows.findIndex(r=>r.id===S.teamId)+1;
+  const prog=S.torneo==='apertura'?'Apertura en curso; se completa con el Intermedio y el Clausura':S.torneo==='intermedio'?'Apertura completo + Intermedio en curso':S.torneo==='clausura'?'Apertura e Intermedio completos + Clausura en curso':'37 fechas completas';
+  const trs=rows.map((r,i)=>'<tr class="'+(i===0?'q cut':'')+(r.id===S.teamId?' me':'')+'"><td>'+(i+1)+'</td><td class="cl"><span class="cmBd">'+badge(T(r.id))+'</span>'+E(T(r.id).name)+'</td><td>'+r.pj+'</td><td>'+r.g+'</td><td>'+r.e+'</td><td>'+r.p+'</td><td>'+r.gf+'</td><td>'+r.gc+'</td><td>'+(r.gf-r.gc>0?'+':'')+(r.gf-r.gc)+'</td><td class="pt">'+r.pts+'</td></tr>').join('');
+  return '<div class="cmCard"><h2>📆 Tabla Anual · Apertura + Intermedio + Clausura</h2><div class="cmNote">Suma de puntos de las 37 fechas ('+prog+'). 🟩 El 1.º de la Tabla Anual juega la Final del Campeonato Uruguayo. Tu club: <b>'+me+'º</b> de '+n+'.</div>'+
+   '<div class="cmScroll"><table class="cmT"><thead><tr><th>Pos</th><th style="text-align:left">Club</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
+   '<div class="cmNote">Definición del Campeón Uruguayo: Semifinal (Campeón del Apertura vs. Campeón del Clausura) y Final contra el 1.º de la Tabla Anual, ambas en cancha neutral. Desempate: Puntos → Diferencia de Gol → Goles a Favor.</div></div>';
+ }
+ function outHtmlUY(){
+  const o=S.po&&S.po.out,tn=S.torneo;
+  let msg,note,btn;
+  if(tn==='intermedio'){
+   msg=o==='nq'?'No clasificaste a la Final del Intermedio':'Quedaste eliminado';
+   note='La Final del Torneo Intermedio la juegan los ganadores de la Serie A y de la Serie B en cancha neutral. Podés simularla y seguir con el Clausura.';
+   btn='⏩ Simular Final del Intermedio';
+  }else{
+   if(!o){msg='¡Sos el 1.º de la Tabla Anual!';note='Esperás en la Final del Campeonato Uruguayo al ganador de la Semifinal (Campeón del Apertura vs. Campeón del Clausura).'}
+   else if(o==='nq'){msg='No disputás la definición del Campeón Uruguayo';note='Definen la Semifinal (Campeón del Apertura vs. Campeón del Clausura) y la Final contra el 1.º de la Tabla Anual.'}
+   else{msg='Quedaste eliminado en la '+uyLbl(o).replace(' del Campeonato Uruguayo','');note='Tu camino en la definición del Campeonato Uruguayo terminó acá.'}
+   btn='⏩ Simular definición del Campeón';
+  }
+  return '<div class="cmCard"><h2>'+E(msg)+'</h2><div class="cmNote">'+E(note)+'</div>'+
+   '<div class="cmRow"><button id="cmSimAll" class="cmBtn" type="button">'+btn+'</button>'+(tn==='anual'?nextBtn('cmBtn'):'')+'<button id="cmNewSeason" class="cmBtn red" type="button">🆕 Nueva carrera</button></div></div>';
+ }
+ function doneHtmlUY(){
+  const nm=id=>id?E(T(id).name):'—',me=id=>!!id&&id===S.teamId;
+  const row=(ttl,id,sub)=>id?'<div class="cmVs"><div class="tm'+(me(id)?' me':'')+'"><span class="cmBd">'+badge(T(id))+'</span>'+E(T(id).name)+'<small>'+ttl+(me(id)?' · TU CLUB':'')+'</small></div></div>'+(sub?'<div class="cmNote">'+sub+'</div>':''):'';
+  const won=[S.aperturaChampionId,S.intermedioChampionId,S.clausuraChampionId,S.uyChampId].filter(me).length;
+  return '<div class="cmCard"><h2>Temporada finalizada · Liga AUF Uruguaya</h2>'+row('🏆 CAMPEÓN URUGUAYO',S.uyChampId,'Subcampeón: <b>'+nm(S.uyRunnerUpId)+'</b>')+
+   '<div class="cmNote">🥈 Apertura: <b>'+nm(S.aperturaChampionId)+'</b> · Intermedio: <b>'+nm(S.intermedioChampionId)+'</b> · Clausura: <b>'+nm(S.clausuraChampionId)+'</b> · 1.º Tabla Anual: <b>'+nm(S.anualFirstId)+'</b></div>'+
+   '<div class="cmNote">'+(me(S.uyChampId)?'¡Tu club es el Campeón Uruguayo!':won?'Tu club ganó '+won+(won>1?' títulos oficiales':' título oficial')+' esta temporada.':'Tu club no ganó títulos oficiales esta temporada.')+'</div>'+
+   '<div class="cmNote">Al pasar a la siguiente temporada continuás en la Liga AUF Uruguaya (sin ascensos ni descensos).</div>'+
+   '<div class="cmRow">'+nextBtn('cmBig')+'<button id="cmNewSeason" class="cmBig red" type="button">🆕 Nueva carrera</button></div></div>';
+ }
+ /* Calendario: próximos compromisos del club (torneo en curso + Clausura con localías invertidas + definición) */
+ function calItemsUY(){
+  const out=[],tid=S.teamId,tn=S.torneo;
+  const mk=(ic,sub,rv,loc,note)=>{out.push({ic,title:CERT[ic],sub,rival:rv,loc,venue:null,note:note||''})};
+  if(S.phase==='regular'){
+   for(let n=S.fecha;n<=NF();n++){const u=userFxM(n,false);if(u&&!u.done)mk(tn,'Fecha '+n+' de '+NF(),u.rival,u.loc,u.kind==='C'?'🔥 Clásico':'')}
+   if(tn==='apertura')mk('intermedio','7 fechas + Final',null,'','Serie A (impares) o Serie B (pares) según tu puesto en el Apertura');
+   if(tn==='intermedio')mk('intermedio','Final del Intermedio',null,'N','Si ganás tu serie');
+  }else if(S.phase==='playoffs'&&S.po&&!S.po.out){
+   const sts=uyStages(),i0=sts.indexOf(S.po.stage);
+   sts.forEach((sg,si)=>{
+    if(si<i0)return;
+    const m=(S.po.rounds[sg]||[]).find(x=>!x.done&&(x.h===tid||x.a===tid));
+    mk(tn==='anual'?'auf':'intermedio',uyLbl(sg),m?(m.h===tid?m.a:m.h):null,'N',m?'':'Si avanzás de ronda');
+   });
+  }
+  if(tn==='apertura'||tn==='intermedio'){
+   (S.fxAp||[]).forEach((f,i)=>{const m=f.find(x=>x.h===tid||x.a===tid);if(m)mk('clausura','Fecha '+(i+1)+' de '+S.fxAp.length,m.h===tid?m.a:m.h,m.h===tid?'V':'L',m.kind==='C'?'🔥 Clásico':'')});
+  }
+  if(tn!=='anual'){
+   mk('auf','Semifinal · Campeón Apertura vs Campeón Clausura',null,'N','Si ganás un torneo');
+   mk('auf','Final del Campeonato Uruguayo',null,'N','Contra el 1.º de la Tabla Anual');
+  }
+  return out;
+ }
+ /* carteles */
+ function uyIntroHtml(it){
+  const tn=it.torneo,nm=id=>id?E(T(id).name):'—';let p;
+  if(tn==='apertura')p='15 fechas con los 16 equipos, todos contra todos a una rueda en una tabla única. El 1.º es el Campeón del Torneo Apertura.';
+  else if(tn==='intermedio')p='Los 16 equipos se dividen según el Apertura: Serie A (puestos impares) y Serie B (puestos pares). 7 fechas por serie y los ganadores juegan la Final del Intermedio en cancha neutral.'+(S.myZone?'<br>Tu club juega la <b>Serie '+E(S.myZone)+'</b>.':'');
+  else p='Tabla única de los 16 equipos con los mismos rivales que en el Apertura y todas las localías invertidas. El 1.º es el Campeón del Torneo Clausura.'+(it.prev?'<br>Campeón del Apertura: <b>'+nm(it.prev)+'</b>':'');
+  return '<div class="cmTc">'+cupSvg('#cbd5e1',84,'AUF')+'<h1>🏆 '+TN_LBL[tn]+'</h1><p>'+p+'</p><button id="cmTorneoBtn" type="button">Comenzar Torneo</button></div>';
+ }
+ function uyDefinHtml(it){
+  const nm=id=>id?E(T(id).name):'—';let p;
+  if(it.mode==='semi')p='<b>Semifinal</b> (cancha neutral): Campeón del Apertura <b>'+nm(it.a)+'</b> vs. Campeón del Clausura <b>'+nm(it.c)+'</b>.<br>El ganador juega la <b>Final</b> contra el 1.º de la Tabla Anual; si el ganador ya es el 1.º de la Tabla Anual, es Campeón Uruguayo directo.';
+  else if(it.mode==='final')p='<b>'+nm(it.a)+'</b> ganó el Apertura y el Clausura y pasa directo a la <b>Final</b> contra el 1.º de la Tabla Anual (cancha neutral).';
+  else p='<b>'+nm(it.a)+'</b> ganó el Apertura, el Clausura y la Tabla Anual: ¡<b>Campeón Uruguayo directo</b>!';
+  return '<div class="cmTc gold">'+cupSvg('#facc15',96,'AUF')+'<h1>🏆 CAMPEONATO URUGUAYO</h1><p>📆 1.º de la Tabla Anual (37 fechas): <b>'+nm(it.a1)+'</b></p><p>'+p+'</p><button id="cmTorneoBtn" type="button">Continuar</button></div>';
+ }
+ function uyContInfo(sv){
+  const n={apertura:'Apertura',intermedio:'Intermedio',clausura:'Clausura',anual:'Definición'}[sv.torneo]||'';
+  if(sv.phase==='regular')return 'Liga AUF Uruguaya · '+n+' · Fecha '+sv.fecha+'/'+((sv.fixture&&sv.fixture.length)||15);
+  if(sv.phase==='playoffs')return 'Liga AUF Uruguaya · '+n+' · Final / Definición';
+  return 'Liga AUF Uruguaya · Temporada finalizada';
+ }
+
  function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t}return a}
  /* sede neutral: club ajeno al partido (prefiere ROS / COR / MZA si no juegan) */
  function pickVenue(h,a,all){
@@ -973,10 +1227,16 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  const rankOf=id=>{const z=S.zonaDe[id],r=stats(S.zones[z]),i=r.findIndex(x=>x.id===id);return{z,pos:i+1,row:r[i]}};
  const nameOf=id=>T(id).name;
  /* etiquetas por partido (Primera Nacional: Final 1.º Ascenso / 1.ª Fase del Reducido) */
- const mLbl=(m,stg)=>isBN()&&m&&m.tag==='F1'?'Final por el 1.º Ascenso':isBN()&&m&&m.tag==='R1'?'1.ª Fase del Reducido':STAGE_LBL[stg||(S.po&&S.po.stage)];
+ const mLbl=(m,stg)=>isUY()?uyLbl(stg||(S.po&&S.po.stage)):isBN()&&m&&m.tag==='F1'?'Final por el 1.º Ascenso':isBN()&&m&&m.tag==='R1'?'1.ª Fase del Reducido':STAGE_LBL[stg||(S.po&&S.po.stage)];
  const stgLbl=k=>STAGE_LBL[k]||k;
  const outLbl=k=>isBN()&&k==='inicial'?'1.ª Fase del Reducido':isBN()&&k==='cuartos'?'Cuartos del Reducido':isBN()&&k==='semis'?'Semifinales del Reducido':isBN()&&k==='final'?'Final del Reducido':STAGE_LBL[k];
  function statusText(){
+  if(isUY()){
+   const tl={apertura:'Apertura',intermedio:'Intermedio',clausura:'Clausura',anual:'Definición'}[S.torneo]||'';
+   if(S.phase==='regular')return 'Liga AUF Uruguaya · '+tl+' · Fecha '+S.fecha+'/'+NF()+(S.torneo==='intermedio'?' · Serie '+S.myZone:'');
+   if(S.phase==='playoffs')return 'Liga AUF Uruguaya · '+(S.po.out==='nq'?tl+' (sin clasificar)':S.po.out?'Eliminado en '+uyLbl(S.po.out):tl+' · '+uyLbl(S.po.stage));
+   return 'Temporada finalizada';
+  }
   if(isBN()){
    if(S.phase==='regular')return 'Primera Nacional · Zona '+S.myZone+' · Fecha '+S.fecha+'/17';
    if(S.phase==='playoffs')return 'Primera Nacional · '+(S.po.out==='nq'?'Reducido (sin clasificar)':S.po.out==='asc'?'Campeón · 1.º Ascenso':S.po.out?'Eliminado en '+outLbl(S.po.out):'Final / Reducido · '+stgLbl(S.po.stage));
@@ -994,11 +1254,12 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   hub.innerHTML='<div class="cmWrap"><div class="cmHead"><button id="cmBack" class="cmGhost" type="button">← Menú</button>'+
    '<div class="cmTitle"><span class="bd">'+badge(t)+'</span><div><b>'+E(t.name)+'</b><small>'+E(S.player.name)+' (#'+S.player.num+') · '+statusText()+'</small></div></div>'+
    '<button id="cmNew" class="cmGhost" type="button">🆕 Nueva carrera</button></div>'+
-   '<nav class="cmTabs">'+[['next','⚽ Próximo Partido'],['table','📊 Tabla de Posiciones'],['anual','📆 Tabla Anual'],['fix',isBN()?'📅 Fixture / Reducido':'📅 Fixture / Playoffs'],['cal','🗓️ Calendario'],['copa','🏆 Copa Argentina'],['squad','👕 Mi Plantel']].filter(x=>!(isBN()&&x[0]==='anual'))
+   '<nav class="cmTabs">'+[['next','⚽ Próximo Partido'],['table','📊 Tabla de Posiciones'],['anual','📆 Tabla Anual'],['fix',isUY()?'📅 Fixture / Definición':isBN()?'📅 Fixture / Reducido':'📅 Fixture / Playoffs'],['cal','🗓️ Calendario'],['copa','🏆 Copa Argentina'],['squad','👕 Mi Plantel']].filter(x=>!(isBN()&&x[0]==='anual')&&!(isUY()&&x[0]==='copa'))
     .map(x=>'<button type="button" data-tab="'+x[0]+'" class="'+(TAB===x[0]?'on':'')+'">'+x[1]+'</button>').join('')+'</nav>'+
    '<div id="cmBody"></div></div>';
   const body=$('cmBody');
   if(isBN()&&TAB==='anual')TAB='next';
+  if(isUY()&&TAB==='copa')TAB='next';
   body.innerHTML=TAB==='table'?tabTable():TAB==='anual'?tabAnual():TAB==='fix'?tabFixture():TAB==='cal'?tabCal():TAB==='copa'?tabCopa():TAB==='squad'?tabSquad():tabNext();
   wireHub();
  }
@@ -1058,18 +1319,19 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   if(!m.copa)warn+=copaNextText();
   if(S.phase==='trofeo')warn+='<div class="cmWarn">🏆 <b>TROFEO DE CAMPEONES</b> · Partido único en cancha neutral. Si hay empate a los '+S.minutes+' min: tiempo extra de 1 minuto y, si persiste, tanda de penales.</div>';
   if(S.phase==='playoffs')warn+='<div class="cmWarn">🏆 <b>'+mLbl(m).toUpperCase()+'</b> · Partido único. Si hay empate al final: tiempo extra de 1 minuto y, si persiste, tanda de penales.'+(m.neutral?' · Cancha neutral.':'')+'</div>';
+  if(isUY()&&S.phase==='playoffs'&&S.po&&S.po.stage==='final')warn+='<div class="cmWarn">🏆 <b>'+(S.torneo==='anual'?'¡ESTÁ EN JUEGO EL TÍTULO DE CAMPEÓN URUGUAYO!':'¡ESTÁ EN JUEGO EL TÍTULO DEL TORNEO INTERMEDIO!')+'</b> Trofeo AUF.</div>';
   if(isBN()&&S.phase==='playoffs'&&m.tag==='F1')warn+='<div class="cmWarn">⬆️ <b>1.º ASCENSO</b> · El ganador es Campeón de la Primera Nacional y asciende a Primera División; el perdedor sigue en los Cuartos del Reducido.</div>';
   if(isBN()&&S.phase==='playoffs'&&m.tag==='R1')warn+='<div class="cmWarn">🎯 <b>REDUCIDO</b> · Quien gane sigue en Cuartos; quien pierda queda eliminado. El mejor ubicado de la fase regular es local.</div>';
   if(m.kind==='C')warn+='<div class="cmWarn cmFire">🔥 <b>¡FECHA DE CLÁSICO!</b> Hoy enfrentás a tu clásico rival.</div>';
   if(m.kind==='I')warn+='<div class="cmWarn">🌐 Fecha interzonal: rival de la otra zona.</div>';
   if((S.player.susp||0)>0)warn+='<div class="cmWarn cmFire">🟥 <b>Estás suspendido (1 fecha)</b>: no jugás este partido. Lo mirás desde afuera y tu equipo juega 6v6 con un suplente.</div>';
   const r=rankOf(S.teamId);
-  const stand=(S.phase==='regular'&&!m.copa)?'<div class="cmNote">Posición actual: <b>'+r.pos+'º</b> en Zona '+r.z+' · '+r.row.pts+' pts ('+r.row.pj+' PJ) · '+(isBN()?'1.º → Final por el 1.º Ascenso · 2.º al 8.º → Reducido.':'clasifican los 8 primeros.')+'</div>':'';
+  const stand=isUY()?uyStand(r):(S.phase==='regular'&&!m.copa)?'<div class="cmNote">Posición actual: <b>'+r.pos+'º</b> en Zona '+r.z+' · '+r.row.pts+' pts ('+r.row.pj+' PJ) · '+(isBN()?'1.º → Final por el 1.º Ascenso · 2.º al 8.º → Reducido.':'clasifican los 8 primeros.')+'</div>':'';
   return '<div class="cmCard"><h2>'+(m.copa?'🏆 COPA ARGENTINA · '+COPA_LBL[S.copaDue]:S.phase==='regular'?tnName()+' · Fecha '+S.fecha+' de '+NF():S.phase==='trofeo'?'🏆 TROFEO DE CAMPEONES':tnName()+' · '+mLbl(m))+'</h2>'+warn+
    '<div class="cmVs"><div class="tm'+(myHome?' me':'')+'"><span class="cmBd">'+badge(h)+'</span>'+E(h.name)+'<small>LOCAL'+(myHome?' · TU CLUB':'')+'</small>'+kitSvg(myHome?myKit:kH,myHome?S.player.num:'')+'</div>'+
    '<div class="mid">VS</div>'+
    '<div class="tm'+(!myHome?' me':'')+'"><span class="cmBd">'+badge(a)+'</span>'+E(a.name)+'<small>VISITANTE'+(!myHome?' · TU CLUB':'')+'</small>'+kitSvg(!myHome?myKit:kA,!myHome?S.player.num:'')+'</div></div>'+
-   '<div class="cmRow"><span class="cmTag">'+(m.copa?'🏟️ Cancha neutral · sede '+E(T(m.venue).shortName)+' ('+E(T(m.venue).name)+')':myHome?'🏟️ Jugás de LOCAL en el estadio de '+E(me.name):'✈️ Jugás de VISITANTE en el estadio de '+E(rv.name))+'</span>'+
+   '<div class="cmRow"><span class="cmTag">'+(m.copa?'🏟️ Cancha neutral · sede '+E(T(m.venue).shortName)+' ('+E(T(m.venue).name)+')':(isUY()&&m.neutral)?'🏟️ Cancha neutral':myHome?'🏟️ Jugás de LOCAL en el estadio de '+E(me.name):'✈️ Jugás de VISITANTE en el estadio de '+E(rv.name))+'</span>'+
    '<span class="cmTag">⏱ '+S.minutes+' min · Realista 6v6</span></div>'+
    (rvSwapped?'<div class="cmNote">'+E(rv.name)+' usa su camiseta suplente para evitar el choque de colores.</div>':'')+
    '<div class="cmKits"><h3>👕 Camisetas del partido</h3><div class="cmKcols"><div><small>LOCAL · '+E(h.shortName)+'</small>'+kitPick('h',h,ks.sH)+'</div><div><small>VISITANTE · '+E(a.shortName)+'</small>'+kitPick('a',a,ks.sA)+'</div></div>'+(ks.clash?'<div class="cmNote">⚠️ Los colores de ambas camisetas son muy parecidos.</div>':'')+'</div>'+
@@ -1093,12 +1355,14 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    '<div class="cmRow">'+nextBtn('cmBig')+'<button id="cmNewSeason" class="cmBig red" type="button">🆕 Nueva carrera</button></div></div>';
  }
  function outHtml(){
+  if(isUY())return outHtmlUY();
   if(isBN())return outHtmlBN();
   const msg=S.po.out==='nq'?'No clasificaste a los Playoffs':'Quedaste eliminado en '+STAGE_LBL[S.po.out];
   return '<div class="cmCard"><h2>'+E(msg)+'</h2><div class="cmNote">'+(S.po.out==='nq'?'Terminaste la fase regular fuera de los 8 primeros de tu zona.':'Tu camino en el torneo terminó acá.')+' Podés simular lo que resta de los Playoffs o empezar otra temporada.</div>'+
    annualNote()+'<div class="cmRow"><button id="cmSimAll" class="cmBtn" type="button">⏩ Simular Playoffs restantes</button>'+(S.torneo==='clausura'?nextBtn('cmBtn'):'')+'<button id="cmNewSeason" class="cmBtn red" type="button">🆕 Nueva carrera</button></div></div>';
  }
  function doneHtml(){
+  if(isUY())return doneHtmlUY();
   if(isBN())return doneHtmlBN();
   const t=S.trofeo,ap=S.aperturaChampionId,cl=S.clausuraChampionId;
   const nm=id=>id?E(T(id).name):'—';
@@ -1123,6 +1387,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   document.head.appendChild(s);
  }
  function tabAnual(){
+  if(isUY())return tabAnualUY();
   injectAnualCSS();
   const rows=annualRows(),n=rows.length;
   const trs=rows.map((r,i)=>'<tr class="'+(i>=n-2?'rel':'')+(i===n-3?' cutR':'')+(r.id===S.teamId?' me':'')+'"><td>'+(i+1)+'</td><td class="cl"><span class="cmBd">'+badge(T(r.id))+'</span>'+E(T(r.id).name)+'</td><td>'+r.pj+'</td><td>'+r.g+'</td><td>'+r.e+'</td><td>'+r.p+'</td><td>'+r.gf+'</td><td>'+r.gc+'</td><td>'+(r.gf-r.gc>0?'+':'')+(r.gf-r.gc)+'</td><td class="pt">'+r.pts+'</td></tr>').join('');
@@ -1132,7 +1397,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    '<div class="cmNote">Desempate: Puntos → Diferencia de Gol → Goles a Favor. Al cerrar el año ascienden a Primera División el Campeón de la Final y el ganador del Reducido de la Primera Nacional.</div></div>';
  }
  function annualNote(){
-  if(isBN()||!S||S.torneo!=='clausura'||!(S.phase==='playoffs'||S.phase==='trofeo'||S.phase==='done'))return '';
+  if(isBN()||isUY()||!S||S.torneo!=='clausura'||!(S.phase==='playoffs'||S.phase==='trofeo'||S.phase==='done'))return '';
   const d=annualRows().slice(-2).reverse();
   return '<div class="cmNote">📆 Tabla Anual · descienden a la Primera Nacional: '+d.map(x=>'<b style="color:#f87171">'+E(T(x.id).name)+'</b>').join(' y ')+(d.some(x=>x.id===S.teamId)?' · <b>¡Tu club desciende!</b>':'')+'. Ascienden el Campeón de la Final y el ganador del Reducido de la Primera Nacional.</div>';
  }
@@ -1142,7 +1407,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    rows.map((r,i)=>'<tr class="'+(i<8?'q':'')+(i===7?' cut':'')+(r.id===S.teamId?' me':'')+'"><td>'+(i+1)+'</td><td class="cl"><span class="cmBd">'+badge(T(r.id))+'</span>'+E(T(r.id).name)+'</td><td>'+r.pj+'</td><td>'+r.g+'</td><td>'+r.e+'</td><td>'+r.p+'</td><td>'+r.gf+'</td><td>'+r.gc+'</td><td>'+(r.gf-r.gc>0?'+':'')+(r.gf-r.gc)+'</td><td class="pt">'+r.pts+'</td></tr>').join('')+
    '</tbody></table></div></div>';
  }
- function posHtml(){return '<div class="cmZ">'+tableHtml('A')+tableHtml('B')+'</div><div class="cmNote">'+(isBN()?'🟩 1.º de cada zona → Final por el 1.º Ascenso · 2.º al 8.º → Reducido por el 2.º Ascenso ·':'🟩 Los 8 primeros de cada zona clasifican a los Playoffs ·')+' Desempate: Puntos → Diferencia de Gol → Goles a Favor.</div>'}
+ function posHtml(){if(isUY())return posHtmlUY();return '<div class="cmZ">'+tableHtml('A')+tableHtml('B')+'</div><div class="cmNote">'+(isBN()?'🟩 1.º de cada zona → Final por el 1.º Ascenso · 2.º al 8.º → Reducido por el 2.º Ascenso ·':'🟩 Los 8 primeros de cada zona clasifican a los Playoffs ·')+' Desempate: Puntos → Diferencia de Gol → Goles a Favor.</div>'}
  /* ---- Rankings de la liga (Tabla de Posiciones) ---- */
  const RKS=[['pos','Posiciones'],['g','Goleadores'],['a','Asistidores'],['gk','Arqueros'],['def','Defensores']];
  let RK='pos';
@@ -1246,7 +1511,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    '<path d="M18 14H8c0 10 5 15 10 15M46 14h10c0 10-5 15-10 15" fill="none" stroke="'+col+'" stroke-width="5" stroke-linecap="round"/>'+
    '<path d="M17 6h30v18c0 11-7 18-15 18S17 35 17 24V6z" fill="'+col+'" stroke="#000" stroke-width="4" stroke-linejoin="round"/>'+
    '<path d="M23 10v14c0 6 3 11 7 13" fill="none" stroke="'+hi+'" stroke-width="3" stroke-linecap="round"/>'+
-   (lpf?'<text x="32" y="26" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="9" fill="#000">LPF</text>':'<path d="M32 15l2.4 5 5.4.6-4 3.7 1.1 5.3-4.9-2.7-4.9 2.7 1.1-5.3-4-3.7 5.4-.6z" fill="#000"/>')+
+   (lpf?'<text x="32" y="26" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="9" fill="#000">'+(typeof lpf==='string'?E(lpf):'LPF')+'</text>':'<path d="M32 15l2.4 5 5.4.6-4 3.7 1.1 5.3-4.9-2.7-4.9 2.7 1.1-5.3-4-3.7 5.4-.6z" fill="#000"/>')+
    '<rect x="28" y="42" width="8" height="8" fill="'+d+'" stroke="#000" stroke-width="3"/>'+
    '<rect x="19" y="50" width="26" height="8" rx="2.5" fill="'+col+'" stroke="#000" stroke-width="3.5"/></svg>';
  }
@@ -1330,6 +1595,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  /* ---- Fixture / Playoffs en cuadrícula de tarjetas compactas ---- */
  let FXV=null,FXK='',CALALL=false;
  const FXS_P={octavos:'Octavos',cuartos:'Cuartos',semis:'Semis',final:'Final'},FXS_B={inicial:'Final + 1.ª Fase',cuartos:'Cuartos',semis:'Semis',final:'Final Red.'};
+ const FXS_U={semi:'Semifinal',final:'Final'};
  let FXS=FXS_P;
  const lvPill=(c,t)=>'<i class="cmLv '+c+'">'+t+'</i>';
  /* tarjeta compacta: escudo + sigla + L/V (o sede neutral) + resultado/estado + fecha */
@@ -1347,31 +1613,31 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  function tabFixture(){
   const key=S.torneo+'|'+S.phase+'|'+S.fecha+'|'+(S.po&&S.po.stage||'');
   if(key!==FXK){FXK=key;FXV=null}
-  const opts=[];for(let n=1;n<=NF();n++)opts.push(['f'+n,'F'+n]);STAGES.forEach(sg=>opts.push([sg,FXS[sg]]));
+  const opts=[];for(let n=1;n<=NF();n++)opts.push(['f'+n,'F'+n]);(isUY()?uyStages():STAGES).forEach(sg=>opts.push([sg,FXS[sg]]));
   const def=S.phase==='regular'?'f'+Math.min(NF(),S.fecha):(S.phase==='playoffs'&&S.po)?S.po.stage:S.po?'final':'f'+NF();
   if(!FXV||!opts.some(o=>o[0]===FXV))FXV=def;
   const isF=/^f\d+$/.test(FXV),mineN=m=>+(m.h===S.teamId||m.a===S.teamId);
   let cards='',ttl='';
   if(isF){
    const n=+FXV.slice(1),fx=(S.fixture[n-1]||[]).slice().sort((a,b)=>mineN(b)-mineN(a));
-   ttl='Fase regular · Fecha '+n+' de '+NF()+(!isBN()&&n===16?' · Interzonal':'');
+   ttl=(isUY()?'':'Fase regular · ')+'Fecha '+n+' de '+NF()+(!isBN()&&!isUY()&&n===16?' · Interzonal':'');
    cards=fx.map(m=>gcHtml(m,'Fecha '+n,S.phase==='regular'&&n===S.fecha,false)).join('');
   }else{
-   let rd=S.po&&S.po.rounds[FXV]||[];const proj=FXV===STAGES[0]&&!rd.length&&S.phase==='regular';
+   let rd=S.po&&S.po.rounds[FXV]||[];const proj=!isUY()&&FXV===STAGES[0]&&!rd.length&&S.phase==='regular';
    if(proj)rd=projOctavos();
-   ttl=(isBN()?'Final 1.º Ascenso / Reducido · ':'Playoffs · ')+STAGE_LBL[FXV]+(proj?' (proyección)':'');
+   ttl=isUY()?uyLbl(FXV):(isBN()?'Final 1.º Ascenso / Reducido · ':'Playoffs · ')+STAGE_LBL[FXV]+(proj?' (proyección)':'');
    if(rd.length)cards=rd.slice().sort((a,b)=>mineN(b)-mineN(a)).map(m=>gcHtml(m,mLbl(m,FXV),S.phase==='playoffs'&&S.po.stage===FXV,proj)).join('');
-   else{const cnt={octavos:8,inicial:8,cuartos:4,semis:2,final:1}[FXV];for(let i=0;i<cnt;i++)cards+='<div class=\"cmGc\"><div class=\"gh\"><span>'+E(STAGE_LBL[FXV])+'</span><span></span></div><div class=\"r\"><span class=\"cmBd q\">?</span><b>A definir</b></div><div class=\"r\"><span class=\"cmBd q\">?</span><b>A definir</b></div><div class=\"gf\"><span>Por jugar</span><span></span></div></div>'}
+   else{const cnt={octavos:8,inicial:8,cuartos:4,semis:2,semi:1,final:1}[FXV];for(let i=0;i<cnt;i++)cards+='<div class=\"cmGc\"><div class=\"gh\"><span>'+E(STAGE_LBL[FXV])+'</span><span></span></div><div class=\"r\"><span class=\"cmBd q\">?</span><b>A definir</b></div><div class=\"r\"><span class=\"cmBd q\">?</span><b>A definir</b></div><div class=\"gf\"><span>Por jugar</span><span></span></div></div>'}
   }
   const chips=opts.map(o=>{const done=/^f\d+$/.test(o[0])?(S.fixture[+o[0].slice(1)-1]||[]).every(m=>m.done):!!(S.po&&S.po.rounds[o[0]]&&S.po.rounds[o[0]].length&&S.po.rounds[o[0]].every(m=>m.done));return '<button type=\"button\" class=\"cmChip'+(FXV===o[0]?' on':'')+(done?' dn':'')+'\" data-fx=\"'+o[0]+'\">'+o[1]+'</button>'}).join('');
-  return '<div class=\"cmCard\"><h2>'+tnName()+' · '+ttl+'</h2><div class=\"cmChips\">'+chips+'</div><div class=\"cmGrid\">'+cards+'</div>'+
-   (!S.po?'<div class=\"cmNote\">'+(isBN()?'Cruces proyectados según la tabla actual; se confirman al terminar la fecha 17 (1.º de cada zona: Final por el 1.º Ascenso · 2.º al 8.º: Reducido).':'Octavos proyectados según la tabla actual; se confirman al terminar la fecha 16 (clasifican los 8 primeros de cada zona).')+'</div>':'')+
+  return '<div class=\"cmCard\"><h2>'+(isUY()&&isF&&S.torneo==='anual'?TN_LBL.clausura:tnName())+' · '+ttl+'</h2><div class=\"cmChips\">'+chips+'</div><div class=\"cmGrid\">'+cards+'</div>'+
+   (isUY()?uyFxNote():'')+(!S.po&&!isUY()?'<div class=\"cmNote\">'+(isBN()?'Cruces proyectados según la tabla actual; se confirman al terminar la fecha 17 (1.º de cada zona: Final por el 1.º Ascenso · 2.º al 8.º: Reducido).':'Octavos proyectados según la tabla actual; se confirman al terminar la fecha 16 (clasifican los 8 primeros de cada zona).')+'</div>':'')+
    (S.po&&S.po.champ?'<div class=\"cmWarn\">🏆 Campeón: <b>'+E(nameOf(S.po.champ))+'</b></div>':'')+'</div>';
  }
 
  /* ---- Calendario (próximos compromisos del club) + vitrina Campeones de la Temporada ---- */
- const CERT={apertura:'Torneo Apertura',clausura:'Torneo Clausura',copa:'Copa Argentina',trofeo:'Trofeo de Campeones',bnacional:'Primera Nacional',reducido:'Reducido · 2.º Ascenso'};
- const certIcon=(k,sz)=>k==='bnacional'||k==='reducido'?cupSvg('#cbd5e1',sz,false):k==='copa'?copaArgSvg(sz):k==='trofeo'?cupSvg('#facc15',sz):cupSvg('#cbd5e1',sz,true);
+ const CERT={apertura:'Torneo Apertura',clausura:'Torneo Clausura',copa:'Copa Argentina',trofeo:'Trofeo de Campeones',bnacional:'Primera Nacional',reducido:'Reducido · 2.º Ascenso',intermedio:'Torneo Intermedio',auf:'Campeonato Uruguayo'};
+ const certIcon=(k,sz)=>isUY()?(k==='auf'?cupSvg('#facc15',sz,'AUF'):cupSvg('#cbd5e1',sz,'AUF')):k==='bnacional'||k==='reducido'?cupSvg('#cbd5e1',sz,false):k==='copa'?copaArgSvg(sz):k==='trofeo'?cupSvg('#facc15',sz):cupSvg('#cbd5e1',sz,true);
  function userFxM(n,inv){
   const f=S.fixture[n-1],m=f&&f.find(x=>x.h===S.teamId||x.a===S.teamId);if(!m)return null;
   const bh=m.h===S.teamId,home=inv?!bh:bh;
@@ -1411,6 +1677,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  function calItems(){
   const out=[],C=S.copa,tid=S.teamId;
   if(!S||!(S.phase==='regular'||S.phase==='playoffs'||S.phase==='trofeo'))return out;
+  if(isUY())return calItemsUY();
   if(isBN())return calItemsBN();
   const copaOn=!!C&&!C.done&&!C.out;
   const copaItem=copaItemFn(out);
@@ -1445,7 +1712,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  }
  function vitrinaHtml(){
   const C=S.copa,tr=S.trofeo;
-  const L=isBN()?[['bnacional',S.po&&S.po.champ||null],['reducido',S.po&&S.po.asc2||null],['copa',C&&C.done?C.champ:null]]:[['apertura',S.aperturaChampionId],['copa',C&&C.done?C.champ:null],['clausura',S.clausuraChampionId],['trofeo',tr&&tr.done?tr.w:null]];
+  const L=isUY()?[['apertura',S.aperturaChampionId],['intermedio',S.intermedioChampionId],['clausura',S.clausuraChampionId],['auf',S.uyChampId]]:isBN()?[['bnacional',S.po&&S.po.champ||null],['reducido',S.po&&S.po.asc2||null],['copa',C&&C.done?C.champ:null]]:[['apertura',S.aperturaChampionId],['copa',C&&C.done?C.champ:null],['clausura',S.clausuraChampionId],['trofeo',tr&&tr.done?tr.w:null]];
   return '<div class=\"cmCard\"><h2>🏆 Campeones de la Temporada</h2><div class=\"cmVit\">'+L.map(x=>{
    const id=x[1],t=id?T(id):null,mine=!!id&&id===S.teamId;
    return '<div class=\"cmVt'+(id?' got':'')+(mine?' me':'')+'\"><span class=\"ti\">'+certIcon(x[0],46)+'</span><b>'+E(CERT[x[0]])+'</b>'+(t?'<span class=\"cmBd\">'+badge(t)+'</span><span class=\"cn2\">'+E(t.name)+'</span>'+(mine?'<em>¡Tu club!</em>':''):'<span class=\"pd\">Por definir</span>')+'</div>';
@@ -1626,7 +1893,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  function setMatchFlags(m){
   const copa=isCopaM(m),poFinal=!copa&&!!S&&S.phase==='playoffs'&&!!S.po&&(S.po.stage==='final'||(isBN()&&m&&m.tag==='F1')),trofeo=!copa&&!!S&&S.phase==='trofeo';
   window._isFinalMatch=!!((copa&&S.copaDue==='final')||poFinal||trofeo);
-  window._isSplitStadium=!!(copa||poFinal||trofeo);
+  window._isSplitStadium=!!(copa||poFinal||trofeo||(isUY()&&S.phase==='playoffs')); /* Uruguay: Final del Intermedio, Semifinal y Final del Campeonato en cancha neutral */
  }
  function playMatch(){
   const m=userMatch();if(!m||CM.live)return;
@@ -1908,7 +2175,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   const m=LIVE.m,r=LIVE.res,h=T(m.h),a=T(m.a),myHome=m.h===S.teamId;
   const my=myHome?r.hg:r.ag,rv=myHome?r.ag:r.hg,cp=isCopaM(m),reg=S.phase==='regular'&&!cp;
   let res,pts='';
-  if(my>rv||(my===rv&&r.ph!=null&&(myHome?r.ph>r.pa:r.pa>r.ph))){res='🏆 ¡VICTORIA!';pts=reg?'+3 puntos':S.phase==='trofeo'?'¡Ganás el Trofeo de Campeones!':'Pasás de ronda'}
+  if(my>rv||(my===rv&&r.ph!=null&&(myHome?r.ph>r.pa:r.pa>r.ph))){res='🏆 ¡VICTORIA!';pts=reg?'+3 puntos':S.phase==='trofeo'?'¡Ganás el Trofeo de Campeones!':(isUY()&&S.po&&S.po.stage==='final')?'¡Ganás el título!':'Pasás de ronda'}
   else if(my===rv&&r.ph==null){res='🤝 Empate';pts=reg?'+1 punto':''}
   else{res='😞 Derrota';pts=reg?'0 puntos':S.phase==='trofeo'?'Perdés el Trofeo de Campeones':cp?'Quedás eliminado de la Copa':'Quedás eliminado'}
   $('cmEnd').innerHTML='<div class="cmCard"><h2>Final del partido</h2><div class="sc">'+E(h.shortName)+' '+r.hg+' - '+r.ag+' '+E(a.shortName)+'</div>'+
@@ -2019,7 +2286,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  }
  /* Copas cartoon vector (mismos trazos que cupSvg/copaArgSvg): 'lpf' plateada, 'gold' dorada, 'copa' celeste/plateada. (cx,by) = centro de la base */
  function campCup(c,type,cx,by,size){
-  const s=size/64,gold=type==='gold',copa=type==='copa',bot=copa?60:58;
+  const s=size/64,gold=type==='gold'||type==='auf',copa=type==='copa',bot=copa?60:58;
   c.save();c.translate(cx-32*s,by-bot*s);c.scale(s,s);c.lineJoin='round';c.lineCap='round';
   const st=(col,w)=>{c.strokeStyle=col;c.lineWidth=w};
   if(copa){
@@ -2038,8 +2305,8 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    st('#000',9);c.stroke(hd);st(col,5);c.stroke(hd);
    c.fillStyle=col;c.fill(bd);st('#000',4);c.stroke(bd);
    st(hi,3);c.stroke(new Path2D('M23 10v14c0 6 3 11 7 13'));
-   if(gold){c.fillStyle='#000';c.fill(new Path2D('M32 15l2.4 5 5.4.6-4 3.7 1.1 5.3-4.9-2.7-4.9 2.7 1.1-5.3-4-3.7 5.4-.6z'))}
-   else{c.fillStyle='#000';c.font='900 9px Arial,sans-serif';c.textAlign='center';c.textBaseline='alphabetic';c.fillText(type==='nac'?'PN':'LPF',32,26)}
+   if(gold&&type!=='auf'){c.fillStyle='#000';c.fill(new Path2D('M32 15l2.4 5 5.4.6-4 3.7 1.1 5.3-4.9-2.7-4.9 2.7 1.1-5.3-4-3.7 5.4-.6z'))}
+   else{c.fillStyle='#000';c.font='900 9px Arial,sans-serif';c.textAlign='center';c.textBaseline='alphabetic';c.fillText(type==='nac'?'PN':(type==='auf'||type==='aufs')?'AUF':'LPF',32,26)}
    c.fillStyle=dk;c.fillRect(28,42,8,8);st('#000',3);c.strokeRect(28,42,8,8);
    campRR(c,19,50,26,8,2.5);c.fillStyle=col;c.fill();st('#000',3.5);c.stroke();
   }
@@ -2079,9 +2346,9 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  function startCampScene(cv,it){
   stopCampScene();
   const t=T(it.id),kit=t.kitHome||{c1:'#1d4ed8',c2:'#facc15',n:1},c1=kit.c1||'#1d4ed8',c2=kit.c2||'#facc15';
-  const TNAME={apertura:'TORNEO APERTURA',clausura:'TORNEO CLAUSURA',copa:'COPA ARGENTINA',trofeo:'TROFEO DE CAMPEONES',bnacional:'PRIMERA NACIONAL'};
+  const TNAME={apertura:'TORNEO APERTURA',clausura:'TORNEO CLAUSURA',copa:'COPA ARGENTINA',trofeo:'TROFEO DE CAMPEONES',bnacional:'PRIMERA NACIONAL',intermedio:'TORNEO INTERMEDIO',auf:'CAMPEONATO URUGUAYO'};
   const line1='CAMPEÓN '+(TNAME[it.torneo]||'TORNEO'),line2=String(t.name||'').toLocaleUpperCase('es');
-  const cupType=it.torneo==='trofeo'?'gold':it.torneo==='copa'?'copa':it.torneo==='bnacional'?'nac':'lpf';
+  const cupType=isUY()?(it.torneo==='auf'?'auf':'aufs'):it.torneo==='trofeo'?'gold':it.torneo==='copa'?'copa':it.torneo==='bnacional'?'nac':'lpf';
   const q=S.squad,nums=[];
   q.starters.forEach(id=>{const p=q.info[id];if(p)nums.push(String(p.number))});
   q.bench.forEach(id=>{const p=q.info[id];if(p&&nums.length<5)nums.push(String(p.number))});
@@ -2331,9 +2598,11 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   let el=$('cmTorneo');if(!el){el=document.createElement('div');el.id='cmTorneo';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');document.body.appendChild(el)}
   if(it.k!=='champ'){el.classList.remove('cmScene');stopCampScene()}
   let h='';
-  if(it.k==='intro'){
+  if(it.k==='intro'&&isUY()){h=uyIntroHtml(it)}
+  else if(it.k==='intro'){
    const cl=it.torneo==='clausura';
    h='<div class="cmTc">'+cupSvg('#cbd5e1',84,it.torneo!=='bnacional')+'<h1>🏆 '+TN_LBL[it.torneo]+'</h1><p>'+(cl?'Mismas zonas y mismos rivales que en el Apertura, con todas las localías invertidas.'+(it.prev?'<br>Campeón del Apertura: <b>'+E(T(it.prev).name)+'</b>':''):(it.torneo==='bnacional'?'17 fechas a una rueda en la Zona '+E(S.myZone)+'. El 1.º de cada zona juega la Final por el 1.º Ascenso; del 2.º al 8.º juegan el Reducido por el 2.º Ascenso a Primera División.':'16 fechas en la Zona '+E(S.myZone)+' y Playoffs: los 8 primeros de cada zona clasifican.'))+'</p><button id="cmTorneoBtn" type="button">Comenzar Torneo</button></div>';
+  }else if(it.k==='defin'&&isUY()){h=uyDefinHtml(it)
   }else if(it.k==='sorteo'&&S.copa){
    const C=S.copa,r=C.rounds.treintaidosavos,um=r.find(m=>m.h===S.teamId||m.a===S.teamId);
    const mine=um?(um.h===S.teamId?um.a:um.h):null,sg=id=>'<b>'+E(T(id).shortName)+'</b>';
@@ -2392,7 +2661,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   if(!sv){if(ex)ex.remove();return}
   if(ex)return;
   const t=T(sv.teamId),d=document.createElement('div');d.id='cmCont';
-  const bn=sv.division==='bnacional',tl=bn?'Primera Nacional · ':sv.torneo==='clausura'?'Clausura · ':'Apertura · ',info=sv.phase==='regular'?tl+'Fecha '+sv.fecha+'/'+(bn?17:16)+' · Zona '+sv.myZone:sv.phase==='playoffs'?tl+(bn?'Final / Reducido':'Playoffs'):sv.phase==='trofeo'?'Trofeo de Campeones':'Temporada finalizada';
+  const bn=sv.division==='bnacional',tl=bn?'Primera Nacional · ':sv.torneo==='clausura'?'Clausura · ':'Apertura · ',info=sv.division==='uruguaya'?uyContInfo(sv):sv.phase==='regular'?tl+'Fecha '+sv.fecha+'/'+(bn?17:16)+' · Zona '+sv.myZone:sv.phase==='playoffs'?tl+(bn?'Final / Reducido':'Playoffs'):sv.phase==='trofeo'?'Trofeo de Campeones':'Temporada finalizada';
   d.innerHTML='<b>▶ Campaña guardada: '+E(t.name)+'</b><div class="cNote">'+E(sv.player.name)+' (#'+sv.player.num+') · '+info+'. Si iniciás una temporada nueva, se reemplaza la guardada.</div><div class="cmRow"><button type="button" id="cmCont1" class="cmBig">▶ CONTINUAR TEMPORADA</button></div>';
   root.insertBefore(d,root.firstChild);
   $('cmCont1').onclick=()=>{S=loadSave();if(S){openHub('next');flushModals()}};
