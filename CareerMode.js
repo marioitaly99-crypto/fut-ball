@@ -1,5 +1,6 @@
 /* =====================================================================
- CareerMode.js · Modo Carrera — Argentina · Primera División
+ CareerMode.js · Modo Carrera — Argentina · Primera División + Primera Nacional
+ (cruce entre categorías: Tabla Anual, ascensos/descensos y Copa Argentina de 64 equipos)
  ---------------------------------------------------------------------
  Se carga DESPUÉS de LigaData.js y del script principal de index.html.
  No modifica el juego online, PeerJS, editores, lesiones, tiros libres ni
@@ -8,26 +9,40 @@
  Guardado: localStorage 'futball_career_save_v2'.
  ===================================================================== */
 (function(){
- const D=window.LIGA_ARGENTINA_DATA;
- if(!D){console.warn('[CareerMode] Falta LigaData.js');return}
+ const D1=window.LIGA_ARGENTINA_DATA,DB=window.LIGA_BNACIONAL_DATA;
+ if(!D1){console.warn('[CareerMode] Falta LigaData.js');return}
+ let D=D1; /* datos de la categoría activa (S.division): 'primera' → LIGA_ARGENTINA_DATA · 'bnacional' → LIGA_BNACIONAL_DATA */
+ const dataOf=div=>div==='bnacional'&&DB?DB:D1;
  const $=id=>document.getElementById(id);
  const K2='futball_career_save_v2';
  const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
- const T=id=>D.getTeam(id);
- const STAGES=['octavos','cuartos','semis','final'];
- const STAGE_LBL={octavos:'Octavos de Final',cuartos:'Cuartos de Final',semis:'Semifinales',final:'Final'};
+ const safeTeam=(d,id)=>{try{return d&&d.getTeam?d.getTeam(id)||null:null}catch(e){return null}};
+ const T=id=>safeTeam(D,id)||safeTeam(D1,id)||safeTeam(DB,id); /* un club ascendido/descendido se resuelve en cualquiera de las dos bases */
+ const ownerOf=id=>safeTeam(D,id)?D:safeTeam(D1,id)?D1:safeTeam(DB,id)?DB:D; /* base de datos (LIGA_ARGENTINA_DATA / LIGA_BNACIONAL_DATA) a la que pertenece el club */
+ const allTeams=()=>D1.teams.concat(DB&&DB.teams?DB.teams:[]);
+ const STAGES_P=['octavos','cuartos','semis','final'],STAGES_B=['inicial','cuartos','semis','final']; /* Primera Nacional: 'inicial' = Final 1.º Ascenso + 1.ª Fase del Reducido */
+ const LBL_P={octavos:'Octavos de Final',cuartos:'Cuartos de Final',semis:'Semifinales',final:'Final'};
+ const LBL_B={inicial:'Final 1.º Ascenso y 1.ª Fase del Reducido',cuartos:'Cuartos de Final del Reducido',semis:'Semifinales del Reducido',final:'Final del Reducido (2.º Ascenso)',asc:'Campeón (1.º Ascenso)'};
+ let STAGES=STAGES_P,STAGE_LBL=LBL_P;
+ const DIVN={primera:'Primera División',bnacional:'Primera Nacional'};
  const POSL={GK:'ARQ',DEF:'DEF',MID:'MED',FWD:'DEL'};
  let S=null,TAB='next',uid=0,SEL=null,LIVE=null;
  const CM={live:false};
+ const isBN=()=>!!S&&S.division==='bnacional';
+ const NF=()=>isBN()?17:16; /* fechas de la fase regular */
+ function setDiv(div){const b=div==='bnacional'&&!!DB;D=b?DB:D1;STAGES=b?STAGES_B:STAGES_P;STAGE_LBL=b?LBL_B:LBL_P;FXS=b?FXS_B:FXS_P;return b?'bnacional':'primera'}
  const isCopaM=m=>!!(m&&m.copa);
  const isKO=()=>!!S&&(S.phase==='playoffs'||S.phase==='trofeo'||!!(LIVE&&isCopaM(LIVE.m))); /* partido de eliminación (Copa: penales directos, sin tiempo extra) */
- /* ---- Copa Argentina: 30 clubes de Primera · 28 juegan 16avos (14 cruces) y 2 pasan a Octavos ---- */
- const COPA_ST=['dieciseisavos','octavos','cuartos','semi','final'];
- const COPA_LBL={dieciseisavos:'Dieciseisavos de Final',octavos:'Octavos de Final',cuartos:'Cuartos de Final',semi:'Semifinales',final:'Final'};
- const COPA_PTS=[['apertura',4,'dieciseisavos'],['apertura',10,'octavos'],['clausura',3,'cuartos'],['clausura',9,'semi'],['clausura',14,'final']]; /* ronda tras la fecha n del torneo */
+ /* ---- Copa Argentina: 64 equipos (30 de Primera División + 34 de Primera Nacional) desde 32avos de Final · cancha neutral ---- */
+ const COPA_ST=['treintaidosavos','dieciseisavos','octavos','cuartos','semi','final'];
+ const COPA_LBL={treintaidosavos:'32avos de Final',dieciseisavos:'16avos de Final',octavos:'Octavos de Final',cuartos:'Cuartos de Final',semi:'Semifinales',final:'Final'};
+ const COPA_PTS=[['apertura',3,'treintaidosavos'],['apertura',8,'dieciseisavos'],['apertura',13,'octavos'],['clausura',3,'cuartos'],['clausura',9,'semi'],['clausura',14,'final']]; /* Primera: ronda tras la fecha n del torneo */
+ const COPA_PTS_B=[['bnacional',3,'treintaidosavos'],['bnacional',6,'dieciseisavos'],['bnacional',9,'octavos'],['bnacional',12,'cuartos'],['bnacional',14,'semi'],['bnacional',16,'final']]; /* Primera Nacional (17 fechas) */
+ const copaPts=()=>isBN()?COPA_PTS_B:COPA_PTS;
+ const copaTn=t=>t==='apertura'?'Apertura':t==='clausura'?'Clausura':'torneo';
  const COPA_VENUES=['ROS','COR','MZA'];
- const TN_LBL={apertura:'TORNEO APERTURA',clausura:'TORNEO CLAUSURA'};
+ const TN_LBL={apertura:'TORNEO APERTURA',clausura:'TORNEO CLAUSURA',bnacional:'PRIMERA NACIONAL'};
  const tnName=()=>TN_LBL[S.torneo]||'TORNEO';
 
  /* ------------------------------------------------------------------
@@ -67,22 +82,42 @@
   return fx;
  }
 
+ /* Primera Nacional: todos contra todos a UNA rueda dentro de cada zona de 18 → 17 fechas × (9 + 9) partidos, sin libres, clásicos ni interzonal */
+ function rounds18(n){
+  const arr=[],out=[];for(let i=0;i<n;i++)arr.push(i);
+  for(let r=0;r<n-1;r++){
+   const ms=[];for(let i=0;i<n/2;i++)ms.push([arr[i],arr[n-1-i]]);
+   out.push(ms);arr.splice(1,0,arr.pop());
+  }
+  return out;
+ }
+ function buildFixtureBN(A,B){
+  const R=rounds18(A.length),fx=[];
+  for(let r=0;r<R.length;r++){
+   const f=[];
+   R[r].forEach(([x,y])=>{f.push(((r+x+y)%2)?mm(A[y],A[x],'Z'):mm(A[x],A[y],'Z'))});
+   R[r].forEach(([x,y])=>{f.push(((r+x+y)%2)?mm(B[y],B[x],'Z'):mm(B[x],B[y],'Z'))});
+   fx.push(f);
+  }
+  return fx;
+ }
+ const BIG_B=['chacarita','atlanta','chicago','ferro','quilmes','colon','godoy_cruz','sanmartin_tuc','almirante','patronato'];
  const BIG=['boca','river','racing','independiente','sanlorenzo','estudiantes','velez','talleres','rosario','lanus'];
  /* Tácticas por club (ADN): el resto es 'balanced' */
  const CLUB_STYLE={river:'offensive',racing:'offensive',boca:'offensive',velez:'offensive',argentinos:'offensive',talleres:'offensive',defensa:'offensive',estudiantes:'defensive',sanlorenzo:'defensive',belgrano:'defensive',platense:'defensive',riestra:'defensive',sarmiento:'defensive',barracas:'defensive',central_cordoba:'defensive'};
  const styleOf=id=>CLUB_STYLE[id]||'balanced';
  function calcBias(id,isHome){
   let b=({offensive:.08,balanced:0,defensive:-.08})[styleOf(id)];
-  if(S.phase==='regular'){
-   const pos=rankOf(id).pos;
+  if(S.phase==='regular'&&S.zonaDe[id]){
+   const pos=rankOf(id).pos,zn=S.zones[S.zonaDe[id]].length;
    if(pos>=1&&pos<=4)b+=.05;
-   else if(pos>=8&&pos<=11&&S.fecha>=12)b+=.08;
-   else if(pos>=12&&pos<=15){b-=.06;if(!isHome)b-=.03}
+   else if(pos>=8&&pos<=zn-4&&S.fecha>=NF()-4)b+=.08;
+   else if(pos>=zn-3&&pos<=zn){b-=.06;if(!isHome)b-=.03}
   }else if(isKO())b+=.04;
   return b;
  }
  function newSquad(teamId,num){
-  const r=D.resolverPlantelCancha(teamId,num),info={};
+  const r=ownerOf(teamId).resolverPlantelCancha(teamId,num),info={};
   const st=r.starters.slice(0,5),bn=r.subs.slice(0,9); /* banco: hasta 9 suplentes; el 6.º titular del club es el lugar de tu jugador */
   const starters=[],bench=[];
   st.forEach((p,i)=>{const id='s'+i;info[id]={id,name:p.name,number:p.number,pos:p.pos,stam:100,ycTotal:0,susp:0};starters.push(id)});
@@ -90,14 +125,197 @@
   return{info,starters,bench};
  }
 
+
+ /* ------------------------------------------------------------------
+  0b) CRUCE Primera ↔ Primera Nacional: zonas de ambas categorías (S.cross), Tabla Anual,
+      ascensos/descensos entre temporadas. Los equipos se leen de LIGA_ARGENTINA_DATA.teams y LIGA_BNACIONAL_DATA.teams.
+  ------------------------------------------------------------------ */
+ const NZ={primera:15,bnacional:18};
+ const zoneOk=(z,div)=>{
+  if(!z||!z.A||!z.B||z.A.length!==NZ[div]||z.B.length!==NZ[div])return false;
+  const all=z.A.concat(z.B);
+  return new Set(all).size===all.length&&all.every(id=>!!T(id));
+ };
+ function newStr(){const str={};allTeams().forEach(t=>{str[t.id]=+(0.82+Math.random()*0.42+((BIG.indexOf(t.id)>=0||BIG_B.indexOf(t.id)>=0)?0.1:0)).toFixed(3)});return str}
+ function ensureStr(s){s.str=s.str||{};allTeams().forEach(t=>{if(!(t.id in s.str))s.str[t.id]=+(0.82+Math.random()*0.42+((BIG.indexOf(t.id)>=0||BIG_B.indexOf(t.id)>=0)?0.1:0)).toFixed(3)})}
+ /* Zona B ordenada para que B[i] sea el clásico de A[i] cuando ambos están en la zona correcta */
+ function alignClassics(A,Bz){
+  const set=new Set(Bz),used=new Set(),B=new Array(A.length).fill(null);
+  A.forEach((id,i)=>{const t=T(id),c=t&&t.classicRivalId;if(c&&set.has(c)&&!used.has(c)){B[i]=c;used.add(c)}});
+  const rest=Bz.filter(id=>!used.has(id));
+  return B.map(x=>x||rest.shift());
+ }
+ function defaultZones(div){
+  const d=div==='bnacional'?DB:D1;if(!d||!d.teams)return null;
+  let z=null;
+  try{if(typeof d.generarZonasAleatorias==='function'){const r=d.generarZonasAleatorias();if(r&&r.A&&r.B)z={A:r.A.slice(),B:r.B.slice()}}}catch(e){}
+  if(!zoneOk(z,div)){ /* respaldo: clásicos en zonas opuestas */
+   const ids=shuffle(d.teams.map(t=>t.id)),seen=new Set(),A=[],B=[],left=[];
+   ids.forEach(id=>{if(seen.has(id))return;seen.add(id);const c=(safeTeam(d,id)||{}).classicRivalId;if(c&&!seen.has(c)&&ids.indexOf(c)>=0){seen.add(c);A.push(id);B.push(c)}else left.push(id)});
+   left.forEach((id,i)=>(i%2?B:A).push(id));
+   z={A,B};
+  }
+  return zoneOk(z,div)?z:null;
+ }
+ /* zonas de las dos categorías: la propia es la que se juega; la otra se simula al cerrar el año */
+ function crossFor(st,div,zones){
+  const o=div==='primera'?'bnacional':'primera',c={primera:null,bnacional:null};
+  c[div]={A:zones.A.slice(),B:zones.B.slice()};
+  const p=st.cross&&st.cross[o];
+  c[o]=zoneOk(p,o)?{A:p.A.slice(),B:p.B.slice()}:((o==='bnacional'&&!DB)?null:defaultZones(o));
+  return c;
+ }
+ function ensureCross(s){
+  if(s.cross&&typeof s.cross==='object')return s.cross;
+  const div=s.division==='bnacional'?'bnacional':'primera';
+  s.cross=crossFor({},div,{A:s.zones.A,B:s.zones.B});
+  return s.cross;
+ }
+ /* Copa Argentina: 30 clubes de Primera + 34 de Primera Nacional (si hay más, quedan los más fuertes; tu club siempre entra) */
+ function copaField(cross,str,keep){
+  const ids=d=>{const z=cross&&cross[d];return z&&z.A&&z.B?z.A.concat(z.B):(d==='primera'?D1.teams:(DB?DB.teams:[])).map(t=>t.id)};
+  const prim=ids('primera');let bn=DB?ids('bnacional'):[];
+  const need=Math.max(0,64-prim.length);
+  if(bn.length>need)bn=bn.slice().sort((x,y)=>((y===keep)-(x===keep))||((str&&str[y]||1)-(str&&str[x]||1))).slice(0,need);
+  return{prim,bn};
+ }
+ function quietSim(fx){fx.forEach(f=>f.forEach(m=>{const g=simGoals(m.h,m.a);m.hg=g[0];m.ag=g[1];m.done=true}))}
+ function koQuiet(h,a){
+  const g=simGoals(h,a);let hg=g[0],ag=g[1];
+  if(hg===ag){const r=Math.random();if(r<.22)hg++;else if(r<.44)ag++}
+  if(hg!==ag)return hg>ag?h:a;
+  return Math.random()<Math.max(.3,Math.min(.7,.5+(st(h)-st(a))*.25))?h:a;
+ }
+ /* Primera División (categoría que no se juega): Apertura + Clausura simulados → filas ordenadas de la Tabla Anual */
+ function simPrimeraYear(z){
+  const A=z.A.slice(),B=alignClassics(A,z.B),fx=buildFixture(A,B),inv=fx.map(f=>f.map(m=>mm(m.a,m.h,m.kind))),all=fx.concat(inv);
+  quietSim(all);
+  return statsFx(all,A.concat(B));
+ }
+ /* Primera Nacional (categoría que no se juega): fase regular + Final 1.º Ascenso + Reducido → [campeón, ganador del Reducido] */
+ function simBNYear(z){
+  const fx=buildFixtureBN(z.A,z.B);quietSim(fx);
+  const rA=statsFx(fx,z.A),rB=statsFx(fx,z.B),qA=rA.slice(0,8),qB=rB.slice(0,8),seed={};
+  [qA,qB].forEach(rows=>rows.forEach((r,i)=>{seed[r.id]={pos:i+1,pts:r.pts,dg:r.gf-r.gc,gf:r.gf}}));
+  const key=id=>{const x=seed[id]||{pos:99,pts:0,dg:0,gf:0};return[x.pos,-x.pts,-x.dg,-x.gf]};
+  const cmp=(a,b)=>{const x=key(a),y=key(b);for(let i=0;i<4;i++)if(x[i]!==y[i])return x[i]-y[i];return 0};
+  const duel=(a,b)=>cmp(a,b)<=0?koQuiet(a,b):koQuiet(b,a);
+  const a0=qA[0].id,b0=qB[0].id,champ=duel(a0,b0),lo=champ===a0?b0:a0;
+  const w1=[];for(let i=1;i<8;i++)w1.push(duel(qA[i].id,qB[8-i].id));
+  const t=w1.concat([lo]).sort(cmp);
+  const q=[duel(t[0],t[7]),duel(t[3],t[4]),duel(t[1],t[6]),duel(t[2],t[5])];
+  const s=[duel(q[0],q[1]),duel(q[2],q[3])];
+  return[champ,duel(s[0],s[1])];
+ }
+ /* Tabla Anual de Primera: puntos del Apertura (guardados al cerrar el torneo) + Clausura en curso = 32 fechas */
+ function annualRows(){
+  const ids=S.zones.A.concat(S.zones.B),cur=stats(ids),ap=S.apS||{};
+  return cur.map(r=>{const a=ap[r.id]||{pj:0,g:0,e:0,p:0,gf:0,gc:0,pts:0};
+   return{id:r.id,pj:r.pj+a.pj,g:r.g+a.g,e:r.e+a.e,p:r.p+a.p,gf:r.gf+a.gf,gc:r.gc+a.gc,pts:r.pts+a.pts}})
+   .sort((a,b)=>b.pts-a.pts||(b.gf-b.gc)-(a.gf-a.gc)||b.gf-a.gf||T(a.id).name.localeCompare(T(b.id).name));
+ }
+ /* Cierre de año: ascensos (campeón de la Final + ganador del Reducido) ↔ descensos (2 últimos de la Tabla Anual) */
+ function closeYear(){
+  ensureCross(S);ensureStr(S);
+  const cr=S.cross;let up=[],down=[];
+  if(S.division==='primera'){
+   down=annualRows().slice(-2).map(r=>r.id).reverse();
+   if(DB&&zoneOk(cr.bnacional,'bnacional'))up=simBNYear(cr.bnacional);
+  }else{
+   up=[S.po&&S.po.champ,S.po&&S.po.asc2].filter(Boolean);
+   if(zoneOk(cr.primera,'primera'))down=simPrimeraYear(cr.primera).slice(-2).map(r=>r.id).reverse();
+  }
+  const n=Math.min(up.length,down.length);
+  return{up:up.slice(0,n),down:down.slice(0,n)};
+ }
+ /* intercambia en las zonas: cada ascendido ocupa el lugar de un descendido y viceversa */
+ function swapDiv(cr,up,down){
+  const out=JSON.parse(JSON.stringify(cr));
+  const rep=(z,from,to)=>{['A','B'].forEach(k=>{const i=z[k].indexOf(from);if(i>=0)z[k][i]=to})};
+  up.forEach((u,k)=>{rep(out.primera,down[k],u);rep(out.bnacional,u,down[k])});
+  return out;
+ }
+ function clashes(cr){
+  let n=0;
+  ['primera','bnacional'].forEach(d=>['A','B'].forEach(k=>{const z=cr[d][k];z.forEach(id=>{const t=T(id),c=t&&t.classicRivalId;if(c&&z.indexOf(c)>=0)n++})}));
+  return n;
+ }
+ /* simula lo que falta del año de la categoría propia (liga, Copa, playoffs/Reducido y Trofeo) */
+ function simUserCopaPending(){
+  const stg=S.copaDue;if(!stg)return;
+  const m=copaUserM(stg);
+  S.copaDue=null;
+  if(m){simCopaMatch(m);if(m.w!==S.teamId&&S.copa&&!S.copa.out)S.copa.out=stg}
+  S.copa.rounds[stg].forEach(x=>{if(!x.done)simCopaMatch(x)});
+  advanceCopa(stg);
+ }
+ function finishYear(){
+  let n=0;
+  while(S.phase!=='done'&&n++<600){
+   if(S.copaDue){simUserCopaPending();continue}
+   if(S.phase==='regular'){
+    S.fixture[S.fecha-1].forEach(x=>{if(!x.done)simRegular(x)});
+    if(S.fecha<NF()){S.fecha++;copaCheck()}else endRegular();
+   }else if(S.phase==='playoffs'){
+    S.po.rounds[S.po.stage].forEach(m=>{if(!m.done)simKO(m)});advanceStage();
+   }else if(S.phase==='trofeo'){
+    if(S.trofeo&&!S.trofeo.done)simTrofeo();
+    break;
+   }else break;
+  }
+  if(S.copa&&!S.copa.done){ /* Copa sin terminar (p. ej. partidos pendientes): se completa */
+   let k=0;while(!S.copa.done&&k++<8){const stg=COPA_ST[Math.max(0,S.copa.next-1)];
+    if(S.copaDue){simUserCopaPending();continue}
+    if(S.copa.next>0&&S.copa.rounds[stg]&&S.copa.rounds[stg].length&&!S.copa.rounds[stg].every(x=>x.done)){S.copa.rounds[stg].forEach(x=>{if(!x.done)simCopaMatch(x)});advanceCopa(stg);continue}
+    if(S.copa.next<COPA_ST.length){copaTrigger(COPA_ST[S.copa.next]);continue}
+    break}
+  }
+ }
+ const yearOver=()=>!!S&&(S.phase==='done'||(S.phase==='trofeo'&&!!S.trofeo&&!!S.trofeo.done));
+ /* Siguiente temporada: aplica ascensos y descensos y arma la nueva temporada (categoría que corresponda) */
+ function nextSeasonFlow(){
+  if(!S||CM.live)return;
+  if(!yearOver()&&!confirm('¿Pasar a la siguiente temporada? Se simula lo que falta del año y se aplican los ascensos y descensos entre Primera División y Primera Nacional.'))return;
+  try{
+   finishYear();
+   const R=closeYear(),me=S.teamId,old=S.division;
+   let best=JSON.parse(JSON.stringify(S.cross));
+   if(R.up.length){
+    const c1=swapDiv(S.cross,R.up,R.down),c2=swapDiv(S.cross,R.up,R.down.slice().reverse());
+    best=clashes(c1)<=clashes(c2)?c1:c2;
+   }
+   const nd=R.up.indexOf(me)>=0?'primera':R.down.indexOf(me)>=0?'bnacional':old;
+   const z=best[nd],zonaDe={};z.A.forEach(id=>zonaDe[id]='A');z.B.forEach(id=>zonaDe[id]='B');
+   const ns=newSeason({division:nd,teamId:me,player:{name:S.player.name,num:S.player.num},matchMinutes:S.minutes,zones:{A:z.A.slice(),B:z.B.slice()},zonaDe,cross:best,year:(S.year||1)+1});
+   ns.modalQ=ns.modalQ||[];
+   ns.modalQ.unshift({k:'move',year:ns.year,up:R.up,down:R.down,from:old,to:nd});
+   S=ns;TAB='next';SEL=null;
+   save();hideTorneoLayer();openHub('next');flushModals();
+  }catch(e){console.warn('[CareerMode] siguiente temporada',e);try{renderHub()}catch(er){}}
+ }
+
+ function newSeasonBN(st){
+  let zones=st.zones&&st.zones.A&&st.zones.B?{A:st.zones.A.slice(),B:st.zones.B.slice()}:null;
+  const all=zones?zones.A.concat(zones.B):[];
+  const ok=!!zones&&zones.A.length===18&&zones.B.length===18&&all.every(id=>!!T(id))&&new Set(all).size===36;
+  if(!ok){const z=D.generarZonasAleatorias();zones={A:z.A.slice(),B:z.B.slice()}} /* Zonas A y B de 18 (cada clásico en zonas opuestas) */
+  const zonaDe={};zones.A.forEach(id=>zonaDe[id]='A');zones.B.forEach(id=>zonaDe[id]='B');
+  const str=newStr(),cross=crossFor(st,'bnacional',zones),copa=buildCopa(cross,str,st.teamId);
+  return{v:2,division:'bnacional',teamId:st.teamId,copa,cross,year:st.year||1,player:{name:st.player.name,num:st.player.num,ycTotal:0,susp:0},minutes:st.matchMinutes||5,
+   zones,zonaDe,myZone:zonaDe[st.teamId],str,fixture:buildFixtureBN(zones.A,zones.B),fecha:1,phase:'regular',
+   po:null,squad:newSquad(st.teamId,st.player.num),champShown:false,createdAt:Date.now(),
+   torneo:'bnacional',aperturaChampionId:null,aperturaRunnerUpId:null,clausuraChampionId:null,clausuraRunnerUpId:null,trofeo:null,copaDue:null,copaInfo:null,
+   modalQ:[{k:'intro',torneo:'bnacional'}]};
+ }
  function newSeason(st){
+  let div=st.division||window.CAREER_DIVISION||'primera';
+  if(div==='bnacional'&&!DB)div='primera';
+  if(!st.cross&&!dataOf(div).getTeam(st.teamId)){const o=div==='bnacional'?'primera':'bnacional';if(o==='primera'||DB){if(dataOf(o).getTeam(st.teamId))div=o}}
+  if(setDiv(div)==='bnacional')return newSeasonBN(st);
   const A=st.zones.A.slice();
-  let B=A.map(id=>T(id).classicRivalId);
-  const okB=B.length===st.zones.B.length&&B.every(id=>st.zones.B.indexOf(id)>=0);
-  if(!okB)B=st.zones.B.slice();
-  const str={};D.teams.forEach(t=>{str[t.id]=+(0.82+Math.random()*0.42+(BIG.indexOf(t.id)>=0?0.1:0)).toFixed(3)});
-  const copa=buildCopa(A.concat(st.zones.B));
-  return{v:2,teamId:st.teamId,copa,player:{name:st.player.name,num:st.player.num,ycTotal:0,susp:0},minutes:st.matchMinutes||5,
+  const B=alignClassics(A,st.zones.B);
+  const str=newStr(),cross=crossFor(st,'primera',{A,B}),copa=buildCopa(cross,str,st.teamId);
+  return{v:2,division:'primera',teamId:st.teamId,copa,cross,year:st.year||1,player:{name:st.player.name,num:st.player.num,ycTotal:0,susp:0},minutes:st.matchMinutes||5,
    zones:{A,B},zonaDe:st.zonaDe,myZone:st.zonaDe[st.teamId],str,fixture:buildFixture(A,B),fecha:1,phase:'regular',
    po:null,squad:newSquad(st.teamId,st.player.num),champShown:false,createdAt:Date.now(),
    torneo:'apertura',aperturaChampionId:null,aperturaRunnerUpId:null,clausuraChampionId:null,clausuraRunnerUpId:null,trofeo:null,copaDue:null,copaInfo:null,
@@ -105,7 +323,7 @@
  }
 
  function save(){try{localStorage.setItem(K2,JSON.stringify(S))}catch(e){}}
- function loadSave(){try{const s=JSON.parse(localStorage.getItem(K2)||'null');if(s&&s.v===2&&s.fixture&&s.squad&&s.zones&&T(s.teamId)){migrate(s);return s}}catch(e){}return null}
+ function loadSave(){try{const s=JSON.parse(localStorage.getItem(K2)||'null');if(s&&s.v===2&&s.fixture&&s.squad&&s.zones){setDiv(s.division||'primera');if(T(s.teamId)){migrate(s);return s}}}catch(e){}return null}
  /* guardados anteriores (una sola temporada) → Torneo Apertura; si ya estaba finalizada pasa al Clausura */
  function migrate(s){
   const prev=S;S=s;
@@ -117,7 +335,8 @@
     if(!('trofeo' in s))s.trofeo=null;
    }
    s.modalQ=s.modalQ||[];
-   if(!s.copa){s.copa=buildCopa(s.zones.A.concat(s.zones.B));s.copaDue=null;s.copaInfo=null;copaCheck()}
+   ensureCross(s);ensureStr(s);
+   if(!s.copa||!s.copa.rounds||!s.copa.rounds.treintaidosavos){s.copa=buildCopa(s.cross,s.str,s.teamId);s.copaDue=null;s.copaInfo=null;copaCheck()} /* Copa de 64 equipos (32avos): guardados anteriores generan la nueva Copa */
    if(legacy&&s.phase==='done'&&s.po&&s.po.champ){
     const f=s.po.rounds&&s.po.rounds.final&&s.po.rounds.final[0];
     s.aperturaChampionId=s.po.champ;s.aperturaRunnerUpId=f?(f.w===f.h?f.a:f.h):null;
@@ -154,7 +373,7 @@
    const o={};
    S.zones.A.concat(S.zones.B).forEach(tid=>{
     if(tid===S.teamId){const q=S.squad;Object.keys(q.info).forEach(id=>{const p=q.info[id];addP(o,tid,p.name,p.number,p.pos,q.starters.indexOf(id)>=0)});return}
-    let r=null;try{r=D.resolverPlantelCancha(tid,null)}catch(e){try{r=D.resolverPlantelCancha(tid,-1)}catch(er){r=null}}
+    let r=null;try{r=ownerOf(tid).resolverPlantelCancha(tid,null)}catch(e){try{r=ownerOf(tid).resolverPlantelCancha(tid,-1)}catch(er){r=null}}
     if(!r)return;
     (r.starters||[]).forEach(p=>addP(o,tid,p.name,p.number,p.pos,true));(r.subs||[]).forEach(p=>addP(o,tid,p.name,p.number,p.pos,false));
    });
@@ -209,9 +428,10 @@
  }catch(e){}}
 
  /* ---- tabla ---- */
- function stats(ids){
+ function stats(ids){return statsFx(S.fixture,ids)}
+ function statsFx(fx,ids){
   const t={};ids.forEach(id=>t[id]={id,pj:0,g:0,e:0,p:0,gf:0,gc:0,pts:0});
-  S.fixture.forEach(f=>f.forEach(m=>{if(!m.done)return;
+  fx.forEach(f=>f.forEach(m=>{if(!m.done)return;
    [[m.h,m.hg,m.ag],[m.a,m.ag,m.hg]].forEach(x=>{const r=t[x[0]];if(!r)return;r.pj++;r.gf+=x[1];r.gc+=x[2];
     if(x[1]>x[2]){r.g++;r.pts+=3}else if(x[1]===x[2]){r.e++;r.pts++}else r.p++})}));
   return ids.map(id=>t[id]).sort((a,b)=>b.pts-a.pts||(b.gf-b.gc)-(a.gf-a.gc)||b.gf-a.gf||T(a.id).name.localeCompare(T(b.id).name));
@@ -219,6 +439,7 @@
 
  /* ---- playoffs ---- */
  function endRegular(){
+  if(isBN())return endRegularBN();
   const A=stats(S.zones.A),B=stats(S.zones.B),qA=A.slice(0,8).map(r=>r.id),qB=B.slice(0,8).map(r=>r.id);
   const oct=[];
   for(let i=0;i<4;i++)oct.push(ko(qA[i],qB[7-i]));
@@ -229,6 +450,7 @@
   S.phase='playoffs';
  }
  function advanceStage(){
+  if(isBN())return advanceStageBN();
   const i=STAGES.indexOf(S.po.stage),rd=S.po.rounds[S.po.stage];
   if(!rd.every(m=>m.done))return;
   if(i===3){const f=rd[0];S.po.champ=f.w;S.po.runnerUp=f.w===f.h?f.a:f.h;endTorneo();return}
@@ -236,19 +458,57 @@
   S.po.rounds[nx]=pr.map(p=>ko(w[p[0]],w[p[1]],nx==='final'));
   S.po.stage=nx;
  }
+ /* ---- Primera Nacional · Final 1.º Ascenso + Reducido (2.º Ascenso) ---- */
+ const seedKey=id=>{const x=(S.seed||{})[id]||{pos:99,pts:0,dg:0,gf:0};return[x.pos,-x.pts,-x.dg,-x.gf]};
+ const seedCmp=(a,b)=>{const x=seedKey(a),y=seedKey(b);for(let i=0;i<4;i++)if(x[i]!==y[i])return x[i]-y[i];return 0};
+ const hiLo=(a,b)=>seedCmp(a,b)<=0?[a,b]:[b,a]; /* el mejor ubicado de la fase regular es local */
+ function endRegularBN(){
+  const A=stats(S.zones.A),B=stats(S.zones.B),qA=A.slice(0,8).map(r=>r.id),qB=B.slice(0,8).map(r=>r.id);
+  S.seed={};
+  [A,B].forEach(rows=>rows.slice(0,8).forEach((r,i)=>{S.seed[r.id]={pos:i+1,pts:r.pts,dg:r.gf-r.gc,gf:r.gf}}));
+  const f1=ko(qA[0],qB[0],true);f1.tag='F1';f1.venue=pickVenue(f1.h,f1.a); /* Final por el 1.º Ascenso: partido único, cancha neutral */
+  const r1=[];
+  for(let i=1;i<8;i++){ /* 2.º A vs 8.º B, 3.º A vs 7.º B … 8.º A vs 2.º B (el mejor ubicado de local) */
+   const a=qA[i],b=qB[8-i],aHome=(i+1)<=(9-i),m=aHome?ko(a,b,false):ko(b,a,false);m.tag='R1';r1.push(m);
+  }
+  const mine=qA.indexOf(S.teamId)>=0||qB.indexOf(S.teamId)>=0;
+  S.q={A:qA,B:qB};
+  S.po={stage:'inicial',rounds:{inicial:[f1].concat(r1),cuartos:[],semis:[],final:[]},out:mine?null:'nq',champ:null,runnerUp:null,asc2:null};
+  S.phase='playoffs';
+ }
+ function advanceStageBN(){
+  const stg=S.po.stage,rd=S.po.rounds[stg];
+  if(!rd.every(m=>m.done))return;
+  const mk=(a,b,neutral)=>{const p=hiLo(a,b),m=ko(p[0],p[1],neutral);if(neutral)m.venue=pickVenue(m.h,m.a);return m};
+  if(stg==='inicial'){
+   const f1=rd.find(m=>m.tag==='F1'),r1=rd.filter(m=>m.tag==='R1');
+   const ch=f1.w,lo=f1.w===f1.h?f1.a:f1.h;
+   S.po.champ=ch;S.po.runnerUp=lo; /* Campeón de la Primera Nacional = 1.º Ascenso */
+   S.modalQ=S.modalQ||[];
+   if(ch===S.teamId){S.modalQ.push({k:'champ',torneo:'bnacional',id:ch});S.po.out='asc'}
+   const t=r1.map(m=>m.w).concat([lo]).sort(seedCmp); /* Cuartos: 7 ganadores + perdedor de la Final */
+   S.po.rounds.cuartos=[mk(t[0],t[7]),mk(t[3],t[4]),mk(t[1],t[6]),mk(t[2],t[5])];
+   S.po.stage='cuartos';return;
+  }
+  if(stg==='final'){const f=rd[0];S.po.asc2=f.w;S.phase='done';return}
+  const w=rd.map(m=>m.w),nx=stg==='cuartos'?'semis':'final';
+  S.po.rounds[nx]=nx==='semis'?[mk(w[0],w[1]),mk(w[2],w[3])]:[mk(w[0],w[1],true)];
+  S.po.stage=nx;
+ }
  function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t}return a}
  /* sede neutral: club ajeno al partido (prefiere ROS / COR / MZA si no juegan) */
- function pickVenue(h,a){
-  const ok=D.teams.filter(t=>t.id!==h&&t.id!==a);
+ function pickVenue(h,a,all){
+  const ok=(all?allTeams():D.teams).filter(t=>t.id!==h&&t.id!==a);
   const pref=ok.filter(t=>COPA_VENUES.indexOf(String(t.shortName).toUpperCase())>=0);
   const pool=pref.length?pref:ok;
   return pool.length?pool[Math.floor(Math.random()*pool.length)].id:null;
  }
- const copaMatch=(h,a)=>({h,a,hg:null,ag:null,done:false,kind:'K',pen:null,w:null,neutral:true,copa:true,venue:pickVenue(h,a)});
- function buildCopa(ids){
-  const L=shuffle(ids&&ids.length?ids:D.teams.map(t=>t.id)),byes=L.slice(0,2),rest=L.slice(2),r32=[];
-  for(let i=0;i+1<rest.length;i+=2)r32.push(copaMatch(rest[i],rest[i+1]));
-  return{rounds:{dieciseisavos:r32,octavos:[],cuartos:[],semi:[],final:[]},byes,next:0,out:null,champ:null,runnerUp:null,done:false};
+ const copaMatch=(h,a)=>({h,a,hg:null,ag:null,done:false,kind:'K',pen:null,w:null,neutral:true,copa:true,venue:pickVenue(h,a,true)});
+ function buildCopa(cross,str,keep){
+  const f=copaField(cross,str,keep),L=shuffle(f.prim.concat(f.bn)),n=L.length;
+  const byeN=Math.max(0,Math.min(n,64-n)),byes=L.slice(0,byeN),rest=L.slice(byeN),r1=[];
+  for(let i=0;i+1<rest.length;i+=2)r1.push(copaMatch(rest[i],rest[i+1])); /* 64 equipos → 32 cruces de 32avos (sin libres) */
+  return{rounds:{treintaidosavos:r1,dieciseisavos:[],octavos:[],cuartos:[],semi:[],final:[]},byes,np:f.prim.length,nb:f.bn.length,next:0,out:null,champ:null,runnerUp:null,done:false};
  }
  function copaPens(m,res){
   if(res&&res.ph!=null&&res.pa!=null&&res.ph!==res.pa){m.pen={h:res.ph,a:res.pa};m.w=res.ph>res.pa?m.h:m.a}
@@ -262,7 +522,7 @@
   m.done=true;simMatchStats(m);
  }
  function copaStage(){const C=S.copa;return C&&C.next>0?COPA_ST[C.next-1]:null}
- /* arma la ronda siguiente con los ganadores (Octavos: 14 ganadores + 2 clasificados directos) */
+ /* arma la ronda siguiente con los ganadores (si hubiera clasificados directos, entran en la ronda siguiente a 32avos) */
  function advanceCopa(stage){
   const C=S.copa,rd=C.rounds[stage];
   if(!rd.every(m=>m.done))return;
@@ -272,7 +532,7 @@
    if(C.champ===S.teamId){S.modalQ=S.modalQ||[];S.modalQ.push({k:'champ',torneo:'copa',id:C.champ})}
    return;
   }
-  const w=rd.map(m=>m.w),L=i===0?[C.byes[0]].concat(w,[C.byes[1]]):w,nx=[];
+  const w=rd.map(m=>m.w),hb=Math.ceil(C.byes.length/2),L=i===0?C.byes.slice(0,hb).concat(w,C.byes.slice(hb)):w,nx=[];
   for(let k=0;k+1<L.length;k+=2)nx.push(copaMatch(L[k],L[k+1]));
   C.rounds[COPA_ST[i+1]]=nx;
  }
@@ -281,28 +541,29 @@
  function copaTrigger(stage){
   const C=S.copa;C.next++;
   S.modalQ=S.modalQ||[];
-  if(stage==='dieciseisavos')S.modalQ.push({k:'sorteo'});
+  if(stage==='treintaidosavos')S.modalQ.push({k:'sorteo'});
   if(copaUserM(stage)){S.copaDue=stage;return true}
   C.rounds[stage].forEach(m=>{if(!m.done)simCopaMatch(m)});
-  const mine=C.byes.indexOf(S.teamId)>=0&&stage==='dieciseisavos';
-  S.copaInfo='🏆 Se jugaron los '+COPA_LBL[stage]+' de la Copa Argentina sin tu equipo'+(mine?' (clasificaste directo a Octavos).':C.out?' (ya habías quedado eliminado).':'.');
+  const mine=C.byes.indexOf(S.teamId)>=0&&stage==='treintaidosavos';
+  S.copaInfo='🏆 Se jugaron los '+COPA_LBL[stage]+' de la Copa Argentina sin tu equipo'+(mine?' (clasificaste directo a los 16avos).':C.out?' (ya habías quedado eliminado).':'.');
   advanceCopa(stage);
   return false;
  }
  /* ¿toca Copa? se evalúa al terminar cada fecha de Liga */
  function copaCheck(){
   const C=S&&S.copa;if(!C||S.copaDue||S.phase!=='regular')return;
-  while(C.next<COPA_PTS.length){
-   const pt=COPA_PTS[C.next],reached=(S.torneo==='clausura'&&pt[0]==='apertura')||(S.torneo===pt[0]&&S.fecha>pt[1]);
+  const PT=copaPts();
+  while(C.next<PT.length){
+   const pt=PT[C.next],reached=(S.torneo==='clausura'&&pt[0]==='apertura')||(S.torneo===pt[0]&&S.fecha>pt[1]);
    if(!reached)break;
    if(copaTrigger(pt[2]))break;
   }
  }
  function copaNextText(){
-  const C=S.copa;if(!C||C.done||C.next>=COPA_PTS.length)return '';
+  const C=S.copa,PT=copaPts();if(!C||C.done||C.next>=PT.length)return '';
   if(C.out)return '';
-  const pt=COPA_PTS[C.next];
-  return '<div class="cmNote">🏆 Copa Argentina · próxima ronda: <b>'+COPA_LBL[pt[2]]+'</b> tras la Fecha '+pt[1]+' del Torneo '+(pt[0]==='apertura'?'Apertura':'Clausura')+'.</div>';
+  const pt=PT[C.next];
+  return '<div class="cmNote">🏆 Copa Argentina · próxima ronda: <b>'+COPA_LBL[pt[2]]+'</b> tras la Fecha '+pt[1]+' del '+(pt[0]==='bnacional'?'torneo de la Primera Nacional':'Torneo '+copaTn(pt[0]))+'.</div>';
  }
  /* Final del torneo: guarda campeón y subcampeón; Apertura → Clausura (mismas zonas, localías invertidas); Clausura → Trofeo de Campeones */
  function endTorneo(){
@@ -314,6 +575,7 @@
  }
  function startClausura(){
   const prevChamp=S.aperturaChampionId;
+  S.apS={};stats(S.zones.A.concat(S.zones.B)).forEach(r=>{S.apS[r.id]={pj:r.pj,g:r.g,e:r.e,p:r.p,gf:r.gf,gc:r.gc,pts:r.pts}}); /* Tabla Anual: puntos del Apertura */
   S.fixture=S.fixture.map(f=>f.map(m=>mm(m.a,m.h,m.kind))); /* mismos rivales y fechas; local ↔ visitante */
   S.torneo='clausura';S.phase='regular';S.fecha=1;S.po=null;S.q=null;S.champShown=false;
   Object.keys(S.squad.info).forEach(id=>{const p=S.squad.info[id];p.stam=100;p.inj=null;p.ycTotal=0});
@@ -374,13 +636,13 @@
   }
   if(S.phase==='regular'){
    S.fixture[S.fecha-1].forEach(x=>{if(!x.done)simRegular(x)});
-   if(S.fecha<16){S.fecha++;copaCheck()}else endRegular();
+   if(S.fecha<NF()){S.fecha++;copaCheck()}else endRegular();
   }else{
    if(m.hg===m.ag){
     if(res.ph!=null&&res.pa!=null&&res.ph!==res.pa){m.pen={h:res.ph,a:res.pa};m.w=res.ph>res.pa?m.h:m.a}
     else{const hw=Math.random()<.5;m.pen={h:hw?5:4,a:hw?4:5};m.w=hw?m.h:m.a}
    }else m.w=m.hg>m.ag?m.h:m.a;
-   if(m.w!==S.teamId)S.po.out=S.po.stage;
+   if(m.w!==S.teamId&&!(isBN()&&m.tag==='F1'))S.po.out=S.po.stage; /* Primera Nacional: el perdedor de la Final 1.º Ascenso sigue en Cuartos del Reducido */
    S.po.rounds[S.po.stage].forEach(x=>{if(!x.done)simKO(x)});
    advanceStage();
   }
@@ -677,6 +939,12 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
 #menu .card #cmMenuSub{background:linear-gradient(180deg,#303843 0%,#262c34 100%)}
 #menu .card #mResume:hover,#menu .card #mLeave:hover,#menu .card #cmMenuSub:hover{filter:brightness(1.1)}
 #menu .card #mResume:active,#menu .card #mLeave:active,#menu .card #cmMenuSub:active{transform:translateY(3px);box-shadow:0 1px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.2)}
+/* ---------- Selector de Categoría (Carrera Nueva) · cartoon vector ---------- */
+#cmDiv{margin:0 0 10px;--ink:#0a1f3d}
+#cmDiv .cmRow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#cmDiv .cmBtn{padding:12px 10px;font-size:.95rem;text-align:center;line-height:1.2}
+#cmDiv .cmBtn.on{background:linear-gradient(180deg,#62c74f 0%,#439e34 100%);color:#fff;border:3px solid #0a1f3d;box-shadow:0 5px 0 #0a1f3d,inset 0 2px 0 rgba(255,255,255,.28);text-shadow:-1.5px -1.5px 0 #0a1f3d,1.5px -1.5px 0 #0a1f3d,-1.5px 1.5px 0 #0a1f3d,1.5px 1.5px 0 #0a1f3d}
+@media(max-width:560px){#cmDiv .cmRow{grid-template-columns:1fr}}
 `;
   document.head.appendChild(s);
  }
@@ -702,7 +970,16 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   ------------------------------------------------------------------ */
  const rankOf=id=>{const z=S.zonaDe[id],r=stats(S.zones[z]),i=r.findIndex(x=>x.id===id);return{z,pos:i+1,row:r[i]}};
  const nameOf=id=>T(id).name;
+ /* etiquetas por partido (Primera Nacional: Final 1.º Ascenso / 1.ª Fase del Reducido) */
+ const mLbl=(m,stg)=>isBN()&&m&&m.tag==='F1'?'Final por el 1.º Ascenso':isBN()&&m&&m.tag==='R1'?'1.ª Fase del Reducido':STAGE_LBL[stg||(S.po&&S.po.stage)];
+ const stgLbl=k=>STAGE_LBL[k]||k;
+ const outLbl=k=>isBN()&&k==='inicial'?'1.ª Fase del Reducido':isBN()&&k==='cuartos'?'Cuartos del Reducido':isBN()&&k==='semis'?'Semifinales del Reducido':isBN()&&k==='final'?'Final del Reducido':STAGE_LBL[k];
  function statusText(){
+  if(isBN()){
+   if(S.phase==='regular')return 'Primera Nacional · Zona '+S.myZone+' · Fecha '+S.fecha+'/17';
+   if(S.phase==='playoffs')return 'Primera Nacional · '+(S.po.out==='nq'?'Reducido (sin clasificar)':S.po.out==='asc'?'Campeón · 1.º Ascenso':S.po.out?'Eliminado en '+outLbl(S.po.out):'Final / Reducido · '+stgLbl(S.po.stage));
+   return 'Temporada finalizada';
+  }
   const tl=S.torneo==='clausura'?'Clausura':'Apertura';
   if(S.phase==='regular')return tl+' · Zona '+S.myZone+' · Fecha '+S.fecha+'/16';
   if(S.phase==='playoffs')return tl+' · '+(S.po.out==='nq'?'Playoffs (sin clasificar)':S.po.out?'Eliminado en '+STAGE_LBL[S.po.out]:'Playoffs · '+STAGE_LBL[S.po.stage]);
@@ -714,12 +991,13 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   const t=T(S.teamId);
   hub.innerHTML='<div class="cmWrap"><div class="cmHead"><button id="cmBack" class="cmGhost" type="button">← Menú</button>'+
    '<div class="cmTitle"><span class="bd">'+badge(t)+'</span><div><b>'+E(t.name)+'</b><small>'+E(S.player.name)+' (#'+S.player.num+') · '+statusText()+'</small></div></div>'+
-   '<button id="cmNew" class="cmGhost" type="button">🆕 Nueva temporada</button></div>'+
-   '<nav class="cmTabs">'+[['next','⚽ Próximo Partido'],['table','📊 Tabla de Posiciones'],['fix','📅 Fixture / Playoffs'],['cal','🗓️ Calendario'],['copa','🏆 Copa Argentina'],['squad','👕 Mi Plantel']]
+   '<button id="cmNew" class="cmGhost" type="button">🆕 Nueva carrera</button></div>'+
+   '<nav class="cmTabs">'+[['next','⚽ Próximo Partido'],['table','📊 Tabla de Posiciones'],['anual','📆 Tabla Anual'],['fix',isBN()?'📅 Fixture / Reducido':'📅 Fixture / Playoffs'],['cal','🗓️ Calendario'],['copa','🏆 Copa Argentina'],['squad','👕 Mi Plantel']].filter(x=>!(isBN()&&x[0]==='anual'))
     .map(x=>'<button type="button" data-tab="'+x[0]+'" class="'+(TAB===x[0]?'on':'')+'">'+x[1]+'</button>').join('')+'</nav>'+
    '<div id="cmBody"></div></div>';
   const body=$('cmBody');
-  body.innerHTML=TAB==='table'?tabTable():TAB==='fix'?tabFixture():TAB==='cal'?tabCal():TAB==='copa'?tabCopa():TAB==='squad'?tabSquad():tabNext();
+  if(isBN()&&TAB==='anual')TAB='next';
+  body.innerHTML=TAB==='table'?tabTable():TAB==='anual'?tabAnual():TAB==='fix'?tabFixture():TAB==='cal'?tabCal():TAB==='copa'?tabCopa():TAB==='squad'?tabSquad():tabNext();
   wireHub();
  }
  function wireHub(){
@@ -735,11 +1013,13 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   const sk=$('cmSkipSusp');if(sk)sk.onclick=()=>window.cmSkipExpelledMatch();
   const sa=$('cmSimAll');if(sa)sa.onclick=()=>{simRest();renderHub();flushModals()};
   const ns=$('cmNewSeason');if(ns)ns.onclick=newSeasonFlow;
+  const nx=$('cmNextSeason');if(nx)nx.onclick=nextSeasonFlow;
   hub.querySelectorAll('.cmPr[data-k]').forEach(b=>b.onclick=()=>squadClick(b.dataset.k,+b.dataset.i));
   hub.querySelectorAll('.cmKb[data-kt]').forEach(b=>b.onclick=()=>{KIT[b.dataset.kt]=b.dataset.kk;renderHub()});
  }
+ const nextBtn=cls=>'<button id="cmNextSeason" class="'+cls+'" type="button">➡️ Siguiente temporada</button>';
  function newSeasonFlow(){
-  if(!confirm('¿Empezar una nueva temporada? Se borra el progreso guardado de la campaña actual.'))return;
+  if(!confirm('¿Empezar una nueva carrera? Se borra el progreso guardado de la campaña actual.'))return;
   try{localStorage.removeItem(K2)}catch(e){}
   S=null;const c=$('cmCont');if(c)c.remove();
   show('career-screen');
@@ -775,13 +1055,15 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   if(S.copaInfo&&!m.copa)warn+='<div class="cmNote">'+E(S.copaInfo)+'</div>';
   if(!m.copa)warn+=copaNextText();
   if(S.phase==='trofeo')warn+='<div class="cmWarn">🏆 <b>TROFEO DE CAMPEONES</b> · Partido único en cancha neutral. Si hay empate a los '+S.minutes+' min: tiempo extra de 1 minuto y, si persiste, tanda de penales.</div>';
-  if(S.phase==='playoffs')warn+='<div class="cmWarn">🏆 <b>'+STAGE_LBL[S.po.stage].toUpperCase()+'</b> · Partido único. Si hay empate al final: tiempo extra de 1 minuto y, si persiste, tanda de penales.'+(m.neutral?' · Cancha neutral.':'')+'</div>';
+  if(S.phase==='playoffs')warn+='<div class="cmWarn">🏆 <b>'+mLbl(m).toUpperCase()+'</b> · Partido único. Si hay empate al final: tiempo extra de 1 minuto y, si persiste, tanda de penales.'+(m.neutral?' · Cancha neutral.':'')+'</div>';
+  if(isBN()&&S.phase==='playoffs'&&m.tag==='F1')warn+='<div class="cmWarn">⬆️ <b>1.º ASCENSO</b> · El ganador es Campeón de la Primera Nacional y asciende a Primera División; el perdedor sigue en los Cuartos del Reducido.</div>';
+  if(isBN()&&S.phase==='playoffs'&&m.tag==='R1')warn+='<div class="cmWarn">🎯 <b>REDUCIDO</b> · Quien gane sigue en Cuartos; quien pierda queda eliminado. El mejor ubicado de la fase regular es local.</div>';
   if(m.kind==='C')warn+='<div class="cmWarn cmFire">🔥 <b>¡FECHA DE CLÁSICO!</b> Hoy enfrentás a tu clásico rival.</div>';
   if(m.kind==='I')warn+='<div class="cmWarn">🌐 Fecha interzonal: rival de la otra zona.</div>';
   if((S.player.susp||0)>0)warn+='<div class="cmWarn cmFire">🟥 <b>Estás suspendido (1 fecha)</b>: no jugás este partido. Lo mirás desde afuera y tu equipo juega 6v6 con un suplente.</div>';
   const r=rankOf(S.teamId);
-  const stand=(S.phase==='regular'&&!m.copa)?'<div class="cmNote">Posición actual: <b>'+r.pos+'º</b> en Zona '+r.z+' · '+r.row.pts+' pts ('+r.row.pj+' PJ) · clasifican los 8 primeros.</div>':'';
-  return '<div class="cmCard"><h2>'+(m.copa?'🏆 COPA ARGENTINA · '+COPA_LBL[S.copaDue]:S.phase==='regular'?tnName()+' · Fecha '+S.fecha+' de 16':S.phase==='trofeo'?'🏆 TROFEO DE CAMPEONES':tnName()+' · '+STAGE_LBL[S.po.stage])+'</h2>'+warn+
+  const stand=(S.phase==='regular'&&!m.copa)?'<div class="cmNote">Posición actual: <b>'+r.pos+'º</b> en Zona '+r.z+' · '+r.row.pts+' pts ('+r.row.pj+' PJ) · '+(isBN()?'1.º → Final por el 1.º Ascenso · 2.º al 8.º → Reducido.':'clasifican los 8 primeros.')+'</div>':'';
+  return '<div class="cmCard"><h2>'+(m.copa?'🏆 COPA ARGENTINA · '+COPA_LBL[S.copaDue]:S.phase==='regular'?tnName()+' · Fecha '+S.fecha+' de '+NF():S.phase==='trofeo'?'🏆 TROFEO DE CAMPEONES':tnName()+' · '+mLbl(m))+'</h2>'+warn+
    '<div class="cmVs"><div class="tm'+(myHome?' me':'')+'"><span class="cmBd">'+badge(h)+'</span>'+E(h.name)+'<small>LOCAL'+(myHome?' · TU CLUB':'')+'</small>'+kitSvg(myHome?myKit:kH,myHome?S.player.num:'')+'</div>'+
    '<div class="mid">VS</div>'+
    '<div class="tm'+(!myHome?' me':'')+'"><span class="cmBd">'+badge(a)+'</span>'+E(a.name)+'<small>VISITANTE'+(!myHome?' · TU CLUB':'')+'</small>'+kitSvg(!myHome?myKit:kA,!myHome?S.player.num:'')+'</div></div>'+
@@ -793,33 +1075,72 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    '<button id="cmPlay" class="cmBig" type="button">▶ JUGAR PARTIDO</button>'+
    ((S.player.susp||0)>0?'<button id="cmSkipSusp" class="cmBig" type="button">⏩ Simular partido (Suspendido)</button>':'')+'</div>';
  }
+ function outHtmlBN(){
+  const o=S.po.out,asc=o==='asc',nq=o==='nq';
+  const msg=asc?'🏆 ¡Campeón de la Primera Nacional!':nq?'No clasificaste al Reducido':'Quedaste eliminado en '+outLbl(o);
+  const note=asc?'Ganaste la Final por el 1.º Ascenso: ¡ascendés a Primera División! Podés simular el resto del Reducido o empezar otra temporada.':(nq?'Terminaste la fase regular fuera de los 8 primeros de tu zona.':'Tu camino en el torneo terminó acá.')+' Podés simular lo que resta del Reducido o empezar otra temporada.';
+  return '<div class="cmCard"><h2>'+E(msg)+'</h2><div class="cmNote">'+E(note)+'</div>'+
+   '<div class="cmRow"><button id="cmSimAll" class="cmBtn" type="button">⏩ Simular Reducido restante</button>'+nextBtn('cmBtn')+'<button id="cmNewSeason" class="cmBtn red" type="button">🆕 Nueva carrera</button></div></div>';
+ }
+ function doneHtmlBN(){
+  const P=S.po||{},nm=id=>id?E(T(id).name):'—',me=id=>id===S.teamId;
+  const row=(ttl,id,sub)=>id?'<div class="cmVs"><div class="tm'+(me(id)?' me':'')+'"><span class="cmBd">'+badge(T(id))+'</span>'+E(T(id).name)+'<small>'+ttl+(me(id)?' · TU CLUB':'')+'</small></div></div>'+(sub?'<div class="cmNote">'+sub+'</div>':''):'';
+  return '<div class="cmCard"><h2>Temporada finalizada · Primera Nacional</h2>'+row('🏆 CAMPEÓN · 1.º ASCENSO',P.champ,'Subcampeón: <b>'+nm(P.runnerUp)+'</b>')+row('⬆️ GANADOR DEL REDUCIDO · 2.º ASCENSO',P.asc2,'')+
+   '<div class="cmNote">'+(me(P.champ)?'¡Ganaste la Final y ascendiste a Primera División!':me(P.asc2)?'¡Ganaste el Reducido y ascendiste a Primera División!':'Tu equipo no ascendió en esta temporada.')+'</div>'+
+   '<div class="cmNote">Al pasar a la siguiente temporada se simula la Primera División: descienden los 2 últimos de su Tabla Anual y ascienden el Campeón de la Final y el ganador del Reducido.</div>'+
+   '<div class="cmRow">'+nextBtn('cmBig')+'<button id="cmNewSeason" class="cmBig red" type="button">🆕 Nueva carrera</button></div></div>';
+ }
  function outHtml(){
+  if(isBN())return outHtmlBN();
   const msg=S.po.out==='nq'?'No clasificaste a los Playoffs':'Quedaste eliminado en '+STAGE_LBL[S.po.out];
   return '<div class="cmCard"><h2>'+E(msg)+'</h2><div class="cmNote">'+(S.po.out==='nq'?'Terminaste la fase regular fuera de los 8 primeros de tu zona.':'Tu camino en el torneo terminó acá.')+' Podés simular lo que resta de los Playoffs o empezar otra temporada.</div>'+
-   '<div class="cmRow"><button id="cmSimAll" class="cmBtn" type="button">⏩ Simular Playoffs restantes</button><button id="cmNewSeason" class="cmBtn red" type="button">🆕 Nueva temporada</button></div></div>';
+   annualNote()+'<div class="cmRow"><button id="cmSimAll" class="cmBtn" type="button">⏩ Simular Playoffs restantes</button>'+(S.torneo==='clausura'?nextBtn('cmBtn'):'')+'<button id="cmNewSeason" class="cmBtn red" type="button">🆕 Nueva carrera</button></div></div>';
  }
  function doneHtml(){
+  if(isBN())return doneHtmlBN();
   const t=S.trofeo,ap=S.aperturaChampionId,cl=S.clausuraChampionId;
   const nm=id=>id?E(T(id).name):'—';
   const hist='<div class="cmNote">🥈 Apertura: <b>'+nm(ap)+'</b> (sub: '+nm(S.aperturaRunnerUpId)+') · Clausura: <b>'+nm(cl)+'</b> (sub: '+nm(S.clausuraRunnerUpId)+')</div>';
-  if(!t)return '<div class="cmCard"><h2>Temporada finalizada</h2>'+hist+'<button id="cmNewSeason" class="cmBig" type="button">🆕 Nueva temporada</button></div>';
+  if(!t)return '<div class="cmCard"><h2>Temporada finalizada</h2>'+hist+annualNote()+'<div class="cmRow">'+nextBtn('cmBig')+'<button id="cmNewSeason" class="cmBig red" type="button">🆕 Nueva carrera</button></div></div>';
   const side=id=>'<div class="tm'+(id===S.teamId?' me':'')+'"><span class="cmBd">'+badge(T(id))+'</span>'+E(T(id).name)+'<small>'+(id===ap&&id===cl?'BICAMPEÓN':id===ap?'CAMPEÓN APERTURA':id===cl?'CAMPEÓN CLAUSURA':'SUBCAMPEÓN')+'</small></div>';
   const vs='<div class="cmVs">'+side(t.h)+'<div class="mid">VS</div>'+side(t.a)+'</div>';
-  if(!t.done)return '<div class="cmCard"><h2>'+cupSvg('#facc15',46)+' TROFEO DE CAMPEONES</h2>'+vs+'<div class="cmNote">Partido único: si empatan, tiempo extra y penales. Tu equipo no participa.</div>'+hist+'<div class="cmRow"><button id="cmSimAll" class="cmBtn" type="button">⏩ Simular Trofeo de Campeones</button><button id="cmNewSeason" class="cmBig red" type="button">🆕 Nueva temporada</button></div></div>';
+  if(!t.done)return '<div class="cmCard"><h2>'+cupSvg('#facc15',46)+' TROFEO DE CAMPEONES</h2>'+vs+'<div class="cmNote">Partido único: si empatan, tiempo extra y penales. Tu equipo no participa.</div>'+hist+annualNote()+'<div class="cmRow"><button id="cmSimAll" class="cmBtn" type="button">⏩ Simular Trofeo de Campeones</button>'+nextBtn('cmBtn')+'<button id="cmNewSeason" class="cmBig red" type="button">🆕 Nueva carrera</button></div></div>';
   const c=T(t.w);
   return '<div class="cmCard"><h2>Temporada finalizada</h2>'+vs+'<div class="cmVs"><div class="tm"><span class="cmBd">'+badge(c)+'</span>🏆 Trofeo de Campeones: '+E(c.name)+'</div></div><div class="cmNote">Resultado: '+gmScore(t)+'</div>'+
-   '<div class="cmNote">'+(t.w===S.teamId?'¡Ganaste el Trofeo de Campeones!':'Tu equipo no levantó el Trofeo de Campeones.')+'</div>'+hist+
-   '<button id="cmNewSeason" class="cmBig" type="button">🆕 Nueva temporada</button></div>';
+   '<div class="cmNote">'+(t.w===S.teamId?'¡Ganaste el Trofeo de Campeones!':'Tu equipo no levantó el Trofeo de Campeones.')+'</div>'+hist+annualNote()+
+   '<div class="cmRow">'+nextBtn('cmBig')+'<button id="cmNewSeason" class="cmBig red" type="button">🆕 Nueva carrera</button></div></div>';
  }
  function gmScore(m){return E(T(m.h).shortName)+' '+m.hg+' - '+m.ag+' '+E(T(m.a).shortName)+(m.pen?' ('+m.pen.h+'-'+m.pen.a+' p)':'')}
 
+
+ /* ---- Tabla Anual (Primera División): Apertura + Clausura = 32 fechas · los 2 últimos descienden ---- */
+ function injectAnualCSS(){
+  if($('cmAnualCSS'))return;
+  const s=document.createElement('style');s.id='cmAnualCSS';
+  s.textContent='.cmT tbody tr.rel td{background:#4a1519;color:#fecaca}.cmT tbody tr.rel td:first-child{box-shadow:inset 4px 0 #ef4444;color:#fca5a5;font-weight:900}.cmT tbody tr.rel td.pt{color:#fecaca}.cmT tbody tr.rel.me td{background:#b91c1c;color:#fff}.cmT tbody tr.cutR td{border-bottom:2px dashed #ef4444}';
+  document.head.appendChild(s);
+ }
+ function tabAnual(){
+  injectAnualCSS();
+  const rows=annualRows(),n=rows.length;
+  const trs=rows.map((r,i)=>'<tr class="'+(i>=n-2?'rel':'')+(i===n-3?' cutR':'')+(r.id===S.teamId?' me':'')+'"><td>'+(i+1)+'</td><td class="cl"><span class="cmBd">'+badge(T(r.id))+'</span>'+E(T(r.id).name)+'</td><td>'+r.pj+'</td><td>'+r.g+'</td><td>'+r.e+'</td><td>'+r.p+'</td><td>'+r.gf+'</td><td>'+r.gc+'</td><td>'+(r.gf-r.gc>0?'+':'')+(r.gf-r.gc)+'</td><td class="pt">'+r.pts+'</td></tr>').join('');
+  const me=rows.findIndex(r=>r.id===S.teamId)+1;
+  return '<div class="cmCard"><h2>📆 Tabla Anual · Apertura + Clausura</h2><div class="cmNote">Suma de puntos de las 32 fechas ('+(S.torneo==='clausura'?'Apertura completo + Clausura en curso':'Apertura en curso; se completa con el Clausura')+'). 🟥 Los 2 últimos puestos descienden a la Primera Nacional. Tu club: <b>'+me+'º</b> de '+n+'.</div>'+
+   '<div class="cmScroll"><table class="cmT"><thead><tr><th>Pos</th><th style="text-align:left">Club</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
+   '<div class="cmNote">Desempate: Puntos → Diferencia de Gol → Goles a Favor. Al cerrar el año ascienden a Primera División el Campeón de la Final y el ganador del Reducido de la Primera Nacional.</div></div>';
+ }
+ function annualNote(){
+  if(isBN()||!S||S.torneo!=='clausura'||!(S.phase==='playoffs'||S.phase==='trofeo'||S.phase==='done'))return '';
+  const d=annualRows().slice(-2).reverse();
+  return '<div class="cmNote">📆 Tabla Anual · descienden a la Primera Nacional: '+d.map(x=>'<b style="color:#f87171">'+E(T(x.id).name)+'</b>').join(' y ')+(d.some(x=>x.id===S.teamId)?' · <b>¡Tu club desciende!</b>':'')+'. Ascienden el Campeón de la Final y el ganador del Reducido de la Primera Nacional.</div>';
+ }
  function tableHtml(z){
   const rows=stats(S.zones[z]);
   return '<div class="cmCard"><h2>Zona '+z+'</h2><div class="cmScroll"><table class="cmT"><thead><tr><th>Pos</th><th style="text-align:left">Club</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr></thead><tbody>'+
    rows.map((r,i)=>'<tr class="'+(i<8?'q':'')+(i===7?' cut':'')+(r.id===S.teamId?' me':'')+'"><td>'+(i+1)+'</td><td class="cl"><span class="cmBd">'+badge(T(r.id))+'</span>'+E(T(r.id).name)+'</td><td>'+r.pj+'</td><td>'+r.g+'</td><td>'+r.e+'</td><td>'+r.p+'</td><td>'+r.gf+'</td><td>'+r.gc+'</td><td>'+(r.gf-r.gc>0?'+':'')+(r.gf-r.gc)+'</td><td class="pt">'+r.pts+'</td></tr>').join('')+
    '</tbody></table></div></div>';
  }
- function posHtml(){return '<div class="cmZ">'+tableHtml('A')+tableHtml('B')+'</div><div class="cmNote">🟩 Los 8 primeros de cada zona clasifican a los Playoffs · Desempate: Puntos → Diferencia de Gol → Goles a Favor.</div>'}
+ function posHtml(){return '<div class="cmZ">'+tableHtml('A')+tableHtml('B')+'</div><div class="cmNote">'+(isBN()?'🟩 1.º de cada zona → Final por el 1.º Ascenso · 2.º al 8.º → Reducido por el 2.º Ascenso ·':'🟩 Los 8 primeros de cada zona clasifican a los Playoffs ·')+' Desempate: Puntos → Diferencia de Gol → Goles a Favor.</div>'}
  /* ---- Rankings de la liga (Tabla de Posiciones) ---- */
  const RKS=[['pos','Posiciones'],['g','Goleadores'],['a','Asistidores'],['gk','Arqueros'],['def','Defensores']];
  let RK='pos';
@@ -939,7 +1260,15 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    '<rect x="19" y="50" width="26" height="8" rx="2.5" fill="#facc15" stroke="#0a1f3d" stroke-width="3.5"/></svg>';
  }
  /* Cruces proyectados de Octavos según la tabla actual (1º A vs 8º B … / 1º B vs 8º A …), igual que endRegular() */
+ function projInicial(){
+  const qA=stats(S.zones.A).slice(0,8).map(r=>r.id),qB=stats(S.zones.B).slice(0,8).map(r=>r.id),o=[];
+  const p=(h,a,tag)=>({h,a,hg:null,ag:null,done:false,w:null,pen:null,proj:true,tag,neutral:tag==='F1'});
+  o.push(p(qA[0],qB[0],'F1'));
+  for(let i=1;i<8;i++){const a=qA[i],b=qB[8-i];o.push((i+1)<=(9-i)?p(a,b,'R1'):p(b,a,'R1'))}
+  return o;
+ }
  function projOctavos(){
+  if(isBN())return projInicial();
   const qA=stats(S.zones.A).slice(0,8).map(r=>r.id),qB=stats(S.zones.B).slice(0,8).map(r=>r.id),o=[];
   for(let i=0;i<4;i++)o.push({h:qA[i],a:qB[7-i],hg:null,ag:null,done:false,w:null,pen:null,proj:true});
   for(let i=0;i<4;i++)o.push({h:qB[i],a:qA[7-i],hg:null,ag:null,done:false,w:null,pen:null,proj:true});
@@ -949,9 +1278,9 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   let cols='';
   STAGES.forEach(sg=>{
    let rd=S.po&&S.po.rounds[sg]||[];
-   const proj=sg==='octavos'&&!rd.length&&S.phase==='regular';
+   const proj=sg===STAGES[0]&&!rd.length&&S.phase==='regular';
    if(proj)rd=projOctavos();
-   const cnt={octavos:8,cuartos:4,semis:2,final:1}[sg];
+   const cnt={octavos:8,inicial:8,cuartos:4,semis:2,final:1}[sg];
    let ms='';
    if(rd.length){
     ms=rd.map(m=>{const mine=m.h===S.teamId||m.a===S.teamId,line=(id,g,isH)=>{const w=m.done&&m.w===id;return '<div class="l'+(w?' w':'')+'"><span><span class="cmBd">'+badge(T(id))+'</span>'+E(T(id).shortName)+'</span><b>'+(m.done?g+((m.pen)?' ('+(isH?m.pen.h:m.pen.a)+')':''):'')+'</b></div>'};
@@ -978,27 +1307,28 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   const C=S.copa;
   let cols='';
   COPA_ST.forEach(sg=>{
-   const rd=C.rounds[sg]||[],cnt={dieciseisavos:14,octavos:8,cuartos:4,semi:2,final:1}[sg];
+   const rd=C.rounds[sg]||[],cnt={treintaidosavos:32,dieciseisavos:16,octavos:8,cuartos:4,semi:2,final:1}[sg];
    let ms='';
    if(rd.length){
     ms=rd.map(m=>{const mine=m.h===S.teamId||m.a===S.teamId,line=(id,g,isH)=>{const w=m.done&&m.w===id;return '<div class="l'+(w?' w':'')+'"><span><span class="cmBd">'+badge(T(id))+'</span>'+E(T(id).shortName)+'</span><b>'+(m.done?g+((m.pen)?' ('+(isH?m.pen.h:m.pen.a)+')':''):'')+'</b></div>'};
      return '<div class="bm'+(mine?' me':'')+'">'+line(m.h,m.hg,true)+line(m.a,m.ag,false)+'<div style="font-size:.62rem;opacity:.75;text-align:center">'+(m.venue?'🏟️ '+E(T(m.venue).shortName):'')+'</div></div>'}).join('');
    }else for(let i=0;i<cnt;i++)ms+='<div class="bm"><div class="l"><span>A definir</span></div><div class="l"><span>A definir</span></div></div>';
-   const byeTxt=sg==='dieciseisavos'?'<div class="cmNote" style="font-size:.7rem">Pasan directo a Octavos: <b>'+C.byes.map(id=>E(T(id).shortName)).join(' · ')+'</b></div>':'';
+   const byeTxt=(sg==='treintaidosavos'&&C.byes.length)?'<div class="cmNote" style="font-size:.7rem">Pasan directo a los 16avos: <b>'+C.byes.map(id=>E(T(id).shortName)).join(' · ')+'</b></div>':'';
    cols+='<div class="col"><h4>'+(sg==='final'?copaArgSvg(26):'')+COPA_LBL[sg]+'</h4>'+ms+byeTxt+'</div>';
   });
-  return '<div class="cmScroll"><div class="cmBr" style="grid-template-columns:repeat(5,minmax(170px,1fr))">'+cols+'</div></div>';
+  return '<div class="cmScroll"><div class="cmBr" style="grid-template-columns:repeat(6,minmax(170px,1fr))">'+cols+'</div></div>';
  }
  function tabCopa(){
   const C=S.copa;if(!C)return '<div class="cmCard"><h2>Copa Argentina</h2><div class="cmNote">Sin datos de Copa.</div></div>';
-  const stg=S.copaDue?'¡Te toca jugar los '+COPA_LBL[S.copaDue]+'! Andá a Próximo Partido.':C.done?'Copa finalizada · Campeón: '+E(nameOf(C.champ))+' (subcampeón: '+E(nameOf(C.runnerUp))+')':C.out?'Tu equipo quedó eliminado en '+COPA_LBL[C.out]+'.':C.next===0?'El sorteo se revela antes de los Dieciseisavos.':'Seguís en carrera.';
-  const cal=COPA_PTS.map(pt=>COPA_LBL[pt[2]]+' → tras Fecha '+pt[1]+' del '+(pt[0]==='apertura'?'Apertura':'Clausura')).join(' · ');
-  return '<div class="cmCard"><h2>'+copaArgSvg(40)+' COPA ARGENTINA</h2><div class="cmNote">30 clubes de Primera · 28 juegan Dieciseisavos y 2 clasifican directo a Octavos · partido único en cancha neutral · penales directos si empatan.</div>'+
+  const stg=S.copaDue?'¡Te toca jugar los '+COPA_LBL[S.copaDue]+'! Andá a Próximo Partido.':C.done?'Copa finalizada · Campeón: '+E(nameOf(C.champ))+' (subcampeón: '+E(nameOf(C.runnerUp))+')':C.out?'Tu equipo quedó eliminado en '+COPA_LBL[C.out]+'.':C.next===0?'El sorteo se revela antes de los 32avos de Final.':'Seguís en carrera.';
+  const cal=copaPts().map(pt=>COPA_LBL[pt[2]]+' → tras Fecha '+pt[1]+(pt[0]==='bnacional'?'':' del '+copaTn(pt[0]))).join(' · ');
+  return '<div class="cmCard"><h2>'+copaArgSvg(40)+' COPA ARGENTINA</h2><div class="cmNote">'+(C.np||30)+' clubes de Primera División + '+(C.nb||34)+' de la Primera Nacional · cuadro de 64 equipos desde 32avos de Final · partido único en cancha neutral · penales directos si empatan.</div>'+
    '<div class="cmWarn">'+stg+'</div>'+copaBracketHtml()+'<div class="cmNote">📅 '+cal+'</div></div>';
  }
  /* ---- Fixture / Playoffs en cuadrícula de tarjetas compactas ---- */
  let FXV=null,FXK='',CALALL=false;
- const FXS={octavos:'Octavos',cuartos:'Cuartos',semis:'Semis',final:'Final'};
+ const FXS_P={octavos:'Octavos',cuartos:'Cuartos',semis:'Semis',final:'Final'},FXS_B={inicial:'Final + 1.ª Fase',cuartos:'Cuartos',semis:'Semis',final:'Final Red.'};
+ let FXS=FXS_P;
  const lvPill=(c,t)=>'<i class="cmLv '+c+'">'+t+'</i>';
  /* tarjeta compacta: escudo + sigla + L/V (o sede neutral) + resultado/estado + fecha */
  function gcHtml(m,head,cur,proj){
@@ -1015,51 +1345,73 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  function tabFixture(){
   const key=S.torneo+'|'+S.phase+'|'+S.fecha+'|'+(S.po&&S.po.stage||'');
   if(key!==FXK){FXK=key;FXV=null}
-  const opts=[];for(let n=1;n<=16;n++)opts.push(['f'+n,'F'+n]);STAGES.forEach(sg=>opts.push([sg,FXS[sg]]));
-  const def=S.phase==='regular'?'f'+Math.min(16,S.fecha):(S.phase==='playoffs'&&S.po)?S.po.stage:S.po?'final':'f16';
+  const opts=[];for(let n=1;n<=NF();n++)opts.push(['f'+n,'F'+n]);STAGES.forEach(sg=>opts.push([sg,FXS[sg]]));
+  const def=S.phase==='regular'?'f'+Math.min(NF(),S.fecha):(S.phase==='playoffs'&&S.po)?S.po.stage:S.po?'final':'f'+NF();
   if(!FXV||!opts.some(o=>o[0]===FXV))FXV=def;
   const isF=/^f\d+$/.test(FXV),mineN=m=>+(m.h===S.teamId||m.a===S.teamId);
   let cards='',ttl='';
   if(isF){
    const n=+FXV.slice(1),fx=(S.fixture[n-1]||[]).slice().sort((a,b)=>mineN(b)-mineN(a));
-   ttl='Fase regular · Fecha '+n+' de 16'+(n===16?' · Interzonal':'');
+   ttl='Fase regular · Fecha '+n+' de '+NF()+(!isBN()&&n===16?' · Interzonal':'');
    cards=fx.map(m=>gcHtml(m,'Fecha '+n,S.phase==='regular'&&n===S.fecha,false)).join('');
   }else{
-   let rd=S.po&&S.po.rounds[FXV]||[];const proj=FXV==='octavos'&&!rd.length&&S.phase==='regular';
+   let rd=S.po&&S.po.rounds[FXV]||[];const proj=FXV===STAGES[0]&&!rd.length&&S.phase==='regular';
    if(proj)rd=projOctavos();
-   ttl='Playoffs · '+STAGE_LBL[FXV]+(proj?' (proyección)':'');
-   if(rd.length)cards=rd.slice().sort((a,b)=>mineN(b)-mineN(a)).map(m=>gcHtml(m,STAGE_LBL[FXV],S.phase==='playoffs'&&S.po.stage===FXV,proj)).join('');
-   else{const cnt={octavos:8,cuartos:4,semis:2,final:1}[FXV];for(let i=0;i<cnt;i++)cards+='<div class=\"cmGc\"><div class=\"gh\"><span>'+E(STAGE_LBL[FXV])+'</span><span></span></div><div class=\"r\"><span class=\"cmBd q\">?</span><b>A definir</b></div><div class=\"r\"><span class=\"cmBd q\">?</span><b>A definir</b></div><div class=\"gf\"><span>Por jugar</span><span></span></div></div>'}
+   ttl=(isBN()?'Final 1.º Ascenso / Reducido · ':'Playoffs · ')+STAGE_LBL[FXV]+(proj?' (proyección)':'');
+   if(rd.length)cards=rd.slice().sort((a,b)=>mineN(b)-mineN(a)).map(m=>gcHtml(m,mLbl(m,FXV),S.phase==='playoffs'&&S.po.stage===FXV,proj)).join('');
+   else{const cnt={octavos:8,inicial:8,cuartos:4,semis:2,final:1}[FXV];for(let i=0;i<cnt;i++)cards+='<div class=\"cmGc\"><div class=\"gh\"><span>'+E(STAGE_LBL[FXV])+'</span><span></span></div><div class=\"r\"><span class=\"cmBd q\">?</span><b>A definir</b></div><div class=\"r\"><span class=\"cmBd q\">?</span><b>A definir</b></div><div class=\"gf\"><span>Por jugar</span><span></span></div></div>'}
   }
   const chips=opts.map(o=>{const done=/^f\d+$/.test(o[0])?(S.fixture[+o[0].slice(1)-1]||[]).every(m=>m.done):!!(S.po&&S.po.rounds[o[0]]&&S.po.rounds[o[0]].length&&S.po.rounds[o[0]].every(m=>m.done));return '<button type=\"button\" class=\"cmChip'+(FXV===o[0]?' on':'')+(done?' dn':'')+'\" data-fx=\"'+o[0]+'\">'+o[1]+'</button>'}).join('');
   return '<div class=\"cmCard\"><h2>'+tnName()+' · '+ttl+'</h2><div class=\"cmChips\">'+chips+'</div><div class=\"cmGrid\">'+cards+'</div>'+
-   (!S.po?'<div class=\"cmNote\">Octavos proyectados según la tabla actual; se confirman al terminar la fecha 16 (clasifican los 8 primeros de cada zona).</div>':'')+
+   (!S.po?'<div class=\"cmNote\">'+(isBN()?'Cruces proyectados según la tabla actual; se confirman al terminar la fecha 17 (1.º de cada zona: Final por el 1.º Ascenso · 2.º al 8.º: Reducido).':'Octavos proyectados según la tabla actual; se confirman al terminar la fecha 16 (clasifican los 8 primeros de cada zona).')+'</div>':'')+
    (S.po&&S.po.champ?'<div class=\"cmWarn\">🏆 Campeón: <b>'+E(nameOf(S.po.champ))+'</b></div>':'')+'</div>';
  }
 
  /* ---- Calendario (próximos compromisos del club) + vitrina Campeones de la Temporada ---- */
- const CERT={apertura:'Torneo Apertura',clausura:'Torneo Clausura',copa:'Copa Argentina',trofeo:'Trofeo de Campeones'};
- const certIcon=(k,sz)=>k==='copa'?copaArgSvg(sz):k==='trofeo'?cupSvg('#facc15',sz):cupSvg('#cbd5e1',sz,true);
+ const CERT={apertura:'Torneo Apertura',clausura:'Torneo Clausura',copa:'Copa Argentina',trofeo:'Trofeo de Campeones',bnacional:'Primera Nacional',reducido:'Reducido · 2.º Ascenso'};
+ const certIcon=(k,sz)=>k==='bnacional'||k==='reducido'?cupSvg('#cbd5e1',sz,false):k==='copa'?copaArgSvg(sz):k==='trofeo'?cupSvg('#facc15',sz):cupSvg('#cbd5e1',sz,true);
  function userFxM(n,inv){
   const f=S.fixture[n-1],m=f&&f.find(x=>x.h===S.teamId||x.a===S.teamId);if(!m)return null;
   const bh=m.h===S.teamId,home=inv?!bh:bh;
   return{rival:bh?m.a:m.h,loc:home?'L':'V',kind:m.kind,done:m.done};
  }
- function calItems(){
-  const out=[],C=S.copa,tid=S.teamId;
-  if(!S||!(S.phase==='regular'||S.phase==='playoffs'||S.phase==='trofeo'))return out;
-  const copaOn=!!C&&!C.done&&!C.out;
-  const copaItem=i=>{
+
+ function copaItemFn(out){
+  const C=S.copa,tid=S.teamId;
+  return i=>{
    const stg=COPA_ST[i];let rival=null,venue=null,note='';
    const known=C.rounds[stg]&&C.rounds[stg].length&&!(i===0&&C.next===0);
    if(known){
     const m=C.rounds[stg].find(x=>x.h===tid||x.a===tid);
     if(m){rival=m.h===tid?m.a:m.h;venue=m.venue}
-    else if(i===0&&C.byes.indexOf(tid)>=0)note='Libre: clasificado directo a Octavos';
+    else if(i===0&&C.byes.indexOf(tid)>=0)note='Libre: clasificado directo a los 16avos';
    }else if(i===0)note='Sorteo pendiente';
    else note='Si avanzás de ronda';
    out.push({ic:'copa',title:CERT.copa,sub:COPA_LBL[stg],rival,loc:'N',venue,note});
   };
+ }
+ function calItemsBN(){
+  const out=[],tid=S.teamId,ic='bnacional',ttl=CERT.bnacional,C=S.copa,copaOn=!!C&&!C.done&&!C.out,copaItem=copaOn?copaItemFn(out):null;
+  if(S.phase==='regular'){
+   if(copaOn&&S.copaDue)copaItem(COPA_ST.indexOf(S.copaDue));
+   for(let n=S.fecha;n<=17;n++){const u=userFxM(n,false);if(u&&!u.done)out.push({ic,title:ttl,sub:'Fecha '+n+' de 17',rival:u.rival,loc:u.loc,venue:null,note:''});if(copaOn)COPA_PTS_B.forEach((pt,i)=>{if(pt[1]===n&&i>=C.next)copaItem(i)})}
+   out.push({ic,title:ttl,sub:'Final por el 1.º Ascenso',rival:null,loc:'N',venue:null,note:'Si terminás 1.º de tu zona'});
+   out.push({ic,title:ttl,sub:'Reducido · 1.ª Fase',rival:null,loc:'',venue:null,note:'Si terminás 2.º al 8.º de tu zona'});
+  }else if(S.phase==='playoffs'&&S.po&&!S.po.out){
+   STAGES.forEach((sg,si)=>{
+    if(si<STAGES.indexOf(S.po.stage))return;
+    const m=(S.po.rounds[sg]||[]).find(x=>!x.done&&(x.h===tid||x.a===tid));
+    out.push({ic,title:ttl,sub:m?mLbl(m,sg):stgLbl(sg),rival:m?(m.h===tid?m.a:m.h):null,loc:m?(m.neutral?'N':m.h===tid?'L':'V'):(sg==='final'?'N':''),venue:null,note:m?'':'Si avanzás de ronda'});
+   });
+  }
+  return out;
+ }
+ function calItems(){
+  const out=[],C=S.copa,tid=S.teamId;
+  if(!S||!(S.phase==='regular'||S.phase==='playoffs'||S.phase==='trofeo'))return out;
+  if(isBN())return calItemsBN();
+  const copaOn=!!C&&!C.done&&!C.out;
+  const copaItem=copaItemFn(out);
   if(copaOn&&S.copaDue)copaItem(COPA_ST.indexOf(S.copaDue));
   const tns=S.phase==='trofeo'?[]:S.torneo==='apertura'?['apertura','clausura']:['clausura'];
   tns.forEach(tn=>{
@@ -1091,7 +1443,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  }
  function vitrinaHtml(){
   const C=S.copa,tr=S.trofeo;
-  const L=[['apertura',S.aperturaChampionId],['copa',C&&C.done?C.champ:null],['clausura',S.clausuraChampionId],['trofeo',tr&&tr.done?tr.w:null]];
+  const L=isBN()?[['bnacional',S.po&&S.po.champ||null],['reducido',S.po&&S.po.asc2||null],['copa',C&&C.done?C.champ:null]]:[['apertura',S.aperturaChampionId],['copa',C&&C.done?C.champ:null],['clausura',S.clausuraChampionId],['trofeo',tr&&tr.done?tr.w:null]];
   return '<div class=\"cmCard\"><h2>🏆 Campeones de la Temporada</h2><div class=\"cmVit\">'+L.map(x=>{
    const id=x[1],t=id?T(id):null,mine=!!id&&id===S.teamId;
    return '<div class=\"cmVt'+(id?' got':'')+(mine?' me':'')+'\"><span class=\"ti\">'+certIcon(x[0],46)+'</span><b>'+E(CERT[x[0]])+'</b>'+(t?'<span class=\"cmBd\">'+badge(t)+'</span><span class=\"cn2\">'+E(t.name)+'</span>'+(mine?'<em>¡Tu club!</em>':''):'<span class=\"pd\">Por definir</span>')+'</div>';
@@ -1255,6 +1607,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  function pickMatchDiff(rivalId){
   if(S.phase==='playoffs'||S.phase==='trofeo')return 'hard';
   if(S.phase!=='regular')return 'normal';
+  if(!S.zonaDe[rivalId]){const v=S.str[rivalId]||1,rr=Math.random();return v>=1.1?(rr<.8?'hard':'normal'):v>=.95?(rr<.2?'hard':rr<.85?'normal':'easy'):(rr<.1?'hard':rr<.8?'normal':'easy')} /* rival de la otra categoría (Copa): por fuerza */
   const z=S.zonaDe[rivalId],rows=stats(S.zones[z]);
   let pos;
   if(rows.every(r=>r.pts===0)){
@@ -1269,7 +1622,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  /* Banderas globales para el motor (index.html): finales y estadio dividido */
  function resetMatchFlags(){window._isFinalMatch=false;window._isSplitStadium=false}
  function setMatchFlags(m){
-  const copa=isCopaM(m),poFinal=!copa&&!!S&&S.phase==='playoffs'&&!!S.po&&S.po.stage==='final',trofeo=!copa&&!!S&&S.phase==='trofeo';
+  const copa=isCopaM(m),poFinal=!copa&&!!S&&S.phase==='playoffs'&&!!S.po&&(S.po.stage==='final'||(isBN()&&m&&m.tag==='F1')),trofeo=!copa&&!!S&&S.phase==='trofeo';
   window._isFinalMatch=!!((copa&&S.copaDue==='final')||poFinal||trofeo);
   window._isSplitStadium=!!(copa||poFinal||trofeo);
  }
@@ -1289,7 +1642,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   const mine=ids.map(id=>{const i=S.squad.info[id],b=mk(i.name,String(i.number),team,true);b.pos=i.pos;b.cSlot=true;b.cId=id;b.stam=i.stam;b.cInj=false;return b});
   const rv=[];for(let i=0;i<6;i++)rv.push(mk('','',rteam,true));
   /* 4) el rival conserva siempre su dorsal oficial: NO se le pasa el dorsal del usuario (la reasignación por duplicado solo rige en tu equipo, vía resolverPlantelCancha) */
-  try{D.aplicarPlantelABots(rv,rvT.id,null)}catch(e){D.aplicarPlantelABots(rv,rvT.id,-1)}
+  try{ownerOf(rvT.id).aplicarPlantelABots(rv,rvT.id,null)}catch(e){ownerOf(rvT.id).aplicarPlantelABots(rv,rvT.id,-1)}
   rv.forEach(b=>{b.name=b.nick||b.name;b.num=String(b.num)});
   rv.forEach(b=>initRivalStam(b,rnd(62,100),0));
   G.players=[me].concat(mine,rv);
@@ -1395,7 +1748,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  const CPU_MAX_SUBS=3,CPU_STAM_MIN=35;
  /* banco rival: plantel del club menos los 6 que están en cancha (hasta 9 suplentes) */
  function rivalBench(teamId,onField){
-  let r;try{r=D.resolverPlantelCancha(teamId,null)}catch(e){try{r=D.resolverPlantelCancha(teamId,-1)}catch(er){return[]}}
+  let r;try{r=ownerOf(teamId).resolverPlantelCancha(teamId,null)}catch(e){try{r=ownerOf(teamId).resolverPlantelCancha(teamId,-1)}catch(er){return[]}}
   const used=p=>onField.some(b=>String(b.num)===String(p.number)||b.name===p.name);
   return r.starters.concat(r.subs).filter(p=>!used(p)).slice(0,9).map(p=>({name:p.name,number:p.number,pos:p.pos}));
  }
@@ -1684,7 +2037,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
    c.fillStyle=col;c.fill(bd);st('#000',4);c.stroke(bd);
    st(hi,3);c.stroke(new Path2D('M23 10v14c0 6 3 11 7 13'));
    if(gold){c.fillStyle='#000';c.fill(new Path2D('M32 15l2.4 5 5.4.6-4 3.7 1.1 5.3-4.9-2.7-4.9 2.7 1.1-5.3-4-3.7 5.4-.6z'))}
-   else{c.fillStyle='#000';c.font='900 9px Arial,sans-serif';c.textAlign='center';c.textBaseline='alphabetic';c.fillText('LPF',32,26)}
+   else{c.fillStyle='#000';c.font='900 9px Arial,sans-serif';c.textAlign='center';c.textBaseline='alphabetic';c.fillText(type==='nac'?'PN':'LPF',32,26)}
    c.fillStyle=dk;c.fillRect(28,42,8,8);st('#000',3);c.strokeRect(28,42,8,8);
    campRR(c,19,50,26,8,2.5);c.fillStyle=col;c.fill();st('#000',3.5);c.stroke();
   }
@@ -1724,9 +2077,9 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
  function startCampScene(cv,it){
   stopCampScene();
   const t=T(it.id),kit=t.kitHome||{c1:'#1d4ed8',c2:'#facc15',n:1},c1=kit.c1||'#1d4ed8',c2=kit.c2||'#facc15';
-  const TNAME={apertura:'TORNEO APERTURA',clausura:'TORNEO CLAUSURA',copa:'COPA ARGENTINA',trofeo:'TROFEO DE CAMPEONES'};
+  const TNAME={apertura:'TORNEO APERTURA',clausura:'TORNEO CLAUSURA',copa:'COPA ARGENTINA',trofeo:'TROFEO DE CAMPEONES',bnacional:'PRIMERA NACIONAL'};
   const line1='CAMPEÓN '+(TNAME[it.torneo]||'TORNEO'),line2=String(t.name||'').toLocaleUpperCase('es');
-  const cupType=it.torneo==='trofeo'?'gold':it.torneo==='copa'?'copa':'lpf';
+  const cupType=it.torneo==='trofeo'?'gold':it.torneo==='copa'?'copa':it.torneo==='bnacional'?'nac':'lpf';
   const q=S.squad,nums=[];
   q.starters.forEach(id=>{const p=q.info[id];if(p)nums.push(String(p.number))});
   q.bench.forEach(id=>{const p=q.info[id];if(p&&nums.length<5)nums.push(String(p.number))});
@@ -1978,12 +2331,16 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   let h='';
   if(it.k==='intro'){
    const cl=it.torneo==='clausura';
-   h='<div class="cmTc">'+cupSvg('#cbd5e1',84,true)+'<h1>🏆 '+TN_LBL[it.torneo]+'</h1><p>'+(cl?'Mismas zonas y mismos rivales que en el Apertura, con todas las localías invertidas.'+(it.prev?'<br>Campeón del Apertura: <b>'+E(T(it.prev).name)+'</b>':''):'16 fechas en la Zona '+E(S.myZone)+' y Playoffs: los 8 primeros de cada zona clasifican.')+'</p><button id="cmTorneoBtn" type="button">Comenzar Torneo</button></div>';
+   h='<div class="cmTc">'+cupSvg('#cbd5e1',84,it.torneo!=='bnacional')+'<h1>🏆 '+TN_LBL[it.torneo]+'</h1><p>'+(cl?'Mismas zonas y mismos rivales que en el Apertura, con todas las localías invertidas.'+(it.prev?'<br>Campeón del Apertura: <b>'+E(T(it.prev).name)+'</b>':''):(it.torneo==='bnacional'?'17 fechas a una rueda en la Zona '+E(S.myZone)+'. El 1.º de cada zona juega la Final por el 1.º Ascenso; del 2.º al 8.º juegan el Reducido por el 2.º Ascenso a Primera División.':'16 fechas en la Zona '+E(S.myZone)+' y Playoffs: los 8 primeros de cada zona clasifican.'))+'</p><button id="cmTorneoBtn" type="button">Comenzar Torneo</button></div>';
   }else if(it.k==='sorteo'&&S.copa){
-   const C=S.copa,r=C.rounds.dieciseisavos,um=r.find(m=>m.h===S.teamId||m.a===S.teamId);
+   const C=S.copa,r=C.rounds.treintaidosavos,um=r.find(m=>m.h===S.teamId||m.a===S.teamId);
    const mine=um?(um.h===S.teamId?um.a:um.h):null,sg=id=>'<b>'+E(T(id).shortName)+'</b>';
-   const rv=mine?'<p><span class="cmBd" style="display:block;width:72px;height:72px;margin:0 auto 4px">'+badge(T(mine))+'</span>Tu rival en Dieciseisavos: <b style="font-size:1.05rem">'+E(T(mine).name)+'</b><br>Sede neutral: <b>'+E(T(um.venue).shortName)+'</b> ('+E(T(um.venue).name)+')</p>':'<p><b>¡Bolilla de privilegio!</b> Tu equipo pasa directo a Octavos de Final.</p>';
-   h='<div class="cmTc">'+copaArgSvg(84)+'<h1>🏆 SORTEO COPA ARGENTINA</h1>'+rv+'<div class="sorteo">'+r.map(m=>'<div class="'+((m.h===S.teamId||m.a===S.teamId)?'me':'')+'">'+sg(m.h)+' vs '+sg(m.a)+' <small>🏟️ '+E(T(m.venue).shortName)+'</small></div>').join('')+'</div><p style="margin:8px 0">Directo a Octavos: '+C.byes.map(sg).join(' · ')+'</p><p>Partido único · penales directos si empatan.</p><button id="cmTorneoBtn" type="button">Continuar</button></div>';
+   const rv=mine?'<p><span class="cmBd" style="display:block;width:72px;height:72px;margin:0 auto 4px">'+badge(T(mine))+'</span>Tu rival en 32avos de Final: <b style="font-size:1.05rem">'+E(T(mine).name)+'</b><br>Sede neutral: <b>'+E(T(um.venue).shortName)+'</b> ('+E(T(um.venue).name)+')</p>':'<p><b>¡Bolilla de privilegio!</b> Tu equipo pasa directo a los 16avos de Final.</p>';
+   h='<div class="cmTc">'+copaArgSvg(84)+'<h1>🏆 SORTEO COPA ARGENTINA</h1>'+rv+'<div class="sorteo">'+r.map(m=>'<div class="'+((m.h===S.teamId||m.a===S.teamId)?'me':'')+'">'+sg(m.h)+' vs '+sg(m.a)+' <small>🏟️ '+E(T(m.venue).shortName)+'</small></div>').join('')+'</div>'+(C.byes.length?'<p style="margin:8px 0">Directo a 16avos: '+C.byes.map(sg).join(' · ')+'</p>':'<p style="margin:8px 0">64 equipos: '+C.np+' de Primera División + '+C.nb+' de Primera Nacional</p>')+'<p>Partido único · penales directos si empatan.</p><button id="cmTorneoBtn" type="button">Continuar</button></div>';
+  }else if(it.k==='move'){
+   const li=(ids,c)=>ids.length?ids.map(id=>'<div style="color:'+c+'"'+(id===S.teamId?' class="me"':'')+'><b>'+E(T(id).name)+'</b></div>').join(''):'<div>—</div>';
+   const mine=it.to!==it.from?(it.to==='primera'?'<p style="color:#15803d"><b>⬆️ ¡Tu club ASCENDIÓ a Primera División!</b></p>':'<p style="color:#b91c1c"><b>⬇️ Tu club DESCENDIÓ a la Primera Nacional.</b></p>'):'<p>Tu club sigue en '+DIVN[it.to]+'.</p>';
+   h='<div class="cmTc gold">'+cupSvg('#facc15',72)+'<h1>ASCENSOS Y DESCENSOS</h1><p>Temporada '+it.year+' · '+DIVN[it.to]+'</p>'+mine+'<div class="sorteo"><div><b>⬆️ Ascienden a Primera División</b></div>'+li(it.up,'#15803d')+'<div style="margin-top:6px"><b>⬇️ Descienden a Primera Nacional</b></div>'+li(it.down,'#b91c1c')+'</div><button id="cmTorneoBtn" type="button">Continuar</button></div>';
   }else if(it.k==='champ'){
    el.classList.add('cmScene');
    if(CAMP&&CAMP.cv&&CAMP.cv.isConnected&&el.contains(CAMP.cv))return; /* la escena ya está en curso */
@@ -2033,7 +2390,7 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   if(!sv){if(ex)ex.remove();return}
   if(ex)return;
   const t=T(sv.teamId),d=document.createElement('div');d.id='cmCont';
-  const tl=sv.torneo==='clausura'?'Clausura · ':'Apertura · ',info=sv.phase==='regular'?tl+'Fecha '+sv.fecha+'/16 · Zona '+sv.myZone:sv.phase==='playoffs'?tl+'Playoffs':sv.phase==='trofeo'?'Trofeo de Campeones':'Temporada finalizada';
+  const bn=sv.division==='bnacional',tl=bn?'Primera Nacional · ':sv.torneo==='clausura'?'Clausura · ':'Apertura · ',info=sv.phase==='regular'?tl+'Fecha '+sv.fecha+'/'+(bn?17:16)+' · Zona '+sv.myZone:sv.phase==='playoffs'?tl+(bn?'Final / Reducido':'Playoffs'):sv.phase==='trofeo'?'Trofeo de Campeones':'Temporada finalizada';
   d.innerHTML='<b>▶ Campaña guardada: '+E(t.name)+'</b><div class="cNote">'+E(sv.player.name)+' (#'+sv.player.num+') · '+info+'. Si iniciás una temporada nueva, se reemplaza la guardada.</div><div class="cmRow"><button type="button" id="cmCont1" class="cmBig">▶ CONTINUAR TEMPORADA</button></div>';
   root.insertBefore(d,root.firstChild);
   $('cmCont1').onclick=()=>{S=loadSave();if(S){openHub('next');flushModals()}};
@@ -2068,17 +2425,43 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   btn.addEventListener('mouseleave',off);btn.addEventListener('blur',off);
  }
 
+ /* ------------------------------------------------------------------
+  Selector de Categoría al iniciar Carrera Nueva: 🏆 Primera División (30) / ⬆️ Primera Nacional (36)
+  El selector de clubes lee window.LIGA_ARGENTINA_DATA: mientras se configura la carrera apunta a la categoría elegida (S.division) y se restaura al empezar o al salir.
+  ------------------------------------------------------------------ */
+ let SWAP=false;
+ function applyDivData(div){if(div==='bnacional'&&DB){window.LIGA_ARGENTINA_DATA=DB;SWAP=true}else{window.LIGA_ARGENTINA_DATA=D1;SWAP=false}}
+ function restoreData(){if(SWAP||window.LIGA_ARGENTINA_DATA!==D1){window.LIGA_ARGENTINA_DATA=D1}SWAP=false}
+ function pickDivision(div){
+  if(div==='bnacional'&&!DB)return;
+  window.CAREER_DIVISION=div;applyDivData(div);
+  try{window.dispatchEvent(new CustomEvent('career:division',{detail:{division:div,data:dataOf(div)}}))}catch(e){}
+  try{if(typeof show==='function')show('career-screen')}catch(e){} /* vuelve a armar la elección de club con los equipos de la categoría */
+  setTimeout(injectDivision,0);
+ }
+ function injectDivision(){
+  const root=$('career-root');if(!root||!DB)return;
+  const cur=window.CAREER_DIVISION==='bnacional'?'bnacional':'primera';
+  let el=$('cmDiv');
+  if(!el){el=document.createElement('div');el.id='cmDiv';el.className='cmCard';const ref=$('cmCont');root.insertBefore(el,ref?ref.nextSibling:root.firstChild)}
+  el.innerHTML='<h2>Categoría</h2><div class="cmRow">'+
+   '<button type="button" class="cmBtn'+(cur==='primera'?' on':'')+'" data-div="primera" aria-pressed="'+(cur==='primera')+'">🏆 Primera División (30 clubes)</button>'+
+   '<button type="button" class="cmBtn'+(cur==='bnacional'?' on':'')+'" data-div="bnacional" aria-pressed="'+(cur==='bnacional')+'">⬆️ Primera Nacional (36 clubes)</button></div>'+
+   '<div class="cmNote">'+(cur==='bnacional'?'Primera Nacional: 17 fechas a una rueda en 2 Zonas de 18 · Final por el 1.º Ascenso y Reducido por el 2.º Ascenso · Copa Argentina de 64 equipos.':'Primera División: Apertura, Clausura, Tabla Anual (descienden 2), Playoffs, Copa Argentina de 64 equipos y Trofeo de Campeones.')+' Elegí la categoría antes de elegir club.</div>';
+  el.querySelectorAll('[data-div]').forEach(b=>b.onclick=()=>{if(b.dataset.div!==cur)pickDivision(b.dataset.div)});
+ }
  function init(){
   resetMatchFlags();injectCSS();injectStatsCSS();injectStartButton();ensureDom();wireGlobal();
+  hook('show',o=>function(id){if(id!=='career-screen')restoreData();else if(window.CAREER_DIVISION==='bnacional')applyDivData('bnacional');return o.apply(this,arguments)});
   const hc=$('homeCareer');
-  if(hc)hc.addEventListener('click',()=>setTimeout(injectContinue,0));
+  if(hc)hc.addEventListener('click',()=>{window.CAREER_DIVISION='primera';restoreData();setTimeout(()=>{injectContinue();injectDivision()},0)});
   const root=$('career-root');
-  if(root)new MutationObserver(()=>{if(!$('cmCont'))injectContinue()}).observe(root,{childList:true});
+  if(root)new MutationObserver(()=>{if(!$('cmCont'))injectContinue();if(!$('cmDiv'))injectDivision()}).observe(root,{childList:true});
   window.addEventListener('career:start',e=>{
-   try{S=newSeason(e.detail);save();const c=$('cmCont');if(c)c.remove();openHub('next');flushModals()}
+   try{S=newSeason(e.detail||{});save();restoreData();const c=$('cmCont');if(c)c.remove();const dv=$('cmDiv');if(dv)dv.remove();openHub('next');flushModals()}
    catch(er){console.error('[CareerMode] no se pudo crear la temporada',er)}
   });
-  window.CAREER_MODE_API={getSeason:()=>S,openHub,newSeason,_t:{buildFixture,stats,simKO,rounds15,applyStamina,stamF,clash,setS:v=>{S=v},userMatch,recordUser,simRest}};
+  window.CAREER_MODE_API={getSeason:()=>S,getDivision:()=>S?S.division||'primera':(window.CAREER_DIVISION||'primera'),openHub,newSeason,_t:{buildFixture,stats,simKO,rounds15,applyStamina,stamF,clash,setS:v=>{S=v},userMatch,recordUser,simRest}};
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
