@@ -2420,9 +2420,12 @@ let last=performance.now(),acc=0;
 <script>
 /* ===== 🏆 Modo Carrera · pantalla de configuración (País → Liga → Club + Jugador) ===== */
 (()=>{
- const root=$('career-root'),D=window.LIGA_ARGENTINA_DATA,KEY='futball_career_v1';
+ const root=$('career-root'),KEY='futball_career_v1';let D=window.LIGA_ARGENTINA_DATA;window._careerSelectedDivision='primera';
  if(!D){root.innerHTML='<div class="cPanel"><h2>Datos no disponibles</h2><div class="cErr">No se pudo cargar LigaData.js. Verificá que esté junto a index.html.</div></div>';return}
- const COUNTRIES=[{id:D.country.id,name:D.country.name,flag:D.country.flag,leagues:[{id:D.league.id,name:D.league.name,data:D}]}];
+ const DIVS=[{id:'primera',key:'LIGA_ARGENTINA_DATA',name:'Liga Profesional Argentina (Primera División)',label:'Primera División',sub:'30 equipos · 2 Zonas · 16 Fechas + Playoffs'},
+  {id:'bnacional',key:'LIGA_BNACIONAL_DATA',name:'Primera Nacional (Segunda División)',label:'Segunda División',sub:'36 equipos · 2 Zonas · 17 Fechas + Final + Reducido'}];
+ const divOf=id=>DIVS.find(x=>x.id===id)||DIVS[0],dataFor=id=>window[divOf(id).key]||null;
+ const COUNTRIES=[{id:D.country.id,name:D.country.name,flag:D.country.flag,leagues:DIVS}];
  const E=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  let sel='',state=null,uid=0;
  const badge=t=>{const sfx='-'+(++uid);return t.badgeSvg.split('b-'+t.id).join('b-'+t.id+sfx)};
@@ -2453,8 +2456,8 @@ let last=performance.now(),acc=0;
    <label class="cLbl" for="cPais">País</label>
    <select id="cPais">${COUNTRIES.map(x=>`<option value="${x.id}">${x.flag} ${E(x.name)}</option>`).join('')}</select>
    <label class="cLbl" for="cLiga">Liga</label>
-   <select id="cLiga">${c.leagues.map(x=>`<option value="${x.id}">${E(x.name)}</option>`).join('')}</select>
-   <div class="cNote">${D.league.teams} equipos · ${D.league.zones} Zonas · ${D.league.fechas} Fechas + Playoffs</div>
+   <select id="cLiga">${c.leagues.map(x=>`<option value="${x.id}"${x.id===window._careerSelectedDivision?' selected':''}>${E(x.name)}</option>`).join('')}</select>
+   <div class="cNote" id="cLigaNote">${E(divOf(window._careerSelectedDivision).sub)}</div>
    <span class="cLbl">Club</span>
    <button id="cRand" type="button">🎲 Equipo Aleatorio</button>
    <div class="cTeams" id="cTeams" role="listbox" aria-label="Equipos"></div>
@@ -2468,29 +2471,34 @@ let last=performance.now(),acc=0;
    <button id="cStart" type="button">⚽ INICIAR TEMPORADA</button>
   </section>
   <section class="cPanel" id="cPrev"></section></div>`;
-  const grid=$('cTeams');
-  D.teams.forEach(t=>{const b=document.createElement('button');b.type='button';b.className='tm';b.dataset.id=t.id;b.title=t.name;b.setAttribute('role','option');
-   b.innerHTML=`<span class="bd">${badge(t)}</span><b>${E(t.shortName)}</b>`;b.onclick=()=>pick(t.id);grid.appendChild(b)});
-  $('cRand').onclick=()=>{const t=D.teams[Math.floor(Math.random()*D.teams.length)];pick(t.id,true)};
+  renderTeams();
+  $('cRand').onclick=()=>{if(!D||!D.teams||!D.teams.length)return;const t=D.teams[Math.floor(Math.random()*D.teams.length)];pick(t.id,true)};
   $('cStart').onclick=start;
   $('cDur').onchange=()=>{const cu=$('cDur').value==='custom';$('cDurCustom').style.display=cu?'':'none';$('cErr').textContent='';if(cu)$('cDurCustom').focus()};
   $('cDurCustom').oninput=()=>{$('cErr').textContent=''};
   $('cNum').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,2);if(sel)preview()};
   $('cName').oninput=()=>{$('cErr').textContent=''};
-  $('cPais').onchange=()=>{};$('cLiga').onchange=()=>{};
+  $('cPais').onchange=()=>{};$('cLiga').onchange=()=>setDivision($('cLiga').value);
   pick(sel,false);
  }
+ function renderTeams(){const grid=$('cTeams');grid.innerHTML='';
+  ((D&&D.teams)||[]).forEach(t=>{const b=document.createElement('button');b.type='button';b.className='tm';b.dataset.id=t.id;b.title=t.name;b.setAttribute('role','option');
+   b.innerHTML=`<span class="bd">${badge(t)}</span><b>${E(t.shortName)}</b>`;b.onclick=()=>pick(t.id);grid.appendChild(b)})}
+ function setDivision(id){const dv=divOf(id),nd=dataFor(dv.id);
+  if(!nd){$('cLiga').value=window._careerSelectedDivision;$('cErr').textContent='No se pudieron cargar los datos de '+dv.name+'.';return}
+  D=nd;window._careerSelectedDivision=dv.id;$('cLiga').value=dv.id;$('cLigaNote').textContent=dv.sub;
+  sel='';renderTeams();pick('',false)}
  function pick(id,scroll){sel=id||'';
   document.querySelectorAll('#cTeams .tm').forEach(b=>{const on=b.dataset.id===sel;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);if(on&&scroll)b.scrollIntoView({block:'nearest'})});
   $('cErr').textContent='';preview()}
  function preview(){const box=$('cPrev'),t=sel&&D.getTeam(sel);
   if(!t){box.innerHTML='<h2>Vista previa</h2><div class="pEmpty">Elegí un club o tocá 🎲 Equipo Aleatorio.</div>';return}
-  const rv=D.getTeam(t.classicRivalId),num=$('cNum')?($('cNum').value||''):'';
+  const rv=D.getTeam(t.classicRivalId)||null,num=$('cNum')?($('cNum').value||''):'';
   box.innerHTML=`<h2>Vista previa</h2>
-   <div class="pHead"><span class="bd">${badge(t)}</span><div><b>${E(t.name)}</b><br><span>${E(t.shortName)} · Primera División</span></div></div>
+   <div class="pHead"><span class="bd">${badge(t)}</span><div><b>${E(t.name)}</b><br><span>${E(t.shortName)} · ${E(divOf(window._careerSelectedDivision).label)}</span></div></div>
    <div class="pBox"><span class="cLbl">Camisetas</span><div class="pKits">
     <div class="pKit"><canvas id="kH"></canvas>Titular</div><div class="pKit"><canvas id="kA"></canvas>Suplente</div></div></div>
-   <div class="pBox"><span class="cLbl">Clásico rival</span><div class="pRiv"><span class="bd">${badge(rv)}</span>${E(rv.name)}</div></div>`;
+   ${rv?`<div class="pBox"><span class="cLbl">Clásico rival</span><div class="pRiv"><span class="bd">${badge(rv)}</span>${E(rv.name)}</div></div>`:''}`;
   drawKit($('kH'),t.kitHome,num);drawKit($('kA'),t.kitAway,num)}
  function start(){const err=$('cErr'),name=$('cName').value.trim(),num=$('cNum').value.trim();
   if(!sel)return err.textContent='Elegí un club (o tocá Equipo Aleatorio) para continuar.';
@@ -2499,14 +2507,15 @@ let last=performance.now(),acc=0;
   let mins=5;
   if($('cDur').value==='custom'){mins=parseInt($('cDurCustom').value,10);if(!(mins>=1&&mins<=60))return err.textContent='Los minutos personalizados deben estar entre 1 y 60.'}
   else mins=parseInt($('cDur').value,10)||5;
+  if(typeof D.generarZonasAleatorias!=='function')return err.textContent='Esta división todavía no admite generar zonas.';
   const z=D.generarZonasAleatorias();
-  state={v:1,country:COUNTRIES[0].id,league:D.league.id,teamId:sel,player:{name,num:n},matchMinutes:mins,
+  state={v:1,division:window._careerSelectedDivision,country:COUNTRIES[0].id,league:D.league.id,teamId:sel,player:{name,num:n},matchMinutes:mins,
    zones:{A:z.A,B:z.B},zonaDe:z.zonaDe,myZone:z.zonaDe[sel],fecha:1,createdAt:Date.now()};
   try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
   window.CAREER_STATE=state;
   try{window.dispatchEvent(new CustomEvent('career:start',{detail:state}))}catch(e){} /* CareerMode.js abre el Hub de la temporada */
  }
- function summary(){const t=D.getTeam(state.teamId),rv=D.getTeam(t.classicRivalId);
+ function summary(){D=dataFor(state.division)||D;const t=D.getTeam(state.teamId),rv=D.getTeam(t.classicRivalId);
   const zl=k=>`<div class="cZ"><h2>Zona ${k}</h2>${state.zones[k].map(id=>{const q=D.getTeam(id);return`<div class="z${id===state.teamId?' me':''}"><span class="bd">${badge(q)}</span>${E(q.name)}${id===state.teamId?' ⭐':''}</div>`}).join('')}</div>`;
   root.innerHTML=`<section class="cPanel"><h2>✅ Temporada lista</h2>
    <div class="pHead"><span class="bd">${badge(t)}</span><div><b>${E(t.name)} · Zona ${state.myZone}</b><br><span>Jugás como ${E(state.player.name)} (#${state.player.num}) · partidos de ${state.matchMinutes} min</span></div></div>
@@ -2518,7 +2527,7 @@ let last=performance.now(),acc=0;
  $('homeCareer').addEventListener('click',()=>{if(!$('cName'))return;
   if(!$('cName').value&&$('nick').value.trim())$('cName').value=$('nick').value.trim().slice(0,16);
   const dn=($('num').value||'').trim();if(/^\d{1,2}$/.test(dn)&&(+dn>=1)&&$('cNum').value==='10')$('cNum').value=dn;if(sel)preview()});
- window.CAREER_API={getState:()=>state,rosterFor:teamId=>D.resolverPlantelCancha(teamId,state&&state.player.num),aplicarPlantelABots:(bots,teamId)=>D.aplicarPlantelABots(bots,teamId,state&&state.player.num)};
+ window.CAREER_API={getState:()=>state,rosterFor:teamId=>(dataFor(state&&state.division)||D).resolverPlantelCancha(teamId,state&&state.player.num),aplicarPlantelABots:(bots,teamId)=>(dataFor(state&&state.division)||D).aplicarPlantelABots(bots,teamId,state&&state.player.num)};
  form();
 })();
 </script>

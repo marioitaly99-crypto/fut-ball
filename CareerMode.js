@@ -308,10 +308,12 @@
    modalQ:[{k:'intro',torneo:'bnacional'}]};
  }
  function newSeason(st){
-  let div=st.division||window.CAREER_DIVISION||'primera';
+  let div=st.division||window._careerSelectedDivision||window.CAREER_DIVISION||'primera';
+  if(div!=='bnacional')div='primera';
   if(div==='bnacional'&&!DB)div='primera';
   if(!st.cross&&!dataOf(div).getTeam(st.teamId)){const o=div==='bnacional'?'primera':'bnacional';if(o==='primera'||DB){if(dataOf(o).getTeam(st.teamId))div=o}}
-  if(setDiv(div)==='bnacional')return newSeasonBN(st);
+  div=setDiv(div);window.CAREER_DIVISION=div;window._careerSelectedDivision=div;
+  if(div==='bnacional')return newSeasonBN(st);
   const A=st.zones.A.slice();
   const B=alignClassics(A,st.zones.B);
   const str=newStr(),cross=crossFor(st,'primera',{A,B}),copa=buildCopa(cross,str,st.teamId);
@@ -2425,40 +2427,18 @@ body.careerOn.cmInGame.cmRed #cmSimRestBtn{background:linear-gradient(180deg,#f0
   btn.addEventListener('mouseleave',off);btn.addEventListener('blur',off);
  }
 
- /* ------------------------------------------------------------------
-  Selector de Categoría al iniciar Carrera Nueva: 🏆 Primera División (30) / ⬆️ Primera Nacional (36)
-  El selector de clubes lee window.LIGA_ARGENTINA_DATA: mientras se configura la carrera apunta a la categoría elegida (S.division) y se restaura al empezar o al salir.
-  ------------------------------------------------------------------ */
- let SWAP=false;
- function applyDivData(div){if(div==='bnacional'&&DB){window.LIGA_ARGENTINA_DATA=DB;SWAP=true}else{window.LIGA_ARGENTINA_DATA=D1;SWAP=false}}
- function restoreData(){if(SWAP||window.LIGA_ARGENTINA_DATA!==D1){window.LIGA_ARGENTINA_DATA=D1}SWAP=false}
- function pickDivision(div){
-  if(div==='bnacional'&&!DB)return;
-  window.CAREER_DIVISION=div;applyDivData(div);
-  try{window.dispatchEvent(new CustomEvent('career:division',{detail:{division:div,data:dataOf(div)}}))}catch(e){}
-  try{if(typeof show==='function')show('career-screen')}catch(e){} /* vuelve a armar la elección de club con los equipos de la categoría */
-  setTimeout(injectDivision,0);
- }
- function injectDivision(){
-  const root=$('career-root');if(!root||!DB)return;
-  const cur=window.CAREER_DIVISION==='bnacional'?'bnacional':'primera';
-  let el=$('cmDiv');
-  if(!el){el=document.createElement('div');el.id='cmDiv';el.className='cmCard';const ref=$('cmCont');root.insertBefore(el,ref?ref.nextSibling:root.firstChild)}
-  el.innerHTML='<h2>Categoría</h2><div class="cmRow">'+
-   '<button type="button" class="cmBtn'+(cur==='primera'?' on':'')+'" data-div="primera" aria-pressed="'+(cur==='primera')+'">🏆 Primera División (30 clubes)</button>'+
-   '<button type="button" class="cmBtn'+(cur==='bnacional'?' on':'')+'" data-div="bnacional" aria-pressed="'+(cur==='bnacional')+'">⬆️ Primera Nacional (36 clubes)</button></div>'+
-   '<div class="cmNote">'+(cur==='bnacional'?'Primera Nacional: 17 fechas a una rueda en 2 Zonas de 18 · Final por el 1.º Ascenso y Reducido por el 2.º Ascenso · Copa Argentina de 64 equipos.':'Primera División: Apertura, Clausura, Tabla Anual (descienden 2), Playoffs, Copa Argentina de 64 equipos y Trofeo de Campeones.')+' Elegí la categoría antes de elegir club.</div>';
-  el.querySelectorAll('[data-div]').forEach(b=>b.onclick=()=>{if(b.dataset.div!==cur)pickDivision(b.dataset.div)});
- }
+ /* La categoría se elige en el desplegable "Liga" de index.html (window._careerSelectedDivision); ya no se inyecta ninguna tarjeta "Categoría". */
+ function restoreData(){if(window.LIGA_ARGENTINA_DATA!==D1&&D1)window.LIGA_ARGENTINA_DATA=D1}
+ function removeLegacyDiv(){const el=$('cmDiv');if(el)el.remove()}
  function init(){
-  resetMatchFlags();injectCSS();injectStatsCSS();injectStartButton();ensureDom();wireGlobal();
-  hook('show',o=>function(id){if(id!=='career-screen')restoreData();else if(window.CAREER_DIVISION==='bnacional')applyDivData('bnacional');return o.apply(this,arguments)});
+  resetMatchFlags();injectCSS();injectStatsCSS();injectStartButton();ensureDom();wireGlobal();removeLegacyDiv();
+  hook('show',o=>function(id){if(id!=='career-screen')restoreData();return o.apply(this,arguments)});
   const hc=$('homeCareer');
-  if(hc)hc.addEventListener('click',()=>{window.CAREER_DIVISION='primera';restoreData();setTimeout(()=>{injectContinue();injectDivision()},0)});
+  if(hc)hc.addEventListener('click',()=>{restoreData();setTimeout(()=>{injectContinue();removeLegacyDiv()},0)});
   const root=$('career-root');
-  if(root)new MutationObserver(()=>{if(!$('cmCont'))injectContinue();if(!$('cmDiv'))injectDivision()}).observe(root,{childList:true});
+  if(root)new MutationObserver(()=>{if(!$('cmCont'))injectContinue();removeLegacyDiv()}).observe(root,{childList:true});
   window.addEventListener('career:start',e=>{
-   try{S=newSeason(e.detail||{});save();restoreData();const c=$('cmCont');if(c)c.remove();const dv=$('cmDiv');if(dv)dv.remove();openHub('next');flushModals()}
+   try{S=newSeason(e.detail||{});save();restoreData();const c=$('cmCont');if(c)c.remove();removeLegacyDiv();openHub('next');flushModals()}
    catch(er){console.error('[CareerMode] no se pudo crear la temporada',er)}
   });
   window.CAREER_MODE_API={getSeason:()=>S,getDivision:()=>S?S.division||'primera':(window.CAREER_DIVISION||'primera'),openHub,newSeason,_t:{buildFixture,stats,simKO,rounds15,applyStamina,stamF,clash,setS:v=>{S=v},userMatch,recordUser,simRest}};
